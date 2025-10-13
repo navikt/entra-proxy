@@ -1,0 +1,23 @@
+no.nav.security.jwt:
+  issuer:
+    azuread:
+      discoveryurl: http://localhost:8080/default/.well-known/openid-configuration
+      accepted_audience: client id
+  client:
+    registration:
+      onbehalfof:
+        token-endpoint-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: https://graph.microsoft.com/.default
+        authentication:
+          client-id:  client id
+          client-jwk: ${azure.app.client.jwk}
+          client-auth-method: private_key_jwt
+spring:
+  cache:
+    type: caffeine
+
+microsoft:
+  graph:
+    url: https://graph.microsoft.com/v1.0
+    scope: https://graph.microsoft.com/.default

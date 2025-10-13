@@ -1,0 +1,13 @@
+apiVersion: aiven.io/v1alpha1
+kind: ServiceIntegration
+metadata:
+  labels:
+    app: entra-proxy
+    team: sikkerhetstjenesten
+  name: valkey-entra-proxy-{{nais.cluster.cache}}
+  namespace: sikkerhetstjenesten
+spec:
+  project: nav-{{nais.cluster.type}}
+  integrationType: prometheus
+  destinationEndpointId: {{nais.cluster.endpoint}}
+  sourceServiceName: valkey-tilgangsmaskin-{{nais.cluster.cache}}

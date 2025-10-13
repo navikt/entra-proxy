@@ -1,0 +1,117 @@
+{
+  "ingresses": [
+    "https://entraproxy.intern.dev.nav.no",
+    "https://entraproxy.ansatt.dev.nav.no"
+  ],
+  "inbound": [
+    {
+      "name": "azure-token-generator",
+      "namespace": "nais",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "notat-administrasjon-q2",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "brev-administrasjon-q2",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "gosys-q1",
+      "namespace": "isa",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "gosys-q2",
+      "namespace": "isa",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "ida",
+      "namespace": "traktor",
+      "cluster": "prod-fss"
+    },
+    {
+      "name": "gosys-oppgavebehandling-api",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "arbeid-og-inntekt",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q1",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q2",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q4",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-ascension",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "oh-tilgangskontroll",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "oppgave",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "saf-q0",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "saf",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "saf-q4",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "saf-q5",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    }
+  ],
+  "nais": {
+    "cluster": {
+      "cache": "cache",
+      "endpoint" : "f20f5b48-18f4-4e2a-8e5f-4ab3edb19733",
+      "plan" : "startup-4",
+      "type": "dev"
+    }
+  },
+  "mem": {
+    "min": "640Mi",
+    "max": "1Gi"
+  },
+  "cpu": {
+    "min": "100m"
+  },
+  "replica": {
+    "min": 2,
+    "max": 2
+  }
+}

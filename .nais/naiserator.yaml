@@ -1,0 +1,74 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    team: sikkerhetstjenesten
+  name: entra-proxy
+  namespace: sikkerhetstjenesten
+spec:
+  valkey:
+    - instance: {{nais.cluster.cache}}
+      access: readwrite
+  leaderElection: true
+  ingresses:
+    {{#each ingresses as |ingress|}}
+       - {{ingress}}
+      {{/each}}
+  image: {{image}}
+  observability:
+    logging:
+      destinations:
+        - id: elastic
+        - id: loki
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+  prometheus:
+    enabled: true
+    path: /monitoring/prometheus
+  readiness:
+    path: /monitoring/health/readiness
+    initialDelay: 30
+  liveness:
+    path: /monitoring/health/liveness
+    initialDelay: 30
+  port: 8080
+  replicas:
+    max: {{replica.max}}
+    min: {{replica.min}}
+  resources:
+    limits:
+      memory: '{{mem.max}}'
+    requests:
+      cpu: '{{cpu.min}}'
+      memory: '{{mem.min}}'
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      claims:
+        groups:
+        extra:
+          - "NAVident"
+          - "azp_name"
+  secureLogs:
+    enabled: true
+  accessPolicy:
+    outbound:
+      rules:
+
+    inbound:
+      rules:
+        {{#each inbound as |app|}}
+           - application: '{{app.name}}'
+               namespace: '{{app.namespace}}'
+               cluster: '{{app.cluster}}'
+               {{/each}}
+        - application: monitoring-prometheus-blackbox-exporter
+          namespace: nais-system
+  env:
+    - name: NAIS_CLUSTER_TYPE
+      value: {{nais.cluster.type}}
+    - name: NAIS_CLUSTER_CACHE
+      value: {{nais.cluster.cache}}
+

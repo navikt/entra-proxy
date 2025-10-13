@@ -1,0 +1,89 @@
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true
+management:
+  observations:
+    annotations:
+      enabled: true
+  health:
+    group:
+      readiness:
+        show-components: never
+      liveness:
+        show-components: never
+    redis:
+      enabled: false
+    ssl:
+      enabled: false
+    ping:
+      enabled: false
+    diskspace:
+      enabled: false
+  endpoints:
+    web:
+      base-path: /monitoring
+
+spring:
+  threads:
+    virtual:
+      enabled: true
+  application:
+    name: entra-proxy
+  data:
+    redis:
+      host: ${valkey.host}
+      port: ${valkey.port}
+      connect-timeout: 10s
+      timeout: 5s
+      username: ${valkey.username}
+      password: ${valkey.password}
+      ssl:
+        enabled: true
+  cache:
+    type: redis
+  mvc:
+    problemdetails:
+      enabled: true
+  main:
+    banner-mode: off
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+    default-property-inclusion: non_null
+
+no.nav.security.jwt:
+  issuer:
+    azuread:
+      discovery-url: ${azure.app.well.known.url}
+      accepted_audience: ${azure.app.client.id}
+  client:
+    registration:
+      graph:
+        token-endpoint-url: ${azure.openid.config.token.endpoint}
+        grant-type: client_credentials
+        scope: ${graph.scope}
+        authentication:
+          client-id: ${azure.app.client.id}
+          client-jwk: ${azure.app.jwk}
+          client-auth-method: private_key_jwt
+springdoc:
+  swagger-ui:
+    oauth:
+      client-id: ${azure.app.client.id}
+    csrf:
+      enabled: true
+
+graph:
+  scope: https://graph.microsoft.com/.default
+  base-uri: https://graph.microsoft.com/v1.0/
+
+valkey:
+  username: ${valkey.username.${nais.cluster.cache}}
+  password: ${valkey.password.${nais.cluster.cache}}
+  uri: ${valkey.uri.${nais.cluster.cache}}
+  port: ${valkey.port.${nais.cluster.cache}}
+  host: ${valkey.host.${nais.cluster.cache}}
+  json:
+    enabled: false
+

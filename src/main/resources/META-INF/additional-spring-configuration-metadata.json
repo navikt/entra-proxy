@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "no.nav.security.jwt.issuer.azuread.accepted_audience",
+      "type": "java.lang.String",
+      "description": "Description for no.nav.security.jwt.issuer.azuread.accepted_audience."
+    },
+    {
+      "name": "no.nav.security.jwt.issuer.azuread.discoveryurl",
+      "type": "java.lang.String",
+      "description": "Description for no.nav.security.jwt.issuer.azuread.discoveryurl."
+    }
+  ] }

@@ -1,0 +1,15 @@
+apiVersion: aiven.io/v1alpha1
+kind: Valkey
+metadata:
+  labels:
+    app: entraproxy
+    team: sikkerhetstjenesten
+  name: valkey-entra-proxy-{{nais.cluster.cache}}
+  namespace: sikkerhetstjenesten
+spec:
+  terminationProtection: false
+  plan: {{nais.cluster.plan}}
+  project: nav-{{nais.cluster.type}}
+  userConfig:
+    valkey_maxmemory_policy: allkeys-lru
+    valkey_notify_keyspace_events: Exd

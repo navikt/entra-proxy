@@ -26,7 +26,11 @@ class EntraConfig(
         queryParam(PARAM_NAME_COUNT, "true")
     }.build()
 
+    fun temaURI(oid: String) = ccTemaUri(oid)
+
     fun grupperURI(ansattId: String, isCCF: Boolean) = if (isCCF) ccUri(ansattId) else oboUri(ansattId)
+
+    private fun ccTemaUri(oid: String) = query(oid,TEMA_PREFIX)
 
     private fun oboUri(ansattId: String) = query(ansattId,GEO_PREFIX)
 
@@ -45,6 +49,7 @@ class EntraConfig(
     override fun toString() = "$javaClass.simpleName [baseUri=$baseUri, pingEndpoint=$pingEndpoint]"
 
     companion object {
+        const val TEMA_PREFIX = "startswith(displayName,'0000-GA-TEMA') "
         const val GEO_PREFIX = "startswith(displayName,'0000-GA-GEO') or startswith(displayName,'0000-GA-ENHET') "
         const val GRAPH = "graph"
         private const val DEFAULT_BATCH_SIZE = 250

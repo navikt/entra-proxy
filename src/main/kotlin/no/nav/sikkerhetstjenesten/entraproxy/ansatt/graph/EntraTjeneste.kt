@@ -23,6 +23,10 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val res
     @WithSpan
     fun geoGrupper(ansattId: AnsattId, oid: UUID) = adapter.grupper(oid.toString(), false)
 
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    @WithSpan
+    fun tema(ansattId: AnsattId, oid: UUID) = adapter.tema(oid.toString())
+
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter resolver=$resolver]"
 }
 

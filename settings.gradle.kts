@@ -1,1 +1,1 @@
-rootProject.name = "entraproxy"
+rootProject.name = "entra-proxy"

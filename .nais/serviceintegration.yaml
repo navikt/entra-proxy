@@ -10,4 +10,4 @@ spec:
   project: nav-{{nais.cluster.type}}
   integrationType: prometheus
   destinationEndpointId: {{nais.cluster.endpoint}}
-  sourceServiceName: valkey-tilgangsmaskin-{{nais.cluster.cache}}
+  sourceServiceName: valkey-entra-proxy-{{nais.cluster.cache}}

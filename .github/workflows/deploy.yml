@@ -55,6 +55,15 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: always() # always run even if the previous step fails
+        with:
+          include_time_in_summary: 'true'
+          include_passed: 'true'
+          detailed_summary: 'true'
+          report_paths: '**/build/test-results/test/TEST-*.xml'
+
       - name: Attest and sign
         uses: nais/attest-sign@v1.5.20
         with:
@@ -78,7 +87,7 @@ jobs:
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m
-      RESOURCE: .nais/naiserator.yaml,.nais/valkey.yaml,.nais/serviceintegration.yaml
+      RESOURCE: .nais/naiserator.yaml
       CLUSTER: ${{matrix.cluster}}
       VARS: .nais/${{matrix.cluster}}.json
       IMAGE: ${{needs.build.outputs.image}}

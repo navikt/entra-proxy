@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     env:
-      IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/entra-proxy/${{ github.event.repository.name }}
+      IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/sikkerhetstjenesten/${{ github.event.repository.name }}
       BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
     name: build
     permissions:

@@ -55,8 +55,6 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-   
-
       - name: Attest and sign
         uses: nais/attest-sign@v1.5.20
         with:

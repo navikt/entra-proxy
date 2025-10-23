@@ -6,6 +6,9 @@ metadata:
   name: entra-proxy
   namespace: sikkerhetstjenesten
 spec:
+  valkey:
+    - instance: {{nais.cluster.cache}}
+      access: readwrite
   leaderElection: true
   ingresses:
     {{#each ingresses as |ingress|}}

@@ -51,6 +51,10 @@ spec:
   secureLogs:
     enabled: true
   accessPolicy:
+    outbound:
+      rules:
+      - application: logging
+        namespace: nais-system
     inbound:
       rules:
         {{#each inbound as |app|}}

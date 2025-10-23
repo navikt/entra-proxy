@@ -4,6 +4,7 @@ import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.profiler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
 import org.springframework.boot.SpringBootVersion
 import org.springframework.boot.actuate.info.Info.Builder
@@ -28,7 +29,9 @@ import org.springframework.stereotype.Component
 class EntraProxyApplication
 
 fun main(args: Array<String>) {
-    runApplication<EntraProxyApplication>(*args)
+    runApplication<EntraProxyApplication>(*args) {
+        setAdditionalProfiles(*profiler)
+    }
 }
 
 @Component

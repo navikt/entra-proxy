@@ -1,4 +1,4 @@
-server:
+  server:
   tomcat:
     mbeanregistry:
       enabled: true

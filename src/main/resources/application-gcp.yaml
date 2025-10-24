@@ -83,7 +83,7 @@ valkey:
   password: ${valkey.password.entra.proxy.${nais.cluster.cache}}
   uri: ${valkey.uri.entra.proxy.${nais.cluster.cache}}
   port: ${valkey.port.entra.proxy.${nais.cluster.cache}}
-  host: ${valkey.host.entra.proxy.${nais.cluster.cache}}
+  host: ${valkey.host.entra.pro2xy.${nais.cluster.cache}}
   json:
     enabled: false
 

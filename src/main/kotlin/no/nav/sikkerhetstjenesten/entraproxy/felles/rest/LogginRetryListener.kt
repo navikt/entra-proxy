@@ -5,8 +5,9 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.RetryContext
 import org.springframework.retry.RetryListener
-import kotlin.reflect.full.declaredFunctions
 import org.springframework.stereotype.Component
+import kotlin.reflect.full.declaredFunctions
+
 @Component
 class LoggingRetryListener : RetryListener {
 

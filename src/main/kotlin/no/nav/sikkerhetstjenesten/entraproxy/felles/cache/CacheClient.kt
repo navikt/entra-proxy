@@ -4,8 +4,8 @@ import io.lettuce.core.api.StatefulRedisConnection
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import org.apache.commons.pool2.impl.GenericObjectPool
-import java.time.Duration
 import org.slf4j.LoggerFactory.getLogger
+import java.time.Duration
 
 
 class CacheClient(

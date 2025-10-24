@@ -1,5 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
 import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.cfg.MapperConfig
 import com.fasterxml.jackson.databind.introspect.AnnotatedClass
@@ -9,8 +11,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.apache.logging.log4j.LogManager.getLogger
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import java.lang.annotation.Inherited
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
 
 
 /**

@@ -7,8 +7,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import org.springframework.cache.annotation.Cacheable
-import java.util.UUID
 import org.springframework.stereotype.Service
+import java.util.*
 
 @RetryingWhenRecoverable
 @Service

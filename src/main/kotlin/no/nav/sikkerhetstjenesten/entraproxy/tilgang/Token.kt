@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.tilgang
+    package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 
 import no.nav.boot.conditionals.Cluster.LOCAL

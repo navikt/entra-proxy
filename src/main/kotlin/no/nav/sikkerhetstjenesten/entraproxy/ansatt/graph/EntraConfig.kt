@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
 
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.GlobalGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig

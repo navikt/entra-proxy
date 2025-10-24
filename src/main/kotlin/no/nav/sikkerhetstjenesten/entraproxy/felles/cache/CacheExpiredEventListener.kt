@@ -1,11 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.micrometer.core.instrument.Tags.of
+import no.nav.sikkerhetstjenesten.entraproxy.felles.teller.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import no.nav.sikkerhetstjenesten.entraproxy.felles.teller.CacheOppfriskerTeller
 
 
 @Component

@@ -4,8 +4,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.binder.MeterBinder
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheConfig
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
@@ -13,7 +11,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.ScanOptions.scanOptions
 import org.springframework.stereotype.Component
-import java.util.Collections.emptyMap
+import java.util.Collections.*
 
 @Component
 class CacheAdapter(private val handler: CacheNøkkelHandler, private val cf: RedisConnectionFactory, cfg: CacheConfig, private val pool: GenericObjectPool<*>, private vararg val cfgs: CachableRestConfig) : Pingable, MeterBinder {

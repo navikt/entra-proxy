@@ -12,5 +12,5 @@ data class EntraGruppe(val id: UUID, val displayName: String = "N/A") {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class EntraGrupper(@JsonProperty("@odata.nextLink") val next: URI? = null,
+data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                         val value: Set<EntraGruppe> = emptySet())

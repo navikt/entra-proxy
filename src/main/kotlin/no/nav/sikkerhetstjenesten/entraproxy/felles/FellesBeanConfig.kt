@@ -11,8 +11,8 @@ import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRequestInterceptor
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around

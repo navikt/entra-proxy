@@ -13,7 +13,7 @@ class EntraClientBeanConfig {
 
     @Bean
     @Qualifier(GRAPH)
-    fun graphRestClient(b: RestClient.Builder, cfg: EntraConfig) =
+    fun entraRestClient(b: RestClient.Builder, cfg: EntraConfig) =
         b.baseUrl(cfg.baseUri)
             .requestInterceptors {
                 it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
@@ -21,7 +21,7 @@ class EntraClientBeanConfig {
 
 
     @Bean
-    fun graphHealthIndicator(a: EntraRestClientAdapter) =  PingableHealthIndicator(a)
+    fun entraHealthIndicator(a: EntraRestClientAdapter) =  PingableHealthIndicator(a)
 
     companion object {
         private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"

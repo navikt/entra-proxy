@@ -2,10 +2,10 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.lettuce.core.RedisClient
 import io.lettuce.core.pubsub.RedisPubSubAdapter
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
-import org.slf4j.LoggerFactory.getLogger
 
 
 @Component

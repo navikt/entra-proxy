@@ -79,7 +79,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        cluster: [ dev-gcp]
+        cluster: [ dev-gcp, prod-gcp ]
     name: Deploy til ${{matrix.cluster}}
     needs: build
     runs-on: ubuntu-latest

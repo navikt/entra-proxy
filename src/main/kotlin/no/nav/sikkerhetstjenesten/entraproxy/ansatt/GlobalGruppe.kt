@@ -1,21 +1,19 @@
 package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
-import jakarta.annotation.PostConstruct
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token
-import org.springframework.boot.context.properties.ConfigurationProperties
 import java.util.*
 
 //behov for denne?
 
-enum class GlobalGruppe(val property: String, val metadata: GruppeMetadata) {
-    STRENGT_FORTROLIG("gruppe.strengt", GruppeMetadata.STRENGT_FORTROLIG),
-    STRENGT_FORTROLIG_UTLAND("gruppe.strengt", GruppeMetadata.STRENGT_FORTROLIG_UTLAND),
-    FORTROLIG("gruppe.fortrolig", GruppeMetadata.FORTROLIG),
-    SKJERMING("gruppe.egenansatt", GruppeMetadata.SKJERMING),
-    UKJENT_BOSTED("gruppe.udefinert", GruppeMetadata.UKJENT_BOSTED),
-    UTENLANDSK("gruppe.utland", GruppeMetadata.UTENLANDSK),
-    NASJONAL("gruppe.nasjonal", GruppeMetadata.NASJONAL);
+enum class GlobalGruppe(val property: String) {
+    STRENGT_FORTROLIG("gruppe.strengt"),
+    STRENGT_FORTROLIG_UTLAND("gruppe.strengt"),
+    FORTROLIG("gruppe.fortrolig"),
+    SKJERMING("gruppe.egenansatt"),
+    UKJENT_BOSTED("gruppe.udefinert"),
+    UTENLANDSK("gruppe.utland"),
+    NASJONAL("gruppe.nasjonal");
 
     lateinit var id: UUID
 
@@ -34,19 +32,3 @@ enum class GlobalGruppe(val property: String, val metadata: GruppeMetadata) {
     }
 }
 
-@ConfigurationProperties("gruppe")
-data class GlobaleGrupperConfig(val strengt: UUID, val nasjonal: UUID, val utland: UUID,
-                                val udefinert: UUID, var fortrolig: UUID, val egenansatt: UUID) {
-
-    @PostConstruct
-    fun setIDs() {
-        GlobalGruppe.setIDs(
-            mapOf(
-                "gruppe.strengt" to strengt,
-                "gruppe.nasjonal" to nasjonal,
-                "gruppe.utland" to utland,
-                "gruppe.udefinert" to udefinert,
-                "gruppe.fortrolig" to fortrolig,
-                "gruppe.egenansatt" to egenansatt))
-    }
-}

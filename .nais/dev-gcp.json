@@ -3,6 +3,14 @@
     "https://entraproxy.intern.dev.nav.no",
     "https://entraproxy.ansatt.dev.nav.no"
   ],
+  "grupper": {
+    "fortrolig": "ea930b6b-9397-44d9-b9e6-f4cf527a632a",
+    "strengt": "5ef775f2-61f8-4283-bf3d-8d03f428aa14",
+    "egenansatt": "dbe4ad45-320b-4e9a-aaa1-73cca4ee124d",
+    "udefinert": "35d9d1ac-7fcb-4a22-9155-e0d1e57898a8",
+    "nasjonal": "c7107487-310d-4c06-83e0-cf5395dc3be3",
+    "utland": "de62a4bf-957b-4cde-acdb-6d8bcbf821a0"
+  },
   "inbound": [
     {
       "name": "azure-token-generator",

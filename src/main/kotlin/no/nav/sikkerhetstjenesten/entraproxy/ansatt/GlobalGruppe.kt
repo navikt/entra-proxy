@@ -1,7 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
+import jakarta.annotation.PostConstruct
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token
+import org.springframework.boot.context.properties.ConfigurationProperties
 import java.util.*
 
 //behov for denne?
@@ -29,5 +31,22 @@ enum class GlobalGruppe(val property: String, val metadata: GruppeMetadata) {
             EntraGruppe(uuid, navnFor(uuid))
         }.toSet()
         fun Set<EntraGruppe>.girNasjonalTilgang() = any { it.id == NASJONAL.id }
+    }
+}
+
+@ConfigurationProperties("gruppe")
+data class GlobaleGrupperConfig(val strengt: UUID, val nasjonal: UUID, val utland: UUID,
+                                val udefinert: UUID, var fortrolig: UUID, val egenansatt: UUID) {
+
+    @PostConstruct
+    fun setIDs() {
+        GlobalGruppe.setIDs(
+            mapOf(
+                "gruppe.strengt" to strengt,
+                "gruppe.nasjonal" to nasjonal,
+                "gruppe.utland" to utland,
+                "gruppe.udefinert" to udefinert,
+                "gruppe.fortrolig" to fortrolig,
+                "gruppe.egenansatt" to egenansatt))
     }
 }

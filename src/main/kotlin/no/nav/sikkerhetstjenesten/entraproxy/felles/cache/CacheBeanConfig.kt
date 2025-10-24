@@ -41,20 +41,12 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
             .build()
 
     @Bean
-    fun cachePool(client: RedisClient) = ConnectionPoolSupport.createGenericObjectPool(
-        { client.connect() },
-        GenericObjectPoolConfig<StatefulRedisConnection<String, String>>().apply {
-            maxTotal = 10 // Set max pool size
-        }
-    )
-
-    @Bean
     fun redisClient(cfg: CacheConfig) =
         RedisClient.create(cfg.cacheURI)
 
     @Bean
-    fun cacheClient(pool: GenericObjectPool<StatefulRedisConnection<String,String>>,handler: CacheNøkkelHandler) =
-        CacheClient(pool, handler)
+    fun cacheClient(client: RedisClient,handler: CacheNøkkelHandler) =
+        CacheClient(client, handler)
 
     @Bean
     fun cacheNøkkelHandler(mgr: RedisCacheManager) =

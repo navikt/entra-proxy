@@ -41,8 +41,6 @@ import java.util.function.Function
 @Configuration
 class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
 
-    private val log = getLogger(javaClass)
-
     @Bean
     fun jacksonCustomizer() = Jackson2ObjectMapperBuilderCustomizer {
         it.featuresToEnable(INCLUDE_SOURCE_IN_LOCATION)
@@ -51,11 +49,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface IgnoreUnknownMixin
-
-    @Bean
-    fun errorMessageSource() = ReloadableResourceBundleMessageSource().apply {
-        setBasename("classpath:messages")
-    }
 
     @Bean
     fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, loggingInterceptor: LoggingRequestInterceptor) = RestClientCustomizer { c ->

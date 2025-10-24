@@ -4,7 +4,7 @@ metadata:
   labels:
     app: entraproxy
     team: sikkerhetstjenesten
-  name: valkey-entra-proxy-{{nais.cluster.cache}}
+  name: valkey-sikkerhetstjenesten-entra-proxy-{{nais.cluster.cache}}
   namespace: sikkerhetstjenesten
 spec:
   terminationProtection: false

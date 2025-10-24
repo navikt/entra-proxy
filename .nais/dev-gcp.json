@@ -105,7 +105,7 @@
   ],
   "nais": {
     "cluster": {
-      "cache": "entra-proxy-cache",
+      "cache": "cache",
       "endpoint" : "f20f5b48-18f4-4e2a-8e5f-4ab3edb19733",
       "plan" : "startup-4",
       "type": "dev"

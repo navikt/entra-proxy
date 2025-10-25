@@ -18,13 +18,13 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         runCatching {
             val ansattId = AnsattId(elementer.id)
             when (elementer.metode) {
-                "geoOgGlobaleGrupper" -> entra.geoOgGlobaleGrupper(ansattId, oidTjeneste.oidFraEntra(ansattId))
-                "geoGrupper" -> entra.geoGrupper(ansattId, oidTjeneste.oidFraEntra(ansattId))
-                else -> error("Ukjent metode ${elementer.metode} i nøkkel ${elementer.nøkkel}")
+                "enheter" -> entra.enheter(ansattId, oidTjeneste.oidFraEntra(ansattId))
+                "tema" -> entra.tema(ansattId, oidTjeneste.oidFraEntra(ansattId))
+                else -> error("Ukjent metode ${elementer.metode} i nøkkel ${elementer.nøkkel} i cache $cacheName")
             }
-            log.info("Oppfrisking av ${elementer.nøkkel} OK")
+            log.info("Oppfrisking av ${elementer.nøkkel} i cache $cacheName OK")
         }.getOrElse {
-            log.info("Oppfrisking av ${elementer.nøkkel} etter sletting feilet, dette er ikke kritisk",it)
+            log.info("Oppfrisking av ${elementer.nøkkel} i cache $cacheName etter sletting feilet, dette er ikke kritisk",it)
         }
     }
 }

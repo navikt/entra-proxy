@@ -23,8 +23,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }.forEach { addAll(it.value) }
     }
 
-    fun grupper(ansattId: String, erCCF: Boolean): Set<EntraGruppe> = buildSet {
-        generateSequence(get<EntraGrupper>(cf.grupperURI(ansattId, erCCF))) { bolk -> bolk.next?.let { get<EntraGrupper>(it) }
+    fun enheter(ansattId: String): Set<EntraGruppe> = buildSet {
+        generateSequence(get<EntraGrupper>(cf.enheterURI(ansattId))) { bolk -> bolk.next?.let { get<EntraGrupper>(it) }
         }.forEach { addAll(it.value) }
     }
 

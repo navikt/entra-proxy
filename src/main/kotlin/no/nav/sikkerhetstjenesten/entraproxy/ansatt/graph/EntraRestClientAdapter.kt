@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapt
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
+import java.net.URI
 import java.util.*
 
 @Component
@@ -26,7 +27,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         generateSequence(get<EntraGrupper>(cf.grupperURI(ansattId, erCCF))) { bolk -> bolk.next?.let { get<EntraGrupper>(it) }
         }.forEach { addAll(it.value) }
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
         data class EntraOids(val id: UUID)
@@ -34,4 +35,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
+                                    val value: Set<EntraGruppe> = emptySet())
 }
+

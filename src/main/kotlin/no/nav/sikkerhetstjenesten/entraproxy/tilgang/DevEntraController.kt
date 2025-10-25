@@ -7,22 +7,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevTilgangController", description = "Denne kontrolleren skal kun brukes til testing")
-class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste, private val norgTjeneste: NorgTjeneste) {
+class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
     fun enheter(@PathVariable ansattId: AnsattId) = entra.enheter(ansattId, oid.oidFraEntra(ansattId))
 
     @GetMapping("ansatt/tema/{ansattId}")
     fun tema(@PathVariable ansattId: AnsattId) = entra.tema(ansattId, oid.oidFraEntra(ansattId))
-
-    @GetMapping("ansatt/enheter/{enhetnummer}/navn/")
-    fun enhetNavn(@PathVariable enhetnummer: Enhetnummer) = norgTjeneste.navnFor(enhetnummer)
 }

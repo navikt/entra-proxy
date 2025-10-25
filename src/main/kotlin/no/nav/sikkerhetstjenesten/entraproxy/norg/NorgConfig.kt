@@ -1,8 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
-import org.springframework.boot.context.properties.ConfigurationProperties
 import java.net.URI
 import java.time.Duration
 
@@ -23,7 +21,7 @@ class NorgConfig(
     companion object {
         private val DEFAULT_URI = URI.create("http://norg2.org")
         private val DEFAULT_ENHET_PATH = "/api/vi/{enhetsnummer}"
-        private const val DEFAULT_PING_PATH = "/todo"
+        private const val DEFAULT_PING_PATH = "/norg2/internal/health/liveness"
         const val NORG = "norg"
     }
 

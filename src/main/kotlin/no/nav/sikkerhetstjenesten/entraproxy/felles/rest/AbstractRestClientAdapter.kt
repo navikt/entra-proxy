@@ -26,17 +26,6 @@ abstract class AbstractRestClientAdapter(
             .onStatus(HttpStatusCode::isError, errorHandler::handle)
             .body(T::class.java) ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
 
-    protected inline fun <reified T> post(uri: URI, body: Any, headers: Map<String, String> = emptyMap()) =
-        restClient
-            .post()
-            .uri(uri)
-            .headers { it.setAll(headers) }
-            .accept(APPLICATION_JSON)
-            .body(body)
-            .retrieve()
-            .onStatus(HttpStatusCode::isError, errorHandler::handle)
-            .body(T::class.java) ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
-
     override val name = cfg.name
 
     override val pingEndpoint = "${cfg.pingEndpoint}"

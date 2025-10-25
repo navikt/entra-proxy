@@ -15,7 +15,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oidFraEntra(ansattId: String) =
-        get<EntraSaksbehandlerRespons>(cf.userURI(ansattId)).oids.single().id
+        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun tema(oid: String): Set<EntraGruppe> = buildSet {
         generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
@@ -29,7 +29,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
+    private data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
         data class EntraOids(val id: UUID)
     }
 

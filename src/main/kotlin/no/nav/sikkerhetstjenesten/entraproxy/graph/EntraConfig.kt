@@ -18,10 +18,10 @@ class EntraConfig(
     override val navn = name
     override val varighet = Duration.ofHours(3)
 
-    fun userURI(oid: String) =
+    fun userURI(ansattId: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, SELECT_USER, "$KONTO eq '$oid'")
+            queryParams(this, SELECT_USER, "$KONTO eq '$ansattId'")
         }.build()
 
     fun temaURI(oid: String) =

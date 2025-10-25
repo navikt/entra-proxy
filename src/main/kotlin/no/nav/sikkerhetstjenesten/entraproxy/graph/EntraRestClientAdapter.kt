@@ -17,7 +17,7 @@ import java.util.*
 class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
-    fun oidFraEntra(ansattId: String) =
+    fun oid(ansattId: String) =
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun tema(oid: String) =

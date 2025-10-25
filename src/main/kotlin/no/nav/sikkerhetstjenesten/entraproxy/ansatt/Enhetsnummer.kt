@@ -6,7 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExten
 
 data class Enhetsnummer(@JsonValue val verdi: String) {
     init {
-      //  requireDigits(verdi, 4)
+        require(verdi.length == 4) { "Kall uten verdi er malformed" }
     }
 }
 

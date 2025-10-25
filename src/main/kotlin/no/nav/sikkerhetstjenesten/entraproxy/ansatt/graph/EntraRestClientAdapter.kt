@@ -21,19 +21,21 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun oidFraEntra(ansattId: String) =
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
-    fun tema(oid: String) = buildSet {
-        generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
-            bolk.next?.let { get<EntraGrupper>(it) }
-        }.flatMap { it.value }
-            .forEach { add(Tema(it.displayName.substringAfter(TEMA_PREFIX))) }
-    }
+    fun tema(oid: String) =
+        buildSet {
+            generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
+                bolk.next?.let { get<EntraGrupper>(it) }
+            }.flatMap { it.value }
+                .forEach { add(Tema(it.displayName.substringAfter(TEMA_PREFIX))) }
+        }
 
-    fun enheter(ansattId: String) = buildSet {
-        generateSequence(get<EntraGrupper>(cf.enheterURI(ansattId))) { bolk ->
-            bolk.next?.let { get<EntraGrupper>(it) }
-        }.flatMap { it.value }
-            .forEach { add(Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
-    }
+    fun enheter(ansattId: String) =
+        buildSet {
+            generateSequence(get<EntraGrupper>(cf.enheterURI(ansattId))) { bolk ->
+                bolk.next?.let { get<EntraGrupper>(it) }
+            }.flatMap { it.value }
+                .forEach { add(Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
+        }
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)

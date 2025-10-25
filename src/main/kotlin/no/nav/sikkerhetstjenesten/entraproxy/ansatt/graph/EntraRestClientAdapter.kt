@@ -31,7 +31,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(ansattId: String) = buildSet {
         generateSequence(get<EntraGrupper>(cf.enheterURI(ansattId))) { bolk -> bolk.next?.let { get<EntraGrupper>(it) }
         }.forEach { addAll(it.value) }
-    }.map { Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX)) }.toSet()
+    }.also { g -> g.forEach {
+        runCatching {
+            log.info("Enhet fra Entra: ${it.displayName.substringAfter(ENHET_PREFIX)}")
+        }.getOrElse { t ->
+            log.warn("OOPS", t)
+        }
+    }
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {

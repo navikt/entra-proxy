@@ -22,7 +22,7 @@ class NorgConfig(
     override val varighet = Duration.ofDays(1)
     companion object {
         private val DEFAULT_URI = URI.create("http://norg2.org")
-        private val DEFAULT_ENHET_PATH = "/api/vi/{enhetsnummer}"
+        private val DEFAULT_ENHET_PATH = "/norg2/api/vi/{enhetsnummer}"
         private const val DEFAULT_PING_PATH = "/norg2/internal/health/liveness"
         const val NORG = "norg"
     }

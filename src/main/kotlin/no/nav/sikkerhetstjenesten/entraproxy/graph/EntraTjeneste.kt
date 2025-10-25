@@ -12,7 +12,7 @@ import java.util.*
 @RetryingWhenRecoverable
 @Service
 @Timed(value = "entra", histogram = true)
-class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val resolver: AnsattOidTjeneste, private val norgTjeneste: NorgTjeneste)  {
+class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
@@ -26,7 +26,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val res
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) = adapter.tema("$oid")
 
-    override fun toString() = "${javaClass.simpleName} [adapter=$adapter resolver=$resolver]"
+    override fun toString() = "${javaClass.simpleName} [adapter=$adapter norgTjeneste=$norgTjeneste]"
 }
 
 

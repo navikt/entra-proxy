@@ -16,25 +16,17 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun oidFraEntra(ansattId: String) =
         get<EntraSaksbehandlerRespons>(cf.userURI(ansattId)).oids.single().id
 
-    fun tema(oid: String): Set<EntraGruppe> =
+    fun tema(oid: String): Set<EntraGruppe> = buildSet {
         generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
-            bolk.next?.let {
-                get<EntraGrupper>(it)
-            }
-        }
-            .flatMap { it.value }
-            .toSet()
+            bolk.next?.let { get<EntraGrupper>(it) }
+        }.forEach { addAll(it.value) }
+    }
 
-    fun grupper(ansattId: String, trengerGlobaleGrupper: Boolean): Set<EntraGruppe> =
-        generateSequence(get<EntraGrupper>(cf.grupperURI(ansattId,trengerGlobaleGrupper))) { bolk ->
-            bolk.next?.let {
-                get<EntraGrupper>(it)
-            }
-        }
-            .flatMap { it.value }
-            .toSet()
-
-
+    fun grupper(ansattId: String, erCCF: Boolean): Set<EntraGruppe> = buildSet {
+        generateSequence(get<EntraGrupper>(cf.grupperURI(ansattId, erCCF))) { bolk -> bolk.next?.let { get<EntraGrupper>(it) }
+        }.forEach { addAll(it.value) }
+    }
+    
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
         data class EntraOids(val id: UUID)

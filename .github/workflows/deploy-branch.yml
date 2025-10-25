@@ -92,7 +92,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment:
-      ${{matrix.cluster}}:tilgangsmaskin
+      ${{matrix.cluster}}:sikkerhetstjenesten
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m

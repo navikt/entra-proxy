@@ -7,7 +7,6 @@ import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
-import org.apache.commons.pool2.impl.GenericObjectPool
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.ScanOptions.scanOptions
 import org.springframework.stereotype.Component

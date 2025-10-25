@@ -29,7 +29,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
+    private data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
         data class EntraOids(val id: UUID)
     }
 

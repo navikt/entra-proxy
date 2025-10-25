@@ -26,10 +26,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    private inline fun <T> grupper(uri: URI, prefix: String, crossinline mapper: (String) -> T) = buildSet {
+    private inline fun <T> grupper(uri: URI, prefix: String, crossinline construct: (String) -> T) = buildSet {
         generateSequence(get<EntraGrupper>(uri)) { it.next?.let(::get) }
             .flatMap { it.value }
-            .forEach { add(mapper(it.displayName.removePrefix(prefix))) }
+            .forEach { add(construct(it.displayName.removePrefix(prefix))) }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

@@ -24,9 +24,9 @@ class EntraConfig(
         queryParam(PARAM_NAME_COUNT, "true")
     }.build()
 
-    fun temaURI(oid: String) = query(oid, TEMA_PREFIX)
+    fun temaURI(oid: String) = query(oid, TEMA_PREFIX_QUERY)
 
-    fun enheterURI(ansattId: String) = query(ansattId,ENHET_PREFIX)
+    fun enheterURI(ansattId: String) = query(ansattId,ENHET_PREFIX_QUERY)
 
     private fun query(ansattId: String, filter: String) = builder().apply {
         path(GRUPPER_PATH)
@@ -40,9 +40,11 @@ class EntraConfig(
     override fun toString() = "$javaClass.simpleName [baseUri=$baseUri, pingEndpoint=$pingEndpoint]"
 
     companion object {
-        const val TEMA_PREFIX = "startswith(displayName,'0000-GA-TEMA') "
-        const val ENHET_PREFIX = "startswith(displayName,'0000-GA-ENHET') "
         const val GRAPH = "graph"
+        const val TEMA_PREFIX = "0000-GA-TEMA_"
+        const val ENHET_PREFIX = "0000-GA-ENHET_"
+        private const val TEMA_PREFIX_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
+        private const val ENHET_PREFIX_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"

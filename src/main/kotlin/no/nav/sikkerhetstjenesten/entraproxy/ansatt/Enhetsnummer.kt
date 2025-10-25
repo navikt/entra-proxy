@@ -9,3 +9,5 @@ data class Enhetsnummer(@JsonValue val verdi: String) {
         requireDigits(verdi, 4)
     }
 }
+
+data class Tema(@JsonValue val verdi: String)

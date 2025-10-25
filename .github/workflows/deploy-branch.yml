@@ -48,7 +48,7 @@ jobs:
       - name: Login GAR
         uses: nais/login@v0
         with:
-          team: tilgangsmaskin
+          team: sikkerhetstjenesten
 
       - name: Test og bygg
         id: kompiler

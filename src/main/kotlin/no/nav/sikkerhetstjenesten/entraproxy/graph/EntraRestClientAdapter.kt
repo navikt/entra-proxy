@@ -21,19 +21,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun tema(oid: String) =
-        buildSet {
-            generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { it.next?.let(::get) }
-                .flatMap { it.value }
-                .forEach { add(Tema(it.displayName.removePrefix(TEMA_PREFIX))) }
-        }
+        grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
 
     fun enheter(oid: String) =
-        buildSet {
-            generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { it.next?.let(::get) }
-                .flatMap { it.value }
-                .forEach { add(Enhetnummer(it.displayName.removePrefix(ENHET_PREFIX))) }
-        }
+        grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
+    private inline fun <T> grupper(uri: URI, prefix: String, crossinline mapper: (String) -> T) = buildSet {
+        generateSequence(get<EntraGrupper>(uri)) { it.next?.let(::get) }
+            .flatMap { it.value }
+            .forEach { add(mapper(it.displayName.removePrefix(prefix))) }
+    }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {

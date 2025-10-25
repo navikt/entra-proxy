@@ -1,8 +1,5 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
+package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelElementer
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfrisker
 import org.slf4j.LoggerFactory.getLogger
@@ -11,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste) : CacheOppfrisker{
 
-    override val cacheName: String = GRAPH
+    override val cacheName: String = EntraConfig.Companion.GRAPH
     private val log = getLogger(javaClass)
 
     override fun oppfrisk(elementer: CacheNøkkelElementer) {

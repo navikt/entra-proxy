@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.security.token.support.spring.ProtectedRestController
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.ansatt.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token.Companion.AAD_ISSUER
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.GetMapping

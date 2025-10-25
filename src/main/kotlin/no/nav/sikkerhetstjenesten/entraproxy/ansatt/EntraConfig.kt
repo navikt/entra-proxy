@@ -1,9 +1,10 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
+package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.ansatt.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.web.util.UriBuilder
 import java.net.URI
 import java.time.Duration
 
@@ -17,25 +18,31 @@ class EntraConfig(
     override val navn = name
     override val varighet = Duration.ofHours(3)
 
-    fun userURI(navIdent: String) = builder().apply {
-        path(USERS_PATH)
-        queryParam(PARAM_NAME_SELECT, PARAM_VALUE_SELECT_USER)
-        queryParam(PARAM_NAME_FILTER, "onPremisesSamAccountName eq '$navIdent'")
-        queryParam(PARAM_NAME_COUNT, "true")
-    }.build()
+    fun userURI(navIdent: String) =
+        builder().apply {
+            path(USERS_PATH)
+            queryParams(this, PARAM_VALUE_SELECT_USER, "$ACCOUNT_NAME_PROPERTY eq '$navIdent'")
+        }.build()
 
-    fun temaURI(oid: String) = query(oid, TEMA_PREFIX_QUERY)
+    fun temaURI(oid: String) =
+        grupperURI(oid, TEMA_QUERY)
 
-    fun enheterURI(ansattId: String) = query(ansattId,ENHET_PREFIX_QUERY)
+    fun enheterURI(oid: String) =
+        grupperURI(oid,ENHET_QUERY)
 
-    private fun query(ansattId: String, filter: String) = builder().apply {
-        path(GRUPPER_PATH)
-        queryParam(PARAM_NAME_SELECT, PARAM_VALUE_SELECT_GROUPS)
-        queryParam(PARAM_NAME_COUNT, "true")
-        queryParam(PARAM_NAME_TOP, size)
-        queryParam(PARAM_NAME_FILTER, filter)
-    }.build(ansattId)
+    private fun grupperURI(oid: String, filter: String) =
+        builder().apply {
+            path(GRUPPER_PATH)
+            queryParams(this, PARAM_VALUE_SELECT_GROUPS, filter)
+            queryParam(PARAM_NAME_TOP, size)
+        }.build(oid)
 
+    private fun queryParams(builder: UriBuilder, select: String, filter: String) =
+        builder.apply {
+            queryParam(PARAM_NAME_SELECT, select)
+            queryParam(PARAM_NAME_COUNT, "true")
+            queryParam(PARAM_NAME_FILTER, filter)
+        }
 
     override fun toString() = "$javaClass.simpleName [baseUri=$baseUri, pingEndpoint=$pingEndpoint]"
 
@@ -43,8 +50,9 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val TEMA_PREFIX = "0000-GA-TEMA_"
         const val ENHET_PREFIX = "0000-GA-ENHET_"
-        private const val TEMA_PREFIX_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
-        private const val ENHET_PREFIX_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
+        private const val ACCOUNT_NAME_PROPERTY = "onPremisesSamAccountName"
+        private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
+        private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"

@@ -5,10 +5,8 @@ import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.spring.UnprotectedRestController
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
+import no.nav.sikkerhetstjenesten.entraproxy.ansatt.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 

@@ -1,21 +1,16 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
+package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.Enhetsnummer
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.Tema
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.ENHET_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.TEMA_PREFIX
 import java.net.URI
 import java.util.*
 
 @Component
-class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
+class EntraRestClientAdapter(@Qualifier(EntraConfig.Companion.GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oidFraEntra(ansattId: String) =
@@ -26,15 +21,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
                 bolk.next?.let { get<EntraGrupper>(it) }
             }.flatMap { it.value }
-                .forEach { add(Tema(it.displayName.substringAfter(TEMA_PREFIX))) }
+                .forEach { add(Tema(it.displayName.substringAfter(EntraConfig.Companion.TEMA_PREFIX))) }
         }
 
-    fun enheter(ansattId: String) =
+    fun enheter(oid: String) =
         buildSet {
-            generateSequence(get<EntraGrupper>(cf.enheterURI(ansattId))) { bolk ->
+            generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { bolk ->
                 bolk.next?.let { get<EntraGrupper>(it) }
             }.flatMap { it.value }
-                .forEach { add(Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
+                .forEach { add(Enhetsnummer(it.displayName.substringAfter(EntraConfig.Companion.ENHET_PREFIX))) }
         }
 
 

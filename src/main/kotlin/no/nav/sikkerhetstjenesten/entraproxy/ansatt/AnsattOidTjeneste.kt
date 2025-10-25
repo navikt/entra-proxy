@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component

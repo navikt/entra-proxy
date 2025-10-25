@@ -1,6 +1,5 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
+package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
 import org.springframework.beans.factory.annotation.Qualifier
@@ -12,7 +11,7 @@ import org.springframework.web.client.RestClient
 class EntraClientBeanConfig {
 
     @Bean
-    @Qualifier(GRAPH)
+    @Qualifier(EntraConfig.Companion.GRAPH)
     fun entraRestClient(b: RestClient.Builder, cfg: EntraConfig) =
         b.baseUrl(cfg.baseUri)
             .requestInterceptors {

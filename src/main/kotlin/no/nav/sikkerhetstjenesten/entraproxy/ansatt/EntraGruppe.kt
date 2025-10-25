@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
+package no.nav.sikkerhetstjenesten.entraproxy.ansatt
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.*

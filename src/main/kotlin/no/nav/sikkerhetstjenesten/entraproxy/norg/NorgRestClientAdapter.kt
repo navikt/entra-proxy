@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 
 
-//@Component
+@Component
 class NorgRestClientAdapter(@Qualifier(NORG) restClient: RestClient, val cf: NorgConfig) :
     AbstractRestClientAdapter(restClient, cf) {
     fun navnFor(enhet: String) =

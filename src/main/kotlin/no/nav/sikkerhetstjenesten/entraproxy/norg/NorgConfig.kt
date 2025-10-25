@@ -1,10 +1,12 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
+import org.springframework.boot.context.properties.ConfigurationProperties
 import java.net.URI
 import java.time.Duration
 
-//@ConfigurationProperties(NORG)
+@ConfigurationProperties(NORG)
 class NorgConfig(
     baseUri: URI = DEFAULT_URI,
     private val enhetPath: String = DEFAULT_ENHET_PATH,

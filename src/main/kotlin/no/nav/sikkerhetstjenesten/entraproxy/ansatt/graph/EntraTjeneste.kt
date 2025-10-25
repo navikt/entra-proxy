@@ -15,7 +15,7 @@ import java.util.*
 @Timed(value = "entra", histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val resolver: AnsattOidTjeneste)  {
 
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
     fun enheter(ansattId: AnsattId, oid: UUID) = adapter.enheter("$oid")
 

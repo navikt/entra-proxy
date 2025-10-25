@@ -47,7 +47,6 @@ spec:
       enabled: true
       allowAllUsers: true
       claims:
-        groups:
         extra:
           - "NAVident"
           - "azp_name"

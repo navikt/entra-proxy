@@ -57,6 +57,8 @@ spec:
       rules:
       - application: logging
         namespace: nais-system
+      - application: norg2
+        namespace: org
     inbound:
       rules:
         {{#each inbound as |app|}}

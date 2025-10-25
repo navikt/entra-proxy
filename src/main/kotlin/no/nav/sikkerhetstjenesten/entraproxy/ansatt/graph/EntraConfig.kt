@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.GlobalGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.ansatt.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
@@ -25,15 +24,9 @@ class EntraConfig(
         queryParam(PARAM_NAME_COUNT, "true")
     }.build()
 
-    fun temaURI(oid: String) = ccTemaUri(oid)
+    fun temaURI(oid: String) = query(oid, TEMA_PREFIX_QUERY)
 
-    fun grupperURI(ansattId: String, isCCF: Boolean) = if (isCCF) ccUri(ansattId) else oboUri(ansattId)
-
-    private fun ccTemaUri(oid: String) = query(oid,TEMA_PREFIX)
-
-    private fun oboUri(ansattId: String) = query(ansattId,GEO_PREFIX)
-
-    private fun ccUri(ansattId: String) = query(ansattId,"id in(${uuidsFormatted()}) or $GEO_PREFIX")
+    fun enheterURI(ansattId: String) = query(ansattId,ENHET_PREFIX_QUERY)
 
     private fun query(ansattId: String, filter: String) = builder().apply {
         path(GRUPPER_PATH)
@@ -43,14 +36,15 @@ class EntraConfig(
         queryParam(PARAM_NAME_FILTER, filter)
     }.build(ansattId)
 
-    private fun uuidsFormatted() = GlobalGruppe.uuids().joinToString(separator ="','" , prefix = "'", postfix = "'")
 
     override fun toString() = "$javaClass.simpleName [baseUri=$baseUri, pingEndpoint=$pingEndpoint]"
 
     companion object {
-        const val TEMA_PREFIX = "startswith(displayName,'0000-GA-TEMA') "
-        const val GEO_PREFIX = "startswith(displayName,'0000-GA-GEO') or startswith(displayName,'0000-GA-ENHET') "
         const val GRAPH = "graph"
+        const val TEMA_PREFIX = "0000-GA-TEMA_"
+        const val ENHET_PREFIX = "0000-GA-ENHET_"
+        private const val TEMA_PREFIX_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
+        private const val ENHET_PREFIX_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"

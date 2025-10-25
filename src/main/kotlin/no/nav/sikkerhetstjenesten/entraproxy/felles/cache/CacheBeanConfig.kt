@@ -61,7 +61,4 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
             .entryTtl(cfg.varighet)
             .serializeKeysWith(fromSerializer(StringRedisSerializer()))
             .serializeValuesWith(fromSerializer(GenericJackson2JsonRedisSerializer(cacheMapper)))
-            .apply {
-                if (!cfg.cacheNulls) disableCachingNullValues()
-            }
 }

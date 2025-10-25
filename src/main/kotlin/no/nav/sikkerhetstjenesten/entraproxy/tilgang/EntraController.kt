@@ -31,7 +31,7 @@ class EntraController(private val entra: EntraTjeneste,
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
-            entra.geoOgGlobaleGrupper(ansattId, oid.oidFraEntra(ansattId)).filter { it.displayName.contains("ENHET") }
+            entra.enheter(ansattId, oid.oidFraEntra(ansattId))
         })
 
     @GetMapping("ansatt/tema/{ansattId}")
@@ -45,7 +45,7 @@ class EntraController(private val entra: EntraTjeneste,
     @ProblemDetailApiResponse
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() = tokenPrecondition( {token.erObo}, {
-        entra.geoOgGlobaleGrupper(token.ansattId!!, token.oid!!).filter { it.displayName.contains("ENHET") }
+        entra.enheter(token.ansattId!!, token.oid!!)
     })
     @PostMapping("ansatt/tema")
     @ProblemDetailApiResponse

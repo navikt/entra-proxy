@@ -47,7 +47,6 @@ spec:
       enabled: true
       allowAllUsers: true
       claims:
-        groups:
         extra:
           - "NAVident"
           - "azp_name"
@@ -72,16 +71,4 @@ spec:
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE
       value: {{nais.cluster.cache}}
-    - name: GRUPPE_STRENGT
-      value: '{{grupper.strengt}}'
-    - name: GRUPPE_FORTROLIG
-      value: '{{grupper.fortrolig}}'
-    - name: GRUPPE_EGENANSATT
-      value: '{{grupper.egenansatt}}'
-    - name: GRUPPE_UDEFINERT
-      value: '{{grupper.udefinert}}'
-    - name: GRUPPE_NASJONAL
-      value: '{{grupper.nasjonal}}'
-    - name: GRUPPE_UTLAND
-      value: '{{grupper.utland}}'
 

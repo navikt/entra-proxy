@@ -15,15 +15,10 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevTilgangController", description = "Denne kontrolleren skal kun brukes til testing")
-class DevEntraController (
-    private val entra: EntraTjeneste,
-    private val oid: AnsattOidTjeneste,
-    private val cache: CacheClient) {
-
-    private val log = getLogger(javaClass)
+class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) = entra.geoOgGlobaleGrupper(ansattId, oid.oidFraEntra(ansattId)).filter { it.displayName.contains("ENHET") }
+    fun enheter(@PathVariable ansattId: AnsattId) = entra.enheter(ansattId, oid.oidFraEntra(ansattId))
 
     @GetMapping("ansatt/tema/{ansattId}")
     fun tema(@PathVariable ansattId: AnsattId) = entra.tema(ansattId, oid.oidFraEntra(ansattId))

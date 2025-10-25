@@ -10,14 +10,7 @@ import java.util.*
 @Component
 class Token(private val contextHolder: TokenValidationContextHolder) {
 
-
-    val globaleGruppeIds
-        get() =
-            claimSet()?.getAsList("groups")
-                ?.mapNotNull { UUID.fromString(it) }
-                ?: emptyList()
-
-
+    val type = TokenType.from(this)
     val system get() = stringClaim(AZP_NAME)  ?: "N/A"
     val oid get() = stringClaim(OID)?.let { UUID.fromString(it) }
     val ansattId get() = stringClaim(NAVIDENT)?.let { AnsattId(it) }

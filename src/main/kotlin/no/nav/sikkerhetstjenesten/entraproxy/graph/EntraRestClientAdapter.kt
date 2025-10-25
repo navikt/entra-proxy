@@ -1,8 +1,11 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt
+package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -10,7 +13,7 @@ import java.net.URI
 import java.util.*
 
 @Component
-class EntraRestClientAdapter(@Qualifier(EntraConfig.Companion.GRAPH) restClient: RestClient, val cf: EntraConfig) :
+class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oidFraEntra(ansattId: String) =
@@ -21,7 +24,7 @@ class EntraRestClientAdapter(@Qualifier(EntraConfig.Companion.GRAPH) restClient:
             generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
                 bolk.next?.let { get<EntraGrupper>(it) }
             }.flatMap { it.value }
-                .forEach { add(Tema(it.displayName.substringAfter(EntraConfig.Companion.TEMA_PREFIX))) }
+                .forEach { add(Tema(it.displayName.substringAfter(TEMA_PREFIX))) }
         }
 
     fun enheter(oid: String) =
@@ -29,7 +32,7 @@ class EntraRestClientAdapter(@Qualifier(EntraConfig.Companion.GRAPH) restClient:
             generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { bolk ->
                 bolk.next?.let { get<EntraGrupper>(it) }
             }.flatMap { it.value }
-                .forEach { add(Enhetsnummer(it.displayName.substringAfter(EntraConfig.Companion.ENHET_PREFIX))) }
+                .forEach { add(Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
         }
 
 

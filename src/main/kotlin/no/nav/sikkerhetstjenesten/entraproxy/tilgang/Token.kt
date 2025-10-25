@@ -3,7 +3,7 @@
 
 import no.nav.boot.conditionals.Cluster.LOCAL
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
-import no.nav.sikkerhetstjenesten.entraproxy.ansatt.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import org.springframework.stereotype.Component
 import java.util.*
 

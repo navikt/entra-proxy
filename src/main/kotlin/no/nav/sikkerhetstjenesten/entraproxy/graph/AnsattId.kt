@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt
+package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 
 import com.fasterxml.jackson.annotation.JsonValue

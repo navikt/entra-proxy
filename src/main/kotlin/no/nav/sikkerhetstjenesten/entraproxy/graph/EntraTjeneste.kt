@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.ansatt
+package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan

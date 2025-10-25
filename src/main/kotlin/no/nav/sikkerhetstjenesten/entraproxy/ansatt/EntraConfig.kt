@@ -21,7 +21,7 @@ class EntraConfig(
     fun userURI(oid: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, SELECT_USER, "$ACCOUNT_NAME_PROPERTY eq '$oid'")
+            queryParams(this, SELECT_USER, "$KONTO eq '$oid'")
         }.build()
 
     fun temaURI(oid: String) =
@@ -50,7 +50,7 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val TEMA_PREFIX = "0000-GA-TEMA_"
         const val ENHET_PREFIX = "0000-GA-ENHET_"
-        private const val ACCOUNT_NAME_PROPERTY = "onPremisesSamAccountName"
+        private const val KONTO = "onPremisesSamAccountName"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250

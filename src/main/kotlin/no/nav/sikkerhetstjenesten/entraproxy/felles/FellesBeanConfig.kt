@@ -14,6 +14,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -26,6 +28,8 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.convert.converter.Converter
+import org.springframework.format.FormatterRegistry
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
@@ -102,11 +106,17 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             .register(meterRegistry).recordCallable { joinPoint.proceed() }
     }
 
+    override fun addFormatters(registry: FormatterRegistry) {
+        registry.addConverter(StringToEnhetnummerConverter())
+    }
     companion object {
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
+    }
+    class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
+        override fun convert(source: String): Enhetnummer = Enhetnummer(source)
     }
 }

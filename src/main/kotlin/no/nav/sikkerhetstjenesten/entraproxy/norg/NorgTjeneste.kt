@@ -7,6 +7,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class NorgTjeneste(private val adapter : NorgRestClientAdapter) {
-    @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetsnummer.verdi")
-    fun navnFor(enhetsnummer: Enhetnummer) = adapter.navnFor(enhetsnummer.verdi)
+    @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
+    fun navnFor(enhetnummer: Enhetnummer) = adapter.navnFor(enhetnummer.verdi)
 }

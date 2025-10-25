@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.teller
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sikkerhetstjenesten.entraproxy.felles.AbstractTeller
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import org.springframework.stereotype.Component
 
 

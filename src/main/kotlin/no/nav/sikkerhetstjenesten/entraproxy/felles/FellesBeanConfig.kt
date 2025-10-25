@@ -13,11 +13,10 @@ import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository
 import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository
@@ -27,7 +26,6 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.boot.web.client.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory

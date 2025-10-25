@@ -67,6 +67,14 @@ no.nav.security.jwt:
           client-id: ${azure.app.client.id}
           client-jwk: ${azure.app.jwk}
           client-auth-method: private_key_jwt
+      norg2:
+        token-endpoint-url: ${azure.openid.config.token.endpoint}
+        grant-type: client_credentials
+        scope: ${graph.scope}
+        authentication:
+          client-id: ${azure.app.client.id}
+          client-jwk: ${azure.app.jwk}
+          client-auth-method: private_key_jwt
 springdoc:
   swagger-ui:
     oauth:

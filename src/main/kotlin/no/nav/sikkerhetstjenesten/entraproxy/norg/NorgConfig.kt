@@ -21,7 +21,7 @@ class NorgConfig(
     override val navn = name
     override val varighet = Duration.ofDays(1)
     companion object {
-        private val DEFAULT_URI = URI.create("http://todo:8080")
+        private val DEFAULT_URI = URI.create("http://norg2.org")
         private val DEFAULT_ENHET_PATH = "/api/vi/{enhetsnummer}"
         private const val DEFAULT_PING_PATH = "/todo"
         const val NORG = "norg"

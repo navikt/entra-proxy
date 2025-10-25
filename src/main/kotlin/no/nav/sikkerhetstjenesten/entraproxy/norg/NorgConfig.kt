@@ -11,7 +11,7 @@ class NorgConfig(
     baseUri: URI = DEFAULT_URI,
     private val enhetPath: String = DEFAULT_ENHET_PATH,
     pingPath: String = DEFAULT_PING_PATH,
-    enabled: Boolean = false) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, NORG, enabled) {
+    enabled: Boolean = true) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, NORG, enabled) {
 
     fun enhetURI(enhetsnummer: String) =
         builder().apply {

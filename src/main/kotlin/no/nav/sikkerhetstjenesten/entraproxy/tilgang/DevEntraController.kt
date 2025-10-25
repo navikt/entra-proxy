@@ -25,5 +25,5 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ans
     fun tema(@PathVariable ansattId: AnsattId) = entra.tema(ansattId, oid.oidFraEntra(ansattId))
 
     @GetMapping("ansatt/enheter/navn/{enhetsnummer}")
-    fun enhetNavn(@PathVariable enhetsnummer: String) = norgTjeneste.navnFor(Enhetsnummer(enhetsnummer))
+    fun enhetNavn(@PathVariable enhetsnummer: Enhetsnummer) = norgTjeneste.navnFor(enhetsnummer)
 }

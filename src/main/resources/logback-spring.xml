@@ -21,7 +21,6 @@
     <springProfile name="dev">
         <logger name="io.lettuce.core.protocol.ReconnectionHandler" level="warn"/>
         <logger name="no.nav.sikkerhetstjenesten" level="trace"/>
-        <logger name="no.nav.security" level="trace"/>
     </springProfile>
 
     <springProfile name="local | test">

@@ -58,13 +58,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-cache")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.springframework.boot:spring-boot-starter-graphql")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.retry:spring-retry")
     implementation("org.springframework:spring-aspects")
-    implementation("org.apache.commons:commons-pool2:2.12.0")
     testImplementation("com.redis:testcontainers-redis")
     testImplementation("com.ninja-squad:springmockk:4.0.2")
     testImplementation("io.mockk:mockk:$mockkVersion")
@@ -72,8 +70,6 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
-    testImplementation("org.awaitility:awaitility-kotlin:4.3.0")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation(kotlin("test"))
 }

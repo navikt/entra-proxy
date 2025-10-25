@@ -11,14 +11,14 @@ import java.util.*
 
 @RetryingWhenRecoverable
 @Service
-@Timed(value = "entra", histogram = true)
+@Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> = buildSet {
-        adapter.enheter("$oid").forEach { enhetsnummer ->
-            add(Enhet(enhetsnummer, norgTjeneste.navnFor(enhetsnummer)))
+        adapter.enheter("$oid").forEach {
+            add(Enhet(it, norgTjeneste.navnFor(it)))
         }
     }
 

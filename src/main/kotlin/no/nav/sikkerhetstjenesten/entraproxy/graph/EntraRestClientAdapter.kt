@@ -22,18 +22,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun tema(oid: String) =
         buildSet {
-            generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { bolk ->
-                bolk.next?.let { get<EntraGrupper>(it) }
-            }.flatMap { it.value }
-                .forEach { add(Tema(it.displayName.substringAfter(TEMA_PREFIX))) }
+            generateSequence(get<EntraGrupper>(cf.temaURI(oid))) { it.next?.let(::get) }
+                .flatMap { it.value }
+                .forEach { add(Tema(it.displayName.removePrefix(TEMA_PREFIX))) }
         }
 
     fun enheter(oid: String) =
         buildSet {
-            generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { bolk ->
-                bolk.next?.let { get<EntraGrupper>(it) }
-            }.flatMap { it.value }
-                .forEach { add(Enhetnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
+            generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { it.next?.let(::get) }
+                .flatMap { it.value }
+                .forEach { add(Enhetnummer(it.displayName.removePrefix(ENHET_PREFIX))) }
         }
 
 

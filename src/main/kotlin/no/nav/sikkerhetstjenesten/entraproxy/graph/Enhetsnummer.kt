@@ -9,4 +9,6 @@ data class Enhetsnummer(@JsonValue val verdi: String) {
     }
 }
 
+data class Enhet(val enhetsnummer: Enhetsnummer, val navn: String)
+
 data class Tema(@JsonValue val verdi: String)

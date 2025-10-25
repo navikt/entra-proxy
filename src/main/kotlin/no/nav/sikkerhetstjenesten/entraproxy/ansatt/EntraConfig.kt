@@ -21,7 +21,7 @@ class EntraConfig(
     fun userURI(oid: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, PARAM_VALUE_SELECT_USER, "$ACCOUNT_NAME_PROPERTY eq '$oid'")
+            queryParams(this, SELECT_USER, "$ACCOUNT_NAME_PROPERTY eq '$oid'")
         }.build()
 
     fun temaURI(oid: String) =
@@ -33,15 +33,15 @@ class EntraConfig(
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
             path(GRUPPER_PATH)
-            queryParams(this, PARAM_VALUE_SELECT_GROUPS, filter)
-            queryParam(PARAM_NAME_TOP, size)
+            queryParams(this, GRUPPE_PROPERTIES, filter)
+            queryParam(TOP, size)
         }.build(oid)
 
     private fun queryParams(builder: UriBuilder, select: String, filter: String) =
         builder.apply {
-            queryParam(PARAM_NAME_SELECT, select)
-            queryParam(PARAM_NAME_COUNT, "true")
-            queryParam(PARAM_NAME_FILTER, filter)
+            queryParam(SELECT, select)
+            queryParam(COUNT, "true")
+            queryParam(FILTER, filter)
         }
 
     override fun toString() = "$javaClass.simpleName [baseUri=$baseUri, pingEndpoint=$pingEndpoint]"
@@ -56,12 +56,12 @@ class EntraConfig(
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"
-        private const val PARAM_NAME_SELECT = "\$select"
-        private const val PARAM_NAME_FILTER = "\$filter"
-        private const val PARAM_NAME_COUNT = "\$count"
-        private const val PARAM_VALUE_SELECT_USER = "id"
-        private const val PARAM_VALUE_SELECT_GROUPS = "id,displayName"
+        private const val SELECT = "\$select"
+        private const val FILTER = "\$filter"
+        private const val COUNT = "\$count"
+        private const val SELECT_USER = "id"
+        private const val GRUPPE_PROPERTIES = "id,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
-        private const val PARAM_NAME_TOP = "\$top"
+        private const val TOP = "\$top"
     }
 }

@@ -7,11 +7,10 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhetsnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.client.RestClient
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
@@ -24,6 +23,6 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ans
     @GetMapping("ansatt/tema/{ansattId}")
     fun tema(@PathVariable ansattId: AnsattId) = entra.tema(ansattId, oid.oidFraEntra(ansattId))
 
-    @GetMapping("ansatt/enheter/navn/{enhetsnummer}")
-    fun enhetNavn(@PathVariable enhetsnummer: Enhetsnummer) = norgTjeneste.navnFor(enhetsnummer)
+    @GetMapping("ansatt/enheter/{enhetnummer}/navn/")
+    fun enhetNavn(@PathVariable enhetnummer: Enhetnummer) = norgTjeneste.navnFor(enhetnummer)
 }

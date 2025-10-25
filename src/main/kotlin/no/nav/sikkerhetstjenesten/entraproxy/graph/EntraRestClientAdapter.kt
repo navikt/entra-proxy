@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
@@ -32,7 +33,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             generateSequence(get<EntraGrupper>(cf.enheterURI(oid))) { bolk ->
                 bolk.next?.let { get<EntraGrupper>(it) }
             }.flatMap { it.value }
-                .forEach { add(Enhetsnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
+                .forEach { add(Enhetnummer(it.displayName.substringAfter(ENHET_PREFIX))) }
         }
 
 

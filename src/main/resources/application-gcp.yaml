@@ -62,7 +62,7 @@ no.nav.security.jwt:
       graph:
         token-endpoint-url: ${azure.openid.config.token.endpoint}
         grant-type: client_credentials
-        scope: ${graph.scope}
+        scope: https://graph.microsoft.com/.defaul
         authentication:
           client-id: ${azure.app.client.id}
           client-jwk: ${azure.app.jwk}
@@ -80,9 +80,6 @@ springdoc:
       client-id: ${azure.app.client.id}
     csrf:
       enabled: true
-
-graph:
-  scope: https://graph.microsoft.com/.default
 
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}

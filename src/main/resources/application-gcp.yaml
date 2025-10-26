@@ -7,6 +7,11 @@ management:
     annotations:
       enabled: true
   health:
+    group:
+      readiness:
+        show-components: never
+      liveness:
+        show-components: never
     redis:
       enabled: false
     ssl:
@@ -57,7 +62,7 @@ no.nav.security.jwt:
       graph:
         token-endpoint-url: ${azure.openid.config.token.endpoint}
         grant-type: client_credentials
-        scope: https://graph.microsoft.com/.default
+        scope: ${graph.scope}
         authentication:
           client-id: ${azure.app.client.id}
           client-jwk: ${azure.app.jwk}
@@ -65,6 +70,7 @@ no.nav.security.jwt:
       norg2:
         token-endpoint-url: ${azure.openid.config.token.endpoint}
         grant-type: client_credentials
+        scope: ${graph.scope}
         authentication:
           client-id: ${azure.app.client.id}
           client-jwk: ${azure.app.jwk}
@@ -76,9 +82,13 @@ springdoc:
     csrf:
       enabled: true
 
+graph:
+  scope: https://graph.microsoft.com/.default
+
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}
   password: ${valkey.password.${nais.cluster.cache}}
+  uri: ${valkey.uri.${nais.cluster.cache}}
   port: ${valkey.port.${nais.cluster.cache}}
   host: ${valkey.host.${nais.cluster.cache}}
   json:

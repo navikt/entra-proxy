@@ -15,8 +15,8 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         runCatching {
             val ansattId = AnsattId(elementer.id)
             when (elementer.metode) {
-                "enheter" -> entra.enheter(ansattId, oidTjeneste.oidFraEntra(ansattId))
-                "tema" -> entra.tema(ansattId, oidTjeneste.oidFraEntra(ansattId))
+                "enheter" -> entra.enheter(ansattId, oidTjeneste.oidFraEntra(ansattId)!!)
+                "tema" -> entra.tema(ansattId, oidTjeneste.oidFraEntra(ansattId)!!)
                 else -> error("Ukjent metode ${elementer.metode} i nøkkel ${elementer.nøkkel} i cache $cacheName")
             }
             log.info("Oppfrisking av ${elementer.nøkkel} i cache $cacheName OK")

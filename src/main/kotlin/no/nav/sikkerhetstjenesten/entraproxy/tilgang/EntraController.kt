@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType.HTTP
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -12,6 +11,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -32,24 +33,22 @@ class EntraController(private val entra: EntraTjeneste,
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
-            entra.enheter(ansattId, oid.oidFraEntra(ansattId))
+            oid.oidFraEntra(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet<Enhet>()
         })
 
     @GetMapping("ansatt/tema/{ansattId}")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
-            entra.tema(ansattId, oid.oidFraEntra(ansattId))
+            oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet<Tema>()
         })
 
     @PostMapping("ansatt/enheter")
-    @ProblemDetailApiResponse
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() = tokenPrecondition( {token.erObo}, {
         entra.enheter(token.ansattId!!, token.oid!!)
     })
     @PostMapping("ansatt/tema")
-    @ProblemDetailApiResponse
     @Operation(summary = "Slå opp tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() = tokenPrecondition( {token.erObo}, {
         entra.tema(token.ansattId!!, token.oid!!)
@@ -61,11 +60,3 @@ class EntraController(private val entra: EntraTjeneste,
     }
 }
 
-annotation class ProblemDetailApiResponse
-@Schema(description = "Problem Detail")
-internal data class ProblemDetailResponse(
-    val type: URI,
-    val status: Int,
-    val instance: String,
-    val navIdent: String,
-    val traceId: String)

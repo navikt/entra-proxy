@@ -18,7 +18,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oid(ansattId: String) =
-        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
+        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
 
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)

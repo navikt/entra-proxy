@@ -16,8 +16,9 @@ import org.springframework.web.bind.annotation.PathVariable
 class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) = entra.enheter(ansattId, oid.oidFraEntra(ansattId))
+
+    fun enheter(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet()
 
     @GetMapping("ansatt/tema/{ansattId}")
-    fun tema(@PathVariable ansattId: AnsattId) = entra.tema(ansattId, oid.oidFraEntra(ansattId))
+    fun tema(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet()
 }

@@ -84,7 +84,6 @@ springdoc:
 
 graph:
   scope: https://graph.microsoft.com/.default
-  base-uri: https://graph.microsoft.com/v1.0/
 
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}

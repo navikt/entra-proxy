@@ -35,7 +35,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
-            data class EntraOids(val id: UUID)
+        data class EntraOids(val id: UUID)
     }
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"

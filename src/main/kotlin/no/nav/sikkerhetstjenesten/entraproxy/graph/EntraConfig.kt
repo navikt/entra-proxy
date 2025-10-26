@@ -10,7 +10,7 @@ import java.time.Duration
 
 @ConfigurationProperties(GRAPH)
 class EntraConfig(
-    baseUri: URI,
+    baseUri: URI = DEFAULT_BASE_URI,
     pingPath: String = DEFAULT_PING_PATH,
     private val size: Int = DEFAULT_BATCH_SIZE,
     enabled: Boolean = true) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, GRAPH, enabled) {
@@ -50,6 +50,7 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val TEMA_PREFIX = "0000-GA-TEMA_"
         const val ENHET_PREFIX = "0000-GA-ENHET_"
+        private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
         private const val KONTO = "onPremisesSamAccountName"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "

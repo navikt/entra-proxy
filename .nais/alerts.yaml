@@ -1,0 +1,19 @@
+apiVersion: "monitoring.coreos.com/v1"
+kind: "PrometheusRule"
+metadata:
+  name: warnings
+  namespace: sikkerhetstjeneten
+  labels:
+    team: sikkerhetstjenesten
+spec:
+  groups:
+    - name: "sikkerhetstjenesten alerts"
+      rules:
+        - alert: "[sikkerhetstjenesten] Forhøyede feilrater"
+          expr: sum(round(increase(logback_events_total{app="entra-proxy", level="warn"}[2m]))) > 20
+          for: 3m
+          annotations:
+            action: "Sjekk loggene for å se hvorfor det er så mye feil"
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: warning

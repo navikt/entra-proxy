@@ -1,11 +1,9 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.teller
+package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sikkerhetstjenesten.entraproxy.felles.AbstractTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import org.springframework.stereotype.Component
-
-
 
 @Component
 class CacheOppfriskerTeller(registry: MeterRegistry, token: Token) :

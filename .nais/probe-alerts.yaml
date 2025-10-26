@@ -1,0 +1,53 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+    name: entraproxy-probe-alerts
+    namespace: sikkerhetstjenesten
+    labels:
+      team: sikkerhetstjenesten
+spec:
+  groups:
+    - name: probe-errors
+      rules:
+        - alert: HelsesjekkValKeyFeilet
+          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/valkey", namespace="sikkerhetstjenesten"} == 0
+          for: 2m
+          annotations:
+            consequence: Valkey er nede
+            action: "Sjekk Grafana og Kibana"
+            summary: |-
+              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Loki securelogs: 
+              Kibana securelogs: 
+              Kibana åpne logger:
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: critical
+        - alert: HelsesjekkEntraFeilet
+          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph", namespace="tilgangsmaskin"} == 0
+          for: 2m
+          annotations:
+            consequence: Entra er nede
+            action: "Sjekk Grafana og Kibana"
+            summary: |-
+              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Loki securelogs: 
+              Kibana securelogs: 
+              Kibana åpne logger:
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: critical
+        - alert: HelsesjekkNorgFeilet
+          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/norg", namespace="tilgangsmaskin"} == 0
+          for: 2m
+          annotations:
+            consequence: Norg2 er nede
+            action: "Sjekk Grafana og Kibana"
+            summary: |-
+              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Loki securelogs: 
+              Kibana securelogs: 
+              Kibana åpne logger:
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: critical

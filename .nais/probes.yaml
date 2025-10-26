@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Probe
+metadata:
+  name: helsesjekker
+  namespace: sikkerhetstjenesten
+spec:
+  interval: 60s
+  module: http_2xx
+  prober:
+    path: /probe
+    url: monitoring-prometheus-blackbox-exporter.nais-system:80
+  targets:
+    staticConfig:
+      static:
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/valKey
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/norg
+

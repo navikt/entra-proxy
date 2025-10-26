@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.cache.annotation.Cacheable
@@ -21,6 +22,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             add(Enhet(it, norgTjeneste.navnFor(it)))
         }
     }
+
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) = UnsupportedOperationException("Henting av enhet medlemmer er ikke implementert")
+
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    fun temaMedlemmer( tema: Tema, oid: UUID) = UnsupportedOperationException("Henting av tema medlemmer er ikke implementert")
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")

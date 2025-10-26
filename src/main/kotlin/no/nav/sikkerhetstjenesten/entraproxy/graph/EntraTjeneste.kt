@@ -17,25 +17,29 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
-    fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> = buildSet {
-        adapter.enheter("$oid").forEach {
-            add(Enhet(it, norgTjeneste.navnFor(it)))
+    fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
+        buildSet {
+            adapter.enheter("$oid").forEach {
+                add(Enhet(it, norgTjeneste.navnFor(it)))
+            }
         }
-    }
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
-    fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) = UnsupportedOperationException("Henting av enhet medlemmer er ikke implementert")
+    fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
+        UnsupportedOperationException("Henting av enhet medlemmer er ikke implementert")
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
-    fun temaMedlemmer( tema: Tema, oid: UUID) = UnsupportedOperationException("Henting av tema medlemmer er ikke implementert")
+    fun temaMedlemmer( tema: Tema, oid: UUID) =
+        UnsupportedOperationException("Henting av tema medlemmer er ikke implementert")
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun tema(ansattId: AnsattId, oid: UUID) = adapter.tema("$oid")
+    fun tema(ansattId: AnsattId, oid: UUID) =
+        adapter.tema("$oid")
 
-    override fun toString() = "${javaClass.simpleName} [adapter=$adapter norgTjeneste=$norgTjeneste]"
+    override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norgTjeneste=$norgTjeneste]"
 }
 
 

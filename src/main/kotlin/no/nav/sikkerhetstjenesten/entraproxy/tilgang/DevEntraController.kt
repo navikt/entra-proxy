@@ -7,8 +7,12 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
@@ -16,8 +20,13 @@ import org.springframework.web.bind.annotation.PathVariable
 class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-
     fun enheter(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet()
+
+    @GetMapping("ansatt/enheter/{enhet}/{ansattId}")
+    fun enhetMedlemmer(@PathVariable enhet: Enhetnummer) =  UnsupportedOperationException("Ikke implementert")
+
+    @GetMapping("ansatt/tema/{tema}/{ansattId}")
+    fun temaMedlemmer(@PathVariable tema: Tema, @PathVariable ansattId: AnsattId) = UnsupportedOperationException("Ikke implementert")
 
     @GetMapping("ansatt/tema/{ansattId}")
     fun tema(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet()

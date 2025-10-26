@@ -22,12 +22,6 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ans
     @GetMapping("ansatt/enheter/{ansattId}")
     fun enheter(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet()
 
-    @GetMapping("ansatt/enheter/{enhet}/{ansattId}")
-    fun enhetMedlemmer(@PathVariable enhet: Enhetnummer) =  UnsupportedOperationException("Ikke implementert")
-
-    @GetMapping("ansatt/tema/{tema}/{ansattId}")
-    fun temaMedlemmer(@PathVariable tema: Tema, @PathVariable ansattId: AnsattId) = UnsupportedOperationException("Ikke implementert")
-
     @GetMapping("ansatt/tema/{ansattId}")
     fun tema(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet()
 }

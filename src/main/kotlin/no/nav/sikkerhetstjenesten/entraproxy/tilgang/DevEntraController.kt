@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
-@Tag(name = "DevTilgangController", description = "Denne kontrolleren skal kun brukes til testing")
+@Tag(name = "DevEntraController", description = "Denne kontrolleren skal kun brukes til testing")
 class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")

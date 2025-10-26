@@ -23,7 +23,7 @@ import java.net.URI
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "TilgangController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 class EntraController(private val entra: EntraTjeneste,
                       private val oid: AnsattOidTjeneste,
                       private val token: Token) {

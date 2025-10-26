@@ -70,7 +70,6 @@ no.nav.security.jwt:
       norg2:
         token-endpoint-url: ${azure.openid.config.token.endpoint}
         grant-type: client_credentials
-        scope: ${graph.scope}
         authentication:
           client-id: ${azure.app.client.id}
           client-jwk: ${azure.app.jwk}

@@ -24,9 +24,11 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     }
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) = UnsupportedOperationException("Henting av enhet medlemmer er ikke implementert")
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    @WithSpan
     fun temaMedlemmer( tema: Tema, oid: UUID) = UnsupportedOperationException("Henting av tema medlemmer er ikke implementert")
 
     @WithSpan

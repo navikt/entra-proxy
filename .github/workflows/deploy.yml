@@ -87,7 +87,7 @@ jobs:
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m
-      RESOURCE: .nais/naiserator.yaml,.nais/probes.yaml,.nais/probe-alerts.yaml,.nais/serviceintegration.yaml,.nais/alerts.yaml
+      RESOURCE: .nais/naiserator.yaml,.nais/probes.yaml,.nais/probe-alerts.yaml,.nais/serviceintegration.yaml,.nais/alerts.yaml,.nais/valkey.yaml
       CLUSTER: ${{matrix.cluster}}
       VARS: .nais/${{matrix.cluster}}.json
       IMAGE: ${{needs.build.outputs.image}}

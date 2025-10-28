@@ -57,6 +57,7 @@ class EntraConfig(
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"
+        //private const val
         private const val SELECT = "\$select"
         private const val FILTER = "\$filter"
         private const val COUNT = "\$count"

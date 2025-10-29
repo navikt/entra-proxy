@@ -17,7 +17,6 @@ class CacheAdapter(private val handler: CacheNøkkelHandler,private val client: 
 
     override val pingEndpoint  =  "${cfg.host}:${cfg.port}"
     override val name = "Cache"
-    private val log = getLogger(javaClass)
 
 
     override fun ping() =
@@ -42,8 +41,6 @@ class CacheAdapter(private val handler: CacheNøkkelHandler,private val client: 
             }
         }
     }
-
-
     companion object {
         const val VALKEY = "valkey"
     }

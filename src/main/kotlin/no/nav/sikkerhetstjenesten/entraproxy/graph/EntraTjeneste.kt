@@ -52,8 +52,8 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
-    fun gruppeIdForEnhet( tema: Enhetnummer) =
-        adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi)
+    fun gruppeIdForEnhet( enhet: Enhetnummer) =
+        adapter.gruppeOid(EntraConfig.ENHET_PREFIX + enhet.verdi)
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")

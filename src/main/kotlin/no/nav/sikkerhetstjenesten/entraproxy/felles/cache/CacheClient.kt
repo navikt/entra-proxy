@@ -10,6 +10,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.C
 import org.slf4j.LoggerFactory.getLogger
 import java.time.Duration
 import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 
 class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  : LeaderAware(){
@@ -98,12 +99,12 @@ class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  : Leade
         return runBlocking {
             runCatching {
                 var size = 0.0
-                val timeUsed = measureTimeMillis {
+                val timeUsed = measureTime {
                     size = withTimeout(Duration.ofSeconds(1).toMillis()) {
                         conn.sync().eval<Int>(CACHE_SIZE_SCRIPT, INTEGER, emptyArray(), prefix).toDouble()
                     }
                 }
-                log.info("Cache størrelse oppslag tok ${timeUsed}ms for $prefix")
+                log.info("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
                 size
             }.getOrElse { e ->
                 log.warn("Feil ved henting av størrelse for $prefix", e)

@@ -79,7 +79,7 @@ jobs:
       id-token: write
     strategy:
       matrix:
-        cluster: [ dev-gcp]
+        cluster: [dev-gcp, prod-gcp]
     name: Deploy til ${{matrix.cluster}}
     needs: build
     runs-on: ubuntu-latest
@@ -87,7 +87,7 @@ jobs:
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m
-      RESOURCE: .nais/naiserator.yaml
+      RESOURCE: .nais/naiserator.yaml,.nais/probes.yaml,.nais/probe-alerts.yaml,.nais/serviceintegration.yaml,.nais/alerts.yaml
       CLUSTER: ${{matrix.cluster}}
       VARS: .nais/${{matrix.cluster}}.json
       IMAGE: ${{needs.build.outputs.image}}

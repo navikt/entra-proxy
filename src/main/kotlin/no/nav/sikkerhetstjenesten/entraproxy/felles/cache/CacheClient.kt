@@ -1,13 +1,15 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.lettuce.core.RedisClient
+import io.lettuce.core.ScriptOutputType.INTEGER
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import org.slf4j.LoggerFactory.getLogger
 import java.time.Duration
 
 
-class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  {
+class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  : LeaderAware(){
     val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)
         if (isLocalOrTest) {
@@ -87,5 +89,23 @@ class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  {
                 put(mapper.tilNøkkel(cache, key), mapper.tilJson(value))
             }
         }
+
+    fun cacheSize(prefix: String) : Double {
+        if (erLeder) {
+            val script = """local cursor = "0"
+    local count = 0
+    local prefix = ARGV[1]
+    repeat
+    local result = redis.call("SCAN", cursor, "MATCH", prefix .. "*", "COUNT", 10000)
+    cursor = result[1]
+    local keys = result[2]
+    count = count + #keys
+    until cursor == "0"
+    return count
+    """.trimIndent()
+            return conn.sync().eval<Int>(script, INTEGER, emptyArray(), prefix).toDouble()
+        }
+        else return 0.toDouble()
+    }
 
 }

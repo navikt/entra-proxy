@@ -27,12 +27,33 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
-        UnsupportedOperationException("Henting av enhet medlemmer er ikke implementert")
+        buildSet {
+            adapter.gruppeOid(EntraConfig.ENHET_PREFIX + enhet.verdi).let { gruppeId ->
+                adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
+                    add(AnsattId(it.toString()))
+                }
+            }
+        }
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun temaMedlemmer( tema: Tema, oid: UUID) =
-        UnsupportedOperationException("Henting av tema medlemmer er ikke implementert")
+        buildSet {
+            adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi).let { gruppeId ->
+                adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
+                    add(AnsattId(it.toString()))
+                }
+            }
+        }
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    @WithSpan
+    fun gruppeIdForTema( tema: Tema) =
+        adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi)
+
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    @WithSpan
+    fun gruppeIdForEnhet( tema: Enhetnummer) =
+        adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi)
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")

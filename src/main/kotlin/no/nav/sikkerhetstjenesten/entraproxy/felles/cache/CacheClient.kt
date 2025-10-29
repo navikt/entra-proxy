@@ -104,7 +104,7 @@ class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  : Leade
                         conn.sync().eval<Int>(CACHE_SIZE_SCRIPT, INTEGER, emptyArray(), prefix).toDouble()
                     }
                 }
-                log.info("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
+                log.info("Cache størrelse oppslag fant størrelse ${size.toLong()} på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
                 size
             }.getOrElse { e ->
                 log.warn("Feil ved henting av størrelse for $prefix", e)

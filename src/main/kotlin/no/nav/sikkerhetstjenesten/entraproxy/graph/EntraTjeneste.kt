@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.toString
 
 @RetryingWhenRecoverable
 @Service
@@ -27,30 +28,23 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             }
         }
 
-    /*
+
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
-    fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
-        buildSet {
-            adapter.gruppeId(ENHET_PREFIX + enhet.verdi).let { gruppeId ->
-                adapter.gruppeMedlemmer(gruppeId.toString()).forEach {
-                    add(AnsattId(it.toString()))
-                }
-            }
+    fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) = buildSet {
+        "$gruppeId".let {
+            adapter.medlemmer(it)
+                .forEach { navIdent -> add(AnsattId(navIdent)) }
         }
-
+    }
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
-    fun temaMedlemmer( tema: Tema, oid: UUID) =
-        buildSet {
-            adapter.gruppeId(TEMA_PREFIX + tema.verdi).let { gruppeId ->
-                adapter.gruppeMedlemmer(gruppeId.toString()).forEach {
-                    add(AnsattId(it.toString()))
-                }
-            }
+    fun temaMedlemmer(tema: Tema, gruppeId: UUID) = buildSet {
+        "$gruppeId".let {
+            adapter.medlemmer(it)
+                .forEach { navIdent -> add(AnsattId(navIdent)) }
         }
-
-     */
+    }
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =

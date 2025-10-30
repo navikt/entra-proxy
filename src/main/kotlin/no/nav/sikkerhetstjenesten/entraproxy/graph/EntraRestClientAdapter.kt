@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraAnsattRespons.EntraAnsattData
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -29,15 +30,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    /*
-    fun gruppeMedlemmer(gruppeId: String) =
+
+    fun medlemmer(oid: String) =
         buildSet {
-            generateSequence(get<AntraAnsattResponser>(cf.medlemmerGrupperURI(gruppeId))) { it.next?.let(::get) }
-                .flatMap { it'' }
-                .forEach { add(it.id) }
+            generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
+                .flatMap { it.value }
+                .forEach { add(it.onPremisesSamAccountName!!) }
         }
 
-     */
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
         buildSet {
@@ -47,10 +47,13 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
-        data class EntraOids(val id: UUID)
-    }
+    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
+                                    val value: Set<EntraAnsattData> = emptySet())
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
+        data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null )
+    }
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

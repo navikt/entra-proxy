@@ -15,31 +15,28 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren skal kun brukes til testing")
-class DevEntraController (private val entra: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste) {
+class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entra.enheter(ansattId, it) }
+    fun enheter(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entraTjeneste.enheter(ansattId, it) }
 
     @GetMapping("ansatt/temaer/{ansattId}")
-    fun temaer(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entra.tema(ansattId, it) }
-    /**
-    @GetMapping("gruppe/enheter/{enhetsnummer}")
-    fun enhetGrupper(@PathVariable enhetsnummer: Enhetnummer) = entra.gruppeIdForEnhet(enhetsnummer).let { entra.(enhetsnummer,it) }
-    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entra.gruppeIdForEnhet(enhetsnummer)
+    fun temaer(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entraTjeneste.tema(ansattId, it) }
 
-    @GetMapping("gruppe/tema/{temakode}")
-    fun temaGrupper(@PathVariable temakode: Tema) = entra.gruppeIdForTema(temakode).let { entra.temaMedlemmer(temakode, it) }
-
-
-    @GetMapping("gruppe/tema/{oid}")
-    fun gruppeMedOID(@PathVariable oid: UUID) = entra.temaMedlemmer(Tema("TSO"),oid)
-     **/
-    @GetMapping("gruppe/enhet/{enhetsnummer}")
-    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entra.gruppeIdForEnhet(enhetsnummer)
-
+     @GetMapping("gruppe/enheter/{enhetsnummer}/medlemmer")
+    fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =   gruppeIdForEnhet(enhetsnummer)?.let {
+         entraTjeneste.enhetMedlemmer(enhetsnummer, it)
+     }
+    @GetMapping("gruppe/tema/medlemmer/{tema}")
+    fun temaMedlemmer(@PathVariable tema: Tema) =   gruppeIdForTema(tema)?.let {
+        entraTjeneste.temaMedlemmer(tema, it)
+    }
+    
+    @GetMapping("gruppe/enhet/medlemmer/{enhetsnummer}")
+    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)
 
     @GetMapping("gruppe/tema/{tema}")
-    fun gruppeIdForTema(@PathVariable tema: Tema) = entra.gruppeIdForTema(tema)
+    fun gruppeIdForTema(@PathVariable tema: Tema) = entraTjeneste.gruppeIdForTema(tema)
 
     @GetMapping("ansatt/{ansattId}")
     fun oid(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId)

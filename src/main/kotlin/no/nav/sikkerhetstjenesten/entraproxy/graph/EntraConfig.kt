@@ -40,7 +40,7 @@ class EntraConfig(
     fun enheterURI(oid: String) =
         grupperURI(oid,ENHET_QUERY).also { log.trace("EnheterURI er {}", it) }
 
-    fun medlemmerGrupperURI(gruppeId: String) =
+    fun medlemmerURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
             queryParams(this,KONTO , "")

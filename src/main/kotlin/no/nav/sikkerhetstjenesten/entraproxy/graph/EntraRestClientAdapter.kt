@@ -29,7 +29,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmerIGruppe(gruppeId: String) =
+    fun gruppeMedlemmer(gruppeId: String) =
         buildSet {
             generateSequence(get<EntraAnsattRespons>(cf.medlemmerGrupperURI(gruppeId))) { it.next?.let(::get) }
                 .flatMap { it.oids }

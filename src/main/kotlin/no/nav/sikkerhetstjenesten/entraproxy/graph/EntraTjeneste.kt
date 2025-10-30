@@ -31,7 +31,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
         buildSet {
             adapter.gruppeId(ENHET_PREFIX + enhet.verdi).let { gruppeId ->
-                adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
+                adapter.gruppeMedlemmer(gruppeId.toString()).forEach {
                     add(AnsattId(it.toString()))
                 }
             }
@@ -42,7 +42,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun temaMedlemmer( tema: Tema, oid: UUID) =
         buildSet {
             adapter.gruppeId(TEMA_PREFIX + tema.verdi).let { gruppeId ->
-                adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
+                adapter.gruppeMedlemmer(gruppeId.toString()).forEach {
                     add(AnsattId(it.toString()))
                 }
             }

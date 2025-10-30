@@ -17,6 +17,7 @@ import java.util.*
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
+
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =

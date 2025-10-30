@@ -5,7 +5,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfrisker
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.stereotype.Component
 
-@Component
+//@Component
 class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste) : CacheOppfrisker{
 
     override val cacheName: String = EntraConfig.Companion.GRAPH

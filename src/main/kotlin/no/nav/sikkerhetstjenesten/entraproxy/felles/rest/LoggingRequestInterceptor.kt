@@ -17,7 +17,7 @@ class LoggingRequestInterceptor : ClientHttpRequestInterceptor {
         }
         log.trace("Headers for {}: {}", request.uri, request.headers.filter { !it.key.contains(AUTHORIZATION) })
         if (!body.isEmpty()) {
-            log.debug("Body for {} {} : {} ",request.method, request.uri,String(body))
+           // log.debug("Body for {} {} : {} ",request.method, request.uri,String(body))
         }
         val response = execution.execute(request, body)
         if (!response.statusCode.is2xxSuccessful) {

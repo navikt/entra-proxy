@@ -27,12 +27,12 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =   gruppeIdForEnhet(enhetsnummer)?.let {
          entraTjeneste.enhetMedlemmer(enhetsnummer, it)
      }
-    @GetMapping("gruppe/tema/medlemmer/{tema}")
+    @GetMapping("gruppe/tema/{tema}/medlemmer")
     fun temaMedlemmer(@PathVariable tema: Tema) =   gruppeIdForTema(tema)?.let {
         entraTjeneste.temaMedlemmer(tema, it)
     }
-    
-    @GetMapping("gruppe/enhet/medlemmer/{enhetsnummer}")
+
+    @GetMapping("gruppe/enhet/{enhetsnummer}")
     fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)
 
     @GetMapping("gruppe/tema/{tema}")

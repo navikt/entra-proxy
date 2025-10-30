@@ -15,11 +15,11 @@ abstract class LeaderAware(var erLeder: Boolean = false) {
     fun onApplicationEvent(event: LederUtvelger.LeaderChangedEvent) {
         erLeder = event.leder == hostname
         if (erLeder) {
-            log.trace("Denne instansen ($hostname) er nå leder")
+           // log.trace("Denne instansen ($hostname) er nå leder")
             doHandleLeaderChange()
         }
         else {
-            log.trace("Denne instansen ($hostname) er IKKE leder, lederen er ${event.leder}")
+            //log.trace("Denne instansen ($hostname) er IKKE leder, lederen er ${event.leder}")
         }
     }
 }

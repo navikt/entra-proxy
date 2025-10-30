@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.PathVariable
 class DevEntraController (private val entra: EntraTjeneste, private val oid: AnsattOidTjeneste) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) = oid.oid(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet()
+    fun enheter(@PathVariable ansattId: AnsattId) = oid.oid(ansattId).let { entra.enheter(ansattId, it) }
 
     @GetMapping("ansatt/tema/{ansattId}")
-    fun tema(@PathVariable ansattId: AnsattId) = oid.oid(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet()
+    fun tema(@PathVariable ansattId: AnsattId) = oid.oid(ansattId).let { entra.tema(ansattId, it) }
 
     @GetMapping("gruppe/enheter/{enhetsnummer}")
     fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entra.gruppeIdForEnhet(enhetsnummer)

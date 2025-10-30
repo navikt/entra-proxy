@@ -32,7 +32,7 @@ class EntraConfig(
         builder().apply {
             path(GRUPPER_PATH)
             queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
-        }.build()
+        }.build().also { log.trace("gruppeURI er {}", it) }
 
     fun temaURI(oid: String) =
         grupperURI(oid, TEMA_QUERY).also { log.trace("temaURI er {}", it) }

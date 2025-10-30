@@ -45,7 +45,7 @@ class EntraConfig(
             path(MEDLEMMER_I_GRUPPE_PATH)
             queryParams(this,KONTO , "")
             queryParam(TOP, size)
-        }.build(gruppeId).also { log.trace("medlemmerGrupperURI er {}", it) }
+        }.build(gruppeId).also { log.trace("medlemmerURI er {}", it) }
 
 
     private fun grupperURI(oid: String, filter: String) =

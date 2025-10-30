@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_P
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
@@ -18,6 +19,7 @@ import kotlin.toString
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
+    private val log = getLogger(javaClass)
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
@@ -28,13 +30,13 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             }
         }
 
-
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) = buildSet {
         "$gruppeId".let {
-            adapter.medlemmer(it)
-                .forEach { navIdent -> add(AnsattId(navIdent)) }
+            adapter.medlemmer(it).also {
+                log.info("Enhet $enhet med gruppeId $gruppeId har medlemmer: $it")
+            }.forEach { navIdent -> add(AnsattId(navIdent)) }
         }
     }
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
@@ -42,6 +44,9 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun temaMedlemmer(tema: Tema, gruppeId: UUID) = buildSet {
         "$gruppeId".let {
             adapter.medlemmer(it)
+                .also {
+                    log.info("Tema $tema med gruppeId $gruppeId har medlemmer: $it")
+                }
                 .forEach { navIdent -> add(AnsattId(navIdent)) }
         }
     }

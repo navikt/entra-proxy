@@ -34,6 +34,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) = buildSet {
         "$gruppeId".let {
+            log.info("Slår opp medlemmer fra enhet $enhet og gruppeId $gruppeId")
             adapter.medlemmer(it).also {
                 log.info("Enhet $enhet med gruppeId $gruppeId har medlemmer: $it")
             }.forEach { navIdent -> add(AnsattId(navIdent)) }
@@ -43,6 +44,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun temaMedlemmer(tema: Tema, gruppeId: UUID) = buildSet {
         "$gruppeId".let {
+            log.info("Slår opp medlemmer fra tema $tema og gruppeId $gruppeId")
             adapter.medlemmer(it)
                 .also {
                     log.info("Tema $tema med gruppeId $gruppeId har medlemmer: $it")

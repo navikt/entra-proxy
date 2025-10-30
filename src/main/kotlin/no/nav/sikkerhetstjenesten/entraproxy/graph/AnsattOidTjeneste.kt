@@ -11,7 +11,7 @@ class AnsattOidTjeneste(private val adapter: EntraRestClientAdapter) : CachableR
 
 
     @Cacheable(cacheNames = [ENTRA_OID],key = "#ansattId.verdi")
-     fun oidFraEntra(ansattId: AnsattId) = adapter.oid(ansattId.verdi)
+     fun oid(ansattId: AnsattId) = adapter.oid(ansattId.verdi)
 
     override val varighet = Duration.ofDays(365)  // Godt nok, blås i skuddår
     override val navn = ENTRA_OID

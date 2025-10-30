@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
 import java.net.URI
@@ -18,35 +19,38 @@ class EntraConfig(
     override val navn = name
     override val varighet = Duration.ofHours(3)
 
+    private val log = getLogger(javaClass)
+
+
     fun userURI(ansattId: String) =
         builder().apply {
             path(USERS_PATH)
             queryParams(this, SELECT_USER, "$KONTO eq '$ansattId'")
-        }.build()
+        }.build().also { log.trace("UserURI er {}", it) }
 
-    fun gruppeOidURI(displayName: String) =
+    fun gruppeURI(displayName: String) =
         builder().apply {
-            path(GROUP_PATH)
+            path(GRUPPER_PATH)
             queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
-        }.build()
+        }.build().also { log.trace("gruppeURI er {}", it) }
 
     fun temaURI(oid: String) =
-        grupperURI(oid, TEMA_QUERY)
+        grupperURI(oid, TEMA_QUERY).also { log.trace("temaURI er {}", it) }
 
     fun enheterURI(oid: String) =
-        grupperURI(oid,ENHET_QUERY)
+        grupperURI(oid,ENHET_QUERY).also { log.trace("EnheterURI er {}", it) }
 
     fun medlemmerGrupperURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
             queryParams(this,KONTO , "")
             queryParam(TOP, size)
-        }.build(gruppeId)
+        }.build(gruppeId).also { log.trace("medlemmerGrupperURI er {}", it) }
 
 
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
-            path(GRUPPER_PATH)
+            path(GRUPPER_FOR_ANSATT_PATH)
             queryParams(this, GRUPPE_PROPERTIES, filter)
             queryParam(TOP, size)
         }.build(oid)
@@ -70,8 +74,8 @@ class EntraConfig(
         private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
-        private const val GROUP_PATH = "/groups"
-        private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"
+        private const val GRUPPER_PATH = "/groups"
+        private const val GRUPPER_FOR_ANSATT_PATH = "/users/{ansattId}/memberOf"
         private const val MEDLEMMER_I_GRUPPE_PATH = "/groups/{gruppeId}/members"
         private const val SELECT = "\$select"
         private const val FILTER = "\$filter"

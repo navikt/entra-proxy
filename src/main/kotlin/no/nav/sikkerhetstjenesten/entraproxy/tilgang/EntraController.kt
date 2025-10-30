@@ -32,14 +32,14 @@ class EntraController(private val entra: EntraTjeneste,
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
-            oid.oidFraEntra(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet<Enhet>()
+            oid.oid(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet<Enhet>()
         })
 
     @GetMapping("ansatt/tema/{ansattId}")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
-            oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet<Tema>()
+            oid.oid(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet<Tema>()
         })
 
     @PostMapping("ansatt/enheter")

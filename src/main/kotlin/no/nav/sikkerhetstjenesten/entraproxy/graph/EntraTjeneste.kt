@@ -27,6 +27,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             }
         }
 
+    /*
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
@@ -48,6 +49,8 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
                 }
             }
         }
+
+     */
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =

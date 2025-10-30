@@ -18,7 +18,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oid(ansattId: String) =
-        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
+        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
         get<EntraGruppe>(cf.gruppeURI(displayName)).id
@@ -29,12 +29,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
+    /*
     fun gruppeMedlemmer(gruppeId: String) =
         buildSet {
-            generateSequence(get<EntraAnsattRespons>(cf.medlemmerGrupperURI(gruppeId))) { it.next?.let(::get) }
-                .flatMap { it.oids }
+            generateSequence(get<AntraAnsattResponser>(cf.medlemmerGrupperURI(gruppeId))) { it.next?.let(::get) }
+                .flatMap { it'' }
                 .forEach { add(it.id) }
         }
+
+     */
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
         buildSet {
@@ -44,9 +47,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class EntraAnsattRespons(@param:JsonProperty("value") val next: URI?, val oids: Set<EntraOids>) {
+    data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraOids>) {
         data class EntraOids(val id: UUID)
     }
+
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

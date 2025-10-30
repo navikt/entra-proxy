@@ -20,9 +20,9 @@ class LoggingRequestInterceptor : ClientHttpRequestInterceptor {
            // log.debug("Body for {} {} : {} ",request.method, request.uri,String(body))
         }
         val response = execution.execute(request, body)
-        if (!response.statusCode.is2xxSuccessful) {
+       // if (!response.statusCode.is2xxSuccessful) {
             log.debug("Response status for {} {}: {}", request.method, request.uri, response.statusCode)
-        }
+        //}
         return response
     }
 }

@@ -36,7 +36,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
                 .forEach { add(it.onPremisesSamAccountName!!) }
-        }
+        }.also { log.trace("gruppeOID er {}", oid) }
 
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =

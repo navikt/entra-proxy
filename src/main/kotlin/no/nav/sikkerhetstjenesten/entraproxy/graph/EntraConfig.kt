@@ -53,7 +53,7 @@ class EntraConfig(
             path(GRUPPER_FOR_ANSATT_PATH)
             queryParams(this, GRUPPE_PROPERTIES, filter)
             queryParam(TOP, size)
-        }.build(oid)
+        }.build(oid).also { log.trace("grupperURI er {}", it) }
 
     private fun queryParams(builder: UriBuilder, select: String, filter: String) =
         builder.apply {

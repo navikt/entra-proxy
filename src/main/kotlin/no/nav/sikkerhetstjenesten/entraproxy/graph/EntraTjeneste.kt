@@ -4,7 +4,9 @@ import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -28,7 +30,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, oid: UUID) =
         buildSet {
-            adapter.gruppeOid(EntraConfig.ENHET_PREFIX + enhet.verdi).let { gruppeId ->
+            adapter.gruppeId(ENHET_PREFIX + enhet.verdi).let { gruppeId ->
                 adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
                     add(AnsattId(it.toString()))
                 }
@@ -39,7 +41,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun temaMedlemmer( tema: Tema, oid: UUID) =
         buildSet {
-            adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi).let { gruppeId ->
+            adapter.gruppeId(TEMA_PREFIX + tema.verdi).let { gruppeId ->
                 adapter.medlemmerIGruppe(gruppeId.toString()).forEach {
                     add(AnsattId(it.toString()))
                 }
@@ -48,12 +50,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =
-        adapter.gruppeOid(EntraConfig.TEMA_PREFIX + tema.verdi)
+        adapter.gruppeId(TEMA_PREFIX + tema.verdi)
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
-        adapter.gruppeOid(EntraConfig.ENHET_PREFIX + enhet.verdi)
+        adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")

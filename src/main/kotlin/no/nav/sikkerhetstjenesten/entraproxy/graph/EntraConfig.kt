@@ -24,9 +24,9 @@ class EntraConfig(
             queryParams(this, SELECT_USER, "$KONTO eq '$ansattId'")
         }.build()
 
-    fun gruppeOidURI(displayName: String) =
+    fun gruppeURI(displayName: String) =
         builder().apply {
-            path(GROUP_PATH)
+            path(GRUPPER_PATH)
             queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
         }.build()
 
@@ -46,7 +46,7 @@ class EntraConfig(
 
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
-            path(GRUPPER_PATH)
+            path(GRUPPER_FOR_ANSATT_PATH)
             queryParams(this, GRUPPE_PROPERTIES, filter)
             queryParam(TOP, size)
         }.build(oid)
@@ -70,8 +70,8 @@ class EntraConfig(
         private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
-        private const val GROUP_PATH = "/groups"
-        private const val GRUPPER_PATH = "/users/{ansattId}/memberOf"
+        private const val GRUPPER_PATH = "/groups"
+        private const val GRUPPER_FOR_ANSATT_PATH = "/users/{ansattId}/memberOf"
         private const val MEDLEMMER_I_GRUPPE_PATH = "/groups/{gruppeId}/members"
         private const val SELECT = "\$select"
         private const val FILTER = "\$filter"

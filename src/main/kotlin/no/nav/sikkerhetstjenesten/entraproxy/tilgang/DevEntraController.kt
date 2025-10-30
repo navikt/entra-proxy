@@ -26,8 +26,8 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ans
     fun tema(@PathVariable ansattId: AnsattId) = oid.oidFraEntra(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet()
 
     @GetMapping("gruppe/enheter/{enhetsnummer}")
-    fun enhetGrupper(@PathVariable enhetsnummer: String) = entra.gruppeIdForEnhet(Enhetnummer(enhetsnummer)).let { entra.enhetMedlemmer(Enhetnummer(enhetsnummer),it) }
+    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entra.gruppeIdForEnhet(enhetsnummer)
 
-    @GetMapping("gruppe/tema/{temakode}")
-    fun temaGrupper(@PathVariable temakode: String) = entra.gruppeIdForTema(Tema(temakode)).let { entra.temaMedlemmer(Tema(temakode),it) }
+    @GetMapping("gruppe/tema/{tema}")
+    fun gruppeIdForTema(@PathVariable tema: Tema) = entra.gruppeIdForTema(tema)
 }

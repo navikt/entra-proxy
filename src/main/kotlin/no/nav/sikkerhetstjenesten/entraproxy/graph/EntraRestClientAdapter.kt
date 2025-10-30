@@ -22,7 +22,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
-        get<EntraGruppe>(cf.gruppeURI(displayName)).id
+        get<EntraGruppe>(cf.gruppeURI(displayName)).id.also { log.trace("gruppeId {}", it) }
 
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
@@ -35,7 +35,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         buildSet {
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
-                .forEach { add(it.onPremisesSamAccountName!!) }
+                .forEach { add(it.onPremisesSamAccountName) }
         }.also { log.trace("gruppeOID er {}", oid) }
 
 

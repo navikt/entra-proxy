@@ -25,18 +25,19 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
      @GetMapping("gruppe/enheter/{enhetsnummer}/medlemmer")
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =   gruppeIdForEnhet(enhetsnummer)?.let {
-         entraTjeneste.enhetMedlemmer(enhetsnummer, it)
+         entraTjeneste.enhetMedlemmer(enhetsnummer, it).also { println("Enhet $enhetsnummer har ansattliste $it")
+         }
      }
     @GetMapping("gruppe/tema/{tema}/medlemmer")
     fun temaMedlemmer(@PathVariable tema: Tema) =   gruppeIdForTema(tema)?.let {
-        entraTjeneste.temaMedlemmer(tema, it)
+        entraTjeneste.temaMedlemmer(tema, it).also { println("Tema $tema har ansattliste $it")}
     }
 
     @GetMapping("gruppe/enhet/{enhetsnummer}")
-    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)
+    fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer).also { println("Enhet $enhetsnummer har gruppeId $it") }
 
     @GetMapping("gruppe/tema/{tema}")
-    fun gruppeIdForTema(@PathVariable tema: Tema) = entraTjeneste.gruppeIdForTema(tema)
+    fun gruppeIdForTema(@PathVariable tema: Tema) = entraTjeneste.gruppeIdForTema(tema).also { println("Tema $tema har gruppeId $it") }
 
     @GetMapping("ansatt/{ansattId}")
     fun oid(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId)

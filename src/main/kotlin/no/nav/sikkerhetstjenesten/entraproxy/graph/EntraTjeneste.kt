@@ -32,24 +32,18 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
-    fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) = buildSet {
+    fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) : Set<AnsattId>  = buildSet {
         "$gruppeId".let {
             log.info("Slår opp medlemmer fra enhet $enhet og gruppeId $gruppeId")
-            adapter.medlemmer(it).also {
-                log.info("Enhet $enhet med gruppeId $gruppeId har medlemmer: $it")
-            }.forEach { navIdent -> add(AnsattId(navIdent)) }
+            adapter.medlemmer(it)
         }
     }
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
-    fun temaMedlemmer(tema: Tema, gruppeId: UUID) = buildSet {
+    fun temaMedlemmer(tema: Tema, gruppeId: UUID) : Set<AnsattId> = buildSet {
         "$gruppeId".let {
             log.info("Slår opp medlemmer fra tema $tema og gruppeId $gruppeId")
             adapter.medlemmer(it)
-                .also {
-                    log.info("Tema $tema med gruppeId $gruppeId har medlemmer: $it")
-                }
-                .forEach { navIdent -> add(AnsattId(navIdent)) }
         }
     }
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")

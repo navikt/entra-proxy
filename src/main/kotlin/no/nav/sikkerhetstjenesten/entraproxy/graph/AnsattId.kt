@@ -4,7 +4,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
-data class AnsattId(@JsonValue val verdi: String) {
+data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
     init {
         with(verdi) {
             require(length == ANSATTID_LENGTH) { "Ugyldig lengde $length for $this, forventet $ANSATTID_LENGTH" }
@@ -12,6 +12,9 @@ data class AnsattId(@JsonValue val verdi: String) {
             requireDigits(substring(1), 6)
         }
     }
+
+    override fun compareTo(other: AnsattId): Int = verdi.compareTo(other.verdi)
+
     companion object {
         const val ANSATTID_LENGTH = 7
     }

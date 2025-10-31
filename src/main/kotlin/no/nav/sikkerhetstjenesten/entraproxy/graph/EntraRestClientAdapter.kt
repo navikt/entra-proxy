@@ -35,7 +35,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
                 .forEach { add(AnsattId(it.onPremisesSamAccountName)) }
-        }
+        }.sorted()
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
         buildSet {

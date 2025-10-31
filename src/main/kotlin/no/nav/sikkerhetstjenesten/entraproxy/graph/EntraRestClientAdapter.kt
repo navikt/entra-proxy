@@ -7,7 +7,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraAnsattRespons.EntraAnsattData
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraGrupper.EntraGruppe
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -20,7 +19,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oid(ansattId: String) =
-        get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
+        get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
         get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
@@ -35,7 +34,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun medlemmerAny(oid: String) = get<EntraAnsatteRespons>(cf.medlemmerURI(oid))
 
-    fun medlemmer(oid: String) : Set<Any> =
+    fun medlemmer(oid: String)  =
         buildSet {
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
@@ -62,7 +61,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
+    data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
         data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null)
     }
 

@@ -36,7 +36,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     }
 
     @GetMapping("medlemmer/{oid}")
-    fun medlemmerAny(@PathVariable oid: UUID) = adapter.medlemmer(oid.toString())
+    fun medlemmerAny(@PathVariable oid: UUID) = adapter.medlemmerAny(oid.toString())
 
     @GetMapping("gruppe/enhet/{enhetsnummer}")
     fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)

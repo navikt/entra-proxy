@@ -32,7 +32,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @WithSpan
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
-    fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
+    fun medlemmer(gruppeId: UUID) : List<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")

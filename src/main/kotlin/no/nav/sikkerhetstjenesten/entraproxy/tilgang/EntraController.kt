@@ -12,6 +12,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.web.bind.annotation.GetMapping
@@ -28,14 +29,14 @@ class EntraController(private val entra: EntraTjeneste,
                       private val token: Token) {
 
 
-    @GetMapping("ansatt/enheter/{ansattId}")
+    @PostMapping("ansatt/enheter/{ansattId}")
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
             oid.oid(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet<Enhet>()
         })
 
-    @GetMapping("ansatt/tema/{ansattId}")
+    @PostMapping("ansatt/tema/{ansattId}")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
         tokenPrecondition( {token.erCC}, {
@@ -52,6 +53,35 @@ class EntraController(private val entra: EntraTjeneste,
     fun temaOBO() = tokenPrecondition( {token.erObo}, {
         entra.tema(token.ansattId!!, token.oid!!)
     })
+
+    @PostMapping("CCF/enheter/medlemmer/{enhetsnummer}")
+    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
+    fun enhetMedlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
+        tokenPrecondition( {token.erCC}, {
+            entra.gruppeIdForEnhet(enhetsnummer)?.let { entra.medlemmer( it)}?: emptySet<AnsattId>()
+    })
+
+    @PostMapping("CCF/tema/medlemmer/{tema}")
+    @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
+    fun temaMedlemmerCC(@PathVariable tema: Tema) =
+        tokenPrecondition( {token.erCC}, {
+        entra.gruppeIdForTema(tema)?.let { entra.medlemmer( it) }?: emptySet<AnsattId>()
+    })
+
+
+    @PostMapping("enheter/medlemmer/{enhetsnummer}")
+    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter Obo-flow")
+    fun enhetMedlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
+        tokenPrecondition( {token.erObo}, {
+            entra.gruppeIdForEnhet(enhetsnummer)?.let { entra.medlemmer( it)}?: emptySet<AnsattId>()
+        })
+
+    @PostMapping("tema/medlemmer/{tema}")
+    @Operation(summary = "Slå opp medlemmer for tema, forutsetter Obo-flow")
+    fun temaMedlemmerOBO(@PathVariable tema: Tema) =
+        tokenPrecondition( {token.erObo}, {
+            entra.gruppeIdForTema(tema)?.let { entra.medlemmer( it) }?: emptySet<AnsattId>()
+        })
     
     private fun tokenPrecondition(predikat: () -> Boolean, block: () -> Any) {
         if (!predikat()) throw ResponseStatusException(BAD_REQUEST, "Feil i token: krever korrekt token-type for å utføre denne operasjonen")

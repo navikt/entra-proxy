@@ -43,7 +43,8 @@ class EntraConfig(
     fun medlemmerURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
-            queryParams(this,KONTO , "")
+            queryParam(SELECT, RETURFELT_MEDLEMMER)
+            queryParam(COUNT, "true")
             queryParam(TOP, size)
         }.build(gruppeId).also { log.trace("medlemmerURI er {}", it) }
 
@@ -70,6 +71,7 @@ class EntraConfig(
         const val ENHET_PREFIX = "0000-GA-ENHET_"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
         private const val KONTO = "onPremisesSamAccountName"
+        private const val RETURFELT_MEDLEMMER = "id,onPremisesSamAccountName"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
         private const val DEFAULT_BATCH_SIZE = 250

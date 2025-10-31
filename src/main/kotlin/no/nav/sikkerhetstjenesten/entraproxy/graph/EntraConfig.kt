@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
 import java.net.URI
@@ -19,26 +18,21 @@ class EntraConfig(
     override val navn = name
     override val varighet = Duration.ofHours(3)
 
-    private val log = getLogger(javaClass)
-
-
     fun userURI(ansattId: String) =
         builder().apply {
             path(USERS_PATH)
             queryParams(this, SELECT_USER, "$KONTO eq '$ansattId'")
-        }.build().also { log.trace("UserURI er {}", it) }
-
+        }.build()
     fun gruppeURI(displayName: String) =
         builder().apply {
             path(GRUPPER_PATH)
             queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
-        }.build().also { log.trace("gruppeURI er {}", it) }
-
+        }.build()
     fun temaURI(oid: String) =
-        grupperURI(oid, TEMA_QUERY).also { log.trace("temaURI er {}", it) }
+        grupperURI(oid, TEMA_QUERY)
 
     fun enheterURI(oid: String) =
-        grupperURI(oid,ENHET_QUERY).also { log.trace("EnheterURI er {}", it) }
+        grupperURI(oid,ENHET_QUERY)
 
     fun medlemmerURI(gruppeId: String) =
         builder().apply {
@@ -46,7 +40,7 @@ class EntraConfig(
             queryParam(SELECT, RETURFELT_MEDLEMMER)
             queryParam(COUNT, "true")
             queryParam(TOP, size)
-        }.build(gruppeId).also { log.trace("medlemmerURI er {}", it) }
+        }.build(gruppeId)
 
 
     private fun grupperURI(oid: String, filter: String) =
@@ -54,7 +48,7 @@ class EntraConfig(
             path(GRUPPER_FOR_ANSATT_PATH)
             queryParams(this, GRUPPE_PROPERTIES, filter)
             queryParam(TOP, size)
-        }.build(oid).also { log.trace("grupperURI er {}", it) }
+        }.build(oid)
 
     private fun queryParams(builder: UriBuilder, select: String, filter: String) =
         builder.apply {

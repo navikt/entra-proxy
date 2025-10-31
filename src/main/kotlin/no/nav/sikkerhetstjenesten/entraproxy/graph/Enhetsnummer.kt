@@ -14,6 +14,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
 
 data class Tema(@JsonValue val verdi: String)  {
     init {
+        require(verdi.length == 3) { "Tema må være på tre bokstaver" }
         require(verdi.all { it.isLetter() }) { "Tema kan kun bestå av bokstaver" }
     }
 }

@@ -31,15 +31,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-
     fun medlemmerAny(oid: String) = get<Any>(cf.medlemmerURI(oid))
 
     fun medlemmer(oid: String) =
         buildSet {
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
-                .forEach { add(it.onPremisesSamAccountName!!) }
-        }.also { log.trace("gruppeOID er {}", oid) }
+                .forEach { add(AnsattId(it.onPremisesSamAccountName)) }
+        }
 
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
@@ -50,14 +49,19 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
 
     //@JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
-                                    val value: Set<EntraAnsattData> = emptySet())
+    data class EntraAnsatteRespons(@param:JsonProperty("@odata.context") val context: String,
+                                   @param:JsonProperty("@odata.nextLink") val next: URI? = null,
+                                   @param:JsonProperty("@odata.count") val count: Int = 0,
+                                   val value: Set<EntraMedlemmerAnsatt> = emptySet())
+
+    data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.context") val context: String, val onPremisesSamAccountName: String)
+
 
     data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
 
     //@JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
-        data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null )
+        data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null)
     }
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"

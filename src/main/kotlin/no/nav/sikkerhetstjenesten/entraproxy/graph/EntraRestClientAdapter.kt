@@ -30,17 +30,12 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmerAny1(oid: String) = get<Any>(cf.medlemmerURI(oid))
-
-    fun medlemmerAny(oid: String) = get<EntraAnsatteRespons>(cf.medlemmerURI(oid))
-
     fun medlemmer(oid: String)  =
         buildSet {
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
                 .forEach { add(AnsattId(it.onPremisesSamAccountName)) }
         }
-
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
         buildSet {
@@ -50,10 +45,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsatteRespons(@param:JsonProperty("@odata.context") val context: String,
-                                   @param:JsonProperty("@odata.count") val count: Int = 0,
-                                   @param:JsonProperty("@odata.nextLink") val next: URI? = null,
-                                   val value: Set<EntraMedlemmerAnsatt> = emptySet())
+    data class EntraAnsatteRespons(@param:JsonProperty("@odata.context") val context: String, @param:JsonProperty("@odata.count") val count: Int = 0, @param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
 
 
     data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.type") val type: String, val id: UUID, val onPremisesSamAccountName: String)

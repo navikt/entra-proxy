@@ -34,7 +34,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun enhetMedlemmer(enhet: Enhetnummer, gruppeId: UUID) : Set<AnsattId>  = buildSet {
         "$gruppeId".let {
-            log.info("Slår opp medlemmer fra enhet $enhet og gruppeId $gruppeId")
+            log.info("Slår opp medlemmer fra enhet ${enhet.verdi} og gruppeId $it")
             adapter.medlemmer(it)
         }
     }
@@ -42,7 +42,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun temaMedlemmer(tema: Tema, gruppeId: UUID) : Set<AnsattId> = buildSet {
         "$gruppeId".let {
-            log.info("Slår opp medlemmer fra tema $tema og gruppeId $gruppeId")
+            log.info("Slår opp medlemmer fra tema ${tema.verdi} og gruppeId $gruppeId")
             adapter.medlemmer(it)
         }
     }

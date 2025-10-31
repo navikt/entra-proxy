@@ -52,8 +52,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsatteRespons(@param:JsonProperty("@odata.context") val context: String,
-                                   @param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                    @param:JsonProperty("@odata.count") val count: Int = 0,
+                                   @param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                    val value: Set<EntraMedlemmerAnsatt> = emptySet())
 
 

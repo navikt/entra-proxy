@@ -13,6 +13,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import java.util.UUID
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
@@ -34,8 +35,8 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         entraTjeneste.temaMedlemmer(tema, it)
     }
 
-    @GetMapping("gruppe/any/{enhetsnummer}")
-    fun gruppeAnyForEnhet(@PathVariable enhetsnummer: Enhetnummer) = adapter.anyGruppeId(ENHET_PREFIX + enhetsnummer.verdi)
+    @GetMapping("medlemmer/{oid}")
+    fun medlemmerAny(@PathVariable oid: UUID) = adapter.medlemmer(oid.toString())
 
     @GetMapping("gruppe/enhet/{enhetsnummer}")
     fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)

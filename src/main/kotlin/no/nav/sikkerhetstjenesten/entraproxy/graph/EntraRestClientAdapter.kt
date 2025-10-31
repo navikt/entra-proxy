@@ -25,15 +25,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun gruppeId(displayName: String) =
         get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
 
-    fun anyGruppeId(displayName: String) =
-        get<Any>(cf.gruppeURI(displayName))
-
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
 
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
+
+    fun medlemmerAny(oid: String) = get<Any>(cf.medlemmerURI(oid))
 
     fun medlemmer(oid: String) =
         buildSet {

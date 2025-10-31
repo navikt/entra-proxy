@@ -56,14 +56,14 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =
         adapter.gruppeId(TEMA_PREFIX + tema.verdi).also {
-            log.info("GruppeId for tema $tema er $it")
+            log.info("GruppeId for tema ${tema.verdi} er $it")
         }
 
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
         adapter.gruppeId(ENHET_PREFIX + enhet.verdi).also {
-            log.info("GruppeId for enhet $enhet er $it")
+            log.info("GruppeId for enhet ${enhet.verdi} er $it")
         }
 
     @WithSpan

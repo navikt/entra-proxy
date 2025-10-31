@@ -61,7 +61,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     private data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraGruppe> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraGruppe(val id: UUID? = null, val displayName: String? = "N/A") {
+        data class EntraGruppe(val id: UUID? = null, val displayName: String = "N/A") {
             override fun equals(other: Any?) = other is EntraGruppe && id == other.id
             override fun hashCode() = id.hashCode()
         }

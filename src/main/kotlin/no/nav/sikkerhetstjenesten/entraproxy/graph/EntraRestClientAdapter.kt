@@ -22,7 +22,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
-        get<EntraGruppe>(cf.gruppeURI(displayName)).id
+        get<EntraGrupper.EntraGruppe>(cf.gruppeURI(displayName)).id
 
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
@@ -59,6 +59,12 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
-                                    val value: Set<EntraGruppe> = emptySet())
+                                    val value: Set<EntraGruppe> = emptySet()) {
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        data class EntraGruppe(val id: UUID, val displayName: String) {
+            override fun equals(other: Any?) = other is EntraGruppe && id == other.id
+            override fun hashCode() = id.hashCode()
+        }
+    }
 }
 

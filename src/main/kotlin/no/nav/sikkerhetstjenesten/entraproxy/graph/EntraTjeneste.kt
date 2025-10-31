@@ -21,7 +21,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     private val log = getLogger(javaClass)
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
         buildSet {
@@ -31,22 +31,22 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =
         adapter.gruppeId(TEMA_PREFIX + tema.verdi)
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
         adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
 
     @WithSpan
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         adapter.tema("$oid")
 

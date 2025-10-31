@@ -2,24 +2,22 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.toString
 
 @RetryingWhenRecoverable
 @Service
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
-    private val log = getLogger(javaClass)
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
@@ -31,7 +29,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    @Cacheable(cacheNames = ["medlemmer"],  key = "#root.methodName + ':' + #enhet.verdi")
+    @Cacheable(cacheNames = [MEDLEMMER])
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 

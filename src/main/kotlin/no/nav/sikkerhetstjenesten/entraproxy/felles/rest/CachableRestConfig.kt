@@ -11,5 +11,9 @@ interface CachableRestConfig {
 @Component
 class MedlemmerCachableRestConfig : CachableRestConfig {
     override val varighet = Duration.ofHours(12)
-    override val navn = "medlemmer"
+    override val navn = MEDLEMMER
+
+    companion object {
+        const val MEDLEMMER = "medlemmer"
+    }
 }

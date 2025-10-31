@@ -54,9 +54,9 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                                    @param:JsonProperty("@odata.count") val count: Int = 0,
                                    val value: Set<EntraMedlemmerAnsatt> = emptySet())
 
-    data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.type") val id: String, val type: String, val onPremisesSamAccountName: String)
 
-
+    data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.type") val type: String, val id: UUID, val onPremisesSamAccountName: String)
+    
     data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
 
     //@JsonIgnoreProperties(ignoreUnknown = true)

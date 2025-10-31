@@ -30,12 +30,11 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmer(oid: String)  =
-        buildSet {
-            generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
-                .flatMap { it.value }
-                .forEach { add(AnsattId(it.onPremisesSamAccountName)) }
-        }.sorted()
+    fun medlemmer(oid: String): Set<AnsattId> =
+        generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
+            .flatMap { it.value }
+            .map { AnsattId(it.onPremisesSamAccountName) }
+            .toSortedSet()
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
         buildSet {

@@ -17,7 +17,7 @@ import java.util.*
 @RetryingWhenRecoverable
 @Service
 @Timed(value = GRAPH, histogram = true)
-class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
+class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste)  {
 
 
     @WithSpan
@@ -25,12 +25,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun tema(ansattId: AnsattId, oid: UUID) =
         adapter.tema("$oid")
 
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
         buildSet {
             adapter.enheter("$oid").forEach {
-                add(Enhet(it, norgTjeneste.navnFor(it)))
+                add(Enhet(it, norg.navnFor(it)))
             }
         }
 
@@ -39,19 +39,17 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 
-    @Cacheable(cacheNames = [GRUPPEID],  key = "$TEMA_PREFIX + #tema.verdi")
     @WithSpan
+    @Cacheable(cacheNames = [GRUPPEID],  key = "$TEMA_PREFIX + #tema.verdi")
     fun gruppeIdForTema( tema: Tema) =
         adapter.gruppeId(TEMA_PREFIX + tema.verdi)
 
-    @Cacheable(cacheNames = [GRUPPEID],  key = "$ENHET_PREFIX + #enhet.verdi")
     @WithSpan
+    @Cacheable(cacheNames = [GRUPPEID],  key = "$ENHET_PREFIX + #enhet.verdi")
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
         adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
 
-
-
-    override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norgTjeneste=$norgTjeneste]"
+    override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 }
 
 

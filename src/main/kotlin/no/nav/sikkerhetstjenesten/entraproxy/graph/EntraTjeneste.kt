@@ -8,20 +8,22 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_P
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.toString
 
 @RetryingWhenRecoverable
 @Service
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norgTjeneste: NorgTjeneste)  {
 
-    private val log = getLogger(javaClass)
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    @WithSpan
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
+    fun tema(ansattId: AnsattId, oid: UUID) =
+        adapter.tema("$oid")
+
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     @WithSpan
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
         buildSet {
@@ -31,26 +33,21 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =
         adapter.gruppeId(TEMA_PREFIX + tema.verdi)
 
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
+    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
         adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
 
-    @WithSpan
-    //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun tema(ansattId: AnsattId, oid: UUID) =
-        adapter.tema("$oid")
-
-    override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norgTjeneste=$norgTjeneste]"
+    override fun toString() = "${javaClass.simpleName} [adapter=$adapter,norgTjeneste=$norgTjeneste]"
 }
 
 

@@ -23,7 +23,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
-        get<EntraGruppe>(cf.gruppeURI(displayName)).id
+        get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
 
     fun anyGruppeId(displayName: String) =
         get<Any>(cf.gruppeURI(displayName))
@@ -54,6 +54,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraAnsattData> = emptySet())
 
+    data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
+
     //@JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
         data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null )
@@ -62,7 +64,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
+    data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraGruppe> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class EntraGruppe(val id: UUID? = null, val displayName: String = "N/A") {

@@ -42,7 +42,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     fun temaMedlemmer(tema: Tema, gruppeId: UUID) : Set<AnsattId> = buildSet {
         "$gruppeId".let {
-            log.info("Slår opp medlemmer fra tema ${tema.verdi} og gruppeId $gruppeId")
+            log.info("Slår opp medlemmer fra tema ${tema.verdi} og gruppeId $it")
             adapter.medlemmer(it)
         }
     }

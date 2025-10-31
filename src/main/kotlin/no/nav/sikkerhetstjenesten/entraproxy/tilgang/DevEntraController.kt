@@ -35,6 +35,9 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         entraTjeneste.temaMedlemmer(tema, it)
     }
 
+    @GetMapping("medlemmer/{oid}")
+    fun medlemmer(@PathVariable oid: UUID) = adapter.medlemmer(oid.toString())
+    
     @GetMapping("medlemmer/any/{oid}")
     fun medlemmerAny(@PathVariable oid: UUID) = adapter.medlemmerAny(oid.toString())
 

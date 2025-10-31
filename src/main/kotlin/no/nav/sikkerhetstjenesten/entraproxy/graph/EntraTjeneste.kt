@@ -46,6 +46,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.medlemmer(it)
         }
     }
+
+    fun medlemmer(gruppeId: UUID) : Set<AnsattId> = buildSet {
+        "$gruppeId".let {
+            adapter.medlemmer(it)
+        }
+    }
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =

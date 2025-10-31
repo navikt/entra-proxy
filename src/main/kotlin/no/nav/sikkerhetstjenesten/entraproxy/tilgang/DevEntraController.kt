@@ -8,7 +8,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,7 +35,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     }
 
     @GetMapping("medlemmer/{oid}")
-    fun medlemmer(@PathVariable oid: UUID) = adapter.medlemmer(oid.toString())
+    fun medlemmer(@PathVariable oid: UUID) = entraTjeneste.medlemmer(oid)
 
     @GetMapping("medlemmer/any/{oid}")
     fun medlemmerAny(@PathVariable oid: UUID) = adapter.medlemmerAny(oid.toString())

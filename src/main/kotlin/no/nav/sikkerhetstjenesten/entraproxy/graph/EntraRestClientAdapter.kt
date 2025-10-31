@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_P
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraAnsattRespons.EntraAnsattData
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraGrupper.EntraGruppe
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -22,7 +23,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattRespons>(cf.userURI(ansattId)).oids.single().id
 
     fun gruppeId(displayName: String) =
-        get<EntraGrupper.EntraGruppe>(cf.gruppeURI(displayName)).id
+        get<EntraGruppe>(cf.gruppeURI(displayName)).id
+
+    fun anyGruppeId(displayName: String) =
+        get<Any>(cf.gruppeURI(displayName))
 
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)

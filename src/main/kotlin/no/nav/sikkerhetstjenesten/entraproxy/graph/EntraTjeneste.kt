@@ -55,12 +55,16 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #tema.verdi")
     @WithSpan
     fun gruppeIdForTema( tema: Tema) =
-        adapter.gruppeId(TEMA_PREFIX + tema.verdi)
+        adapter.gruppeId(TEMA_PREFIX + tema.verdi).also {
+            log.info("GruppeId for tema $tema er $it")
+        }
 
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #enhet.verdi")
     @WithSpan
     fun gruppeIdForEnhet( enhet: Enhetnummer) =
-        adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
+        adapter.gruppeId(ENHET_PREFIX + enhet.verdi).also {
+            log.info("GruppeId for enhet $enhet er $it")
+        }
 
     @WithSpan
     //@Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")

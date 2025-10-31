@@ -46,11 +46,11 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                 .forEach { add(constructorOn(it.displayName.removePrefix(prefix))) }
         }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    //@JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraAnsattData> = emptySet())
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
+    //@JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsattRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
         data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null )
     }

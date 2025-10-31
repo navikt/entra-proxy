@@ -20,17 +20,25 @@ import java.util.UUID
 class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste, private val adapter: EntraRestClientAdapter) {
 
     @GetMapping("ansatt/enheter/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entraTjeneste.enheter(ansattId, it) }
+    fun enheter(@PathVariable ansattId: AnsattId) =
+        oidTjeneste.oid(ansattId).let {
+            entraTjeneste.enheter(ansattId, it)
+        }
 
     @GetMapping("ansatt/temaer/{ansattId}")
-    fun temaer(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entraTjeneste.tema(ansattId, it) }
+    fun temaer(@PathVariable ansattId: AnsattId) =
+        oidTjeneste.oid(ansattId).let {
+            entraTjeneste.tema(ansattId, it)
+        }
 
-     @GetMapping("enheter/medlemmer/{enhetsnummer}")
-    fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =   entraTjeneste.gruppeIdForEnhet(enhetsnummer)?.let {
-         entraTjeneste.medlemmer( it)
-     }
+    @GetMapping("enheter/medlemmer/{enhetsnummer}")
+    fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =
+        entraTjeneste.gruppeIdForEnhet(enhetsnummer)?.let {
+            entraTjeneste.medlemmer( it)
+        }
     @GetMapping("tema/medlemmer/{tema}")
-    fun temaMedlemmer(@PathVariable tema: Tema) =   entraTjeneste.gruppeIdForTema(tema)?.let {
-        entraTjeneste.medlemmer( it)
-    }
+    fun temaMedlemmer(@PathVariable tema: Tema) =
+        entraTjeneste.gruppeIdForTema(tema)?.let {
+            entraTjeneste.medlemmer( it)
+        }
 }

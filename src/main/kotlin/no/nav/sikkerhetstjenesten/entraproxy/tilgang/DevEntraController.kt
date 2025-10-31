@@ -26,13 +26,13 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     @GetMapping("ansatt/temaer/{ansattId}")
     fun temaer(@PathVariable ansattId: AnsattId) = oidTjeneste.oid(ansattId).let { entraTjeneste.tema(ansattId, it) }
 
-     @GetMapping("gruppe/enheter/{enhetsnummer}/medlemmer")
+     @GetMapping("enheter/{enhetsnummer}/medlemmer")
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =   gruppeIdForEnhet(enhetsnummer)?.let {
-         entraTjeneste.enhetMedlemmer(enhetsnummer, it)
+         entraTjeneste.medlemmer( it)
      }
-    @GetMapping("gruppe/tema/{tema}/medlemmer")
+    @GetMapping("tema/{tema}/medlemmer")
     fun temaMedlemmer(@PathVariable tema: Tema) =   gruppeIdForTema(tema)?.let {
-        entraTjeneste.temaMedlemmer(tema, it)
+        entraTjeneste.medlemmer( it)
     }
 
     @GetMapping("medlemmer/{oid}")
@@ -45,10 +45,10 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun medlemmerAny1(@PathVariable oid: UUID) = adapter.medlemmerAny1(oid.toString())
 
 
-    @GetMapping("gruppe/enhet/{enhetsnummer}")
+    @GetMapping("enhet/{enhetsnummer}")
     fun gruppeIdForEnhet(@PathVariable enhetsnummer: Enhetnummer) = entraTjeneste.gruppeIdForEnhet(enhetsnummer)
 
-    @GetMapping("gruppe/tema/{tema}")
+    @GetMapping("tema/{tema}")
     fun gruppeIdForTema(@PathVariable tema: Tema) = entraTjeneste.gruppeIdForTema(tema)
 
     @GetMapping("ansatt/{ansattId}")

@@ -31,9 +31,9 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmerAny(oid: String) = get<Any>(cf.medlemmerURI(oid))
+    fun medlemmerAny(oid: String) = get<EntraAnsatteRespons>(cf.medlemmerURI(oid))
 
-    fun medlemmer(oid: String) =
+    fun medlemmer(oid: String) : Set<Any> =
         buildSet {
             generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
                 .flatMap { it.value }
@@ -56,7 +56,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.type") val type: String, val id: UUID, val onPremisesSamAccountName: String)
-    
+
     data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
 
     //@JsonIgnoreProperties(ignoreUnknown = true)

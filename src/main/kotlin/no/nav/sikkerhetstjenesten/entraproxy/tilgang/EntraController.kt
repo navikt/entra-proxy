@@ -56,31 +56,22 @@ class EntraController(private val entra: EntraTjeneste,
     @PostMapping("CCF/enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
     fun enhetMedlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
-        token.assert( {erCC}, {
-            medlemmer(enhetsnummer.gruppeNavn)
-        })
+            medlemmer({erCC},enhetsnummer.gruppeNavn)
 
     @PostMapping("CCF/tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
     fun temaMedlemmerCC(@PathVariable tema: Tema) =
-        token.assert( {erCC}, {
-            medlemmer(tema.gruppeNavn)
-        })
-
+            medlemmer({erCC},tema.gruppeNavn)
 
     @PostMapping("enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter Obo-flow")
     fun enhetMedlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
-        token.assert( {erObo}, {
-            medlemmer(enhetsnummer.gruppeNavn)
-        })
+            medlemmer({erObo},enhetsnummer.gruppeNavn)
 
     @PostMapping("tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter Obo-flow")
     fun temaMedlemmerOBO(@PathVariable tema: Tema) =
-        token.assert( {erObo}, {
-            medlemmer(tema.gruppeNavn)
-        })
+            medlemmer({erObo},tema.gruppeNavn)
 
     private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T): T {
         val (ansattId, oid) = token.requireOboFields()
@@ -90,10 +81,13 @@ class EntraController(private val entra: EntraTjeneste,
     private inline fun <T> hentForAnsatt(ansattId: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
         oid.oid(ansattId)?.let { hent(ansattId, it) } ?: empty()
 
-    private fun medlemmer(gruppeNavn: String) =
-        entra.gruppeId(gruppeNavn)?.let {
-            entra.medlemmer( it)
-        } ?: emptySet()
+    private fun medlemmer(predikat: Token.() -> Boolean,gruppeNavn: String) =
+        token.assert( predikat, {
+            entra.gruppeId(gruppeNavn)?.let {
+                entra.medlemmer( it)
+            } ?: emptySet()
+        })
+
 
     fun Token.requireOboFields(): Pair<AnsattId, UUID> =
     ansattId?.let { id -> oid?.let { o -> id to o } }

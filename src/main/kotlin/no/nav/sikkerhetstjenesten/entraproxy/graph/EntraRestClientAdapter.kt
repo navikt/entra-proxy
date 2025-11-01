@@ -29,21 +29,29 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
-
+    
     fun medlemmer(oid: String) =
-        pagedSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
-            .flatMap { it.value.map { medlem -> medlem.navIdent } }
-            .toSortedSet { AnsattId(it) }
+        pagedSortedSet(
+            get<EntraAnsatteRespons>(cf.medlemmerURI(oid)),
+            { it.next?.let(::get) },
+            { it.value },
+            { AnsattId(it.navIdent) }
+        )
 
-    private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) = pagedSequence(get<EntraGrupper>(uri)) { it.next?.let(::get) }
-        .flatMap { gruppe -> gruppe.value.map { it.displayName } }
-        .toSortedSet { constructorOn(it.removePrefix(prefix)) }
+    private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
+        pagedSortedSet(
+            get<EntraGrupper>(uri),
+            { it.next?.let(::get) },
+            { it.value },
+            { constructorOn(it.displayName.removePrefix(prefix)) }
+        )
 
-    private inline fun <T : Any> pagedSequence(firstPage: T, crossinline nextPage: (T) -> T?): Sequence<T> =
+    private inline fun <T, V, R> pagedSortedSet(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
         generateSequence(firstPage) { nextPage(it) }
+            .flatMap { values(it) }
+            .map(transform)
+            .toSortedSet()
 
-    private inline fun <T, R> Sequence<T>.toSortedSet(transform: (T) -> R): Set<R> =
-        mapTo(sortedSetOf(), transform)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())

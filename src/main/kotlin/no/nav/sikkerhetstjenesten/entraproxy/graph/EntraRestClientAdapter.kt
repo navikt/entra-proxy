@@ -31,7 +31,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
     fun medlemmer(oid: String) =
-        pageAndSort(
+        pageTransformAndSort(
             get<EntraAnsatteRespons>(cf.medlemmerURI(oid)),
             { it.next?.let(::get) },
             { it.value },
@@ -39,14 +39,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         )
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
-        pageAndSort(
+        pageTransformAndSort(
             get<EntraGrupper>(uri),
             { it.next?.let(::get) },
             { it.value },
             { constructorOn(it.displayName.removePrefix(prefix)) }
         )
 
-    private inline fun <T, V, R> pageAndSort(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
+    private inline fun <T, V, R> pageTransformAndSort(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
         generateSequence(firstPage) { nextPage(it) }
             .flatMap { values(it) }
             .map(transform)

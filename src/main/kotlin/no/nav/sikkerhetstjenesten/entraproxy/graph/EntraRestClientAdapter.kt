@@ -33,7 +33,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun medlemmer(oid: String): Set<AnsattId> =
         generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
             .flatMap { it.value }
-            .map { AnsattId(it.onPremisesSamAccountName) }
+            .map { AnsattId(it.navIdent) }
             .toSortedSet().also {
                 log.trace("Henter ${it.size} medlemmer")
             }
@@ -46,16 +46,17 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsatteRespons(@param:JsonProperty("@odata.context") val context: String, @param:JsonProperty("@odata.count") val count: Int = 0, @param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
+    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
 
-
-    data class EntraMedlemmerAnsatt(@param:JsonProperty("@odata.type") val type: String, val id: UUID, val onPremisesSamAccountName: String)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraMedlemmerAnsatt(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
 
     data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
-        data class EntraAnsattData(val id: UUID, val onPremisesSamAccountName: String? = null)
+        @JsonIgnoreProperties(ignoreUnknown = true)
+        data class EntraAnsattData(val id: UUID)
     }
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"

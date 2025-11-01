@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
-import hentForObo
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType.HTTP
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -34,18 +33,19 @@ class EntraController(private val entra: EntraTjeneste,
             hentForAnsatt(ansattId, entra::enheter) { emptySet() }
         })
 
+    @PostMapping("ansatt/enheter")
+    @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
+    fun enheterOBO() = token.assert({ erObo }, {
+        hentForObo(entra::enheter)
+    })
+
     @PostMapping("CCF/ansatt/tema/{ansattId}")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(ansattId, entra::tema) { emptySet() }
         })
-
-    @PostMapping("ansatt/enheter")
-    @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
-    fun enheterOBO() = token.assert({ erObo }, {
-        hentForObo(entra::enheter)
-    })
+    
     @PostMapping("ansatt/tema")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() = token.assert( {erObo}, {
@@ -54,28 +54,29 @@ class EntraController(private val entra: EntraTjeneste,
 
     @PostMapping("CCF/enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
-    fun enhetMedlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
+    fun medlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer({erCC},enhetsnummer.gruppeNavn)
 
     @PostMapping("CCF/tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
-    fun temaMedlemmerCC(@PathVariable tema: Tema) =
+    fun medlemmerCC(@PathVariable tema: Tema) =
             medlemmer({erCC},tema.gruppeNavn)
 
     @PostMapping("enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter Obo-flow")
-    fun enhetMedlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
+    fun medlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer({erObo},enhetsnummer.gruppeNavn)
 
     @PostMapping("tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter Obo-flow")
-    fun temaMedlemmerOBO(@PathVariable tema: Tema) =
+    fun medlemmerOBO(@PathVariable tema: Tema) =
             medlemmer({erObo},tema.gruppeNavn)
 
     private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T): T {
         val (ansattId, oid) = token.requireOboFields()
         return hent(ansattId, oid)
     }
+
     private inline fun <T> hentForAnsatt(ansattId: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
         oid.oid(ansattId)?.let { hent(ansattId, it) } ?: empty()
 

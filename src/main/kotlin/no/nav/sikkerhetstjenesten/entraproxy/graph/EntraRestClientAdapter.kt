@@ -30,20 +30,20 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(oid: String) =
         grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmer(oid: String): Set<AnsattId> =
-        generateSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
-            .flatMap { it.value }
-            .map { AnsattId(it.navIdent) }
-            .toSortedSet().also {
-                log.trace("Henter ${it.size} medlemmer")
-            }
+    fun medlemmer(oid: String) =
+        pagedSequence(get<EntraAnsatteRespons>(cf.medlemmerURI(oid))) { it.next?.let(::get) }
+            .flatMap { it.value.map { medlem -> medlem.navIdent } }
+            .toSortedSet { AnsattId(it) }
 
-    private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) =
-        buildSet {
-            generateSequence(get<EntraGrupper>(uri)) { it.next?.let(::get) }
-                .flatMap { it.value }
-                .forEach { add(constructorOn(it.displayName.removePrefix(prefix))) }
-        }
+    private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T) = pagedSequence(get<EntraGrupper>(uri)) { it.next?.let(::get) }
+        .flatMap { gruppe -> gruppe.value.map { it.displayName } }
+        .toSortedSet { constructorOn(it.removePrefix(prefix)) }
+
+    private inline fun <T : Any> pagedSequence(firstPage: T, crossinline nextPage: (T) -> T?): Sequence<T> =
+        generateSequence(firstPage) { nextPage(it) }
+
+    private inline fun <T, R> Sequence<T>.toSortedSet(transform: (T) -> R): Set<R> =
+        mapTo(sortedSetOf(), transform)
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())

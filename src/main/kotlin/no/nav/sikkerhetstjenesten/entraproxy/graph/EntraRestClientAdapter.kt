@@ -66,9 +66,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class EntraAnsattData(val id: UUID)
     }
-
-    override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
-
+    
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraGruppe> = emptySet()) {
@@ -78,4 +76,5 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             override fun hashCode() = id.hashCode()
         }
     }
+    override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

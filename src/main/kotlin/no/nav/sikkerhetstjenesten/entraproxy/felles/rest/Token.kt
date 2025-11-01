@@ -28,9 +28,9 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
     val erCC get() = stringClaim(IDTYP) == APP
     val erObo get()  = !erCC && oid != null
 
-    fun precondition(predikat: Token.() -> Boolean, block: () -> Any){
+    fun <T> assert(predikat: Token.() -> Boolean, block: () -> Set<T>): Set<T> {
         if (!this.predikat()) throw ResponseStatusException(BAD_REQUEST, "Feil i token: krever korrekt token-type for å utføre denne operasjonen")
-        else block()
+        else return block()
     }
     companion object {
         const val AAD_ISSUER: String = "azuread"

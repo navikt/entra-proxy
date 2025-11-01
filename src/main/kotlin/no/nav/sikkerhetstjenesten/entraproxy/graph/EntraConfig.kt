@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
 import java.net.URI
@@ -61,13 +62,11 @@ class EntraConfig(
 
     companion object {
         const val GRAPH = "graph"
-        const val TEMA_PREFIX = "0000-GA-TEMA_"
-        const val ENHET_PREFIX = "0000-GA-ENHET_"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
         private const val KONTO = "onPremisesSamAccountName"
         private const val RETURFELT_MEDLEMMER = "id,onPremisesSamAccountName"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
-        private const val ENHET_QUERY = "startswith(displayName,'$ENHET_PREFIX') "
+        private const val ENHET_QUERY = "startswith(displayName,'${Enhet.ENHET_PREFIX}') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/groups"

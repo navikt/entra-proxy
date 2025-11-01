@@ -4,7 +4,9 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 import no.nav.boot.conditionals.Cluster.LOCAL
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.stereotype.Component
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @Component
@@ -25,6 +27,11 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
     val cluster get() = runCatching { system.split(":").first() }.getOrElse { LOCAL.name.lowercase() }
     val erCC get() = stringClaim(IDTYP) == APP
     val erObo get()  = !erCC && oid != null
+
+    fun precondition(predikat: Token.() -> Boolean, block: () -> Any){
+        if (!this.predikat()) throw ResponseStatusException(BAD_REQUEST, "Feil i token: krever korrekt token-type for å utføre denne operasjonen")
+        else block()
+    }
     companion object {
         const val AAD_ISSUER: String = "azuread"
         private const val APP = "app"

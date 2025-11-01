@@ -8,7 +8,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -20,24 +19,25 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("ansatt/enheter/{ansattId}")
     fun enheter(@PathVariable ansattId: AnsattId) =
-        oidTjeneste.oid(ansattId).let {
+        oidTjeneste.oid(ansattId)?.let {
             entraTjeneste.enheter(ansattId, it)
         }
 
     @GetMapping("ansatt/temaer/{ansattId}")
     fun temaer(@PathVariable ansattId: AnsattId) =
-        oidTjeneste.oid(ansattId).let {
+        oidTjeneste.oid(ansattId)?.let {
             entraTjeneste.tema(ansattId, it)
         }
 
     @GetMapping("enheter/medlemmer/{enhetsnummer}")
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =
-        entraTjeneste.gruppeIdForEnhet(enhetsnummer)?.let {
-            entraTjeneste.medlemmer( it)
-        }
+        medlemmer(enhetsnummer.gruppeNavn)
+
     @GetMapping("tema/medlemmer/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =
-        entraTjeneste.gruppeIdForTema(tema)?.let {
-            entraTjeneste.medlemmer( it)
-        }
+        medlemmer(tema.gruppeNavn)
+
+    private fun medlemmer(gruppeNavn: String) =  entraTjeneste.gruppeId(gruppeNavn)?.let {
+        entraTjeneste.medlemmer( it)
+    }
 }

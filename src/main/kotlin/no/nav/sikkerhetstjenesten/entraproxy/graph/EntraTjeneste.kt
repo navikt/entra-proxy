@@ -6,9 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.GruppeIdCachableRestCon
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -35,19 +33,15 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    @Cacheable(cacheNames = [MEDLEMMER])
+    @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
             adapter.medlemmer(gruppeId.toString())
 
     @WithSpan
-    @Cacheable(cacheNames = [GRUPPEID],  key = "$TEMA_PREFIX + #tema.verdi")
-    fun gruppeIdForTema( tema: Tema) =
-        adapter.gruppeId(TEMA_PREFIX + tema.verdi)
+    @Cacheable(cacheNames = [GRUPPEID],  key = "#gruppeNavn")
+    fun gruppeId(gruppeNavn: String) =
+        adapter.gruppeId(gruppeNavn)
 
-    @WithSpan
-    @Cacheable(cacheNames = [GRUPPEID],  key = "$ENHET_PREFIX + #enhet.verdi")
-    fun gruppeIdForEnhet( enhet: Enhetnummer) =
-        adapter.gruppeId(ENHET_PREFIX + enhet.verdi)
 
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 }

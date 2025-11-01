@@ -14,11 +14,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISS
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import org.springframework.http.HttpStatus.BAD_REQUEST
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.server.ResponseStatusException
 
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
@@ -32,60 +29,62 @@ class EntraController(private val entra: EntraTjeneste,
     @PostMapping("CCF/ansatt/enheter/{ansattId}")
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
-        tokenPrecondition( {token.erCC}, {
+        token.precondition( {erCC}, {
             oid.oid(ansattId)?.let { entra.enheter(ansattId, it) } ?: emptySet<Enhet>()
         })
 
     @PostMapping("CCF/ansatt/tema/{ansattId}")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
-        tokenPrecondition( {token.erCC}, {
+        token.precondition( {erCC}, {
             oid.oid(ansattId)?.let { entra.tema(ansattId, it) } ?: emptySet<Tema>()
         })
 
     @PostMapping("ansatt/enheter")
     @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
-    fun enheterOBO() = tokenPrecondition( {token.erObo}, {
+    fun enheterOBO() = token.precondition( {erObo}, {
         entra.enheter(token.ansattId!!, token.oid!!)
     })
     @PostMapping("ansatt/tema")
     @Operation(summary = "Slå opp tema for ansatt, forutsetter OBO-flow")
-    fun temaOBO() = tokenPrecondition( {token.erObo}, {
+    fun temaOBO() = token.precondition( {erObo}, {
         entra.tema(token.ansattId!!, token.oid!!)
     })
 
     @PostMapping("CCF/enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
     fun enhetMedlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
-        tokenPrecondition( {token.erCC}, {
-            entra.gruppeIdForEnhet(enhetsnummer)?.let { entra.medlemmer( it)}?: emptySet<AnsattId>()
-    })
+        token.precondition( {erCC}, {
+            medlemmer(enhetsnummer.gruppeNavn)
+        })
 
     @PostMapping("CCF/tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
     fun temaMedlemmerCC(@PathVariable tema: Tema) =
-        tokenPrecondition( {token.erCC}, {
-        entra.gruppeIdForTema(tema)?.let { entra.medlemmer( it) }?: emptySet<AnsattId>()
-    })
+        token.precondition( {erCC}, {
+            medlemmer(tema.gruppeNavn)
+        })
 
 
     @PostMapping("enheter/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet, forutsetter Obo-flow")
     fun enhetMedlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
-        tokenPrecondition( {token.erObo}, {
-            entra.gruppeIdForEnhet(enhetsnummer)?.let { entra.medlemmer( it)}?: emptySet<AnsattId>()
+        token.precondition( {erObo}, {
+            medlemmer(enhetsnummer.gruppeNavn)
         })
 
     @PostMapping("tema/medlemmer/{tema}")
     @Operation(summary = "Slå opp medlemmer for tema, forutsetter Obo-flow")
     fun temaMedlemmerOBO(@PathVariable tema: Tema) =
-        tokenPrecondition( {token.erObo}, {
-            entra.gruppeIdForTema(tema)?.let { entra.medlemmer( it) }?: emptySet<AnsattId>()
+        token.precondition( {erObo}, {
+            medlemmer(tema.gruppeNavn)
         })
+
+    private fun medlemmer(gruppeNavn: String) =
+        entra.gruppeId(gruppeNavn)?.let {
+            entra.medlemmer( it)
+        } ?: emptySet()
     
-    private fun tokenPrecondition(predikat: () -> Boolean, block: () -> Any) {
-        if (!predikat()) throw ResponseStatusException(BAD_REQUEST, "Feil i token: krever korrekt token-type for å utføre denne operasjonen")
-        else block()
-    }
+
 }
 

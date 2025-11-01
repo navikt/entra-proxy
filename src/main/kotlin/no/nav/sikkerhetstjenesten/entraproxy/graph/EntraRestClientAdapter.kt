@@ -3,11 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraGrupper.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -19,7 +19,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun oid(ansattId: String) =
-        get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.single().id
+        get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
 
     fun gruppeId(displayName: String) =
         get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
@@ -70,4 +70,3 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         }
     }
 }
-

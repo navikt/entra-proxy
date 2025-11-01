@@ -59,22 +59,20 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraMedlemmerAnsatt(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
 
-    data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null, @param:JsonProperty("@odata.count") val count: Int = 0, val value: Set<EntraGruppe> = emptySet())
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null,val value: Set<EntraGruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class EntraAnsattData(val id: UUID)
     }
-    
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
                                     val value: Set<EntraGruppe> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraGruppe(val id: UUID? = null, val displayName: String = "N/A") {
-            override fun equals(other: Any?) = other is EntraGruppe && id == other.id
-            override fun hashCode() = id.hashCode()
-        }
+        data class EntraGruppe(val id: UUID, val displayName: String)
     }
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

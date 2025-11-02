@@ -53,12 +53,12 @@ class EntraController(private val entra: EntraTjeneste,
     })
 
     @PostMapping("enheter/medlemmer/{enhetsnummer}")
-    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
+    @Operation(summary = "Slå opp medlemmer for enhet")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer(enhetsnummer.gruppeNavn)
 
     @PostMapping("tema/medlemmer/{tema}")
-    @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
+    @Operation(summary = "Slå opp medlemmer for tema")
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)
 

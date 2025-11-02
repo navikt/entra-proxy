@@ -6,7 +6,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraGrupper.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -22,7 +21,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
 
     fun gruppeId(displayName: String) =
-        get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
+        get<EntraGrupperIdRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
 
     fun tema(oid: String) =
         grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
@@ -40,7 +39,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     private inline fun <T> grupper(uri: URI, prefix: String, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pageTransformAndSort(
-            get<EntraGrupper>(uri),
+            get<EntraGrupperRespons>(uri),
             { it.next?.let(::get) },
             { it.value },
             { constructorOn(it.displayName.removePrefix(prefix)) }
@@ -54,25 +53,24 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraMedlemmerAnsatt(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null,val value: Set<EntraGruppe> = emptySet())
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
+    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraAnsattRespons> = emptySet())  {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraAnsattData(val id: UUID)
+        data class EntraAnsattRespons(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
-                                    val value: Set<EntraGruppe> = emptySet()) {
+    data class EntraGrupperIdRespons(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<EntraIdRespons> = emptySet())
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraIdRespons(val id: UUID)
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraIdRespons>)
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class EntraGrupperRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraGruppeRespons> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraGruppe(val id: UUID, val displayName: String)
+        data class EntraGruppeRespons(val id: UUID, val displayName: String)
     }
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

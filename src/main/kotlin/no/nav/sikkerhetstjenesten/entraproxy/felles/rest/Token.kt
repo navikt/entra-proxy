@@ -10,7 +10,7 @@ import java.util.*
 @Component
 class Token(private val contextHolder: TokenValidationContextHolder) {
 
-    val type = TokenType.from(this)
+    val type = TokenType.from(this).name.lowercase()
     val system get() = stringClaim(AZP_NAME)  ?: "N/A"
     val oid get() = stringClaim(OID)?.let { UUID.fromString(it) }
     val ansattId get() = stringClaim(NAVIDENT)?.let { AnsattId(it) }

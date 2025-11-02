@@ -10,7 +10,7 @@ abstract class AbstractTeller(private val registry: MeterRegistry, private val t
         Counter.builder(navn)
             .description(beskrivelse)
             .tags(tags
-                .and("token", TokenType.from(token).name.lowercase())
+                .and("token", token.type)
                 .and("system", token.system)
                 .and("clustersystem", token.clusterAndSystem))
             .register(registry)

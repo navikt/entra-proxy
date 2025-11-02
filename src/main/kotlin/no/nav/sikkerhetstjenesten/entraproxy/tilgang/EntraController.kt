@@ -52,25 +52,15 @@ class EntraController(private val entra: EntraTjeneste,
         hentForObo(entra::tema)
     })
 
-    @PostMapping("CCF/enheter/medlemmer/{enhetsnummer}")
-    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
-    fun medlemmerCC(@PathVariable enhetsnummer: Enhetnummer) =
-            medlemmer({erCC},enhetsnummer.gruppeNavn)
-
-    @PostMapping("CCF/tema/medlemmer/{tema}")
-    @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
-    fun medlemmerCC(@PathVariable tema: Tema) =
-            medlemmer({erCC},tema.gruppeNavn)
-
     @PostMapping("enheter/medlemmer/{enhetsnummer}")
-    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter Obo-flow")
-    fun medlemmerOBO(@PathVariable enhetsnummer: Enhetnummer) =
-            medlemmer({erObo},enhetsnummer.gruppeNavn)
+    @Operation(summary = "Slå opp medlemmer for enhet, forutsetter CC-flow")
+    fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
+            medlemmer(enhetsnummer.gruppeNavn)
 
     @PostMapping("tema/medlemmer/{tema}")
-    @Operation(summary = "Slå opp medlemmer for tema, forutsetter Obo-flow")
-    fun medlemmerOBO(@PathVariable tema: Tema) =
-            medlemmer({erObo},tema.gruppeNavn)
+    @Operation(summary = "Slå opp medlemmer for tema, forutsetter CC-flow")
+    fun medlemmer(@PathVariable tema: Tema) =
+            medlemmer(tema.gruppeNavn)
 
     private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T): T {
         val (ansattId, oid) = token.requireOboFields()
@@ -80,12 +70,10 @@ class EntraController(private val entra: EntraTjeneste,
     private inline fun <T> hentForAnsatt(ansattId: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
         oid.oid(ansattId)?.let { hent(ansattId, it) } ?: empty()
 
-    private fun medlemmer(predikat: Token.() -> Boolean,gruppeNavn: String) =
-        token.assert( predikat, {
-            entra.gruppeId(gruppeNavn)?.let {
-                entra.medlemmer( it)
-            } ?: emptySet()
-        })
+    private fun medlemmer(gruppeNavn: String) =
+        entra.gruppeId(gruppeNavn)?.let {
+            entra.medlemmer( it)
+        } ?: emptySet()
 
 
     fun Token.requireOboFields(): Pair<AnsattId, UUID> =

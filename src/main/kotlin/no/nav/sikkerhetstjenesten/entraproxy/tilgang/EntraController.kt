@@ -52,7 +52,7 @@ class EntraController(private val entra: EntraTjeneste,
         hentForObo(entra::tema)
     })
 
-    @PostMapping("enheter/medlemmer/{enhetsnummer}")
+    @PostMapping("enhet/medlemmer/{enhetsnummer}")
     @Operation(summary = "Slå opp medlemmer for enhet")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer(enhetsnummer.gruppeNavn)

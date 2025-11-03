@@ -1,12 +1,14 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonValue
+import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 
 
 data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
 
+    @Schema(description = "Enhetsnummer representerer en fire-sifret enhet")
     data class Enhetnummer(@JsonValue val verdi: String) : Comparable<Enhetnummer> {
         init {
             requireDigits(verdi,4)
@@ -22,6 +24,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
     }
 }
 
+@Schema(description = "Tema representerer en trebokstavs temakode")
 data class Tema(@JsonValue val verdi: String) : Comparable<Tema>   {
     init {
         require(verdi.length == 3) { "Tema må være på tre bokstaver" }

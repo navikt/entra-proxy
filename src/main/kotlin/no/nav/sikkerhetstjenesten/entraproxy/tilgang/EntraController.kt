@@ -34,7 +34,7 @@ class EntraController(private val entra: EntraTjeneste,
         })
 
     @GetMapping("enhet")
-    @Operation(summary = "Hent alle tilgjengelige enheter or ansatt, forutsetter OBO-flow")
+    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() = token.assert({ erObo }, {
         hentForObo(entra::enheter)
     })

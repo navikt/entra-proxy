@@ -6,9 +6,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExten
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 
 
+@Schema(description = "Enhet består av en fire-sifret enhetsnummer og et navn hentet fra Norg")
 data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
 
-    @Schema(description = "Enhetsnummer representerer en fire-sifret enhet")
     data class Enhetnummer(@JsonValue val verdi: String) : Comparable<Enhetnummer> {
         init {
             requireDigits(verdi,4)
@@ -24,7 +24,6 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
     }
 }
 
-@Schema(description = "Tema representerer en trebokstavs temakode")
 data class Tema(@JsonValue val verdi: String) : Comparable<Tema>   {
     init {
         require(verdi.length == 3) { "Tema må være på tre bokstaver" }

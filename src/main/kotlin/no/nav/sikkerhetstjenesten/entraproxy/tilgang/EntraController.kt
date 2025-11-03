@@ -71,7 +71,7 @@ class EntraController(private val entra: EntraTjeneste,
         oid.oid(ansattId)?.let { hent(ansattId, it) } ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
-        entra.gruppeId(gruppeNavn)?.let {
+        oid.gruppeId(gruppeNavn)?.let {
             entra.medlemmer( it)
         } ?: emptySet()
 

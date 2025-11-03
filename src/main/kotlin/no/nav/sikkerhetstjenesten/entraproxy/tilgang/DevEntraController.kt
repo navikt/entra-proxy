@@ -38,7 +38,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         medlemmer(tema.gruppeNavn)
 
     private fun medlemmer(gruppeNavn: String) =
-        entraTjeneste.gruppeId(gruppeNavn)?.let {
+        oidTjeneste.gruppeId(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }
 }

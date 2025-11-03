@@ -13,8 +13,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import java.util.UUID
 
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
@@ -26,38 +26,38 @@ class EntraController(private val entra: EntraTjeneste,
                       private val token: Token) {
 
 
-    @PostMapping("enhet/ansatt/{navIdent}")
+    @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entra::enheter) { emptySet() }
         })
 
-    @PostMapping("enhet")
+    @GetMapping("enhet")
     @Operation(summary = "Hent alle tilgjengelige enheter or ansatt, forutsetter OBO-flow")
     fun enheterOBO() = token.assert({ erObo }, {
         hentForObo(entra::enheter)
     })
 
-    @PostMapping("tema/ansatt/{navIdent}")
+    @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entra::tema) { emptySet() }
         })
     
-    @PostMapping("tema")
+    @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() = token.assert( {erObo}, {
         hentForObo(entra::tema)
     })
 
-    @PostMapping("enhet/{enhetsnummer}")
+    @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer(enhetsnummer.gruppeNavn)
 
-    @PostMapping("tema/{tema}")
+    @GetMapping("tema/{tema}")
     @Operation(summary = "Hent alle medlemmer for et gitt tema")
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)

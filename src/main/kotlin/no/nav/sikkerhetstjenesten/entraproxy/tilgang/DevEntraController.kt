@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
-import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.spring.UnprotectedRestController
@@ -19,23 +18,23 @@ import org.springframework.web.bind.annotation.PathVariable
 class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: OidTjeneste) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
-    fun enheter(@PathVariable @Schema(implementation = AnsattId::class) navIdent: AnsattId) =
+    fun enheter(@PathVariable navIdent: AnsattId) =
         oidTjeneste.oid(navIdent)?.let {
             entraTjeneste.enheter(navIdent, it)
         }
 
     @GetMapping("tema/ansatt/{navIdent}")
-    fun temaer(@PathVariable @Schema(implementation = AnsattId::class) navIdent: AnsattId) =
+    fun temaer(@PathVariable navIdent: AnsattId) =
         oidTjeneste.oid(navIdent)?.let {
             entraTjeneste.tema(navIdent, it)
         }
 
     @GetMapping("enhet/{enhetsnummer}")
-    fun enhetMedlemmer(@PathVariable @Schema(implementation = Enhetnummer ::class) enhetsnummer: Enhetnummer) =
+    fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =
         medlemmer(enhetsnummer.gruppeNavn)
 
     @GetMapping("tema/{tema}")
-    fun temaMedlemmer(@PathVariable @Schema(implementation = Tema::class) tema: Tema) =
+    fun temaMedlemmer(@PathVariable tema: Tema) =
         medlemmer(tema.gruppeNavn)
 
     private fun medlemmer(gruppeNavn: String) =

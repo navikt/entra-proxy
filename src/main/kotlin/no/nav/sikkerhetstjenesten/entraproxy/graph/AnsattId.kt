@@ -2,11 +2,10 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 
 import com.fasterxml.jackson.annotation.JsonValue
-import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
-data class AnsattId(@field:Schema(description = "NAV-ansattID")
-                    @JsonValue val verdi: String) : Comparable<AnsattId> {
+
+data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
     init {
         with(verdi) {
             require(length == ANSATTID_LENGTH) { "Ugyldig lengde $length for $this, forventet $ANSATTID_LENGTH" }

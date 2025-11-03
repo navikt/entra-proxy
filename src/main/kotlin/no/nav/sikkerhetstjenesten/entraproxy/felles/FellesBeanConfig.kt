@@ -6,6 +6,10 @@ import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
+import io.swagger.v3.core.converter.AnnotatedType
+import io.swagger.v3.core.converter.ModelConverter
+import io.swagger.v3.core.converter.ModelConverterContext
+import io.swagger.v3.oas.models.media.Schema
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
@@ -117,5 +121,23 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
     class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
         override fun convert(source: String): Enhetnummer = Enhetnummer(source)
+    }
+}
+
+@Component
+class AnsattIdModelConverter : ModelConverter {
+    override fun resolve(
+        type: AnnotatedType,
+        context: ModelConverterContext,
+        chain: MutableIterator<ModelConverter>
+    ): Schema<*>? {
+        if (type.type is Class<*> && (type.type as Class<*>).simpleName == "AnsattId") {
+            val schema = Schema<String>()
+            schema.name = "AnsattId"
+            schema.type = "string"
+            schema.description = "NAV-ansattID (7 tegn)"
+            return schema
+        }
+        return chain.next().resolve(type, context, chain)
     }
 }

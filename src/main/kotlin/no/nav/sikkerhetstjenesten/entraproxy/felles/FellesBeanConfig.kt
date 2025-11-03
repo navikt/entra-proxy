@@ -41,6 +41,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.util.function.Function
+import kotlin.io.resolve
 
 
 @Configuration
@@ -125,19 +126,32 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 }
 
 @Component
-class AnsattIdModelConverter : ModelConverter {
+class CustomModelConverter : ModelConverter {
     override fun resolve(
-        type: AnnotatedType,
+        t: AnnotatedType,
         context: ModelConverterContext,
         chain: MutableIterator<ModelConverter>
     ): Schema<*>? {
-        if (type.type is Class<*> && (type.type as Class<*>).simpleName == "AnsattId") {
-            val schema = Schema<String>()
-            schema.name = "AnsattId"
-            schema.type = "string"
-            schema.description = "NAV-ansattID (7 tegn)"
-            return schema
+        if (t.type is Class<*>) {
+            return when ((t.type as Class<*>).simpleName) {
+                "AnsattId" -> Schema<String>().apply {
+                    name = "AnsattId"
+                    type = "string"
+                    description = "NAV-ansattID (7 tegn)"
+                }
+                "Enhetnummer" -> Schema<String>().apply {
+                    name = "Enhetnummer"
+                    type = "string"
+                    description = "Enhetens nummer"
+                }
+                "Tema" -> Schema<String>().apply {
+                    name = "Tema"
+                    type = "string"
+                    description = "Tema"
+                }
+                else -> null
+            } ?: chain.next().resolve(t, context, chain)
         }
-        return chain.next().resolve(type, context, chain)
+        return chain.next().resolve(t, context, chain)
     }
 }

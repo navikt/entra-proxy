@@ -2,6 +2,10 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType.HTTP
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -16,6 +20,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import java.util.UUID
+import kotlin.annotation.AnnotationRetention.RUNTIME
+import kotlin.annotation.AnnotationTarget.FUNCTION
 
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
@@ -28,6 +34,15 @@ class EntraController(private val entra: EntraTjeneste,
 
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
+    @ApiResponse200WithExample(
+        description = "Enheter funnet",
+        example = """
+            [{
+              "enhetsnummer":"1234",
+              "navn":"Enhet A"
+             }]
+           """
+    )
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entra::enheter) { emptySet() }
@@ -81,3 +96,27 @@ class EntraController(private val entra: EntraTjeneste,
     ?: error("ansattId og oid må være satt for OBO")
 
 }
+
+@Target(FUNCTION)
+@Retention(RUNTIME)
+@ApiResponses(
+    value = [
+        ApiResponse(
+            responseCode = "200",
+            description = "",
+            content = [Content(
+                mediaType = "application/json",
+                examples = [ExampleObject(value = "")]
+            )]
+        ),
+        ApiResponse(
+            responseCode = "403",
+            description = "Ikke tilgang",
+            content = [Content(mediaType = "application/problem+json")]
+        )
+    ]
+)
+annotation class ApiResponse200WithExample(
+    val description: String,
+    val example: String
+)

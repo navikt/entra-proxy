@@ -7,7 +7,10 @@ Tjeneste for å hente ut:
 
 
 Swagger-dokumentasjon:
-DEV: https://entra-proxy.dev.intern.nav.no/swagger/index.html Devkontroller er kun for enkel test/visuell sjekk, mens EntraController er den som skal brukes for system.
+
+DEV: https://entra-proxy.dev.intern.nav.no/swagger/index.html 
+    Devkontroller er kun for enkel test/visuell sjekk, mens EntraController er den som skal brukes for system.
+
 PROD: https://entra-proxy.intern.nav.no/swagger/index.html
 
 Dokumentasjon:

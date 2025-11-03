@@ -24,10 +24,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
 
     fun tema(ansattOid: String) =
-        ansattAttributter(cf.temaURI(ansattOid), TEMA_PREFIX, ::Tema)
+        tilganger(cf.temaURI(ansattOid), TEMA_PREFIX, ::Tema)
 
     fun enheter(ansattOid: String) =
-        ansattAttributter(cf.enheterURI(ansattOid), ENHET_PREFIX, ::Enhetnummer)
+        tilganger(cf.enheterURI(ansattOid), ENHET_PREFIX, ::Enhetnummer)
 
     fun gruppeMedlemmer(gruppeOId: String) =
         pageTransformAndSort(
@@ -37,7 +37,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { AnsattId(it.navIdent) }
         )
 
-    private inline fun <T> ansattAttributter(uri: URI, prefix: String, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
+    private inline fun <T> tilganger(uri: URI, prefix: String, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pageTransformAndSort(
             get<EntraGrupper>(uri),
             { it.next?.let(::get) },

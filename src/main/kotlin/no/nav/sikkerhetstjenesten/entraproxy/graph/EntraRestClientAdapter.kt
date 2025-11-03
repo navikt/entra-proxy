@@ -6,7 +6,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraGrupper.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
@@ -19,10 +18,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun ansattOid(ansattId: String) =
-        get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
+        get<AnsattOids>(cf.userURI(ansattId)).oids.singleOrNull()?.id
 
     fun gruppeOId(gruppeNavn: String) =
-        get<EntraGruppeRespons>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
+        get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
 
     fun tema(ansattOid: String) =
         grupper(cf.temaURI(ansattOid), TEMA_PREFIX, ::Tema)
@@ -32,7 +31,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun gruppeMedlemmer(gruppeOId: String) =
         pageTransformAndSort(
-            get<GruppeMedlemmerRespons>(cf.gruppeMedlemmerURI(gruppeOId)),
+            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOId)),
             { it.next?.let(::get) },
             { it.value },
             { AnsattId(it.navIdent) }
@@ -54,25 +53,26 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class GruppeMedlemmerRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
+    data class GruppeMedlemmer(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class GruppeMedlem(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraGruppeRespons(@param:JsonProperty("@odata.context") val next: URI? = null,val value: Set<EntraGruppe> = emptySet())
+    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<Gruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsattOidRespons(@param:JsonProperty("value") val oids: Set<EntraAnsattData>) {
+    data class AnsattOids(@param:JsonProperty("value") val oids: Set<AnsattOid>) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraAnsattData(val id: UUID)
+        data class AnsattOid(val id: UUID)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
-                                    val value: Set<EntraGruppe> = emptySet()) {
-        @JsonIgnoreProperties(ignoreUnknown = true)
-        data class EntraGruppe(val id: UUID, val displayName: String)
-    }
+                                    val value: Set<Gruppe> = emptySet())
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class Gruppe(val id: UUID, val displayName: String)
+
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

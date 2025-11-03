@@ -18,21 +18,21 @@ import java.util.*
 class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
-    fun oid(ansattId: String) =
+    fun ansattOid(ansattId: String) =
         get<EntraAnsattOidRespons>(cf.userURI(ansattId)).oids.singleOrNull()?.id
 
-    fun gruppeId(displayName: String) =
+    fun gruppeOId(displayName: String) =
         get<EntraGruppeRespons>(cf.gruppeURI(displayName)).value.firstOrNull()?.id
 
-    fun tema(oid: String) =
-        grupper(cf.temaURI(oid), TEMA_PREFIX, ::Tema)
+    fun tema(ansattOid: String) =
+        grupper(cf.temaURI(ansattOid), TEMA_PREFIX, ::Tema)
 
-    fun enheter(oid: String) =
-        grupper(cf.enheterURI(oid), ENHET_PREFIX, ::Enhetnummer)
+    fun enheter(ansattOid: String) =
+        grupper(cf.enheterURI(ansattOid), ENHET_PREFIX, ::Enhetnummer)
 
-    fun medlemmer(oid: String) =
+    fun gruppeMedlemmer(gruppeOId: String) =
         pageTransformAndSort(
-            get<EntraAnsatteRespons>(cf.medlemmerURI(oid)),
+            get<GruppeMedlemmerRespons>(cf.gruppeMedlemmerURI(gruppeOId)),
             { it.next?.let(::get) },
             { it.value },
             { AnsattId(it.navIdent) }
@@ -54,7 +54,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraAnsatteRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
+    data class GruppeMedlemmerRespons(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<EntraMedlemmerAnsatt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraMedlemmerAnsatt(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)

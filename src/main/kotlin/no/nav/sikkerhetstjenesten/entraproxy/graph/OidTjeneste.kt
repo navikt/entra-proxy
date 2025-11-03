@@ -11,12 +11,12 @@ import java.time.Duration
 class OidTjeneste(private val adapter: EntraRestClientAdapter) : CachableRestConfig {
 
     @Cacheable(cacheNames = [ENTRA_OID],key = "#root.methodName + ':' + #ansattId.verdi")
-     fun oid(ansattId: AnsattId) = adapter.oid(ansattId.verdi)
+     fun oid(ansattId: AnsattId) = adapter.ansattOid(ansattId.verdi)
 
     @WithSpan
     @Cacheable(cacheNames = [ENTRA_OID],key = "#root.methodName + ':' + #gruppeNavn")
     fun gruppeId(gruppeNavn: String) =
-        adapter.gruppeId(gruppeNavn)
+        adapter.gruppeOId(gruppeNavn)
 
     override val varighet = Duration.ofDays(365)  // Godt nok, blås i skuddår
     override val navn = ENTRA_OID

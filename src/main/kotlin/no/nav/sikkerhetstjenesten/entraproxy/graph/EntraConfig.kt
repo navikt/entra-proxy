@@ -35,7 +35,7 @@ class EntraConfig(
     fun enheterURI(oid: String) =
         grupperURI(oid,ENHET_QUERY)
 
-    fun medlemmerURI(gruppeId: String) =
+    fun gruppeMedlemmerURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
             queryParam(SELECT, RETURFELT_MEDLEMMER)

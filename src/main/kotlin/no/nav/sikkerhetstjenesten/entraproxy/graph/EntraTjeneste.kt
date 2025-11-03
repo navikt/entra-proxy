@@ -2,10 +2,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.GruppeIdCachableRestConfig.Companion.GRUPPEID
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.cache.annotation.Cacheable
@@ -35,7 +33,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) : Set<AnsattId> =
-            adapter.medlemmer(gruppeId.toString())
+            adapter.gruppeMedlemmer(gruppeId.toString())
 
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 }

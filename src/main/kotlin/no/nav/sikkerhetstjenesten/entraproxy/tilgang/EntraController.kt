@@ -26,7 +26,7 @@ class EntraController(private val entra: EntraTjeneste,
                       private val token: Token) {
 
 
-    @PostMapping("enhet/ansatt/{ansattId}")
+    @PostMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
@@ -39,7 +39,7 @@ class EntraController(private val entra: EntraTjeneste,
         hentForObo(entra::enheter)
     })
 
-    @PostMapping("tema/ansatt/{ansattId}")
+    @PostMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {

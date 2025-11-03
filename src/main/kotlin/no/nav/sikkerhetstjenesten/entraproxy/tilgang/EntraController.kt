@@ -28,9 +28,9 @@ class EntraController(private val entra: EntraTjeneste,
 
     @PostMapping("enhet/ansatt/{ansattId}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
-    fun enheterCC(@PathVariable ansattId: AnsattId) =
+    fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(ansattId, entra::enheter) { emptySet() }
+            hentForAnsatt(navIdent, entra::enheter) { emptySet() }
         })
 
     @PostMapping("enhet")
@@ -41,9 +41,9 @@ class EntraController(private val entra: EntraTjeneste,
 
     @PostMapping("tema/ansatt/{ansattId}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
-    fun temaCC(@PathVariable ansattId: AnsattId) =
+    fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(ansattId, entra::tema) { emptySet() }
+            hentForAnsatt(navIdent, entra::tema) { emptySet() }
         })
     
     @PostMapping("tema")
@@ -67,8 +67,8 @@ class EntraController(private val entra: EntraTjeneste,
         return hent(ansattId, oid)
     }
 
-    private inline fun <T> hentForAnsatt(ansattId: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
-        oid.oid(ansattId)?.let { hent(ansattId, it) } ?: empty()
+    private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
+        oid.oid(navIdent)?.let { hent(navIdent, it) } ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
         oid.gruppeId(gruppeNavn)?.let {

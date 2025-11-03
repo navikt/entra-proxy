@@ -17,16 +17,16 @@ import org.springframework.web.bind.annotation.PathVariable
 @Tag(name = "DevEntraController", description = "Denne kontrolleren skal kun brukes til testing")
 class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: OidTjeneste) {
 
-    @GetMapping("enhet/ansatt/{ansattId}")
-    fun enheter(@PathVariable ansattId: AnsattId) =
-        oidTjeneste.oid(ansattId)?.let {
-            entraTjeneste.enheter(ansattId, it)
+    @GetMapping("enhet/ansatt/{navIdent}")
+    fun enheter(@PathVariable navIdent: AnsattId) =
+        oidTjeneste.oid(navIdent)?.let {
+            entraTjeneste.enheter(navIdent, it)
         }
 
-    @GetMapping("tema/ansatt/{ansattId}")
-    fun temaer(@PathVariable ansattId: AnsattId) =
-        oidTjeneste.oid(ansattId)?.let {
-            entraTjeneste.tema(ansattId, it)
+    @GetMapping("tema/ansatt/{navIdent}")
+    fun temaer(@PathVariable navIdent: AnsattId) =
+        oidTjeneste.oid(navIdent)?.let {
+            entraTjeneste.tema(navIdent, it)
         }
 
     @GetMapping("enhet/{enhetsnummer}")

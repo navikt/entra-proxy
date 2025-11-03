@@ -125,7 +125,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 }
 
-@Component
+//@Component
 class CustomModelConverter : ModelConverter {
     override fun resolve(
         t: AnnotatedType,

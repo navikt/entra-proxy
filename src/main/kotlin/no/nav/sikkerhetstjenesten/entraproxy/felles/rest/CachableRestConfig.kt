@@ -17,12 +17,3 @@ class MedlemmerCachableRestConfig : CachableRestConfig {
         const val MEDLEMMER = "medlemmer"
     }
 }
-@Component
-class GruppeIdCachableRestConfig : CachableRestConfig {
-    override val varighet = Duration.ofDays(365)
-    override val navn = GRUPPEID
-
-    companion object {
-        const val GRUPPEID = "gruppeid"
-    }
-}

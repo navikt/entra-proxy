@@ -27,38 +27,38 @@ class EntraController(private val entra: EntraTjeneste,
 
 
     @PostMapping("enhet/ansatt/{ansattId}")
-    @Operation(summary = "Slå opp enheter for ansatt, forutsetter CC-flow")
+    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable ansattId: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(ansattId, entra::enheter) { emptySet() }
         })
 
     @PostMapping("enhet")
-    @Operation(summary = "Slå opp enheter for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "Hent alle tilgjengelige enheter or ansatt, forutsetter OBO-flow")
     fun enheterOBO() = token.assert({ erObo }, {
         hentForObo(entra::enheter)
     })
 
     @PostMapping("tema/ansatt/{ansattId}")
-    @Operation(summary = "Slå opp tema for ansatt, forutsetter CC-flow")
+    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable ansattId: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(ansattId, entra::tema) { emptySet() }
         })
     
     @PostMapping("tema")
-    @Operation(summary = "Slå opp tema for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() = token.assert( {erObo}, {
         hentForObo(entra::tema)
     })
 
     @PostMapping("enhet/{enhetsnummer}")
-    @Operation(summary = "Slå opp medlemmer for enhet")
+    @Operation(summary = "Hent alle medlemmer for en gitt enhet")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer(enhetsnummer.gruppeNavn)
 
     @PostMapping("tema/{tema}")
-    @Operation(summary = "Slå opp medlemmer for tema")
+    @Operation(summary = "Hent alle medlemmer for et gitt tema")
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)
 

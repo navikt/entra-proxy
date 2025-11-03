@@ -2,6 +2,12 @@
   "ingresses": ["https://entraproxy.intern.nav.no"],
 
   "inbound": [
+
+{
+  "name": "veilarbaktivitet",
+  "namespace": "dab",
+  "cluster": "prod-gcp"
+}
   ],
   "nais": {
     "cluster": {
@@ -20,6 +26,6 @@
   },
   "replica": {
     "min": 2,
-    "max": 2
+    "max": 4
   }
 }

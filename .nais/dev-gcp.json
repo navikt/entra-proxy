@@ -14,7 +14,13 @@
       "name": "ida",
       "namespace": "traktor",
       "cluster": "prod-fss"
+    },
+    {
+      "name": "veilarbaktivitet",
+      "namespace": "dab",
+      "cluster": "dev-gcp"
     }
+
 
   ],
   "nais": {
@@ -26,14 +32,14 @@
     }
   },
   "mem": {
-    "min": "640Mi",
+    "min": "1Gi",
     "max": "1Gi"
   },
   "cpu": {
-    "min": "100m"
+    "min": "200m"
   },
   "replica": {
-    "min": 1,
-    "max": 1
+    "min": 2,
+    "max": 2
   }
 }

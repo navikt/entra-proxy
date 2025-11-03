@@ -3,20 +3,24 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonValue
 import io.swagger.v3.oas.annotations.media.Schema
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 
 
 @Schema(description = "Enhet består av en fire-sifret enhetsnummer og et navn hentet fra Norg")
 data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
 
-    data class Enhetnummer(@JsonValue val verdi: String) : Comparable<Enhetnummer> {
+    class Enhetnummer(nummer: String) : Comparable<Enhetnummer> {
+
+        @JsonValue
+        val verdi = nummer.removePrefix(ENHET_PREFIX)
+
         init {
             requireDigits(verdi,4)
         }
+        val gruppeNavn = "${ENHET_PREFIX}$verdi"
 
         override fun compareTo(other: Enhetnummer): Int = verdi.compareTo(other.verdi)
-
-        val gruppeNavn = "${ENHET_PREFIX}$verdi"
 
     }
     companion object {
@@ -24,15 +28,18 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) {
     }
 }
 
-data class Tema(@JsonValue val verdi: String) : Comparable<Tema>   {
+ class Tema(tema: String) : Comparable<Tema>   {
+
+    @JsonValue
+    val verdi = tema.removePrefix(TEMA_PREFIX)
     init {
         require(verdi.length == 3) { "Tema må være på tre bokstaver" }
         require(verdi.all { it.isLetter() }) { "Tema kan kun bestå av bokstaver" }
     }
+     val gruppeNavn = "${TEMA_PREFIX}$verdi"
 
-    override fun compareTo(other: Tema): Int = verdi.compareTo(other.verdi)
+     override fun compareTo(other: Tema): Int = verdi.compareTo(other.verdi)
 
-    val gruppeNavn = "${TEMA_PREFIX}$verdi"
     companion object {
         const val TEMA_PREFIX = "0000-GA-TEMA_"
     }

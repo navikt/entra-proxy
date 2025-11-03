@@ -1,21 +1,14 @@
 {
   "ingresses": ["https://entraproxy.intern.nav.no"],
-  "grupper": {
-    "fortrolig": "9ec6487d-f37a-4aad-a027-cd221c1ac32b",
-    "strengt": "ad7b87a6-9180-467c-affc-20a566b0fec0",
-    "egenansatt": "e750ceb5-b70b-4d94-b4fa-9d22467b786b",
-    "udefinert": "8804ac77-50c7-4339-822f-d509e551e82e",
-    "nasjonal": "ebdddf06-dc5b-45ef-9dad-850894b935f9",
-    "utland": "bb308252-d600-4e5c-bc53-bbd2bb8a29ba"
-  },
+
   "inbound": [
   ],
   "nais": {
     "cluster": {
       "cache": "cache",
       "endpoint" : "76685598-1048-4f56-b34a-9769ef747a92",
-      "plan" : "startup-4",
-      "type": "dev"
+      "plan" : "business-8",
+      "type": "prod"
     }
   },
   "mem": {

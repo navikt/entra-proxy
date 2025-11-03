@@ -34,15 +34,6 @@ class EntraController(private val entra: EntraTjeneste,
 
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
-    @ApiResponse200WithExample(
-        description = "Enheter funnet",
-        example = """
-            [{
-              "enhetsnummer":"1234",
-              "navn":"Enhet A"
-             }]
-           """
-    )
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entra::enheter) { emptySet() }

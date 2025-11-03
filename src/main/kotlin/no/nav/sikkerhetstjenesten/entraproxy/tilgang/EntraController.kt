@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.security.token.support.spring.ProtectedRestController
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.OidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
@@ -22,7 +22,7 @@ import java.util.UUID
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 class EntraController(private val entra: EntraTjeneste,
-                      private val oid: AnsattOidTjeneste,
+                      private val oid: OidTjeneste,
                       private val token: Token) {
 
 

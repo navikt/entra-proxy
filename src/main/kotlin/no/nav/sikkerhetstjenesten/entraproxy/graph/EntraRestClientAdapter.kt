@@ -28,7 +28,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
     fun gruppeMedlemmer(gruppeOId: String) =
-        pageTransformAndSort(
+        pagedTransformedAndSorted(
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOId)),
             { it.next?.let(::get) },
             { it.value },
@@ -36,14 +36,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         )
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
-        pageTransformAndSort(
+        pagedTransformedAndSorted(
             get<EntraGrupper>(uri),
             { it.next?.let(::get) },
             { it.value },
             { constructorOn(it.displayName) }
         )
 
-    private inline fun <T, V, R> pageTransformAndSort(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
+    private inline fun <T, V, R> pagedTransformedAndSorted(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
         generateSequence(firstPage) { nextPage(it) }
             .flatMap { values(it) }
             .map(transform)

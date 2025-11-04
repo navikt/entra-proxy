@@ -124,25 +124,23 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         override fun convert(source: String): Enhetnummer = Enhetnummer(source)
     }
 
-    @Component
-    class OpenApiSchemaConfig {
-        @Bean
-        fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
-            openApi.components.schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
-                type = "object"
-                description = "Enhetnummer"
-                example = "1234"
-            }
-            openApi.components.schemas["NavIdent"] = Schema<AnsattId>().apply {
-                type = "object"
-                description = "NavIdent 7 siffer"
-                example = "N123456"
-            }
-            openApi.components.schemas["Tema"] = Schema<Tema>().apply {
-                type = "object"
-                description = "Tema"
-                example = "AAP"
-            }
+    @Bean
+    fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
+        val schemas = openApi.components.schemas
+        schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
+            type = "object"
+            description = "Enhetnummer (4 siffer)"
+            example = "1234"
+        }
+        schemas["NavIdent"] = Schema<AnsattId>().apply {
+            type = "object"
+            description = "NavIdent (7 siffer)"
+            example = "N123456"
+        }
+        schemas["Tema"] = Schema<Tema>().apply {
+            type = "object"
+            description = "Tema (3 store bokstaver)"
+            example = "AAP"
         }
     }
 }

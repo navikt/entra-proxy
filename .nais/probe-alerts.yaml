@@ -16,10 +16,9 @@ spec:
             consequence: Valkey er nede
             action: "Sjekk Grafana og Kibana"
             summary: |-
-              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Grafana: https://grafana.nav.cloud.nais.io/goto/Ejqy8DzDg?orgId=1
               Loki securelogs: 
-              Kibana securelogs: 
-              Kibana åpne logger:
+              Kibana åpne logger: https://logs.adeo.no/s/nav-logs-legacy/app/r/s/vLl8e
           labels:
             namespace: sikkerhetstjenesten
             severity: critical
@@ -30,10 +29,9 @@ spec:
             consequence: Entra er nede
             action: "Sjekk Grafana og Kibana"
             summary: |-
-              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Grafana: https://grafana.nav.cloud.nais.io/goto/Ejqy8DzDg?orgId=1
               Loki securelogs: 
-              Kibana securelogs: 
-              Kibana åpne logger:
+              Kibana åpne logger: https://logs.adeo.no/s/nav-logs-legacy/app/r/s/vLl8e
           labels:
             namespace: sikkerhetstjenesten
             severity: critical
@@ -44,10 +42,9 @@ spec:
             consequence: Norg2 er nede
             action: "Sjekk Grafana og Kibana"
             summary: |-
-              Grafana: https://grafana.nav.cloud.nais.io/d/42e329f6-6f6c-4365-84a1-7c65def92463/tilgangmaskin-prod?orgId=1
+              Grafana: https://grafana.nav.cloud.nais.io/goto/Ejqy8DzDg?orgId=1
               Loki securelogs: 
-              Kibana securelogs: 
-              Kibana åpne logger:
+              Kibana åpne logger: https://logs.adeo.no/s/nav-logs-legacy/app/r/s/vLl8e
           labels:
             namespace: sikkerhetstjenesten
             severity: critical

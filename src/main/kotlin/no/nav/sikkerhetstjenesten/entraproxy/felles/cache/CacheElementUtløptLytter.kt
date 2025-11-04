@@ -15,12 +15,12 @@ class CacheElementUtløptLytter(client: RedisClient, private val publiserer: App
     init {
         client.connectPubSub().apply {
             addListener(this@CacheElementUtløptLytter)
-            sync().subscribe(KANAL)
+            sync().subscribe(UTLØPT_KANAL)
         }
     }
 
     override fun message(kanal: String, nøkkel: String) {
-        if (!kanal.startsWith(KANAL)) {
+        if (!kanal.startsWith(UTLØPT_KANAL)) {
             log.warn("Uventet hendelse på $kanal med nøkkel $nøkkel")
         }
         else {
@@ -28,7 +28,7 @@ class CacheElementUtløptLytter(client: RedisClient, private val publiserer: App
         }
     }
     companion object {
-        private const val KANAL = "__keyevent@0__:expired"
+        private const val UTLØPT_KANAL = "__keyevent@0__:expired"
     }
     data class CacheInnslagFjernetHendelse(val nøkkel: String) : ApplicationEvent(nøkkel)
 }

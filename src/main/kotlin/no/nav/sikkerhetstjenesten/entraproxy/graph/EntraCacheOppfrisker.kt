@@ -1,10 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelElementer
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfrisker
-import org.slf4j.LoggerFactory.getLogger
-import org.springframework.stereotype.Component
-
 //@Component
 /*
 class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: AnsattOidTjeneste) : CacheOppfrisker{

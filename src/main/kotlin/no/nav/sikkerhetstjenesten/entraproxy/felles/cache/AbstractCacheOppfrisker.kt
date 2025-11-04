@@ -17,11 +17,6 @@ abstract class AbstractCacheOppfrisker : CacheOppfrisker {
     protected abstract fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer)
 }
 
-interface CacheOppfrisker {
-    val cacheName: String
-    fun oppfrisk(nøkkelElementer: CacheNøkkelElementer)
-}
-
 data class CacheNøkkelElementer(val nøkkel: String) {
     private val elementer = nøkkel.split("::", ":")
     val cacheName = elementer.first()

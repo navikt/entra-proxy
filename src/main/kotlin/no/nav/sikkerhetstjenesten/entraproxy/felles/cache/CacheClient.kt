@@ -114,6 +114,7 @@ class CacheClient(client: RedisClient, val mapper: CacheNøkkelHandler)  : Leade
     }
 
 
+    data class CachableConfig(val name: String, val extraPrefix: String? = null)
 
     companion object {
         private const val CACHE_SIZE_SCRIPT = """

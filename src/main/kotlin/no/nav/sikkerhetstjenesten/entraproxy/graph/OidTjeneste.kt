@@ -10,11 +10,11 @@ import java.time.Duration
 @Component
 class OidTjeneste(private val adapter: EntraRestClientAdapter) : CachableRestConfig {
 
-    @Cacheable(cacheNames = [ENTRA_OID],key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(cacheNames = [ENTRA_OID],key = "#ansattId.verdi")
      fun oid(ansattId: AnsattId) = adapter.ansattOid(ansattId.verdi)
 
     @WithSpan
-    @Cacheable(cacheNames = [ENTRA_OID],key = "#root.methodName + ':' + #gruppeNavn")
+    @Cacheable(ENTRA_OID)
     fun gruppeId(gruppeNavn: String) =
         adapter.gruppeOId(gruppeNavn)
 

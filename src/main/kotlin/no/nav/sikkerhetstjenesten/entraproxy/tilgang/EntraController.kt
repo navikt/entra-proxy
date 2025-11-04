@@ -87,27 +87,3 @@ class EntraController(private val entra: EntraTjeneste,
     ?: error("ansattId og oid må være satt for OBO")
 
 }
-
-@Target(FUNCTION)
-@Retention(RUNTIME)
-@ApiResponses(
-    value = [
-        ApiResponse(
-            responseCode = "200",
-            description = "",
-            content = [Content(
-                mediaType = "application/json",
-                examples = [ExampleObject(value = "")]
-            )]
-        ),
-        ApiResponse(
-            responseCode = "403",
-            description = "Ikke tilgang",
-            content = [Content(mediaType = "application/problem+json")]
-        )
-    ]
-)
-annotation class ApiResponse200WithExample(
-    val description: String,
-    val example: String
-)

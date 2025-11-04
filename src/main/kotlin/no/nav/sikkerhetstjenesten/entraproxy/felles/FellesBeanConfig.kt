@@ -6,9 +6,7 @@ import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
-import io.swagger.v3.core.converter.AnnotatedType
-import io.swagger.v3.core.converter.ModelConverter
-import io.swagger.v3.core.converter.ModelConverterContext
+import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.boot.conditionals.ConditionalOnNotProd
@@ -123,35 +121,18 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
         override fun convert(source: String): Enhetnummer = Enhetnummer(source)
     }
-}
 
-//@Component
-class CustomModelConverter : ModelConverter {
-    override fun resolve(
-        t: AnnotatedType,
-        context: ModelConverterContext,
-        chain: MutableIterator<ModelConverter>
-    ): Schema<*>? {
-        if (t.type is Class<*>) {
-            return when ((t.type as Class<*>).simpleName) {
-                "AnsattId" -> Schema<String>().apply {
-                    name = "AnsattId"
-                    type = "string"
-                    description = "NAV-ansattID (7 tegn)"
-                }
-                "Enhetnummer" -> Schema<String>().apply {
-                    name = "Enhetnummer"
-                    type = "string"
-                    description = "Enhetens nummer"
-                }
-                "Tema" -> Schema<String>().apply {
-                    name = "Tema"
-                    type = "string"
-                    description = "Tema"
-                }
-                else -> null
-            } ?: chain.next().resolve(t, context, chain)
+    @Component
+    class OpenApiSchemaConfig {
+        @Bean
+        fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
+            openApi.components.schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
+                type = "string"
+                description = "Enhetnummer"
+                example = "1234"
+            }
         }
-        return chain.next().resolve(t, context, chain)
     }
 }
+
+

@@ -37,7 +37,8 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun temaMedlemmer(@PathVariable tema: Tema) =
         medlemmer(tema.gruppeNavn)
 
-    private fun medlemmer(gruppeNavn: String) =
+    @GetMapping("gruppe/medlemmer")
+     fun medlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeId(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }

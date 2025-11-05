@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
@@ -22,7 +23,7 @@ class EntraConfig(
     fun userURI(ansattId: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, SELECT_USER, "$KONTO eq '$ansattId'")
+            queryParams(this, SELECT_USER, "$NAVIDENT eq '$ansattId'")
         }.build()
     fun gruppeURI(displayName: String) =
         builder().apply {
@@ -62,11 +63,11 @@ class EntraConfig(
 
     companion object {
         const val GRAPH = "graph"
+        const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
-        private const val KONTO = "onPremisesSamAccountName"
-        private const val RETURFELT_MEDLEMMER = "id,onPremisesSamAccountName"
+        private const val RETURFELT_MEDLEMMER = "id,$NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
-        private const val ENHET_QUERY = "startswith(displayName,'${Enhet.ENHET_PREFIX}') "
+        private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/groups"

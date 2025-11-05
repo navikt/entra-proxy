@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDENT
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -51,9 +52,9 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class GruppeMedlemmer(@param:JsonProperty("@odata.nextLink") val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
+    data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty("onPremisesSamAccountName") val navIdent: String)
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -66,11 +67,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraGrupper(@param:JsonProperty("@odata.nextLink") val next: URI? = null,
+    data class EntraGrupper(@param:JsonProperty(NEXT_LINK) val next: URI? = null,
                                     val value: Set<Gruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Gruppe(val id: UUID, val displayName: String)
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
+
+    companion object {
+        private const val NEXT_LINK = "@odata.nextLink"
+    }
 }

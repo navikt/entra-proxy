@@ -6,6 +6,31 @@
 
   "inbound": [
     {
+      "name": "arbeid-og-inntekt",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q1",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q2",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-q4",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "arbeid-og-inntekt-ascension",
+      "namespace": "team-inntekt",
+      "cluster": "dev-fss"
+    },
+    {
       "name": "azure-token-generator",
       "namespace": "nais",
       "cluster": "dev-gcp"

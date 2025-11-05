@@ -1,19 +1,24 @@
 {
-  "ingresses": ["https://entraproxy.intern.nav.no"],
-
+  "ingresses": [
+    "https://entraproxy.intern.nav.no"
+  ],
   "inbound": [
-
-{
-  "name": "veilarbaktivitet",
-  "namespace": "dab",
-  "cluster": "prod-gcp"
-}
+    {
+      "name": "veilarbaktivitet",
+      "namespace": "dab",
+      "cluster": "prod-gcp"
+    },
+    {
+      "name": "arbeid-og-inntekt",
+      "namespace": "team-inntekt",
+      "cluster": "prod-fss"
+    }
   ],
   "nais": {
     "cluster": {
       "cache": "cache",
-      "endpoint" : "76685598-1048-4f56-b34a-9769ef747a92",
-      "plan" : "business-8",
+      "endpoint": "76685598-1048-4f56-b34a-9769ef747a92",
+      "plan": "business-8",
       "type": "prod"
     }
   },

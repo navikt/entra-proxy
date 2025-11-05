@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.EVERYTHING
-import io.lettuce.core.RedisClient
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
@@ -35,18 +34,6 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
             .withInitialCacheConfigurations(cfgs.associate { it.navn to cacheConfig(it) })
             .enableStatistics()
             .build()
-
-    @Bean
-    fun redisClient(cfg: CacheConfig) =
-        RedisClient.create(cfg.cacheURI)
-
-    @Bean
-    fun cacheClient(client: RedisClient) =
-        CacheClient(client)
-
-    @Bean
-    fun cacheNøkkelHandler(mgr: RedisCacheManager) =
-        CacheNøkkelHandler(mgr.cacheConfigurations,cacheMapper)
 
     @Bean
     fun cacheHealthIndicator(adapter: CacheAdapter)  =

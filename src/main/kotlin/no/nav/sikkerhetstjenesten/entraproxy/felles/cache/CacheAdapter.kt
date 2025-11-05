@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 import java.util.Collections.*
 
 @Component
-class CacheAdapter(private val handler: CacheNøkkelHandler,private val client: CacheClient, private val cf: RedisConnectionFactory, cfg: CacheConfig, private vararg val cfgs: CachableRestConfig) : Pingable, MeterBinder {
+class CacheAdapter(private val client: CacheClient, private val cf: RedisConnectionFactory, cfg: CacheConfig, private vararg val cfgs: CachableRestConfig) : Pingable, MeterBinder {
 
     override val pingEndpoint  =  "${cfg.host}:${cfg.port}"
     override val name = "Cache"

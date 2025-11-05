@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "fagarkiv-administrasjon-q2",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "arbeid-og-inntekt",
       "namespace": "team-inntekt",
       "cluster": "dev-fss"

@@ -50,8 +50,6 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
-  secureLogs:
-    enabled: true
   accessPolicy:
     outbound:
       rules:

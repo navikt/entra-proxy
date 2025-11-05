@@ -5,12 +5,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-
+import kotlin.properties.Delegates.notNull
 
 @Component
-class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Boolean = true, private vararg val oppfriskere: CacheOppfrisker = emptyArray()) :
+class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Boolean = false, private vararg val oppfriskere: CacheOppfrisker = emptyArray()) :
     LeaderAware(erLeder), SmartLifecycle {
-    private var running = false
+    private var running by notNull<Boolean>()
+
     @EventListener
     fun cacheInnslagFjernet(hendelse: CacheElementUtløptLytter.CacheInnslagFjernetHendelse) {
         if (erLeder && isRunning()) {

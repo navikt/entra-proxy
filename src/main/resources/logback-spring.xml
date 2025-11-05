@@ -4,16 +4,6 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
-    <appender name="secure-appender" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>team-logs.nais-system:5170</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>
-                {"google_cloud_project":"${GOOGLE_CLOUD_PROJECT}","nais_namespace_name":"${NAIS_NAMESPACE}","nais_pod_name":"${HOSTNAME}","nais_container_name":"${NAIS_APP_NAME}"}
-            </customFields>
-            <includeContext>false</includeContext>
-        </encoder>
-    </appender>
-
     <appender name="otel" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
         <appender-ref ref="stdout-appender" />
     </appender>
@@ -43,12 +33,8 @@
             <Marker>CONFIDENTIAL</Marker>
             <OnMatch>DENY</OnMatch>
         </turboFilter>
-        <logger name="no.nav.sikkerhetstjenesten" level="info"/>
     </springProfile>
 
-    <logger name="secureLog" level="info" additivity="false">
-        <appender-ref ref="secure-appender"/>
-    </logger>
     <root level="info">
         <appender-ref ref="otel"/>
     </root>

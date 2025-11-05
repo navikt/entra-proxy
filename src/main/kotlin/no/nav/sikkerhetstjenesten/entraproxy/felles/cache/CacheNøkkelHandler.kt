@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.boot.conditionals.EnvUtil.CONFIDENTIAL
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient.CachableConfig
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 

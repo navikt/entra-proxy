@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: OidTjeneste) {
+class DevEntraController (private val entra: EntraTjeneste, private val oid: OidTjeneste) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.oid(navIdent)?.let {
-            entraTjeneste.enheter(navIdent, it)
+        oid.oid(navIdent)?.let {
+            entra.enheter(navIdent, it)
         }
 
     @GetMapping("tema/ansatt/{navIdent}")
     fun temaer(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.oid(navIdent)?.let {
-            entraTjeneste.tema(navIdent, it)
+        oid.oid(navIdent)?.let {
+            entra.tema(navIdent, it)
         }
 
     @GetMapping("enhet/{enhetsnummer}")
@@ -39,7 +39,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("gruppe/medlemmer")
      fun medlemmer(gruppeNavn: String) =
-        oidTjeneste.gruppeId(gruppeNavn)?.let {
-            entraTjeneste.medlemmer( it)
+        oid.gruppeId(gruppeNavn)?.let {
+            entra.medlemmer( it)
         }
 }

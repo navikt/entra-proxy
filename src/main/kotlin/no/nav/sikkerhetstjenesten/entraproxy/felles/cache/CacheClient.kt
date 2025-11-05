@@ -4,14 +4,16 @@ import io.lettuce.core.RedisClient
 import io.lettuce.core.ScriptOutputType.INTEGER
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
 import org.slf4j.LoggerFactory.getLogger
 import java.time.Duration
 import kotlin.time.measureTime
 
 
-class CacheClient(client: RedisClient)  : LeaderAware() {
+class CacheClient(client: RedisClient, private vararg val cfgs: CachableRestConfig)  : LeaderAware() {
     val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)
         if (isLocalOrTest) {
@@ -38,6 +40,11 @@ class CacheClient(client: RedisClient)  : LeaderAware() {
             }
         }
     }
+
+    fun cacheStørrelser() =
+        cfgs.associate {
+            it.navn to "${cacheStørrelse(it.navn).toLong()} innslag, ttl: ${it.varighet.format()}"
+        }
 
 
     companion object {

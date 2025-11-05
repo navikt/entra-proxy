@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.profiler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
@@ -35,7 +36,7 @@ fun main(args: Array<String>) {
 }
 
 @Component
-class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: CacheAdapter) :
+class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: CacheClient) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {
@@ -48,7 +49,7 @@ class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, pr
                     "Java vendor" to environment.getProperty("java.vm.vendor"),
                     "Client ID" to environment.getProperty("azure.app.client.id"),
                     "Name" to environment.getProperty("spring.application.name"),
-                    cache.name to cache.cacheStørrelser(),
+                    "Caches" to cache.cacheStørrelser(),
                     "Spring Boot version" to SpringBootVersion.getVersion(),
                     "Spring Framework version" to SpringVersion.getVersion()))
 

@@ -39,15 +39,7 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
     @Bean
     fun redisClient(cfg: CacheConfig) =
         RedisClient.create(cfg.cacheURI)
-
-    @Bean
-    fun cacheClient(client: RedisClient) =
-        CacheClient(client)
-
-    @Bean
-    fun cacheHealthIndicator(pingable: CachePingable)  =
-        PingableHealthIndicator(pingable)
-
+    
     private fun cacheConfig(cfg: CachableRestConfig) =
         defaultCacheConfig()
             .entryTtl(cfg.varighet)

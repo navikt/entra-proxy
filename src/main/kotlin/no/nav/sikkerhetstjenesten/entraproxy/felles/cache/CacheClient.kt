@@ -9,10 +9,12 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.stereotype.Component
 import java.time.Duration
 import kotlin.time.measureTime
 
 
+@Component
 class CacheClient(client: RedisClient, private vararg val cfgs: CachableRestConfig)  : LeaderAware() {
     val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)

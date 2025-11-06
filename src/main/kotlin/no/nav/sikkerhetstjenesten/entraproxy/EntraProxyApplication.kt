@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy
 
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.profiler

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping.EVERYTHING
 import io.lettuce.core.RedisClient
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
 import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -38,6 +39,10 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
     @Bean
     fun redisClient(cfg: CacheConfig) =
         RedisClient.create(cfg.cacheURI)
+
+    @Bean
+    fun cacheHealthIndicator(pingable: CachePingable)  =
+        PingableHealthIndicator(pingable)
 
     private fun cacheConfig(cfg: CachableRestConfig) =
         defaultCacheConfig()

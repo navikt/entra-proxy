@@ -45,8 +45,8 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory, mapper: ObjectMapp
         CacheClient(client)
 
     @Bean
-    fun cacheHealthIndicator(adapter: CacheAdapter)  =
-        PingableHealthIndicator(adapter)
+    fun cacheHealthIndicator(pingable: CachePingable)  =
+        PingableHealthIndicator(pingable)
 
     private fun cacheConfig(cfg: CachableRestConfig) =
         defaultCacheConfig()

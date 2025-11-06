@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient
 import java.net.URI
 import java.util.*
 
-@Component
+
 class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 

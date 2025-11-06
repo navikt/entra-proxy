@@ -12,6 +12,11 @@
       "name": "arbeid-og-inntekt",
       "namespace": "team-inntekt",
       "cluster": "prod-fss"
+    },
+    {
+      "name": "fagarkiv-administrasjon",
+      "namespace": "isa",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

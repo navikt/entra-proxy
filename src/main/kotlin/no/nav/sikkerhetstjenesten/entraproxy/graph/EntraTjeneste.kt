@@ -36,6 +36,10 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.gruppeMedlemmer(gruppeId.toString())
 
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
+
+    fun  EntraTjenesteMetrikker() {
+        TODO("Not implemented")
+    }
 }
 
 

@@ -27,7 +27,7 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
     val erObo get()  = !erCC && oid != null
 
     fun <T> assert(predikat: Token.() -> Boolean, block: () -> Set<T>): Set<T> {
-        require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen" }
+        require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen " }
         return block()
     }
     companion object {

@@ -4,9 +4,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
-import org.springframework.stereotype.Component
 
-@Component
+
 class PingableHealthIndicator(private val pingable: Pingable) : HealthIndicator {
 
     private val log = getLogger(javaClass)

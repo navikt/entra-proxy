@@ -8,10 +8,10 @@ Tjeneste for å hente ut:
 
 Swagger-dokumentasjon:
 
-DEV: https://entra-proxy.dev.intern.nav.no/swagger/index.html 
-    Devkontroller er tilgjengelig kun i dev-gcp og er ment kun for enkel test/visuell sjekk, mens EntraController er den som skal brukes for system i produksjon.
-
-PROD: https://entra-proxy.intern.nav.no/swagger/index.html
+DEV: https://entraproxy.intern.dev.nav.no/swagger-ui/index.html#/
+    Dev har to forskjellige kontroller Dev for manuell testing og API/V1  for integrasjon mot systemer.
+    
+PROD: https://entraproxy.intern.nav.no/swagger-ui/index.html#/
 
 Dokumentasjon:
 https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy

@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "populasjonstilgangskontroll",
+      "namespace": "tilgangsmaskin",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "fagarkiv-administrasjon-q2",
       "namespace": "isa",
       "cluster": "dev-gcp"

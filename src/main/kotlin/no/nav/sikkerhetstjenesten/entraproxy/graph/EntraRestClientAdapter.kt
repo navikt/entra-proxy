@@ -28,12 +28,12 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(ansattOid: String) =
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
-    fun gruppeMedlemmer(gruppeOId: String) =
+    fun gruppeMedlemmer(gruppeOid: String) =
         pagedTransformedAndSorted(
-            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOId)),
+            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.navIdent, it.displayName) }
+            { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
         )
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
@@ -54,11 +54,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String,  val displayName: String = "N/A")
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String,
+                                val displayName: String = UKJENT,
+                                val givenName: String = UKJENT,
+                                val surname: String = UKJENT)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
+    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null,
+                       val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattOids(@param:JsonProperty("value") val oids: Set<AnsattOid>) {
@@ -67,14 +71,17 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Tilganger(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
+    data class Tilganger(@param:JsonProperty(NEXT_LINK) val next: URI? = null,
+                         val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class IdentifiserbartObjekt(val id: UUID, val displayName: String = "N/A")
+    data class IdentifiserbartObjekt(val id: UUID,
+                                     val displayName: String = UKJENT)
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 
     companion object {
+        private const val UKJENT = "N/A"
         private const val NEXT_LINK = "@odata.nextLink"
     }
 }

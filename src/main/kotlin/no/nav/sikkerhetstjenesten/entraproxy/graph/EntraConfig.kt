@@ -28,7 +28,7 @@ class EntraConfig(
     fun gruppeURI(displayName: String) =
         builder().apply {
             path(GRUPPER_PATH)
-            queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
+            queryParams(this, TILGANG_EGENSKAPER, "displayName eq '$displayName'")
         }.build()
     fun temaURI(oid: String) =
         grupperURI(oid, TEMA_QUERY)
@@ -39,7 +39,7 @@ class EntraConfig(
     fun gruppeMedlemmerURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
-            queryParam(SELECT, RETURFELT_MEDLEMMER)
+            queryParam(SELECT, ANSATT_EGENSKAPER)
             queryParam(COUNT, "true")
             queryParam(TOP, size)
         }.build(gruppeId)
@@ -48,7 +48,7 @@ class EntraConfig(
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
             path(GRUPPER_FOR_ANSATT_PATH)
-            queryParams(this, GRUPPE_PROPERTIES, filter)
+            queryParams(this, TILGANG_EGENSKAPER, filter)
             queryParam(TOP, size)
         }.build(oid)
 
@@ -65,7 +65,7 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
-        private const val RETURFELT_MEDLEMMER = "id, displayName, $NAVIDENT"
+        private const val ANSATT_EGENSKAPER = "id, givenName, surname,displayName, $NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "
         private const val DEFAULT_BATCH_SIZE = 250
@@ -77,7 +77,7 @@ class EntraConfig(
         private const val FILTER = "\$filter"
         private const val COUNT = "\$count"
         private const val SELECT_USER = "id"
-        private const val GRUPPE_PROPERTIES = "id,displayName"
+        private const val TILGANG_EGENSKAPER = "id,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
         private const val TOP = "\$top"
     }

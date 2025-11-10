@@ -6,7 +6,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDENT
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -55,11 +54,11 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, @param:JsonProperty("displayName") val displayName: String = "N/A")
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String,  val displayName: String = "N/A")
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<Gruppe> = emptySet())
+    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<IdentifiserbartInnslag> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattOids(@param:JsonProperty("value") val oids: Set<AnsattOid>) {
@@ -69,10 +68,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class EntraGrupper(@param:JsonProperty(NEXT_LINK) val next: URI? = null,
-                                    val value: Set<Gruppe> = emptySet())
+                                    val value: Set<IdentifiserbartInnslag> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Gruppe(val id: UUID, @param:JsonProperty("displayName") val displayName: String = "N/A")
+    data class IdentifiserbartInnslag(val id: UUID, val displayName: String = "N/A")
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

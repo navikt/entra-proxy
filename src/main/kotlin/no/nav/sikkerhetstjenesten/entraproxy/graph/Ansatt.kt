@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonValue
 
 
-data class Ansatt(@JsonValue val id: String, @JsonValue val displayName: String): Comparable<Ansatt> {
+data class Ansatt(@JsonValue val id: String, val displayName: String): Comparable<Ansatt> {
 
     init {
         with(id) {

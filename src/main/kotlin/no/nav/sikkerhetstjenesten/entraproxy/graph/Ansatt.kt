@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
 
-data class Ansatt(@JsonValue val id: String, val displayName: String = "Intet navn"): Comparable<Ansatt> {
+data class Ansatt(val id: String, val displayName: String = "Intet navn"): Comparable<Ansatt> {
 
     init {
         with(id) {
@@ -23,5 +23,5 @@ data class Ansatt(@JsonValue val id: String, val displayName: String = "Intet na
         const val ANSATTID_LENGTH = 7
     }
 
-    override fun toString() = id
+    //override fun toString() = id
 }

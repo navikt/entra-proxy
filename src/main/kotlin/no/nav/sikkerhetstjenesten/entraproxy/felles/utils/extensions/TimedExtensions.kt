@@ -1,31 +1,13 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions
 
 import java.time.Instant
-import java.time.Instant.now
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Period
 import java.time.ZoneId
-import java.time.ZoneId.systemDefault
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 import kotlin.time.toKotlinDuration
 
 object TimeExtensions {
-
-    val ALLTID = LocalDate.now().plusYears(100)
-    val IMORGEN get() = LocalDate.now().plusDays(1)
-    val IGÅR get() = LocalDate.now().minusDays(1)
-
-    fun Instant.isBeforeNow() = isBefore(now())
-    fun Instant.diffFromNow() = java.time.Duration.between(now(), this).toKotlinDuration().format()
-    fun LocalDate.toInstant(): Instant = atStartOfDay(systemDefault()).toInstant()
-
-    private fun LocalDate.månederSidenIdag() =
-        LocalDate.now().let {
-            assert(isBefore(it)) { "Datoen $this er ikke før dagens dato $it" }
-            Period.between(this, it).let { it.years * 12 + it.months } + if (it.dayOfMonth > dayOfMonth) 1 else 0
-        }
 
     fun java.time.Duration.format() = this.toKotlinDuration().format()
 
@@ -49,11 +31,4 @@ object TimeExtensions {
     )
         .format(DateTimeFormatter.ofPattern(fmt))
 
-    fun LocalDate.intervallSiden() =
-        when (månederSidenIdag()) {
-            in 0..6 -> "0-6"
-            in 7..12 -> "7-12"
-            in 13..24 -> "13-24"
-            else -> ">24"
-        }
 }

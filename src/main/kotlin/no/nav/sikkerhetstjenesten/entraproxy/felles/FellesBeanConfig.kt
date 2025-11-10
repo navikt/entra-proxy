@@ -132,6 +132,16 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             description = "Enhetnummer (4 siffer)"
             example = "1234"
         }
+        schemas["Ansatt"] = Schema<Ansatt>().apply {
+            type = "object"
+            description = "Navn og ident for en ansatt"
+            example = """
+                {
+                 "id": "T123445",
+                 "visningsNavn": "Tore Tang"
+                }
+                """.trimIndent()
+        }
         schemas["NavIdent"] = Schema<Ansatt>().apply {
             type = "object"
             description = "NavIdent (7 siffer)"

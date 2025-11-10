@@ -7,7 +7,10 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 
 
-data class Enhet(@field:Schema(implementation = Enhetnummer::class) val enhetnummer: Enhetnummer, val navn: String) {
+data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<Enhet> {
+
+    override fun compareTo(other: Enhet): Int = enhetnummer.compareTo(other.enhetnummer)
+
 
     class Enhetnummer(nummer: String) : Comparable<Enhetnummer> {
 

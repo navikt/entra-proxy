@@ -33,7 +33,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.navIdent, it.displayName, it.firstName,it.lastName) }
+            { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
         )
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
@@ -56,8 +56,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String,
                                 val displayName: String = UKJENT,
-                                val firstName: String = UKJENT,
-                                val lastName: String = UKJENT)
+                                val givenName: String = UKJENT,
+                                val surname: String = UKJENT)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

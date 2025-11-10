@@ -65,7 +65,7 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
-        private const val RETURFELT_MEDLEMMER = "id, displayname, $NAVIDENT"
+        private const val RETURFELT_MEDLEMMER = "id, displayName, $NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "
         private const val DEFAULT_BATCH_SIZE = 250

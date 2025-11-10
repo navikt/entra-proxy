@@ -22,7 +22,7 @@ data class Ansatt(val id: String,
         }
     }
 
-    override fun compareTo(other: Ansatt): Int = id.compareTo(other.id)
+    override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)
 
     companion object {
         private const val UKJENT = "N/A"

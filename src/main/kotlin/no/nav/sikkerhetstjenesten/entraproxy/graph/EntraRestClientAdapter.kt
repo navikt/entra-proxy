@@ -71,7 +71,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                                     val value: Set<Gruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Gruppe(val id: UUID, val displayName: String)
+    data class Gruppe(val id: UUID, val displayName: String = "N/A")
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

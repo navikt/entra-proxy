@@ -7,7 +7,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 
 
-@Schema(description = "Enhet består av en fire-sifret enhetsnummer og et navn hentet fra Norg")
 data class Enhet(@field:Schema(implementation = Enhetnummer::class) val enhetnummer: Enhetnummer, val navn: String) {
 
     class Enhetnummer(nummer: String) : Comparable<Enhetnummer> {

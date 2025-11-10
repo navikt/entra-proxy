@@ -39,7 +39,7 @@ class EntraConfig(
     fun gruppeMedlemmerURI(gruppeId: String) =
         builder().apply {
             path(MEDLEMMER_I_GRUPPE_PATH)
-            queryParam(SELECT, RETURFELT_MEDLEMMER)
+            queryParam(SELECT, ANSATT_EGENSKAPER)
             queryParam(COUNT, "true")
             queryParam(TOP, size)
         }.build(gruppeId)
@@ -65,7 +65,7 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
-        private const val RETURFELT_MEDLEMMER = "id, firstName,lastName,displayName, $NAVIDENT"
+        private const val ANSATT_EGENSKAPER = "id, firstName,lastName,displayName, $NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "
         private const val DEFAULT_BATCH_SIZE = 250

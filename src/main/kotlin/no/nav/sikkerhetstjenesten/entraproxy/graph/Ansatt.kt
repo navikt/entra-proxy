@@ -17,11 +17,11 @@ data class Ansatt(@JsonValue val id: String, val displayName: String = "Intet na
         }
     }
 
-    override fun compareTo(other: Ansatt): Int = displayName.compareTo(other.displayName)
+    override fun compareTo(other: Ansatt): Int = id.compareTo(other.id)
 
     companion object {
         const val ANSATTID_LENGTH = 7
     }
 
-    //override fun toString() = id
+    override fun toString() = id
 }

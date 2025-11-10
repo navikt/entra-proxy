@@ -1,10 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
 
-data class Ansatt(val id: String, val displayName: String = "Intet navn"): Comparable<Ansatt> {
+data class Ansatt(val id: String, @param:JsonProperty("displayName") val navn: String = "Intet navn"): Comparable<Ansatt> {
 
     init {
         with(id) {
@@ -22,6 +22,4 @@ data class Ansatt(val id: String, val displayName: String = "Intet navn"): Compa
     companion object {
         const val ANSATTID_LENGTH = 7
     }
-
-    //override fun toString() = id
 }

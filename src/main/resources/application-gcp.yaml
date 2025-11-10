@@ -51,7 +51,8 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
     default-property-inclusion: non_null
-
+    mapper:
+      accept-case-insensitive-properties: true
 no.nav.security.jwt:
   issuer:
     azuread:

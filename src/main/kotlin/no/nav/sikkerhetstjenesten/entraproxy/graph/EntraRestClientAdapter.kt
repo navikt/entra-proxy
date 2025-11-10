@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -33,7 +34,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOId)),
             { it.next?.let(::get) },
             { it.value },
-            { AnsattId(it.navIdent) }
+            { Ansatt(it.navIdent, it.displayName) }
         )
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
@@ -54,7 +55,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String)
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, @JsonProperty("displayname") val displayName: String)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

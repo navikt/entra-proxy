@@ -55,7 +55,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, val displayName: String = "N/A")
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, @param:JsonProperty("displayName") val displayName: String = "N/A")
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -72,7 +72,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                                     val value: Set<Gruppe> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Gruppe(val id: UUID, @param:JsonProperty("displayname") val displayName: String? = "N/A")
+    data class Gruppe(val id: UUID, @param:JsonProperty("displayName") val displayName: String = "N/A")
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

@@ -33,7 +33,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) : Set<Ansatt> =
-            adapter.gruppeMedlemmer(gruppeId.toString())
+            adapter.gruppeMedlemmer("$gruppeId")
 
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 

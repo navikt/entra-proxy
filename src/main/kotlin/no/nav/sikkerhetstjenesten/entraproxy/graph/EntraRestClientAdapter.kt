@@ -16,10 +16,10 @@ import java.util.*
 class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
-    fun ansattOid(ansattId: String) =
-        get<AnsattOids>(cf.userURI(ansattId)).oids.singleOrNull()?.id
+    fun ansattOid(navIdent: String) =
+        get<AnsattOids>(cf.userURI(navIdent)).oids.singleOrNull()?.id
 
-    fun gruppeOId(gruppeNavn: String) =
+    fun gruppeOid(gruppeNavn: String) =
         get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
 
     fun tema(ansattOid: String) =
@@ -38,7 +38,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
-            get<EntraGrupper>(uri),
+            get<Tilganger>(uri),
             { it.next?.let(::get) },
             { it.value },
             { constructorOn(it.displayName) }
@@ -58,7 +58,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<IdentifiserbartInnslag> = emptySet())
+    data class Grupper(@param:JsonProperty("@odata.context") val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattOids(@param:JsonProperty("value") val oids: Set<AnsattOid>) {
@@ -67,11 +67,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraGrupper(@param:JsonProperty(NEXT_LINK) val next: URI? = null,
-                                    val value: Set<IdentifiserbartInnslag> = emptySet())
+    data class Tilganger(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class IdentifiserbartInnslag(val id: UUID, val displayName: String = "N/A")
+    data class IdentifiserbartObjekt(val id: UUID, val displayName: String = "N/A")
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 

@@ -16,7 +16,7 @@ class OidTjeneste(private val adapter: EntraRestClientAdapter) : CachableRestCon
     @WithSpan
     @Cacheable(ENTRA_OID)
     fun gruppeId(gruppeNavn: String) =
-        adapter.gruppeOId(gruppeNavn)
+        adapter.gruppeOid(gruppeNavn)
 
     override val varighet = Duration.ofDays(365)  // Godt nok, blås i skuddår
     override val navn = ENTRA_OID

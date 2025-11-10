@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonValue
 
 
-data class Ansatt(@JsonValue val id: String, @JsonValue val displayname: String): Comparable<Ansatt> {
+data class Ansatt(@JsonValue val id: String, @JsonValue val displayName: String): Comparable<Ansatt> {
 
     init {
         with(id) {
@@ -16,7 +16,7 @@ data class Ansatt(@JsonValue val id: String, @JsonValue val displayname: String)
         }
     }
 
-    override fun compareTo(other: Ansatt): Int = displayname.compareTo(other.displayname)
+    override fun compareTo(other: Ansatt): Int = displayName.compareTo(other.displayName)
 
     companion object {
         const val ANSATTID_LENGTH = 7

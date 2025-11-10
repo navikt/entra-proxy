@@ -55,7 +55,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, @JsonProperty("displayName") val displayName: String)
+        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String, val displayName: String = "N/A")
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

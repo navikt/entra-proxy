@@ -28,7 +28,7 @@ class EntraConfig(
     fun gruppeURI(displayName: String) =
         builder().apply {
             path(GRUPPER_PATH)
-            queryParams(this, GRUPPE_PROPERTIES, "displayName eq '$displayName'")
+            queryParams(this, TILGANG_EGENSKAPER, "displayName eq '$displayName'")
         }.build()
     fun temaURI(oid: String) =
         grupperURI(oid, TEMA_QUERY)
@@ -48,7 +48,7 @@ class EntraConfig(
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
             path(GRUPPER_FOR_ANSATT_PATH)
-            queryParams(this, GRUPPE_PROPERTIES, filter)
+            queryParams(this, TILGANG_EGENSKAPER, filter)
             queryParam(TOP, size)
         }.build(oid)
 
@@ -77,7 +77,7 @@ class EntraConfig(
         private const val FILTER = "\$filter"
         private const val COUNT = "\$count"
         private const val SELECT_USER = "id"
-        private const val GRUPPE_PROPERTIES = "id,displayName"
+        private const val TILGANG_EGENSKAPER = "id,firstName,lastName,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
         private const val TOP = "\$top"
     }

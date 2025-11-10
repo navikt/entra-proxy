@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
 
-data class Ansatt(val id: String,@param:JsonProperty("visningsNavn") @param:JsonAlias("displayName") val navn: String = "Intet navn"): Comparable<Ansatt> {
+data class Ansatt(val id: String,
+                  @param:JsonProperty("visningNavn") @param:JsonAlias("displayName") val navn: String =UKJENT,
+                  @param:JsonProperty("fornavn") @param:JsonAlias("firstName") val fornavn: String = UKJENT,
+                  @param:JsonProperty("etternavn") @param:JsonAlias("lastName") val etternavn: String = UKJENT,
+                  ): Comparable<Ansatt> {
 
     init {
         with(id) {
@@ -21,6 +25,7 @@ data class Ansatt(val id: String,@param:JsonProperty("visningsNavn") @param:Json
     override fun compareTo(other: Ansatt): Int = id.compareTo(other.id)
 
     companion object {
+        private const val UKJENT = "N/A"
         const val ANSATTID_LENGTH = 7
     }
 }

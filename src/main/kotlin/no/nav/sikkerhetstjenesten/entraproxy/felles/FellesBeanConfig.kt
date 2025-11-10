@@ -17,6 +17,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeReques
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.aspectj.lang.ProceedingJoinPoint
@@ -130,17 +131,22 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
             type = "object"
             description = "Enhetnummer (4 siffer)"
-            example = "1234"
+            example = Enhetnummer("1234")
+        }
+        schemas["Ansatt"] = Schema<Ansatt>().apply {
+            type = "object"
+            description = "Navn og ident for en ansatt"
+            example = Ansatt("A123456","Tore Tang")
         }
         schemas["NavIdent"] = Schema<Ansatt>().apply {
             type = "object"
             description = "NavIdent (7 siffer)"
-            example = "N123456"
+            example = AnsattId("A123456")
         }
         schemas["Tema"] = Schema<Tema>().apply {
             type = "object"
             description = "Tema (3 store bokstaver)"
-            example = "AAP"
+            example = Tema("AAP")
         }
     }
 }

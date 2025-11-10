@@ -1,10 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.requireDigits
 
 
-data class Ansatt(val id: String, @param:JsonProperty("displayName") val visningsNavn: String = "Intet navn"): Comparable<Ansatt> {
+data class Ansatt(val id: String,@param:JsonProperty("visningsNavn") @param:JsonAlias("displayName") val navn: String = "Intet navn"): Comparable<Ansatt> {
 
     init {
         with(id) {

@@ -19,7 +19,6 @@ management:
   endpoints:
     web:
       base-path: /monitoring
-
 spring:
   threads:
     virtual:

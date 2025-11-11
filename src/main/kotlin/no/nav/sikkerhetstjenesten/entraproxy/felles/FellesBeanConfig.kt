@@ -129,7 +129,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
         val schemas = openApi.components.schemas
         schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
-            type = "object"
+            type = "string"
             description = "Enhetnummer (4 siffer)"
             example = Enhetnummer("1234")
         }
@@ -139,17 +139,17 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             example = Enhet(Enhetnummer("1234"),"Nav Avdeling Sydpolen")
         }
         schemas["Ansatt"] = Schema<Ansatt>().apply {
-            type = "object"
+            type = "string"
             description = "Navn og ident for en ansatt"
             example = Ansatt("A123456","Tore Tang","Tore","Tang")
         }
         schemas["NavIdent"] = Schema<Ansatt>().apply {
-            type = "object"
+            type = "string"
             description = "NavIdent (7 siffer)"
             example = AnsattId("A123456")
         }
         schemas["Tema"] = Schema<Tema>().apply {
-            type = "object"
+            type = "string"
             description = "Tema (3 store bokstaver)"
             example = Tema("AAP")
         }

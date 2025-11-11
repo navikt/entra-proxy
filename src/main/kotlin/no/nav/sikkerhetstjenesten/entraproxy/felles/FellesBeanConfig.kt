@@ -164,7 +164,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         http
             .authorizeHttpRequests {
                 it
-                    .requestMatchers("/monitoring/health", "/monitoring/info").permitAll()
+                    .requestMatchers("/monitoring/health/**", "/monitoring/info").permitAll()
                     .requestMatchers("/monitoring/**").authenticated()
                     .anyRequest().permitAll()
             }

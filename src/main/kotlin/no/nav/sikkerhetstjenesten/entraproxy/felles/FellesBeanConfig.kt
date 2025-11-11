@@ -38,6 +38,9 @@ import org.springframework.format.FormatterRegistry
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
+import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -153,6 +156,20 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             description = "Tema (3 store bokstaver)"
             example = Tema("AAP")
         }
+    }
+
+
+    @Bean
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .authorizeHttpRequests {
+                it
+                    .requestMatchers("/monitoring/health", "/actuator/info").permitAll()
+                    .requestMatchers("/monitoring/**").authenticated()
+                    .anyRequest().permitAll()
+            }
+            .oauth2ResourceServer { it.jwt(Customizer.withDefaults()) }
+        return http.build()
     }
 }
 

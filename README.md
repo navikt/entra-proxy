@@ -6,7 +6,7 @@ Tjeneste for å hente ut:
 4) Medlemmer i en bestemt arkivtema-gruppe
 
 
-Swagger-dokumentasjon:
+Swagger:
 
 DEV: https://entraproxy.intern.dev.nav.no/swagger-ui/index.html#/
     Dev har to forskjellige kontroller Dev for manuell testing og API/V1  for integrasjon mot systemer.

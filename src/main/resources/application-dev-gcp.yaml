@@ -1,4 +1,9 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${azure.app.well.known.url}
   mvc:
     log-request-details: true
 management:

@@ -36,8 +36,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
         )
 
-    fun ansattUtvidet(ansattOid: String) =
-        get<AnsattUtvidetInfo>(cf.userTIdentURI(ansattOid))
+    fun utvidetAnsatt(ansattOid: String) =
+        get<UtvidetAnsatt>(cf.utvidetAnsattURI(ansattOid))
 
 
 

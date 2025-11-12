@@ -44,7 +44,7 @@ class EntraConfig(
             queryParam(TOP, size)
         }.build(gruppeId)
 
-    fun userTIdentURI(oid: String) =
+    fun utvidetAnsattURI(oid: String) =
         builder().apply {
             path(USERS_PATH)
             queryParam(SELECT, T_IDENT_NAVIDENT)

@@ -37,6 +37,9 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 
+    @WithSpan
+    fun ansattUtvidet(oid: UUID) =
+        adapter.ansattUtvidet("$oid")
 }
 
 

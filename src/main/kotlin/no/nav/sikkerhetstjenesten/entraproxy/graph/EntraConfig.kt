@@ -44,6 +44,13 @@ class EntraConfig(
             queryParam(TOP, size)
         }.build(gruppeId)
 
+    fun userTIdentURI(oid: String) =
+        builder().apply {
+            path(USERS_PATH)
+            queryParam(SELECT, T_IDENT_NAVIDENT)
+            queryParam(COUNT, "true")
+            queryParam(TOP,size)
+        }.build(oid)
 
     private fun grupperURI(oid: String, filter: String) =
         builder().apply {
@@ -65,6 +72,8 @@ class EntraConfig(
         const val GRAPH = "graph"
         const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
+        private const val T_IDENT = "jobTitle"
+        private const val T_IDENT_NAVIDENT = "$T_IDENT,$NAVIDENT, givenName, surname,displayName,mail,officeLocation "
         private const val ANSATT_EGENSKAPER = "id, givenName, surname,displayName, $NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "

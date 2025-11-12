@@ -36,6 +36,11 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
         )
 
+    fun ansattUtvidet(ansattOid: String) =
+        get<AnsattUtvidetInfo>(cf.userTIdentURI(ansattOid))
+
+
+
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),
@@ -69,7 +74,6 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class AnsattOid(val id: UUID)
     }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Tilganger(@param:JsonProperty(NEXT_LINK) val next: URI? = null,
                          val value: Set<IdentifiserbartObjekt> = emptySet())

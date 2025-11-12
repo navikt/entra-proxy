@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "name": "opprett-oppgave-frontend",
+      "namespace": "isa",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "veilarbaktivitet",
       "namespace": "dab",
       "cluster": "prod-gcp"

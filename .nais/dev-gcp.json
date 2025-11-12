@@ -6,6 +6,16 @@
 
   "inbound": [
     {
+      "name": "opprett-oppgave-frontend-q1",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "opprett-oppgave-frontend-q2",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "populasjonstilgangskontroll",
       "namespace": "tilgangsmaskin",
       "cluster": "dev-gcp"

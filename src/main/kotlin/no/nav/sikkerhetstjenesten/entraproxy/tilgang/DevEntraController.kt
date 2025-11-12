@@ -9,6 +9,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.OidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,7 +17,14 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entra: EntraTjeneste, private val oid: OidTjeneste) {
+class DevEntraController (private val entra: EntraTjeneste, private val oid: OidTjeneste, private val adapter: EntraRestClientAdapter) {
+
+
+    @GetMapping("ansatt/{navIdent}")
+    fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
+        oid.oid(navIdent)?.let {
+            adapter.utvidetAnsatt(oid.oid(navIdent).toString())
+        }
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =

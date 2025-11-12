@@ -39,7 +39,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @WithSpan
     fun ansattUtvidet(oid: UUID) =
-        adapter.ansattUtvidet("$oid")
+        adapter.utvidetAnsatt("$oid")
 }
 
 

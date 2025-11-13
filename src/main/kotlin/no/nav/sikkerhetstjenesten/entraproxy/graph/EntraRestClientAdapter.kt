@@ -37,7 +37,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         )
 
     fun ansattUtvidet(navIdent: String) =
-        get<EntraSaksbehandlerRespons>(cf.userTIdentURI(navIdent)).ansatte.firstOrNull()
+        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(navIdent)).ansatte.firstOrNull()
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(

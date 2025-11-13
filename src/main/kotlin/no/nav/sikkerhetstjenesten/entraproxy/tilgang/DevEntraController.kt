@@ -50,8 +50,7 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Oid
             Hente spesifikke auditlogg-informasjon knyttet til ansattinfo fra Entra basert på navIdent
         """""")
     @GetMapping("ansattUtvidet/{navIdent}")
-    fun ansattUtvidet(@PathVariable navIdent: AnsattId) =
-        oid.oid(navIdent)?.let {
-            entra.ansattUtvidet(it)
-        }
+    fun ansattUtvidet(@PathVariable navIdent: String) =
+        entra.ansattUtvidet(navIdent)
+
 }

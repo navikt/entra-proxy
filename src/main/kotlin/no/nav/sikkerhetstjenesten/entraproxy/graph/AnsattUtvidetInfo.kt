@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class AnsattUtvidetInfo(val id: String,

@@ -36,9 +36,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
         )
 
-    fun ansattUtvidet(navIdent: String) =
-        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(navIdent)).ansatte.firstOrNull()
-
+    fun ansattUtvidet(navIdent: String): AnsattUtvidetInfo? {
+        log.trace("URI for kall til entra" + cf.userNavIdentURI(navIdent).toString())
+       return get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(navIdent)).ansatte.firstOrNull()
+    }
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),

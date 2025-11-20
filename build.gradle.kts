@@ -31,11 +31,6 @@ repositories {
     }
 }
 
-tasks.processResources {
-    filesMatching("application-gcp.yaml") {
-        expand("jdkVersion" to System.getProperty("java.version"))
-    }
-}
 
 configurations.all {
     resolutionStrategy {

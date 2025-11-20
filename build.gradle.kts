@@ -9,7 +9,7 @@ group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
 
 plugins {
-    val kotlinVersion = "2.2.20"
+    val kotlinVersion = "2.2.22"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "4.0.0-RC2"

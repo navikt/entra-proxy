@@ -32,7 +32,7 @@ repositories {
 }
 
 tasks.processResources {
-    filesMatching("application.properties") {
+    filesMatching("application-gcp.yml") {
         expand("jdkVersion" to System.getProperty("java.version"))
     }
 }

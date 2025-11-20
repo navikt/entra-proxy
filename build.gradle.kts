@@ -1,7 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val javaVersion = JavaLanguageVersion.of(25)
-val springdocVersion = "2.8.14"
+val springdocVersion = "3.0.0-RC1"
 val tokenSupportVersion = "6.0.0-SNAPSHOT"
 val mockkVersion = "1.14.6"
 
@@ -46,6 +46,7 @@ dependencies {
     implementation("no.nav.boot:boot-conditionals:5.1.11")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
+    implementation("org.apache.httpcomponents.client5:httpclient5")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
     implementation("org.springframework.boot:spring-boot-starter-actuator")

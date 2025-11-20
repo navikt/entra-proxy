@@ -6,12 +6,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensi
 import org.springframework.boot.SpringBootVersion
 import org.springframework.boot.actuate.info.Info.Builder
 import org.springframework.boot.actuate.info.InfoContributor
+import org.springframework.boot.info.BuildProperties
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.core.SpringVersion
 import org.springframework.stereotype.Component
 
 @Component
-class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: CacheClient) :
+class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: CacheClient, private val buildPropereties: BuildProperties) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {
@@ -20,10 +21,11 @@ class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, pr
                 "extra-info", mapOf(
                     "Cluster" to current.clusterName,
                     "Startup" to startupDate.local(),
-                    "Java version" to environment.getProperty("java.version"),
+                    "Java runtime version" to environment.getProperty("java.version"),
                     "Java runtime version" to environment.getProperty("java.runtime.version"),
-                    "Java vendor" to environment.getProperty("java.vm.vendor"),
-                    "JDK version" to environment.getProperty("jdk.version"),
+                    "Java runtime vendor" to environment.getProperty("java.vm.vendor"),
+                    "JDK version" to buildPropereties.get("jdk.version"),
+                    "JDK vendor" to buildPropereties.get("jdk.vendor"),
                     "Client ID" to environment.getProperty("azure.app.client.id"),
                     "Name" to environment.getProperty("spring.application.name"),
                     "Caches" to cache.cacheStørrelser(),

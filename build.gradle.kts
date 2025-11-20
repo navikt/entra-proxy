@@ -1,7 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val javaVersion = JavaLanguageVersion.of(25)
-val springdocVersion = "3.0.0-RC1"
+val springdocVersion = "2.8.14"
 val tokenSupportVersion = "6.0.0-SNAPSHOT"
 val mockkVersion = "1.14.6"
 

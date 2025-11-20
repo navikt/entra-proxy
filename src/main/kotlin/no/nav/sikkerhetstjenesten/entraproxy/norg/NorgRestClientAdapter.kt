@@ -12,7 +12,7 @@ import org.springframework.web.client.RestClient
 class NorgRestClientAdapter(@Qualifier(NORG) restClient: RestClient, val cf: NorgConfig) :
     AbstractRestClientAdapter(restClient, cf) {
     fun navnFor(enhet: String) =
-        get<Any>(cf.enhetURI(enhet)).navn
+        get<Any>(cf.enhetURI(enhet))//.navn
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class NorgEnhetRespons(val enhetsnummer: Int,val navn: String)

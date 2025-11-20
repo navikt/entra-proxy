@@ -10,13 +10,14 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entra: EntraTjeneste, private val oid: OidTjeneste) {
+class DevEntraController (private val entra: EntraTjeneste, private val oid: OidTjeneste,private val norg: NorgTjeneste) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
@@ -33,6 +34,10 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Oid
     @GetMapping("enhet/{enhetsnummer}")
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =
         medlemmer(enhetsnummer.gruppeNavn)
+
+    @GetMapping("navn/{enhetsnummer}")
+    fun norgNavn(@PathVariable enhetsnummer: Enhetnummer) =
+       norg.navnFor(enhetsnummer)
 
     @GetMapping("tema/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =

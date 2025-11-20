@@ -66,7 +66,7 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
             .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(mapper)))
 }
 
-class NavPolymorphicTypeValidator(private vararg val allowedPrefixes: String = arrayOf("no.nav.tilgangsmaskin","java.", "kotlin.*")) : PolymorphicTypeValidator() {
+class NavPolymorphicTypeValidator(private vararg val allowedPrefixes: String = arrayOf("no.nav.sikkerhetstjenesten","java.", "kotlin.*")) : PolymorphicTypeValidator() {
 
     override fun validateBaseType(ctx: DatabindContext, base: JavaType) = validityFor(base.rawClass.name)
 

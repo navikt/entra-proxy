@@ -4,12 +4,12 @@ val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.0-RC1"
 val tokenSupportVersion = "6.0.0-SNAPSHOT"
 val mockkVersion = "1.14.6"
-val kotlinVersion = "2.3.0-RC"
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
 
 plugins {
+    val kotlinVersion = "2.3.0-RC"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("java")
@@ -23,8 +23,8 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                "kotlin.version" to kotlinVersion,
-                "jdk.version" to System.getProperty("java.version"),
+                "kotlin.version" to "2.3.0-RC",
+                "jdk.version" to java.toolchain.languageVersion.get().toString(),
                 "jdk.vendor" to System.getProperty("java.vendor")
             )
         }

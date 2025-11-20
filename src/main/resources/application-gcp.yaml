@@ -88,3 +88,5 @@ valkey:
   port: ${valkey.port.${nais.cluster.cache}}
   host: ${valkey.host.${nais.cluster.cache}}
 
+jdk:
+  version=${jdkVersion}

@@ -23,6 +23,7 @@ class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, pr
                     "Java version" to environment.getProperty("java.version"),
                     "Java runtime version" to environment.getProperty("java.runtime.version"),
                     "Java vendor" to environment.getProperty("java.vm.vendor"),
+                    "JDK version" to environment.getProperty("jdk.version"),
                     "Client ID" to environment.getProperty("azure.app.client.id"),
                     "Name" to environment.getProperty("spring.application.name"),
                     "Caches" to cache.cacheStørrelser(),

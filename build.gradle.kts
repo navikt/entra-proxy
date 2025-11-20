@@ -31,6 +31,12 @@ repositories {
     }
 }
 
+tasks.processResources {
+    filesMatching("application.properties") {
+        expand("jdkVersion" to System.getProperty("java.version"))
+    }
+}
+
 configurations.all {
     resolutionStrategy {
         //failOnNonReproducibleResolution()

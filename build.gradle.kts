@@ -13,7 +13,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("java")
-    id("org.springframework.boot") version "4.0.0-RC2"
+    id("org.springframework.boot") version "4.0.0"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.cyclonedx.bom") version "2.4.1"
     id("com.google.cloud.tools.jib") version "3.4.5"

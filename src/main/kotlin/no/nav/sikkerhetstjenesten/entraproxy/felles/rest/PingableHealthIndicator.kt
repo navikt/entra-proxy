@@ -2,8 +2,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 
 
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.boot.actuate.health.Health
-import org.springframework.boot.actuate.health.HealthIndicator
+import org.springframework.boot.health.contributor.Health
+import org.springframework.boot.health.contributor.HealthIndicator
 
 
 class PingableHealthIndicator(private val pingable: Pingable) : HealthIndicator {

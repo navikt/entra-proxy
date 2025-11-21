@@ -64,6 +64,16 @@
       "name": "veilarbaktivitet",
       "namespace": "dab",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "navansatt",
+      "namespace": "teampensjon",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "navansatt",
+      "namespace": "teampensjon",
+      "cluster": "dev-fss"
     }
   ],
   "nais": {

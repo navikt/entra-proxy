@@ -1,12 +1,13 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val javaVersion = JavaLanguageVersion.of(25)
-val springdocVersion = "3.0.0-RC1"
-val tokenSupportVersion = "6.0.0-SNAPSHOT"
+val springdocVersion = "3.0.0"
+val tokenSupportVersion = "6.0.2-SNAPSHOT"
 val mockkVersion = "1.14.6"
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
+
 
 plugins {
     val kotlinVersion = "2.3.0-RC"

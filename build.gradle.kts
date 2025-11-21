@@ -2,7 +2,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.0"
-val tokenSupportVersion = "6.0.2-SNAPSHOT"
+val tokenSupportVersion = "6.0.0"
 val mockkVersion = "1.14.6"
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
@@ -35,7 +35,6 @@ springBoot {
 repositories {
     mavenCentral()
     mavenLocal()
-
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
@@ -44,7 +43,7 @@ repositories {
 
 configurations.all {
     resolutionStrategy {
-        //failOnNonReproducibleResolution()
+        failOnNonReproducibleResolution()
     }
 }
 
@@ -76,21 +75,6 @@ dependencies {
     testImplementation(kotlin("test"))
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/navikt/token-support")
-        credentials {
-            username = findProperty("gpr.user") as String?
-            password = findProperty("gpr.key") as String?
-        }
-    }
-    maven {
-        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
-}
 dependencyManagement {
     imports {
         mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.20.1")

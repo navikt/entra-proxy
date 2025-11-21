@@ -7,14 +7,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import org.springframework.cache.annotation.EnableCaching
-import org.springframework.retry.annotation.EnableRetry
+import org.springframework.resilience.annotation.EnableResilientMethods
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableOAuth2Client(cacheEnabled = true)
 @EnableCaching
-@EnableRetry
+@EnableResilientMethods
 @EnableScheduling
 @EnableJwtTokenValidation(ignore = ["org.springdoc", "org.springframework"])
 class EntraProxyApplication

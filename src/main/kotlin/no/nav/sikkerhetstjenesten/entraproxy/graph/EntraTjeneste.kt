@@ -26,7 +26,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
         buildSet {
             adapter.enheter("$oid").forEach {
-                add(Enhet(it, norg.navnFor(it)))
+                add(Enhet(it,norg.navnFor(it)))
             }
         }
 

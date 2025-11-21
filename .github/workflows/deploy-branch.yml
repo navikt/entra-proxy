@@ -41,6 +41,12 @@ jobs:
         with:
           cosign-release: v2.4.1
 
+      - name: Configure Gradle for GPR
+        run: |
+          mkdir -p ~/.gradle
+          echo "gpr.user=${{ github.actor }}" >> ~/.gradle/gradle.properties
+          echo "gpr.key=${{ secrets.GITHUB_TOKEN }}" >> ~/.gradle/gradle.properties          
+
 
       - name: Setter tag-navn
         run: echo "TAG=$(date +%Y.%m.%d.%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
@@ -76,7 +82,7 @@ jobs:
         uses: nais/attest-sign@v1.5.20
         with:
           image_ref: ${{env.IMAGE}}@${{env.DIGEST}}
-          sbom: build/reports/application.cdx.json
+          sbom: build/reports/bom.json
 
     outputs:
       image: ${{ steps.kompiler.outputs.image }}

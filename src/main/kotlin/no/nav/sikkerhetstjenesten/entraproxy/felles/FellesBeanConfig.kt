@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.core.JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
@@ -14,7 +13,6 @@ import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenRespons
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.LoggingRetryListener
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
@@ -24,13 +22,12 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.springframework.boot.actuate.audit.InMemoryAuditEventRepository
 import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository
 import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository
 import org.springframework.boot.actuate.web.exchanges.Include.defaultIncludes
-import org.springframework.boot.actuate.web.exchanges.servlet.HttpExchangesFilter
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
-import org.springframework.boot.web.client.RestClientCustomizer
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
+import org.springframework.boot.restclient.RestClientCustomizer
+import org.springframework.boot.servlet.actuate.web.exchanges.HttpExchangesFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -42,6 +39,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
 
 
@@ -49,40 +47,34 @@ import java.util.function.Function
 class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
 
     @Bean
-    fun jacksonCustomizer() = Jackson2ObjectMapperBuilderCustomizer {
-        it.featuresToEnable(INCLUDE_SOURCE_IN_LOCATION)
-        it.mixIns(mapOf(OAuth2AccessTokenResponse::class.java to IgnoreUnknownMixin::class.java))
+    fun jackson3Customizer() = JsonMapperBuilderCustomizer {
+        it.addMixIn(OAuth2AccessTokenResponse::class.java, IgnoreUnknownMixin::class.java)
+        it.enable(INCLUDE_SOURCE_IN_LOCATION)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface IgnoreUnknownMixin
 
     @Bean
-    fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) = RestClientCustomizer { c ->
-        c.requestFactory(HttpComponentsClientHttpRequestFactory().apply {
-            setConnectTimeout(2000)
-            setReadTimeout(2000)
-        })
-        c.requestInterceptors {
-            it.addFirst(interceptor)
-            it.add(tokenInterceptor)
+    fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
+        RestClientCustomizer { c ->
+            c.requestFactory(HttpComponentsClientHttpRequestFactory().apply {
+                setConnectionRequestTimeout(2000)
+                setReadTimeout(2000)
+            })
+            c.requestInterceptors {
+                it.addFirst(interceptor)
+                it.add(tokenInterceptor)
+            }
         }
-    }
 
     @Bean
     fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: Token) =
         TimedAspect(meterRegistry, Function { pjp -> Tags.of("cluster", token.cluster, "method", pjp.signature.name, "client", token.systemNavn) })
 
     @Bean
-    fun fellesRetryListener() = LoggingRetryListener()
-
-    @Bean
     @ConditionalOnNotProd
     fun traceRepository() = InMemoryHttpExchangeRepository()
-
-    @Bean
-    @ConditionalOnNotProd
-    fun auditRepository() = InMemoryAuditEventRepository()
 
 
     @Bean

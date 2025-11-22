@@ -10,6 +10,12 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
+import kotlin.system.measureTimeMillis
+import kotlin.time.DurationUnit
+import kotlin.time.DurationUnit.MILLISECONDS
+import kotlin.time.TimedValue
+import kotlin.time.measureTimedValue
+import kotlin.time.toDuration
 
 @RetryingWhenRecoverable
 @Service
@@ -21,27 +27,35 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
-        adapter.tema("$oid").also {
-            log.info("Hentet ${it.size} tema for $ansattId")
+        measureTimedValue {
+            adapter.tema("$oid")
+        }.let { timed ->
+            log.info("Hentet ${timed.value.size} tema for $ansattId")
+            timed.value
         }
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID)  =
-        buildSet {
-            adapter.enheter("$oid").forEach {
-                add(Enhet(it,norg.navnFor(it)))
+        measureTimedValue {
+            buildSet {
+                adapter.enheter("$oid").forEach {
+                    add(Enhet(it,norg.navnFor(it)))
+                }
             }
-        }.also {
-            log.info("Hentet ${it.size} enhet(er) for $ansattId")
+        }.let { timed ->
+            log.info("Hentet ${timed.value.size} enheter for ansatt ${ansattId} og gruppe $oid på ${timed.duration.inWholeMilliseconds} ms")
+            timed.value
         }
 
     @WithSpan
     @Cacheable(MEDLEMMER)
-    fun medlemmer(gruppeId: UUID)  =
-            adapter.gruppeMedlemmer("$gruppeId").also {
-                log.info("Hentet ${it.size} medlemmer for $gruppeId")
-            }
+    fun medlemmer(gruppeId: UUID) = measureTimedValue {
+        adapter.gruppeMedlemmer("$gruppeId")
+    }.let { timed ->
+        log.info("Hentet ${timed.value.size} medlemmer for gruppe $gruppeId på ${timed.duration.inWholeMilliseconds} ms")
+        timed.value
+    }
     
     @WithSpan
     fun ansattUtvidet(navIdent: String) =
@@ -49,7 +63,5 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
-
 }
-
 

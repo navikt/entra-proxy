@@ -30,7 +30,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         measureTimedValue {
             adapter.tema("$oid")
         }.let { timed ->
-            log.info("Hentet ${timed.value.size} tema for $ansattId")
+            log.info("Hentet ${timed.value.size} tema for $ansattId på ${timed.duration.inWholeMilliseconds} ms")
             timed.value
         }
 

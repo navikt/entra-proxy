@@ -11,3 +11,7 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus,cache
+
+springdoc:
+  api-docs:
+    enabled: false

@@ -14,4 +14,4 @@ management:
 
 springdoc:
   api-docs:
-    enabled: false
+    enabled: true

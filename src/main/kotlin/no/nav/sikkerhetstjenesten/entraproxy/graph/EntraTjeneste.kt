@@ -27,18 +27,18 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> =
+    fun enheter(ansattId: AnsattId, oid: UUID)  =
         buildSet {
             adapter.enheter("$oid").forEach {
                 add(Enhet(it,norg.navnFor(it)))
             }
         }.also {
-            log.info("Hentet ${it.size} enheter for $ansattId")
+            log.info("Hentet ${it.size} enhet(er) for $ansattId")
         }
 
     @WithSpan
     @Cacheable(MEDLEMMER)
-    fun medlemmer(gruppeId: UUID) : Set<Ansatt> =
+    fun medlemmer(gruppeId: UUID)  =
             adapter.gruppeMedlemmer("$gruppeId").also {
                 log.info("Hentet ${it.size} medlemmer for $gruppeId")
             }

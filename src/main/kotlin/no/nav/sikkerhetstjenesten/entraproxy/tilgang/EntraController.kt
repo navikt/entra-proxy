@@ -24,7 +24,6 @@ class EntraController(private val entra: EntraTjeneste,
                       private val oid: EntraOidTjeneste,
                       private val token: Token) {
 
-
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
@@ -34,9 +33,10 @@ class EntraController(private val entra: EntraTjeneste,
 
     @GetMapping("enhet")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
-    fun enheterOBO() = token.assert({ erObo }, {
-        hentForObo(entra::enheter)
-    })
+    fun enheterOBO() =
+        token.assert({ erObo }, {
+            hentForObo(entra::enheter)
+        })
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
@@ -44,12 +44,13 @@ class EntraController(private val entra: EntraTjeneste,
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entra::tema) { emptySet() }
         })
-    
+
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
-    fun temaOBO() = token.assert( {erObo}, {
-        hentForObo(entra::tema)
-    })
+    fun temaOBO() =
+        token.assert( {erObo}, {
+            hentForObo(entra::tema)
+        })
 
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
@@ -61,22 +62,17 @@ class EntraController(private val entra: EntraTjeneste,
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)
 
-    private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T): T {
-        val (ansattId, oid) = token.requireOboFields()
-        return hent(ansattId, oid)
-    }
+    private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T) =
+        with(token.oboFields) {
+            hent(first, second)
+        }
 
-    private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T): T =
+    private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T) =
         oid.oid(navIdent)?.let { hent(navIdent, it) } ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
         oid.gruppeId(gruppeNavn)?.let {
             entra.medlemmer( it)
         } ?: emptySet()
-
-
-    fun Token.requireOboFields(): Pair<AnsattId, UUID> =
-    ansattId?.let { id -> oid?.let { o -> id to o } }
-    ?: error("ansattId og oid må være satt for OBO")
 
 }

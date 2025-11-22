@@ -30,6 +30,11 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
         require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen " }
         return block()
     }
+
+    val oboFields  get() =
+        ansattId?.let { id -> oid?.let { o -> id to o } }
+            ?: error("ansattId og oid må være satt for OBO")
+
     companion object {
         const val AAD_ISSUER: String = "azuread"
         private const val APP = "app"

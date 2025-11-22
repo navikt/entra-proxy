@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestCo
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
@@ -15,11 +16,14 @@ import java.util.*
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste)  {
 
+    private val log = getLogger(javaClass)
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
-        adapter.tema("$oid")
+        adapter.tema("$oid").also {
+            log.info("Hentet ${it.size} tema for $ansattId")
+        }
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
@@ -28,18 +32,24 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.enheter("$oid").forEach {
                 add(Enhet(it,norg.navnFor(it)))
             }
+        }.also {
+            log.info("Hentet ${it.size} enheter for $ansattId")
         }
 
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) : Set<Ansatt> =
-            adapter.gruppeMedlemmer("$gruppeId")
-
-    override fun toString() = "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
-
+            adapter.gruppeMedlemmer("$gruppeId").also {
+                log.info("Hentet ${it.size} medlemmer for $gruppeId")
+            }
+    
     @WithSpan
     fun ansattUtvidet(navIdent: String) =
         adapter.ansattUtvidet(navIdent)
+
+    override fun toString() =
+        "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
+
 }
 
 

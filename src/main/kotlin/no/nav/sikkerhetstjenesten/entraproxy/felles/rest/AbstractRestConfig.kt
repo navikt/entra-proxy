@@ -10,10 +10,11 @@ abstract class AbstractRestConfig(
     val name: String,
     val isEnabled: Boolean = true) {
 
-    protected fun builder() = DefaultUriBuilderFactory("$baseUri").builder()
-
-    protected fun uri(path: String) = builder().path(path).build()
+    protected fun builder() =
+        DefaultUriBuilderFactory("$baseUri").builder()
 
     val pingEndpoint = builder().path(pingPath).build()
-    override fun toString() = "name=$name, pingPath=$pingPath,enabled=$isEnabled,baseUri=$baseUri"
+
+    override fun toString() =
+        "name=$name, pingPath=$pingPath,enabled=$isEnabled,baseUri=$baseUri"
 }

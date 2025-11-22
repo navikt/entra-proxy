@@ -38,4 +38,6 @@
     <root level="info">
         <appender-ref ref="otel"/>
     </root>
+    <logger name="io.lettuce.core.protocol.ReconnectionHandler" level="warn"/>
+    <logger name="io.lettuce.core.protocol.ConnectionWatchdog" level="warn"/>
 </configuration>

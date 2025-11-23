@@ -78,7 +78,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                          val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val ansatte: Set<AnsattUtvidetInfo>)
+    data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val ansatte: Set<UtvidetAnsatt>)
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)

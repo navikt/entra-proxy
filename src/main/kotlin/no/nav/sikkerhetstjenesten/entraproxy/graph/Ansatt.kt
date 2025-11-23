@@ -5,7 +5,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDEN
 import java.util.UUID
 
 
-open class Ansatt(val id: UUID,
+open class Ansatt(id: UUID,
                   val navIdent: AnsattId,
                   val navn: String,
                   val fornavn: String,
@@ -14,11 +14,6 @@ open class Ansatt(val id: UUID,
     override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)
 }
 
-class UtvidetAnsatt(id: UUID,
-                    @JsonAlias(NAVIDENT)  navIdent: AnsattId,
-                    @JsonAlias("displayName")  navn: String,
-                    @JsonAlias("givenName")  fornavn: String,
-                    @JsonAlias("surname")  etternavn: String,
-                    @param:JsonAlias("jobTitle")  val tIdent: String,
-                    @param:JsonAlias("mail")  val epost: String,
-                    @param:JsonAlias("officeLocation")  val enhet: String) : Ansatt(id,navIdent,navn,fornavn,etternavn)
+class UtvidetAnsatt(id: UUID, navIdent: AnsattId, navn: String, fornavn: String,
+                    etternavn: String, val tIdent: String, val epost: String,
+                    val enhet: String) : Ansatt(id,navIdent,navn,fornavn,etternavn)

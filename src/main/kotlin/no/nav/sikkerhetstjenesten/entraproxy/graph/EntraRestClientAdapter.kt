@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
@@ -36,8 +37,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName,it.surname) }
         )
 
-    fun ansatt(ansattId: String) =
-         get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()
+    fun utvidetAnsatt(ansattId: String) =
+         get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
+             with(it) {
+                 UtvidetAnsatt(
+                     id, AnsattId(navIdent), displayName,
+                     givenName, surname, jobTitle, mail,officeLocation)
+             }
+
+         }
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
@@ -69,7 +77,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                        val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class AnsattOids(@param:JsonProperty("value") val oids: Set<AnsattOid>) {
+    data class AnsattOids(@param:JsonProperty(VALUE) val oids: Set<AnsattOid>) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         data class AnsattOid(val id: UUID)
     }
@@ -78,7 +86,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                          val value: Set<IdentifiserbartObjekt> = emptySet())
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    data class EntraSaksbehandlerRespons(@param:JsonProperty("value") val ansatte: Set<UtvidetAnsatt>)
+    data class EntraSaksbehandlerRespons(@param:JsonProperty(VALUE) val ansatte: Set<UtvidetAnsattRespons>) {
+        data class UtvidetAnsattRespons(val id: UUID,
+                                        @param:JsonAlias(NAVIDENT) val navIdent: String,
+                                        val displayName: String,
+                                        val  givenName: String,
+                                        val  surname: String,
+                                        val jobTitle: String,
+                                        val mail: String,
+                                        val officeLocation: String)
+    }
 
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -88,6 +105,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 
     companion object {
+        private const val VALUE = "value",
         private const val UKJENT = "N/A"
         private const val NEXT_LINK = "@odata.nextLink"
     }

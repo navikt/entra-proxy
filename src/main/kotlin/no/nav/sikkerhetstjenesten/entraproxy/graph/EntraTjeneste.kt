@@ -29,7 +29,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID)  =
-        tidOgLog(log, "enheter for $ansattId") {
+        tidOgLog(log, "enhet(er) for $ansattId") {
             buildSet {
                 adapter.enheter("$oid").forEach {
                     add(Enhet(it, norg.navnFor(it)))
@@ -40,7 +40,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) =
-        tidOgLog(log, "medlemmer for gruppe $gruppeId") {
+        tidOgLog(log, "medlem(mer) for gruppe $gruppeId") {
             adapter.gruppeMedlemmer("$gruppeId")
         }
 

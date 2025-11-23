@@ -33,7 +33,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.navIdent, it.displayName, it.givenName,it.surname) }
+            { Ansatt(AnsattId(it.navIdent), it.displayName, it.givenName,it.surname) }
         )
 
     fun ansatt(ansattId: String) =

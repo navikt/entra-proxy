@@ -1,15 +1,15 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDENT
 
 data class AnsattUtvidetInfo(val id: String,
-                             @param:JsonProperty("jobTitle")  val tIdent: String = UKJENT,
-                             @param:JsonProperty("mail")  val epost: String = UKJENT,
-                             @param:JsonProperty("officeLocation")  val enhet: String = UKJENT,
-                             @param:JsonProperty("onPremisesSamAccountName")  val navIdent: String = UKJENT,
-                             @param:JsonProperty("displayName")  val navn: String = UKJENT,
-                             @param:JsonProperty("givenName")  val fornavn: String = UKJENT,
+                             @param:JsonAlias("jobTitle")  val tIdent: String = UKJENT,
+                             @param:JsonAlias("mail")  val epost: String = UKJENT,
+                             @param:JsonAlias("officeLocation")  val enhet: String = UKJENT,
+                             @param:JsonAlias(NAVIDENT)  val navIdent: String = UKJENT,
+                             @param:JsonAlias("displayName")  val navn: String = UKJENT,
+                             @param:JsonAlias("givenName")  val fornavn: String = UKJENT,
                              @param:JsonAlias("surname")
                              val etternavn: String = UKJENT,
 ): Comparable<AnsattUtvidetInfo> {

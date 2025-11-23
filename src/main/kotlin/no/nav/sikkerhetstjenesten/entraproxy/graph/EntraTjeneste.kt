@@ -10,12 +10,7 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.system.measureTimeMillis
-import kotlin.time.DurationUnit
-import kotlin.time.DurationUnit.MILLISECONDS
-import kotlin.time.TimedValue
 import kotlin.time.measureTimedValue
-import kotlin.time.toDuration
 
 @RetryingWhenRecoverable
 @Service
@@ -27,36 +22,36 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
-        measureTimedValue {
+        tidOgLog("tema for $ansattId") {
             adapter.tema("$oid")
-        }.let { timed ->
-            log.info("Hentet ${timed.value.size} tema for $ansattId på ${timed.duration.inWholeMilliseconds} ms")
-            timed.value
         }
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID)  =
-        measureTimedValue {
+        tidOgLog("enheter for $ansattId")  {
             buildSet {
                 adapter.enheter("$oid").forEach {
                     add(Enhet(it,norg.navnFor(it)))
                 }
             }
-        }.let { timed ->
-            log.info("Hentet ${timed.value.size} enheter for ansatt ${ansattId} og gruppe $oid på ${timed.duration.inWholeMilliseconds} ms")
-            timed.value
         }
 
     @WithSpan
     @Cacheable(MEDLEMMER)
-    fun medlemmer(gruppeId: UUID) = measureTimedValue {
-        adapter.gruppeMedlemmer("$gruppeId")
-    }.let { timed ->
-        log.info("Hentet ${timed.value.size} medlemmer for gruppe $gruppeId på ${timed.duration.inWholeMilliseconds} ms")
-        timed.value
-    }
-    
+    fun medlemmer(gruppeId: UUID) =
+        tidOgLog("medlemmer for gruppe $gruppeId") {
+            adapter.gruppeMedlemmer("$gruppeId")
+        }
+
+    private inline fun <T> tidOgLog(type: String, block: () -> Set<T>) =
+        measureTimedValue {
+            block()
+        }.let {
+            log.info("Hentet ${it.value.size} $type på ${it.duration.inWholeMilliseconds}ms")
+            it.value}
+
+
     @WithSpan
     fun ansattUtvidet(navIdent: String) =
         adapter.ansattUtvidet(navIdent)

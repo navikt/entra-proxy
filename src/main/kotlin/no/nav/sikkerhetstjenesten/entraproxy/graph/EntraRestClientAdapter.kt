@@ -105,7 +105,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 
     companion object {
-        private const val VALUE = "value",
+        private const val VALUE = "value"
         private const val UKJENT = "N/A"
         private const val NEXT_LINK = "@odata.nextLink"
     }

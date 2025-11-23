@@ -4,13 +4,13 @@ import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.time.measureTimedValue
 
 @RetryingWhenRecoverable
 @Service
@@ -22,17 +22,17 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
-        tidOgLog("tema for $ansattId") {
+        tidOgLog(log, "tema for $ansattId") {
             adapter.tema("$oid")
         }
 
     @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID)  =
-        tidOgLog("enheter for $ansattId")  {
+        tidOgLog(log, "enheter for $ansattId") {
             buildSet {
                 adapter.enheter("$oid").forEach {
-                    add(Enhet(it,norg.navnFor(it)))
+                    add(Enhet(it, norg.navnFor(it)))
                 }
             }
         }
@@ -40,21 +40,13 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) =
-        tidOgLog("medlemmer for gruppe $gruppeId") {
+        tidOgLog(log, "medlemmer for gruppe $gruppeId") {
             adapter.gruppeMedlemmer("$gruppeId")
         }
 
     @WithSpan
     fun ansattUtvidet(navIdent: String) =
         adapter.ansattUtvidet(navIdent)
-
-    private inline fun <T> tidOgLog(tekst: String, block: () -> Set<T>) =
-        measureTimedValue {
-            block()
-        }.let {
-            log.info("Hentet ${it.value.size} $tekst på ${it.duration.inWholeMilliseconds}ms")
-            it.value
-        }
 
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"

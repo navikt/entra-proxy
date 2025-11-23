@@ -45,6 +45,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
+    @Cacheable(GRAPH)
     fun ansatt(navIdent: AnsattId) =
         tidOgLog(log) {
             adapter.ansatt(navIdent.verdi)

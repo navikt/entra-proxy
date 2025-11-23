@@ -33,7 +33,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(AnsattId(it.navIdent), it.displayName, it.givenName,it.surname) }
+            { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName,it.surname) }
         )
 
     fun ansatt(ansattId: String) =
@@ -57,7 +57,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
         @JsonIgnoreProperties(ignoreUnknown = true)
-        data class GruppeMedlem(@param:JsonProperty(NAVIDENT) val navIdent: String,
+        data class GruppeMedlem(val id: UUID,
+            @param:JsonProperty(NAVIDENT) val navIdent: String,
                                 val displayName: String = UKJENT,
                                 val givenName: String = UKJENT,
                                 val surname: String = UKJENT)

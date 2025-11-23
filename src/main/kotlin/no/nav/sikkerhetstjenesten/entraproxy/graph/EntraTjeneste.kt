@@ -44,17 +44,17 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.gruppeMedlemmer("$gruppeId")
         }
 
-    private inline fun <T> tidOgLog(type: String, block: () -> Set<T>) =
-        measureTimedValue {
-            block()
-        }.let {
-            log.info("Hentet ${it.value.size} $type på ${it.duration.inWholeMilliseconds}ms")
-            it.value}
-
-
     @WithSpan
     fun ansattUtvidet(navIdent: String) =
         adapter.ansattUtvidet(navIdent)
+
+    private inline fun <T> tidOgLog(tekst: String, block: () -> Set<T>) =
+        measureTimedValue {
+            block()
+        }.let {
+            log.info("Hentet ${it.value.size} $tekst på ${it.duration.inWholeMilliseconds}ms")
+            it.value
+        }
 
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"

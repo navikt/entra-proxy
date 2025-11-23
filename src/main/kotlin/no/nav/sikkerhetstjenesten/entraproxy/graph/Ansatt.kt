@@ -8,17 +8,17 @@ import java.util.UUID
 
 
 open class Ansatt(val id: UUID,
-                  @param:JsonAlias(NAVIDENT) val navIdent: AnsattId,
-                  @param:JsonAlias("displayName") val navn: String,
-                   @param:JsonAlias("givenName") val fornavn: String,
-                   @param:JsonAlias("surname") val etternavn: String): Comparable<Ansatt> {
+                  val navIdent: AnsattId,
+                  val navn: String,
+                  val fornavn: String,
+                  val etternavn: String): Comparable<Ansatt> {
 
     override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)
 }
 
-class AnsattUtvidetInfo( id: UUID,
-                         @JsonAlias(NAVIDENT)  navIdent: AnsattId,
-                         @JsonAlias("displayName")  navn: String,
+class AnsattUtvidetInfo(id: UUID,
+                        @JsonAlias(NAVIDENT)  navIdent: AnsattId,
+                        @JsonAlias("displayName")  navn: String,
                         @JsonAlias("givenName")  fornavn: String,
                         @JsonAlias("surname")  etternavn: String,
                         @param:JsonAlias("jobTitle")  val tIdent: String,

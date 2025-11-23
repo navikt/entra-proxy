@@ -6,15 +6,11 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.Requirement
 
 
 data class Ansatt(val id: AnsattId,
-                  @param:JsonAlias("displayName") val navn: String =UKJENT,
-                   @param:JsonAlias("firstName") val fornavn: String = UKJENT,
-                   @param:JsonAlias("lastName") val etternavn: String = UKJENT,
+                  @param:JsonAlias("displayName") val navn: String,
+                   @param:JsonAlias("firstName") val fornavn: String,
+                   @param:JsonAlias("lastName") val etternavn: String,
                   ): Comparable<Ansatt> {
 
     override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)
 
-    companion object {
-        private const val UKJENT = "N/A"
-        const val ANSATTID_LENGTH = 7
-    }
 }

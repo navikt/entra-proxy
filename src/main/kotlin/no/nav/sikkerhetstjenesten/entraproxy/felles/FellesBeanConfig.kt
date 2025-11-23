@@ -40,6 +40,7 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
+import java.util.UUID
 import java.util.function.Function
 
 
@@ -133,7 +134,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         schemas["Ansatt"] = Schema<Ansatt>().apply {
             type = "string"
             description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"),"Tore Tang","Tore","Tang")
+            example = Ansatt(UUID.randomUUID(),AnsattId("A123456"),"Tore Tang","Tore","Tang")
         }
         schemas["NavIdent"] = Schema<Ansatt>().apply {
             type = "string"

@@ -11,6 +11,7 @@ class AnsattSerializationTest {
     fun `Ansatt serialiseres og deserialiseres korrekt`() {
         val json = """
             {
+              "id": "7a9cca1f-8552-4042-ad1a-255efb740991",
               "onPremisesSamAccountName": "B654321",
               "displayName": "Kari Nordmann",
               "givenName": "Kari",
@@ -24,6 +25,7 @@ class AnsattSerializationTest {
     fun `AnsattUtvidetInfo serialiseres og deserialiseres korrekt`() {
         val json = """
             {
+              "id": "7a9cca1f-8552-4042-ad1a-255efb740991",
               "onPremisesSamAccountName": "B654321",
               "displayName": "Kari Nordmann",
               "givenName": "Kari",

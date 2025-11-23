@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
-import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.spring.UnprotectedRestController
@@ -49,13 +48,8 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ent
             entra.medlemmer( it)
         }
 
-    @Operation(
-        summary= "Hente utansattinfo fra Entra ",
-        description = """
-            Hente spesifikke auditlogg-informasjon knyttet til ansattinfo fra Entra basert på navIdent
-        """""")
-    @GetMapping("ansattUtvidet/{navIdent}")
-    fun ansattUtvidet(@PathVariable navIdent: String) =
-        entra.ansattUtvidet(navIdent)
+    @GetMapping("ansatt/{navIdent}")
+    fun ansatt(@PathVariable navIdent: AnsattId) =
+        entra.ansatt(navIdent)
 
 }

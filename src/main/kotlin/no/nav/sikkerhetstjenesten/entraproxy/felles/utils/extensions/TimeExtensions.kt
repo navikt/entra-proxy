@@ -41,4 +41,12 @@ object TimeExtensions {
             log.info("Hentet ${it.value.size} $tekst på ${it.duration.inWholeMilliseconds}ms")
             it.value
         }
+
+    inline fun <reified T> tidOgLog(log: Logger, block: () -> T?) =
+        measureTimedValue {
+            block()
+        }.let {
+            log.info("Hentet ${it.value} på ${it.duration.inWholeMilliseconds}ms")
+            it.value
+        }
 }

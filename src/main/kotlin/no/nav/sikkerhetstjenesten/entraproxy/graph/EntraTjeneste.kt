@@ -45,8 +45,10 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    fun ansattUtvidet(navIdent: String) =
-        adapter.ansattUtvidet(navIdent)
+    fun ansatt(navIdent: AnsattId) =
+        tidOgLog(log) {
+            adapter.ansatt(navIdent.verdi)
+        }
 
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"

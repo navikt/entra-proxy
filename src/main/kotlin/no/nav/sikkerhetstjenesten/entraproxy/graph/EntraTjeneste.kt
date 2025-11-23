@@ -45,10 +45,10 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     @WithSpan
-    @Cacheable(GRAPH)
-    fun ansatt(navIdent: AnsattId) =
+    @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
+    fun ansatt(ansattId: AnsattId) =
         tidOgLog(log) {
-            adapter.ansatt(navIdent.verdi)
+            adapter.ansatt(ansattId.verdi)
         }
 
     override fun toString() =

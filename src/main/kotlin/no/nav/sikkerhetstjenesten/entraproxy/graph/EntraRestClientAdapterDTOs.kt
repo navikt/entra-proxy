@@ -65,5 +65,5 @@ internal data class GruppeMedlemmer(
 internal const val VALUE = "value"
 internal const val UKJENT = "N/A"
 internal const val NEXT_LINK = "@odata.nextLink"
-internal const val NAVIDENT = "navIdent"
+internal const val NAVIDENT = "onPremisesSamAccountName"
 

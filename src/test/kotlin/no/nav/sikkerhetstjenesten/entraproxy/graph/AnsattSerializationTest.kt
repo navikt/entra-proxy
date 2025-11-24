@@ -1,7 +1,4 @@
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt.Navn
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraRestClientAdapter.EntraSaksbehandlerRespons.UtvidetAnsattRespons
-import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import tools.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.jacksonObjectMapper

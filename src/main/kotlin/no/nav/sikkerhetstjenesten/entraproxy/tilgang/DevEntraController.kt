@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val norg: NorgTjeneste) {
+class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
-        oid.oid(navIdent)?.let {
-            entra.enheter(navIdent, it)
+        oidTjeneste.ansattOid(navIdent)?.let {
+            entraTjeneste.enheter(navIdent, it)
         }
 
     @GetMapping("tema/ansatt/{navIdent}")
     fun temaer(@PathVariable navIdent: AnsattId) =
-        oid.oid(navIdent)?.let {
-            entra.tema(navIdent, it)
+        oidTjeneste.ansattOid(navIdent)?.let {
+            entraTjeneste.tema(navIdent, it)
         }
 
     @GetMapping("enhet/{enhetsnummer}")
@@ -36,7 +36,7 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ent
 
     @GetMapping("navn/{enhetsnummer}")
     fun norgNavn(@PathVariable enhetsnummer: Enhetnummer) =
-       norg.navnFor(enhetsnummer)
+       norgTjeneste.navnFor(enhetsnummer)
 
     @GetMapping("tema/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =
@@ -44,12 +44,12 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ent
 
     @GetMapping("gruppe/medlemmer")
      fun medlemmer(gruppeNavn: String) =
-        oid.gruppeId(gruppeNavn)?.let {
-            entra.medlemmer( it)
+        oidTjeneste.gruppeOid(gruppeNavn)?.let {
+            entraTjeneste.medlemmer( it)
         }
 
     @GetMapping("ansatt/{navIdent}")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
-        entra.utvidetAnsatt(navIdent)
+        entraTjeneste.utvidetAnsatt(navIdent)
 
 }

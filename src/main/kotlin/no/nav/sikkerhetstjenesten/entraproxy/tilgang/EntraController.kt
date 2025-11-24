@@ -20,36 +20,36 @@ import java.util.UUID
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
-class EntraController(private val entra: EntraTjeneste,
-                      private val oid: EntraOidTjeneste,
+class EntraController(private val entraTjeneste: EntraTjeneste,
+                      private val oidTjeneste: EntraOidTjeneste,
                       private val token: Token) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(navIdent, entra::enheter) { emptySet() }
+            hentForAnsatt(navIdent, entraTjeneste::enheter) { emptySet() }
         })
 
     @GetMapping("enhet")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() =
         token.assert({ erObo }, {
-            hentForObo(entra::enheter)
+            hentForObo(entraTjeneste::enheter)
         })
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(navIdent, entra::tema) { emptySet() }
+            hentForAnsatt(navIdent, entraTjeneste::tema) { emptySet() }
         })
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() =
         token.assert( {erObo}, {
-            hentForObo(entra::tema)
+            hentForObo(entraTjeneste::tema)
         })
 
     @GetMapping("enhet/{enhetsnummer}")
@@ -68,11 +68,11 @@ class EntraController(private val entra: EntraTjeneste,
         }
 
     private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T) =
-        oid.oid(navIdent)?.let { hent(navIdent, it) } ?: empty()
+        oidTjeneste.ansattOid(navIdent)?.let { hent(navIdent, it) } ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
-        oid.gruppeId(gruppeNavn)?.let {
-            entra.medlemmer( it)
+        oidTjeneste.gruppeOid(gruppeNavn)?.let {
+            entraTjeneste.medlemmer( it)
         } ?: emptySet()
 
 }

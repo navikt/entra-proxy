@@ -10,16 +10,17 @@ import java.time.Duration
 @Component
 class EntraOidTjeneste(private val adapter: EntraRestClientAdapter) : CachableRestConfig {
 
+    override val varighet = Duration.ofDays(365)  // Godt nok, blås i skuddår
+    override val navn = ENTRA_OID
+
     @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
-     fun oid(ansattId: AnsattId) = adapter.ansattOid(ansattId.verdi)
+     fun ansattOid(ansattId: AnsattId) =
+         adapter.ansattOid(ansattId.verdi)
 
     @WithSpan
     @Cacheable(ENTRA_OID)
-    fun gruppeId(gruppeNavn: String) =
+    fun gruppeOid(gruppeNavn: String) =
         adapter.gruppeOid(gruppeNavn)
-
-    override val varighet = Duration.ofDays(365)  // Godt nok, blås i skuddår
-    override val navn = ENTRA_OID
 
     companion object {
         const val ENTRA_OID = "entraoid"

@@ -49,7 +49,7 @@ class DevEntraController (private val entra: EntraTjeneste, private val oid: Ent
         }
 
     @GetMapping("ansatt/{navIdent}")
-    fun ansatt(@PathVariable navIdent: AnsattId) =
-        entra.ansatt(navIdent)
+    fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
+        entra.utvidetAnsatt(navIdent)
 
 }

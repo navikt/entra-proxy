@@ -34,18 +34,9 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName,it.surname) }
+            { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName, it.surname) }
         )
 
-    fun utvidetAnsatt(ansattId: String) =
-         get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
-             with(it) {
-                 UtvidetAnsatt(
-                     id, AnsattId(navIdent), displayName,
-                     givenName, surname, jobTitle, mail,officeLocation)
-             }
-
-         }
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
@@ -61,6 +52,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             .map(transform)
             .toSortedSet()
 
+    fun utvidetAnsatt(ansattId: String) =
+        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
+            with(it) {
+                UtvidetAnsatt(
+                    id, AnsattId(navIdent), displayName,
+                    givenName, surname, jobTitle, mail,officeLocation)
+            }
+        }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class GruppeMedlemmer(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<GruppeMedlem> = emptySet()) {
@@ -90,13 +89,12 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         data class UtvidetAnsattRespons(val id: UUID,
                                         @param:JsonAlias(NAVIDENT) val navIdent: String,
                                         val displayName: String,
-                                        val  givenName: String,
-                                        val  surname: String,
+                                        val givenName: String,
+                                        val surname: String,
                                         val jobTitle: String,
                                         val mail: String,
                                         val officeLocation: String)
     }
-
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class IdentifiserbartObjekt(val id: UUID,

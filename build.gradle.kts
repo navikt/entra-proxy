@@ -4,6 +4,10 @@ val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.0"
 val tokenSupportVersion = "6.0.0"
 val mockkVersion = "1.14.6"
+val logstashEncoderVersion = "9.0"
+val springMockVersion = "4.0.2"
+val conditionalsVersion = "5.1.11"
+val coroutinesVersion = "1.10.2"
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
@@ -48,12 +52,12 @@ configurations.all {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.20.1")
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.20.1-alpha")
     implementation("io.micrometer:micrometer-registry-prometheus")
-    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("no.nav.boot:boot-conditionals:5.1.11")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
+    implementation("no.nav.boot:boot-conditionals:$conditionalsVersion")
     implementation("no.nav.security:token-client-spring:$tokenSupportVersion")
     implementation("no.nav.security:token-validation-spring:$tokenSupportVersion")
     implementation("org.apache.httpcomponents.client5:httpclient5")
@@ -68,7 +72,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webclient")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework:spring-aspects")
-    testImplementation("com.ninja-squad:springmockk:4.0.2")
+    testImplementation("com.ninja-squad:springmockk:$springMockVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

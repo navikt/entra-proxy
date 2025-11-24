@@ -36,7 +36,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
             with(it) {
                 UtvidetAnsatt(
-                    id, AnsattId(navIdent), displayName,
+                    id, AnsattId(onPremisesSamAccountName ), displayName,
                     givenName, surname, jobTitle, mail,officeLocation)
             }
         }

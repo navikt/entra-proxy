@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.net.URI
@@ -32,7 +31,7 @@ internal data class EntraSaksbehandlerRespons(
 ) {
     internal data class UtvidetAnsattRespons(
         val id: UUID,
-        @param:JsonAlias(NAVIDENT) val navIdent: String,
+        val onPremisesSamAccountName: String,
         val displayName: String,
         val givenName: String,
         val surname: String,

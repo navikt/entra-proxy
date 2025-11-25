@@ -54,7 +54,7 @@ configurations.all {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:$otelVersion")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.20.1-alpha")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")

@@ -7,14 +7,12 @@ import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class Grupper(
-    @param:JsonProperty("@odata.context") val next: URI? = null,
+    @param:JsonProperty(CONTEXT) val next: URI? = null,
     val value: Set<IdentifiserbartObjekt> = emptySet()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class AnsattOids(
-    @param:JsonProperty(VALUE) val oids: Set<AnsattOid>
-) {
+internal data class AnsattOids(val value: Set<AnsattOid>) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     internal data class AnsattOid(val id: UUID)
 }
@@ -27,7 +25,7 @@ internal data class Tilganger(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class EntraSaksbehandlerRespons(
-    @param:JsonProperty(VALUE) val ansatte: Set<UtvidetAnsattRespons>
+    val value: Set<UtvidetAnsattRespons>
 ) {
     internal data class UtvidetAnsattRespons(
         val id: UUID,
@@ -55,15 +53,14 @@ internal data class GruppeMedlemmer(
     @JsonIgnoreProperties(ignoreUnknown = true)
     internal data class GruppeMedlem(
         val id: UUID,
-        @param:JsonProperty(NAVIDENT) val navIdent: String,
+        val onPremisesSamAccountName: String,
         val displayName: String = UKJENT,
         val givenName: String = UKJENT,
         val surname: String = UKJENT
     )
 }
 
-internal const val VALUE = "value"
-internal const val UKJENT = "N/A"
-internal const val NEXT_LINK = "@odata.nextLink"
-internal const val NAVIDENT = "onPremisesSamAccountName"
+private const val UKJENT = "N/A"
+private const val CONTEXT  = "@odata.context"
+private const val NEXT_LINK = "@odata.nextLink"
 

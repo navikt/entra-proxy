@@ -76,7 +76,7 @@ class EntraConfig(
 
     companion object {
         const val GRAPH = "graph"
-        const val NAVIDENT = "onPremisesSamAccountName"
+        private const val NAVIDENT = "onPremisesSamAccountName"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
         private const val T_IDENT = "jobTitle"
         private const val T_IDENT_NAVIDENT = "$T_IDENT,$NAVIDENT,id, givenName, surname,displayName,mail,officeLocation "

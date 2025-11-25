@@ -13,7 +13,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     AbstractRestClientAdapter(restClient, cf) {
 
     fun ansattOid(navIdent: String) =
-        get<AnsattOids>(cf.userURI(navIdent)).oids.singleOrNull()?.id
+        get<AnsattOids>(cf.userURI(navIdent)).value.singleOrNull()?.id
 
     fun gruppeOid(gruppeNavn: String) =
         get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
@@ -29,11 +29,11 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName, it.surname) }
+            { Ansatt(it.id,AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) }
         )
 
     fun utvidetAnsatt(ansattId: String) =
-        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
+        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).value.firstOrNull()?.let {
             with(it) {
                 UtvidetAnsatt(
                     id, AnsattId(onPremisesSamAccountName ), displayName,

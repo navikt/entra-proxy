@@ -8,7 +8,7 @@ data class TIdent (@JsonValue val verdi: String) : Comparable<TIdent> {
         with(verdi) {
             require(length == ANSATTID_LENGTH) { "Ugyldig lengde $length for $this, forventet $ANSATTID_LENGTH" }
             require(first().isLetter()) { "Ugyldig første tegn ${first()} i $this, må være stor bokstav" }
-            requireDigits(substring(3), 6)
+            requireDigits(substring(3), 4)
         }
     }
 

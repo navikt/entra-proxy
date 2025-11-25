@@ -33,16 +33,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         )
 
     fun utvidetAnsatt(ansattId: String) =
-        get<EntraSaksbehandlerRespons>(cf.userNavIdentURI(ansattId)).ansatte.firstOrNull()?.let {
-            with(it) {
-                UtvidetAnsatt(
-                    id, AnsattId(onPremisesSamAccountName ), displayName,
-                    givenName, surname, jobTitle, mail,officeLocation)
-            }
-        }
+        utvidetAnsatt(cf.userNavIdentURI(ansattId))
+
 
     fun utvidetAnsattTident(ansattId: String) =
-        get<EntraSaksbehandlerRespons>(cf.userTIdentURI(ansattId)).ansatte.firstOrNull()?.let {
+        utvidetAnsatt(cf.userIdentURI(ansattId))
+
+    private fun utvidetAnsatt(uri: URI)  =
+        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {
             with(it) {
                 UtvidetAnsatt(
                     id, AnsattId(onPremisesSamAccountName ), displayName,
@@ -63,9 +61,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             .flatMap { values(it) }
             .map(transform)
             .toSortedSet()
-
-
-
+    
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }
 

@@ -53,9 +53,9 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
         entraTjeneste.utvidetAnsatt(navIdent)
 
-    @GetMapping("ansatt/tident/{navTAFKdent}")
-    fun utvidetAnsatt(@PathVariable navTAFKdent: TIdent) =
-        entraTjeneste.utvidetAnsattTident(navTAFKdent)
+    @GetMapping("ansatt/tident/{tIdent}")
+    fun utvidetAnsatt(@PathVariable tIdent: TIdent) =
+        entraTjeneste.utvidetAnsatt(tIdent)
 
 }
 

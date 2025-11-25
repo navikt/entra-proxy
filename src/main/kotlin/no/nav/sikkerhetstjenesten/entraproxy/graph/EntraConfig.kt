@@ -48,14 +48,12 @@ class EntraConfig(
         builder().apply {
             path(USERS_PATH)
             queryParams(this, T_IDENT_NAVIDENT, "$NAVIDENT eq '$ansattId'")
-
         }.build()
 
-    fun userTIdentURI(ansattTIdent: String) =
+    fun userIdentURI(ansattId: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, T_IDENT_NAVIDENT, "$T_IDENT eq '$ansattTIdent'")
-
+            queryParams(this, T_IDENT_NAVIDENT, "$T_IDENT eq '$ansattId'")
         }.build()
 
     private fun grupperURI(oid: String, filter: String) =

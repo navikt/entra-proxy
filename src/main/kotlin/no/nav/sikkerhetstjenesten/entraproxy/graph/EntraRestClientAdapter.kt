@@ -61,7 +61,6 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             .flatMap { values(it) }
             .map(transform)
             .toSortedSet()
-    
+
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }
-

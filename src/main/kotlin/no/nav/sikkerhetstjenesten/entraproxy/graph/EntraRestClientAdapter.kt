@@ -37,7 +37,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     fun utvidetAnsattTident(ansattId: String) =
-        utvidetAnsatt(cf.userIdentURI(ansattId))
+        utvidetAnsatt(cf.userTidentURI(ansattId))
 
     private fun utvidetAnsatt(uri: URI)  =
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {

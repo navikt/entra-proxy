@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import buildUserUri
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
@@ -45,15 +46,15 @@ class EntraConfig(
         }.build(gruppeId)
 
     fun userNavIdentURI(ansattId: String) =
-        builder().apply {
-            path(USERS_PATH)
-            queryParams(this, T_IDENT_NAVIDENT, "$NAVIDENT eq '$ansattId'")
-        }.build()
+        userIdentURI( "$NAVIDENT eq '$ansattId'")
 
-    fun userIdentURI(ansattId: String) =
+    fun userTidentURI(ansattId: String) =
+        userIdentURI( "$T_IDENT eq '$ansattId'")
+
+    private fun userIdentURI(filter: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, T_IDENT_NAVIDENT, "$T_IDENT eq '$ansattId'")
+            queryParams(this, T_IDENT_NAVIDENT, filter)
         }.build()
 
     private fun grupperURI(oid: String, filter: String) =

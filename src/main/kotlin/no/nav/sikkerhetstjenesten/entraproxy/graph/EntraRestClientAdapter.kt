@@ -41,6 +41,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             }
         }
 
+    fun utvidetAnsattTident(ansattId: String) =
+        get<EntraSaksbehandlerRespons>(cf.userTIdentURI(ansattId)).ansatte.firstOrNull()?.let {
+            with(it) {
+                UtvidetAnsatt(
+                    id, AnsattId(onPremisesSamAccountName ), displayName,
+                    givenName, surname, jobTitle, mail,officeLocation)
+            }
+        }
+
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),

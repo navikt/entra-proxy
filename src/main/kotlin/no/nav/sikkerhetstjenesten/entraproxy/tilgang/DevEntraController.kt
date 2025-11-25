@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.web.bind.annotation.GetMapping
@@ -52,4 +53,9 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
         entraTjeneste.utvidetAnsatt(navIdent)
 
+    @GetMapping("ansatt/tident/{navTAFKdent}")
+    fun utvidetAnsatt(@PathVariable navTAFKdent: TIdent) =
+        entraTjeneste.utvidetAnsattTident(navTAFKdent)
+
 }
+

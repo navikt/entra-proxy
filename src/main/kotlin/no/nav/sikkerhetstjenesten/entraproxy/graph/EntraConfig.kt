@@ -51,7 +51,7 @@ class EntraConfig(
         userIdentURI( "$T_IDENT eq '$ansattId'")
 
     fun ansattesGrupperURI(oid: String) =
-        grupperURI(oid, "SECENABLED")
+        grupperURI(oid, SECENABLED)
 
     private fun userIdentURI(filter: String) =
         builder().apply {

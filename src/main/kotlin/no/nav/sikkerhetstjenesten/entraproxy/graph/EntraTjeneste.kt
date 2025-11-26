@@ -58,6 +58,13 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.utvidetAnsattTident(ansattId.verdi)
         }
 
+    @WithSpan
+    @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
+    fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
+        tidOgLog(log, " Entragrupper for $navIdent") {
+            adapter.ansattesGrupper("$oid")
+        }
+
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 }

@@ -24,6 +24,9 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(ansattOid: String) =
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
+    fun ansattesGrupper(ansattOid: String) =
+        tilganger(cf.ansattesGrupperURI(ansattOid), :: EntraGruppe)
+
     fun gruppeMedlemmer(gruppeOid: String) =
         pagedTransformedAndSorted(
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
@@ -38,6 +41,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun utvidetAnsattTident(ansattId: String) =
         utvidetAnsatt(cf.userTidentURI(ansattId))
+
+
 
     private fun utvidetAnsatt(uri: URI)  =
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {

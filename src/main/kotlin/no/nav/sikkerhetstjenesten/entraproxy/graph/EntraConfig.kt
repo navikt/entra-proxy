@@ -50,6 +50,9 @@ class EntraConfig(
     fun userTidentURI(ansattId: String) =
         userIdentURI( "$T_IDENT eq '$ansattId'")
 
+    fun ansattesGrupperURI(oid: String) =
+        grupperURI(oid, "SECENABLED")
+
     private fun userIdentURI(filter: String) =
         builder().apply {
             path(USERS_PATH)
@@ -81,6 +84,7 @@ class EntraConfig(
         private const val ANSATT_EGENSKAPER = "id, givenName, surname,displayName, $NAVIDENT"
         private const val TEMA_QUERY = "startswith(displayName,'$TEMA_PREFIX') "
         private const val ENHET_QUERY = "startswith(displayName,'${ENHET_PREFIX}') "
+        private const val SECENABLED = "securityEnabled eq true"
         private const val DEFAULT_BATCH_SIZE = 250
         private const val USERS_PATH = "/users"
         private const val GRUPPER_PATH = "/groups"

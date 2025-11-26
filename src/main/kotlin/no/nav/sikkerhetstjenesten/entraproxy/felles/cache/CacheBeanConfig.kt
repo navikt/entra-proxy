@@ -104,13 +104,13 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
 
 @Component
 class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
-    val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Int::class.java)
+    val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Long::class.java)
 
-    fun count(prefix: String): Int {
-        val keys = listOf<String>() // No keys, only ARGV
+    fun count(prefix: String): Long {
+        val keys = listOf<String>()
         val args = listOf(prefix)
-        val result: Int? = redisTemplate.execute(script, keys, *args.toTypedArray())
-        return result ?: 0
+        val result  = (redisTemplate.execute(script, keys, *args.toTypedArray()))
+        return result ?: 0L
 
     }
 }

@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import java.util.UUID
 
-open class Ansatt(id: UUID,
+open class Ansatt(val id: UUID,
                   val navIdent: AnsattId,
                   val navn: String, val fornavn: String,
                   val etternavn: String): Comparable<Ansatt> {

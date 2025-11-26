@@ -56,6 +56,14 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
         RedisClient.create(cfg.cacheURI)
 
     @Bean
+    fun cacheClient(client: RedisClient,handler: CacheNøkkelHandler) =
+        CacheClient(client, handler)
+
+    @Bean
+    fun cacheNøkkelHandler(mgr: RedisCacheManager) =
+        CacheNøkkelHandler(mgr.cacheConfigurations,mapper)
+
+    @Bean
     fun cacheHealthIndicator(pingable: CachePingable)  =
         PingableHealthIndicator(pingable)
 

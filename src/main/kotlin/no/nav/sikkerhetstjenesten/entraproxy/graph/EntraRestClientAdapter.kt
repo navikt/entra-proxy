@@ -29,7 +29,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(it.id,AnsattId(it.navIdent), it.displayName, it.givenName, it.surname) }
+            { Ansatt(AnsattId(it.navIdent), it.displayName, it.givenName, it.surname) }
         )
 
     fun utvidetAnsatt(ansattId: String) =
@@ -43,7 +43,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {
             with(it) {
                 UtvidetAnsatt(
-                    id, AnsattId(onPremisesSamAccountName ), displayName,
+                    AnsattId(onPremisesSamAccountName ), displayName,
                     givenName, surname, TIdent(jobTitle), mail,officeLocation)
             }
         }

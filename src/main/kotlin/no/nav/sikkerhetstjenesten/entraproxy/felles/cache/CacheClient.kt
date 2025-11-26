@@ -15,7 +15,7 @@ import kotlin.time.measureTime
 
 
 @Component
-class CacheClient(client: RedisClient, private vararg val cfgs: CachableRestConfig)  : LeaderAware() {
+class CacheClient(client: RedisClient, val handler: CacheNøkkelHandler,private vararg val cfgs: CachableRestConfig)  : LeaderAware() {
     val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)
         if (isLocalOrTest) {
@@ -46,6 +46,13 @@ class CacheClient(client: RedisClient, private vararg val cfgs: CachableRestConf
     fun cacheStørrelser() =
         cfgs.associate {
             it.navn to "${cacheStørrelse(it.navn).toLong()} innslag, ttl: ${it.varighet.format()}"
+        }
+
+    fun getAllCaches(cache: String) =
+        conn.sync().keys("$cache::*").map {
+            handler.idFraNøkkel(it)
+        }.also {
+            log.info("Fant ${it.size} nøkler i cache $cache")
         }
 
 

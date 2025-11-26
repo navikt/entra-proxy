@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import buildUserUri
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig

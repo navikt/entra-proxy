@@ -110,7 +110,7 @@ class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
         val keys = listOf<String>()
         val args = listOf(prefix)
         val result  = (redisTemplate.execute(script, keys, *args.toTypedArray()))
-        return result ?: 0L
+        return result ?: 42L
 
     }
 }

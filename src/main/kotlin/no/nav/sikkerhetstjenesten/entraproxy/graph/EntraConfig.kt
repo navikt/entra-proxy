@@ -45,17 +45,15 @@ class EntraConfig(
         }.build(gruppeId)
 
     fun userNavIdentURI(ansattId: String) =
+        userIdentURI( "$NAVIDENT eq '$ansattId'")
+
+    fun userTidentURI(ansattId: String) =
+        userIdentURI( "$T_IDENT eq '$ansattId'")
+
+    private fun userIdentURI(filter: String) =
         builder().apply {
             path(USERS_PATH)
-            queryParams(this, T_IDENT_NAVIDENT, "$NAVIDENT eq '$ansattId'")
-
-        }.build()
-
-    fun userTIdentURI(ansattTIdent: String) =
-        builder().apply {
-            path(USERS_PATH)
-            queryParams(this, T_IDENT_NAVIDENT, "$T_IDENT eq '$ansattTIdent'")
-
+            queryParams(this, T_IDENT_NAVIDENT, filter)
         }.build()
 
     private fun grupperURI(oid: String, filter: String) =

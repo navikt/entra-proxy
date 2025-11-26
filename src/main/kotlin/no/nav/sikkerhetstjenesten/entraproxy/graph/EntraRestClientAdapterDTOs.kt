@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import java.net.URI
 import java.util.UUID
 
@@ -27,9 +28,11 @@ internal data class Tilganger(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class EntraSaksbehandlerRespons(
-    @param:JsonProperty(VALUE) val ansatte: Set<UtvidetAnsattRespons>
+    @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>
 ) {
-    internal data class UtvidetAnsattRespons(
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    internal data class AnsattRespons(
         val id: UUID,
         val onPremisesSamAccountName: String,
         val displayName: String,
@@ -50,17 +53,8 @@ internal data class IdentifiserbartObjekt(
 @JsonIgnoreProperties(ignoreUnknown = true)
 internal data class GruppeMedlemmer(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<GruppeMedlem> = emptySet()
-) {
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    internal data class GruppeMedlem(
-        val id: UUID,
-        @param:JsonProperty(NAVIDENT) val navIdent: String,
-        val displayName: String = UKJENT,
-        val givenName: String = UKJENT,
-        val surname: String = UKJENT
-    )
-}
+    val value: Set<AnsattRespons> = emptySet()
+)
 
 internal const val VALUE = "value"
 internal const val UKJENT = "N/A"

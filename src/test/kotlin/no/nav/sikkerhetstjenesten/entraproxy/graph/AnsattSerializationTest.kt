@@ -1,5 +1,4 @@
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.UtvidetAnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import tools.jackson.module.kotlin.readValue
 import org.junit.jupiter.api.Test
 import tools.jackson.module.kotlin.jacksonObjectMapper
@@ -21,7 +20,7 @@ class AnsattSerializationTest {
               "officeLocation": "Oslo"
             }
         """.trimIndent()
-        val deserialized = objectMapper.readValue<UtvidetAnsattRespons>(json)
+        val deserialized = objectMapper.readValue<AnsattRespons>(json)
         println(deserialized)
     }
 }

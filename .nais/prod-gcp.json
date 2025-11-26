@@ -22,6 +22,16 @@
       "name": "fagarkiv-administrasjon",
       "namespace": "isa",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "oppgave",
+      "namespace": "oppgavehandtering",
+      "cluster": "prod-fss"
+    },
+    {
+      "name": "gosys-oppgavebehandling-api",
+      "namespace": "oppgavehandtering",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {
@@ -41,6 +51,6 @@
   },
   "replica": {
     "min": 2,
-    "max": 4
+    "max": 6
   }
 }

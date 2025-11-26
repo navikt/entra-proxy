@@ -74,6 +74,31 @@
       "name": "navansatt",
       "namespace": "teampensjon",
       "cluster": "dev-fss"
+    },
+    {
+      "name": "oppgave",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "oppgave-q0",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "oppgave-q1",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "name": "gosys-oppgavebehandling-api",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "gosys-oppgavebehandling-api-q1",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-gcp"
     }
   ],
   "nais": {

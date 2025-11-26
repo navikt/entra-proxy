@@ -13,4 +13,4 @@ open class Ansatt(id: UUID,
 }
 
 class UtvidetAnsatt(id: UUID, navIdent: AnsattId,  navn: String,
-                    fornavn: String, etternavn: String, val tIdent: String, val epost: String, val enhet: String) : Ansatt(id,navIdent,navn,fornavn,etternavn)
+                    fornavn: String, etternavn: String, val tIdent: TIdent, val epost: String, val enhet: String) : Ansatt(id,navIdent,navn,fornavn,etternavn)

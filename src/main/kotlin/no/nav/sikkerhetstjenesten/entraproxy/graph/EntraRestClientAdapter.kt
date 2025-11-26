@@ -44,7 +44,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             with(it) {
                 UtvidetAnsatt(
                     id, AnsattId(onPremisesSamAccountName ), displayName,
-                    givenName, surname, jobTitle, mail,officeLocation)
+                    givenName, surname, TIdent(jobTitle), mail,officeLocation)
             }
         }
 

@@ -103,7 +103,7 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
 }
 
 @Component
-class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any>) {
+class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
     val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Int::class.java)
 
     fun count(prefix: String): Int {

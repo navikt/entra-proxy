@@ -52,12 +52,8 @@ import kotlin.text.toDouble
 
 
 @Configuration
-class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor,  meterRegistry: MeterRegistry,
-                       teller: CacheNøkkelTeller) : WebMvcConfigurer {
+class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
 
-    init {
-        cacheGauges(meterRegistry, teller)
-    }
 
     @Bean
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
@@ -67,17 +63,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface IgnoreUnknownMixin
-
-    private fun cacheGauges(meterRegistry: MeterRegistry, teller: CacheNøkkelTeller) {
-        listOf(GRAPH, MEDLEMMER, NAVIDENT,NORG).forEach { cache ->
-            meterRegistry.gauge(
-                "cache_size",
-                Tags.of("cache", cache),
-                teller
-            ) { it.tell(cache).toDouble() }
-        }
-    }
-
+    
     @Bean
     fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
         RestClientCustomizer { c ->

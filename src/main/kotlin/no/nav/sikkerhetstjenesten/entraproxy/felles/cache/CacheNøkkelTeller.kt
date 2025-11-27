@@ -1,7 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tags
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
@@ -51,16 +49,5 @@ class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?
                 until cursor == "0"
                 return count
             """
-    }
-}
-
-@Component
-class CacheMetrics(private val teller: CacheNøkkelTeller, private val meterRegistry: MeterRegistry) {
-    fun gaugeForCache(prefix: String) {
-        meterRegistry.gauge(
-            "cache_size",
-            Tags.of("cache", prefix),
-            teller
-        ) { it.tell(prefix).toDouble() }
     }
 }

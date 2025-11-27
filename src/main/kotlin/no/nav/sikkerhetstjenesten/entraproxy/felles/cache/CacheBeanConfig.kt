@@ -1,7 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import io.lettuce.core.RedisClient
 import no.nav.boot.conditionals.ConditionalOnGCP
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient.Companion.CACHE_SIZE_SCRIPT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
 import org.springframework.cache.annotation.CachingConfigurer
@@ -12,9 +16,12 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCache
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.cache.RedisCacheWriter.nonLockingRedisCacheWriter
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair.fromSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.stereotype.Component
 import tools.jackson.core.Version.unknownVersion
 import tools.jackson.databind.AnnotationIntrospector
 import tools.jackson.databind.DatabindContext
@@ -27,9 +34,6 @@ import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.ALLOWED
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.DENIED
 import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder
 import tools.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import tools.jackson.module.kotlin.KotlinModule.Builder
 
 @Configuration(proxyBeanMethods = true)
@@ -38,11 +42,17 @@ import tools.jackson.module.kotlin.KotlinModule.Builder
 class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
+
     private val mapper = JsonMapper.builder().polymorphicTypeValidator(NavPolymorphicTypeValidator()).apply {
         addModule(Builder().build())
         addModule(JacksonTypeInfoAddingValkeyModule())
     }.build()
 
+    @Bean
+    fun redisTemplate(): RedisTemplate<String, Any?> =
+        RedisTemplate<String, Any?>().apply {
+            connectionFactory = cf
+        }
 
     @Bean
     override fun cacheManager()  =
@@ -89,5 +99,21 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
                     construct(CLASS, PROPERTY, "@class", null, true, true), null)
             override fun version() = unknownVersion()
         })
+    }
+}
+
+@Component
+class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
+    val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Long::class.java)
+
+    fun count(): Long {
+        val script = DefaultRedisScript<Long>(
+            """
+            return 42
+            """.trimIndent(),
+            Long::class.java
+        )
+
+        return redisTemplate.execute(script, emptyList()) ?: -42L
     }
 }

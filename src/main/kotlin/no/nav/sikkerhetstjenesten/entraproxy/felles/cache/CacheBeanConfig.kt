@@ -4,14 +4,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import io.lettuce.core.RedisClient
-import io.lettuce.core.ScriptOutputType.INTEGER
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -21,11 +16,9 @@ import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.cache.RedisCacheWriter.nonLockingRedisCacheWriter
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair.fromSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
-import org.springframework.stereotype.Component
 import tools.jackson.core.Version.unknownVersion
 import tools.jackson.databind.AnnotationIntrospector
 import tools.jackson.databind.DatabindContext
@@ -39,8 +32,6 @@ import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.DENIED
 import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder
 import tools.jackson.databind.module.SimpleModule
 import tools.jackson.module.kotlin.KotlinModule.Builder
-import java.time.Duration
-import kotlin.time.measureTime
 
 @Configuration(proxyBeanMethods = true)
 @EnableCaching
@@ -110,42 +101,3 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
     }
 }
 
-@Component
-class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) : LeaderAware() {
-    private val log = getLogger(javaClass)
-
-    fun count(prefix: String) =
-        if (erLeder){
-            runBlocking {
-                var size = 0L
-                runCatching {
-                    val timeUsed = measureTime {
-                        size = withTimeout(Duration.ofSeconds(1).toMillis()) {
-                            redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java), emptyList(), prefix) ?: 0L
-                        }
-                    }
-                    log.info("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
-                    size
-                }.getOrElse { e ->
-                    log.warn("Feil ved henting av størrelse for $prefix", e)
-                    size
-                }
-            }
-        }
-        else 0L
-
-    companion object {
-        private const val CACHE_SIZE_SCRIPT = """
-                local cursor = "0"
-                local count = 0
-                local prefix = ARGV[1]
-                repeat
-                    local result = redis.call("SCAN", cursor, "MATCH", prefix .. "*", "COUNT", 10000)
-                    cursor = result[1]
-                    local keys = result[2]
-                    count = count + #keys
-                until cursor == "0"
-                return count
-            """
-    }
-}

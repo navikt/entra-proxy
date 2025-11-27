@@ -4,15 +4,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import io.lettuce.core.RedisClient
+import io.lettuce.core.ScriptOutputType.INTEGER
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import no.nav.boot.conditionals.ConditionalOnGCP
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient.Companion.CACHE_SIZE_SCRIPT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.cache.RedisCacheWriter.nonLockingRedisCacheWriter
@@ -36,6 +39,8 @@ import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.DENIED
 import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder
 import tools.jackson.databind.module.SimpleModule
 import tools.jackson.module.kotlin.KotlinModule.Builder
+import java.time.Duration
+import kotlin.time.measureTime
 
 @Configuration(proxyBeanMethods = true)
 @EnableCaching
@@ -50,7 +55,7 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
     }.build()
 
     @Bean
-    fun redisTemplate(): RedisTemplate<String, Any?> =
+    fun redisTemplate() =
         RedisTemplate<String, Any?>().apply {
             connectionFactory = cf
             keySerializer = StringRedisSerializer()
@@ -106,13 +111,31 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
 }
 
 @Component
-class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
-    val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Long::class.java)
+class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) : LeaderAware() {
+    private val log = getLogger(javaClass)
 
-        fun count(prefix: String): Long {
-            return try {
-                val script = DefaultRedisScript(
-                    """
+    fun count(prefix: String) =
+        if (erLeder){
+            runBlocking {
+                var size = 0L
+                runCatching {
+                    val timeUsed = measureTime {
+                        size = withTimeout(Duration.ofSeconds(1).toMillis()) {
+                            redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java), emptyList(), prefix) ?: 0L
+                        }
+                    }
+                    log.info("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
+                    size
+                }.getOrElse { e ->
+                    log.warn("Feil ved henting av størrelse for $prefix", e)
+                    size
+                }
+            }
+        }
+        else 0L
+
+    companion object {
+        private const val CACHE_SIZE_SCRIPT = """
                 local cursor = "0"
                 local count = 0
                 local prefix = ARGV[1]
@@ -123,15 +146,6 @@ class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
                     count = count + #keys
                 until cursor == "0"
                 return count
-                """.trimIndent(),
-                    Long::class.java
-                )
-
-                redisTemplate.execute(script, emptyList(), prefix) ?: 0L
-            } catch (e: RedisConnectionFailureException) {
-                -41L
-            }  catch (e: Exception) {
-                -42L
-            }
-        }
+            """
+    }
 }

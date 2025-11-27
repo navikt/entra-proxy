@@ -40,7 +40,7 @@ internal data class EntraSaksbehandlerRespons(
         val surname: String,
         val jobTitle: String = TIDENT_DEFAULT,
         val mail: String = UKJENT,
-        val officeLocation: String = UKJENT_ENHET
+        val streetAddress: String = UKJENT_ENHET
     )
 }
 

@@ -3,13 +3,14 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgRestClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Component
-class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
+class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig, private val norg: NorgRestClientAdapter) :
     AbstractRestClientAdapter(restClient, cf) {
 
     fun ansattOid(navIdent: String) =
@@ -49,7 +50,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             with(it) {
                 UtvidetAnsatt(
                     AnsattId(onPremisesSamAccountName ), displayName,
-                    givenName, surname, TIdent(jobTitle), mail,officeLocation)
+                    givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(streetAddress) ))
             }
         }
 

@@ -15,12 +15,14 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
     private var running = false
     @EventListener
     fun cacheInnslagFjernet(hendelse: CacheElementUtløptLytter.CacheInnslagFjernetHendelse) {
-        if (erLeder && isRunning()) {
-            val elementer = CacheNøkkelElementer(hendelse.nøkkel)
-            log.info("cache innslag utløpt for cache '${elementer.cacheName}' med nøkkel '${hendelse.nøkkel}'")
-            oppfriskere.firstOrNull { it.cacheName == elementer.cacheName }?.run {
-                oppfrisk(elementer)
-                teller.tell(of("cache", elementer.cacheName, "result", "expired", "method", elementer.metode ?: "ingen"))
+        somLeder {
+            if (isRunning()) {
+                val elementer = CacheNøkkelElementer(hendelse.nøkkel)
+                log.info("Cache innslag utløpt for cache '${elementer.cacheName}' med nøkkel '${hendelse.nøkkel}'")
+                oppfriskere.firstOrNull { it.cacheName == elementer.cacheName }?.run {
+                    oppfrisk(elementer)
+                    teller.tell(of("cache", elementer.cacheName, "result", "expired", "method", elementer.metode ?: "ingen"))
+                }
             }
         }
     }

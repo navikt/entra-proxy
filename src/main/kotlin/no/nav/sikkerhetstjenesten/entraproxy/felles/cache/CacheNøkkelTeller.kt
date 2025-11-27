@@ -16,27 +16,26 @@ class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun tell(prefix: String) =
-        if (erLeder) {
-            runBlocking {
-                var size = 0L
-                runCatching {
-                    val timeUsed = measureTime {
-                        size = withTimeout(Duration.ofMillis(500).toMillis()) {
-                            redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java),
-                                emptyList(),
-                                prefix) ?: 0L
+        somLeder {
+                runBlocking {
+                    var size = 0L
+                    runCatching {
+                        val timeUsed = measureTime {
+                            size = withTimeout(Duration.ofMillis(500).toMillis()) {
+                                redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java),
+                                    emptyList(),
+                                    prefix) ?: 0L
+                            }
                         }
+                        teller.tell(of("cache",prefix, "size", "$size"))
+                        log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
+                        size
+                    }.getOrElse { e ->
+                        log.warn("Feil ved henting av størrelse for $prefix", e)
+                        size
                     }
-                    teller.tell(of("cache",prefix,"size", "$size"))
-                    log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
-                    size
-                }.getOrElse { e ->
-                    log.warn("Feil ved henting av størrelse for $prefix", e)
-                    size
                 }
             }
-        }
-        else 0L
 
     companion object {
         private const val CACHE_SIZE_SCRIPT = """

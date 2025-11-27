@@ -20,4 +20,10 @@ abstract class LeaderAware(var erLeder: Boolean = false) {
             doHandleLeaderChange()
         }
     }
+
+    protected fun somLeder(block: () -> Unit ) {
+        if (erLeder) {
+            block()
+        }
+    }
 }

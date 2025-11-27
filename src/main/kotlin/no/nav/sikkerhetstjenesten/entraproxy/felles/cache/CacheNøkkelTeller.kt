@@ -16,7 +16,7 @@ class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun tell(prefix: String) =
-        somLeder {
+        somLeder(0L) {
                 runBlocking {
                     var size = 0L
                     runCatching {

@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.event.EventListener
 import java.net.InetAddress
 
-abstract class LeaderAware(var erLeder: Boolean = false) {
+abstract class LeaderAware(private var erLeder: Boolean = false) {
     private val hostname = InetAddress.getLocalHost().hostName
     protected fun doHandleLeaderChange()  = Unit
 
@@ -21,9 +21,9 @@ abstract class LeaderAware(var erLeder: Boolean = false) {
         }
     }
 
-    protected fun somLeder(block: () -> Unit ) {
+    protected fun <T> somLeder(default: T, block: () -> T ) : T =
         if (erLeder) {
             block()
         }
-    }
+        else default
 }

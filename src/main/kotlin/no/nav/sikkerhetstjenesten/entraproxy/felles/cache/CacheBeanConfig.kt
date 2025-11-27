@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.cache.RedisCacheWriter.nonLockingRedisCacheWriter
@@ -52,6 +53,8 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
     fun redisTemplate(): RedisTemplate<String, Any?> =
         RedisTemplate<String, Any?>().apply {
             connectionFactory = cf
+            keySerializer = StringRedisSerializer()
+            valueSerializer = StringRedisSerializer()
         }
 
     @Bean
@@ -106,14 +109,29 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
 class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
     val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Long::class.java)
 
-    fun count(): Long {
-        val script = DefaultRedisScript<Long>(
-            """
-            return 42
-            """.trimIndent(),
-            Long::class.java
-        )
+        fun count(prefix: String): Long {
+            return try {
+                val script = DefaultRedisScript(
+                    """
+                local cursor = "0"
+                local count = 0
+                local prefix = ARGV[1]
+                repeat
+                    local result = redis.call("SCAN", cursor, "MATCH", prefix .. "*", "COUNT", 10000)
+                    cursor = result[1]
+                    local keys = result[2]
+                    count = count + #keys
+                until cursor == "0"
+                return count
+                """.trimIndent(),
+                    Long::class.java
+                )
 
-        return redisTemplate.execute(script, emptyList()) ?: -42L
-    }
+                redisTemplate.execute(script, emptyList(), prefix) ?: 0L
+            } catch (e: RedisConnectionFailureException) {
+                -41L
+            }  catch (e: Exception) {
+                -42L
+            }
+        }
 }

@@ -57,7 +57,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("cache/{prefix}")
     fun count() =
-        counter.count()
+        counter.count("graph")
 
     @GetMapping("ansatt/{navIdent}")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =

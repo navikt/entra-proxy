@@ -77,7 +77,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
-        tidOgLog(log, " Entragrupper for $navIdent") {
+        tidOgLog(log) {
             adapter.ansattesGrupper("$oid")
         }
 

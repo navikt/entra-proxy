@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.spring.UnprotectedRestController
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheKeyCounter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable
 @UnprotectedRestController(value = ["/${DEV}"])
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste) {
+class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste, private val counter: CacheKeyCounter) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
@@ -53,6 +54,10 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }
+
+    @GetMapping("cache/{prefix}")
+    fun count() =
+        counter.count("graph")
 
     @GetMapping("ansatt/{navIdent}")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =

@@ -8,7 +8,3 @@ import org.springframework.stereotype.Component
 @Component
 class CacheOppfriskerTeller(registry: MeterRegistry, token: Token) :
     AbstractTeller(registry, token, "cache.oppfrisker", "Antall oppfriskninger av cache etter utløp")
-
-@Component
-class CacheStørrelseTeller(registry: MeterRegistry, token: Token) :
-    AbstractTeller(registry, token, "cache.size", "Cache størrelse")

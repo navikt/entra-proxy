@@ -9,7 +9,7 @@ import java.time.Duration
 
 
 @Component
-class CacheClient(client: RedisClient,private val teller : CacheKeyCounter,private vararg val cfgs: CachableRestConfig)  {
+class CacheClient(client: RedisClient, private val teller : CacheNøkkelTeller, private vararg val cfgs: CachableRestConfig)  {
     init {
         client.connect().apply {
             timeout = Duration.ofSeconds(30)
@@ -24,5 +24,5 @@ class CacheClient(client: RedisClient,private val teller : CacheKeyCounter,priva
         }
 
     private fun cacheStørrelse(prefix: String) =
-        teller.count(prefix).toDouble()
+        teller.tell(prefix).toDouble()
 }

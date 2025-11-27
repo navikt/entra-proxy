@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import io.micrometer.core.instrument.Tags.of
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
@@ -11,10 +12,10 @@ import java.time.Duration
 import kotlin.time.measureTime
 
 @Component
-class CacheKeyCounter(private val redisTemplate: RedisOperations<String, Any?>) : LeaderAware() {
+class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?>, private val teller: CacheStørrelseTeller) : LeaderAware() {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun count(prefix: String) =
+    fun tell(prefix: String) =
         if (erLeder) {
             runBlocking {
                 var size = 0L
@@ -26,6 +27,7 @@ class CacheKeyCounter(private val redisTemplate: RedisOperations<String, Any?>) 
                                 prefix) ?: 0L
                         }
                     }
+                    teller.tell(of("cache",prefix,"size", "$size"))
                     log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
                     size
                 }.getOrElse { e ->

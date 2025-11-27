@@ -39,8 +39,8 @@ internal data class EntraSaksbehandlerRespons(
         val givenName: String,
         val surname: String,
         val jobTitle: String = TIDENT_DEFAULT,
-        val mail: String,
-        val officeLocation: String
+        val mail: String = UKJENT,
+        val officeLocation: String = UKJENT_ENHET
     )
 }
 
@@ -59,5 +59,6 @@ internal data class GruppeMedlemmer(
 internal const val TIDENT_DEFAULT = "AAA1234"
 internal const val VALUE = "value"
 internal const val UKJENT = "N/A"
+internal  const val UKJENT_ENHET = "0000"
 internal const val NEXT_LINK = "@odata.nextLink"
 

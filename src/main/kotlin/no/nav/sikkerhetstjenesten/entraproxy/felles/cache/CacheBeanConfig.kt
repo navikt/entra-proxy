@@ -1,20 +1,28 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import io.lettuce.core.RedisClient
 import no.nav.boot.conditionals.ConditionalOnGCP
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient.Companion.CACHE_SIZE_SCRIPT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
 import org.springframework.cache.annotation.CachingConfigurer
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.cache.RedisCacheWriter.nonLockingRedisCacheWriter
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair.fromSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import org.springframework.stereotype.Component
 import tools.jackson.core.Version.unknownVersion
 import tools.jackson.databind.AnnotationIntrospector
 import tools.jackson.databind.DatabindContext
@@ -27,9 +35,6 @@ import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.ALLOWED
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator.Validity.DENIED
 import tools.jackson.databind.jsontype.impl.StdTypeResolverBuilder
 import tools.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
 import tools.jackson.module.kotlin.KotlinModule.Builder
 
 @Configuration(proxyBeanMethods = true)
@@ -38,11 +43,19 @@ import tools.jackson.module.kotlin.KotlinModule.Builder
 class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
+
     private val mapper = JsonMapper.builder().polymorphicTypeValidator(NavPolymorphicTypeValidator()).apply {
         addModule(Builder().build())
         addModule(JacksonTypeInfoAddingValkeyModule())
     }.build()
 
+    @Bean
+    fun redisTemplate(): RedisTemplate<String, Any?> =
+        RedisTemplate<String, Any?>().apply {
+            connectionFactory = cf
+            keySerializer = StringRedisSerializer()
+            valueSerializer = StringRedisSerializer()
+        }
 
     @Bean
     override fun cacheManager()  =
@@ -90,4 +103,35 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
             override fun version() = unknownVersion()
         })
     }
+}
+
+@Component
+class CacheKeyCounter(private val redisTemplate: RedisTemplate<String, Any?>) {
+    val script = DefaultRedisScript(CACHE_SIZE_SCRIPT, Long::class.java)
+
+        fun count(prefix: String): Long {
+            return try {
+                val script = DefaultRedisScript(
+                    """
+                local cursor = "0"
+                local count = 0
+                local prefix = ARGV[1]
+                repeat
+                    local result = redis.call("SCAN", cursor, "MATCH", prefix .. "*", "COUNT", 10000)
+                    cursor = result[1]
+                    local keys = result[2]
+                    count = count + #keys
+                until cursor == "0"
+                return count
+                """.trimIndent(),
+                    Long::class.java
+                )
+
+                redisTemplate.execute(script, emptyList(), prefix) ?: 0L
+            } catch (e: RedisConnectionFailureException) {
+                -41L
+            }  catch (e: Exception) {
+                -42L
+            }
+        }
 }

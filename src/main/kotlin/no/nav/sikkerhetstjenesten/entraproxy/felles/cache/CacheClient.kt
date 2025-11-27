@@ -47,17 +47,9 @@ class CacheClient(client: RedisClient,private vararg val cfgs: CachableRestConfi
         cfgs.associate {
             it.navn to "${cacheStørrelse(it.navn).toLong()} innslag, ttl: ${it.varighet.format()}"
         }
-/**
-    fun getAllCaches(cache: String) =
-        conn.sync().keys("$cache::*").map {
-            handler.idFraNøkkel(it)
-        }.also {
-            log.info("Fant ${it.size} nøkler i cache $cache")
-        }
 
-**/
     companion object {
-        private const val CACHE_SIZE_SCRIPT = """
+         const val CACHE_SIZE_SCRIPT = """
     local cursor = "0"
     local count = 0
     local prefix = ARGV[1]

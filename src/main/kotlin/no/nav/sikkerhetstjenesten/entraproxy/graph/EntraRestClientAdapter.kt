@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Component
-class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig, private val norg: NorgRestClientAdapter) :
+class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
     fun ansattOid(navIdent: String) =
@@ -46,13 +46,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     private fun utvidetAnsatt(uri: URI)  =
-        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {
-            with(it) {
-                UtvidetAnsatt(
-                    AnsattId(onPremisesSamAccountName ), displayName,
-                    givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(streetAddress) ))
-            }
-        }
+        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(

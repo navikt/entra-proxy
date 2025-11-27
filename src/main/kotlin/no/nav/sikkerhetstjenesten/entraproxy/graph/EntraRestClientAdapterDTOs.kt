@@ -27,12 +27,12 @@ internal data class Tilganger(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class EntraSaksbehandlerRespons(
+data class EntraSaksbehandlerRespons(
     @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>
 ) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    internal data class AnsattRespons(
+    data class AnsattRespons(
         val id: UUID,
         val onPremisesSamAccountName: String,
         val displayName: String,

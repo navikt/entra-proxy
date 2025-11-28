@@ -9,11 +9,20 @@ spec:
   groups:
     - name: "sikkerhetstjenesten alerts"
       rules:
-        - alert: "[sikkerhetstjenesten] Forhøyede feilrater"
+        - alert: "[sikkerhetstjenesten] Forhøyede advarselsrater"
           expr: sum(round(increase(logback_events_total{app="entra-proxy", level="warn"}[2m]))) > 20
           for: 3m
           annotations:
-            action: "Sjekk loggene for å se hvorfor det er så mye feil"
+            action: "Sjekk loggene for å se hvorfor det er så mye advarsler"
           labels:
             namespace: sikkerhetstjenesten
             severity: warning
+        - alert: "[sikkerhetstjenesten] Forhøyede errorrater"
+          expr: sum(round(increase(logback_events_total{app="entra-proxy", level="error"}[2m]))) > 3
+          for: 3m
+          annotations:
+            action: "Sjekk loggene for å se hvorfor det er så mye errors"
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: error
+

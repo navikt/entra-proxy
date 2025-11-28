@@ -68,7 +68,7 @@ jobs:
         uses: nais/attest-sign@v1.5.20
         with:
           image_ref: ${{env.IMAGE}}@${{env.DIGEST}}
-          sbom: build/reports/bom.json
+          sbom:  build/reports/cyclonedx/application.cdx.json
 
     outputs:
       image: ${{ steps.kompiler.outputs.image }}

@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
-import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.data.redis.core.RedisOperations
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Component
@@ -12,25 +12,25 @@ import kotlin.time.measureTime
 
 @Component
 class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?>) : LeaderAware() {
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = getLogger(javaClass)
 
-    fun tell(prefix: String) =
+    fun tell(cache: String) =
         somLeder(0L) {
                 runBlocking {
                     var size = 0L
                     runCatching {
                         val timeUsed = measureTime {
                             size = withTimeout(Duration.ofMillis(500).toMillis()) {
-                                log.info("SKraper $prefix")
+                                log.info("Teller størrelse i cache $cache")
                                 redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java),
                                     emptyList(),
-                                    prefix) ?: 0L
+                                    cache) ?: 0L
                             }
                         }
-                        log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $prefix")
+                        log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $cache")
                         size
                     }.getOrElse { e ->
-                        log.warn("Feil ved henting av størrelse for $prefix", e)
+                        log.warn("Feil ved henting av størrelse for $cache", e)
                         size
                     }
                 }

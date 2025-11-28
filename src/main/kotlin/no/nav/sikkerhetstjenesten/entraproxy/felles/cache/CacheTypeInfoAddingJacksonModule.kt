@@ -11,7 +11,7 @@ import tools.jackson.databind.module.SimpleModule
 /**
 Dette er en modul for Jackson 3 Json-serialisering som legger til en egendefinert AnnotationIntrospector. Denne introspektoren styrer hvordan typeinformasjon håndteres ved serialisering, slik at objekter får med seg typeinformasjon i JSON-feltet @class.
  */
-class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
+class CacheTypeInfoAddingJacksonModule : SimpleModule() {
     override fun setupModule(ctx: SetupContext) {
         ctx.insertAnnotationIntrospector(object : AnnotationIntrospector() {
             override fun findTypeResolverBuilder(config: MapperConfig<*>, ann: Annotated) =

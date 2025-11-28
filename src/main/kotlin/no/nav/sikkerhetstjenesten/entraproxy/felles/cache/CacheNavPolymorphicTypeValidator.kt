@@ -4,7 +4,7 @@ import tools.jackson.databind.DatabindContext
 import tools.jackson.databind.JavaType
 import tools.jackson.databind.jsontype.PolymorphicTypeValidator
 
-class NavPolymorphicTypeValidator(private vararg val allowedPrefixes: String = arrayOf("no.nav.","java.", "kotlin.")) : PolymorphicTypeValidator() {
+class CacheNavPolymorphicTypeValidator(private vararg val allowedPrefixes: String = arrayOf("no.nav.","java.", "kotlin.")) : PolymorphicTypeValidator() {
 
     override fun validateBaseType(ctx: DatabindContext, base: JavaType) = validityFor(base.rawClass.name)
 

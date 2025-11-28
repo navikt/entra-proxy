@@ -1,9 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.lettuce.core.RedisClient
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tags
-import io.micrometer.core.instrument.binder.MeterBinder
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
@@ -29,9 +26,9 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
 
-    private val mapper = JsonMapper.builder().polymorphicTypeValidator(NavPolymorphicTypeValidator()).apply {
+    private val mapper = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
         addModule(Builder().build())
-        addModule(JacksonTypeInfoAddingValkeyModule())
+        addModule(CacheTypeInfoAddingJacksonModule())
     }.build()
 
     @Bean

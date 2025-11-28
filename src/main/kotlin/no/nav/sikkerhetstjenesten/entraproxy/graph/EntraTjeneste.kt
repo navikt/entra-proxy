@@ -49,39 +49,38 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
-        tidOgLog(log) {
-            ansatt  {
-                adapter.utvidetAnsatt(ansattId.verdi)
-            }
+        ansatt  {
+            adapter.utvidetAnsatt(ansattId.verdi)
         }
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
-        tidOgLog(log) {
-            ansatt  {
-                adapter.utvidetAnsattTident(ansattId.verdi)
-            }
+        ansatt  {
+            adapter.utvidetAnsattTident(ansattId.verdi)
         }
+
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
-    fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
+    fun ansattesGrupper(oid: UUID) =
         tidOgLog(log) {
             adapter.ansatteGrupper("$oid")
         }
 
     private fun ansatt(block: () -> AnsattRespons?) =
-        block()?.let {
-            with(it) {
-                UtvidetAnsatt(
-                    AnsattId(onPremisesSamAccountName),
-                    displayName,
-                    givenName,
-                    surname,
-                    TIdent(jobTitle),
-                    mail,
-                    Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+        tidOgLog(log) {
+            block()?.let {
+                with(it) {
+                    UtvidetAnsatt(
+                        AnsattId(onPremisesSamAccountName),
+                        displayName,
+                        givenName,
+                        surname,
+                        TIdent(jobTitle),
+                        mail,
+                        Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+                }
             }
         }
 

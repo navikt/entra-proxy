@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -49,29 +50,18 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
         tidOgLog(log) {
-            adapter.utvidetAnsatt(ansattId.verdi)
-                ?.let {
-                with(it) {
-                    UtvidetAnsatt(
-                        AnsattId(onPremisesSamAccountName ), displayName,
-                        givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
-                }
+            ansatt  {
+                adapter.utvidetAnsatt(ansattId.verdi)
             }
-
         }
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
         tidOgLog(log) {
-            adapter.utvidetAnsattTident(ansattId.verdi)
-                ?.let {
-                    with(it) {
-                        UtvidetAnsatt(
-                            AnsattId(onPremisesSamAccountName ), displayName,
-                            givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
-                    }
-                }
+            ansatt  {
+                adapter.utvidetAnsattTident(ansattId.verdi)
+            }
         }
 
     @WithSpan
@@ -79,6 +69,20 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
         tidOgLog(log) {
             adapter.ansatteGrupper("$oid")
+        }
+
+    private fun ansatt( block: EntraRestClientAdapter.() -> AnsattRespons?) =
+        adapter.block()?.let {
+            with(it) {
+                UtvidetAnsatt(
+                    AnsattId(onPremisesSamAccountName),
+                    displayName,
+                    givenName,
+                    surname,
+                    TIdent(jobTitle),
+                    mail,
+                    Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+            }
         }
 
     override fun toString() =

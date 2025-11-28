@@ -43,12 +43,12 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     private fun utvidetAnsatt(uri: URI)  =
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
 
-    private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
+    private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),
             { it.next?.let(::get) },
             { it.value },
-            { constructorOn(it.displayName) })
+            { stringTransformer(it.displayName) })
 
     private inline fun <T, V, R> pagedTransformedAndSorted(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
         generateSequence(firstPage) { nextPage(it) }

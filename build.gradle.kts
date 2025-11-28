@@ -16,7 +16,8 @@ version = "1.0.1"
 
 
 plugins {
-    val kotlinVersion = CURRENT.toString()
+    val kotlinVersion = KotlinVersion.CURRENT.toString()
+    id("org.jetbrains.dokka") version "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("java")

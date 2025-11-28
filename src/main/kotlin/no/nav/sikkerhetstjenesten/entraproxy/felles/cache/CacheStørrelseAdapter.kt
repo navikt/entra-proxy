@@ -17,19 +17,19 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
     fun størrelse(cache: String) =
         somLeder(0L) {
                 runBlocking {
-                    var size = 0L
+                    var størrelse = 0L
                     runCatching {
                         val timeUsed = measureTime {
-                            size = withTimeout(Duration.ofMillis(500).toMillis()) {
+                            størrelse = withTimeout(Duration.ofMillis(500).toMillis()) {
                                 log.trace("Teller størrelse i cache $cache")
                                 redisTemplate.execute(SCRIPT, emptyList(),cache) ?: 0L
                             }
                         }
-                        log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $cache")
-                        size
+                        log.trace("Cache størrelse oppslag fant størrelse $størrelse på ${timeUsed.inWholeMilliseconds}ms for cache $cache")
+                        størrelse
                     }.getOrElse { e ->
                         log.warn("Feil ved henting av størrelse for $cache", e)
-                        size
+                        størrelse
                     }
                 }
             }

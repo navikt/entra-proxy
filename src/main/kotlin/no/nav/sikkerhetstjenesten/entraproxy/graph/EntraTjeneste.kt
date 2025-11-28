@@ -71,8 +71,8 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.ansatteGrupper("$oid")
         }
 
-    private fun ansatt( block: EntraRestClientAdapter.() -> AnsattRespons?) =
-        adapter.block()?.let {
+    private fun ansatt(block: () -> AnsattRespons?) =
+        block()?.let {
             with(it) {
                 UtvidetAnsatt(
                     AnsattId(onPremisesSamAccountName),

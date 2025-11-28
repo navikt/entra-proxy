@@ -29,7 +29,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                "kotlin.version" to "2.2.20",
+                "kotlin.version" to "2.2.21",
                 "jdk.version" to java.toolchain.languageVersion.get().toString(),
                 "jdk.vendor" to System.getProperty("java.vendor")
             )

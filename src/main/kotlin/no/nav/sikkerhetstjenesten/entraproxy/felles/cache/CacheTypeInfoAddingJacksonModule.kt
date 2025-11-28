@@ -1,8 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Value
 import tools.jackson.core.Version.unknownVersion
 import tools.jackson.databind.AnnotationIntrospector
 import tools.jackson.databind.cfg.MapperConfig
@@ -18,7 +18,7 @@ class CacheTypeInfoAddingJacksonModule : SimpleModule() {
         ctx.insertAnnotationIntrospector(object : AnnotationIntrospector() {
             override fun findTypeResolverBuilder(config: MapperConfig<*>, ann: Annotated) =
                 StdTypeResolverBuilder().init(
-                    JsonTypeInfo.Value.construct(CLASS,
+                    Value.construct(CLASS,
                         PROPERTY,
                         "@class",
                         null,

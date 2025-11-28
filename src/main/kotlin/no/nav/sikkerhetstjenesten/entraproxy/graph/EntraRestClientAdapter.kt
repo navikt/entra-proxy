@@ -3,14 +3,13 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgRestClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
 import java.net.URI
 
 @Component
-class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig, private val norg: NorgRestClientAdapter) :
+class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
     fun ansattOid(navIdent: String) =
@@ -26,7 +25,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
     fun ansattesGrupper(ansattOid: String) =
-        tilganger(cf.ansattesGrupperURI(ansattOid), :: EntraGruppe)
+        tilganger(cf.ansattesGrupperURI(ansattOid),  ::EntraGruppe )
 
     fun gruppeMedlemmer(gruppeOid: String) =
         pagedTransformedAndSorted(
@@ -46,13 +45,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     private fun utvidetAnsatt(uri: URI)  =
-        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()?.let {
-            with(it) {
-                UtvidetAnsatt(
-                    AnsattId(onPremisesSamAccountName ), displayName,
-                    givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(streetAddress) ))
-            }
-        }
+        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
 
     private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(

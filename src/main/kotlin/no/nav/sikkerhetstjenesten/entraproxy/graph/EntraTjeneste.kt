@@ -5,6 +5,7 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
@@ -49,6 +50,14 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun utvidetAnsatt(ansattId: AnsattId) =
         tidOgLog(log) {
             adapter.utvidetAnsatt(ansattId.verdi)
+                ?.let {
+                with(it) {
+                    UtvidetAnsatt(
+                        AnsattId(onPremisesSamAccountName ), displayName,
+                        givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+                }
+            }
+
         }
 
     @WithSpan
@@ -56,12 +65,19 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun utvidetAnsatt(ansattId: TIdent) =
         tidOgLog(log) {
             adapter.utvidetAnsattTident(ansattId.verdi)
+                ?.let {
+                    with(it) {
+                        UtvidetAnsatt(
+                            AnsattId(onPremisesSamAccountName ), displayName,
+                            givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+                    }
+                }
         }
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
-        tidOgLog(log, " Entragrupper for $navIdent") {
+        tidOgLog(log) {
             adapter.ansattesGrupper("$oid")
         }
 

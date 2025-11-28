@@ -44,13 +44,13 @@ class EntraConfig(
             queryParam(TOP, size)
         }.build(gruppeId)
 
-    fun userNavIdentURI(ansattId: String) =
+    fun navIdentURI(ansattId: String) =
         userIdentURI( "$NAVIDENT eq '$ansattId'")
 
-    fun userTidentURI(ansattId: String) =
+    fun tIdentURI(ansattId: String) =
         userIdentURI( "$T_IDENT eq '$ansattId'")
 
-    fun ansattesGrupperURI(oid: String) =
+    fun ansatteGrupperURI(oid: String) =
         grupperURI(oid, SECENABLED)
 
     private fun userIdentURI(filter: String) =

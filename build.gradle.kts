@@ -8,6 +8,7 @@ val logstashEncoderVersion = "9.0"
 val springMockVersion = "4.0.2"
 val conditionalsVersion = "5.1.11"
 val coroutinesVersion = "1.10.2"
+val otelVersion = "2.22.0"
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
@@ -53,8 +54,8 @@ configurations.all {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.20.1")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.20.1-alpha")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:$otelVersion-alpha")
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
     implementation("no.nav.boot:boot-conditionals:$conditionalsVersion")
@@ -81,7 +82,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.20.1")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:$otelVersion")
     }
 }
 

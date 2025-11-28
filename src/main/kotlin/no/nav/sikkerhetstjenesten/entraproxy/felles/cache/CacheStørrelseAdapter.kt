@@ -22,9 +22,7 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
                         val timeUsed = measureTime {
                             size = withTimeout(Duration.ofMillis(500).toMillis()) {
                                 log.trace("Teller størrelse i cache $cache")
-                                redisTemplate.execute(DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java),
-                                    emptyList(),
-                                    cache) ?: 0L
+                                redisTemplate.execute(SCRIPT, emptyList(),cache) ?: 0L
                             }
                         }
                         log.trace("Cache størrelse oppslag fant størrelse $size på ${timeUsed.inWholeMilliseconds}ms for cache $cache")
@@ -49,5 +47,7 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
                 until cursor == "0"
                 return count
             """
+        private val SCRIPT = DefaultRedisScript(CACHE_SIZE_SCRIPT.trimIndent(), Long::class.java)
+
     }
 }

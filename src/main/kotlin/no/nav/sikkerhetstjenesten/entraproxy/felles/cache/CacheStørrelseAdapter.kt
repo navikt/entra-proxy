@@ -11,10 +11,10 @@ import java.time.Duration
 import kotlin.time.measureTime
 
 @Component
-class CacheNøkkelTeller(private val redisTemplate: RedisOperations<String, Any?>) : LeaderAware() {
+class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, Any?>) : LeaderAware() {
     private val log = getLogger(javaClass)
 
-    fun tell(cache: String) =
+    fun størrelse(cache: String) =
         somLeder(0L) {
                 runBlocking {
                     var size = 0L

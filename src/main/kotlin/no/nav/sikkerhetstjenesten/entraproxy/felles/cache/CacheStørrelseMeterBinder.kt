@@ -6,7 +6,7 @@ import io.micrometer.core.instrument.binder.MeterBinder
 import org.springframework.stereotype.Component
 
 @Component
-class CacheMeterBinder(private val client: CacheClient) : MeterBinder {
+class CacheStørrelseMeterBinder(private val client: CacheClient) : MeterBinder {
 
     override fun bindTo(registry: MeterRegistry) {
         client.cfgs.forEach { cfg ->

@@ -25,11 +25,13 @@ class EntraConfig(
             path(USERS_PATH)
             queryParams(this, SELECT_USER, "$NAVIDENT eq '$ansattId'")
         }.build()
+
     fun gruppeURI(displayName: String) =
         builder().apply {
             path(GRUPPER_PATH)
             queryParams(this, TILGANG_EGENSKAPER, "displayName eq '$displayName'")
         }.build()
+
     fun temaURI(oid: String) =
         grupperURI(oid, TEMA_QUERY)
 
@@ -44,16 +46,16 @@ class EntraConfig(
             queryParam(TOP, size)
         }.build(gruppeId)
 
-    fun userNavIdentURI(ansattId: String) =
-        userIdentURI( "$NAVIDENT eq '$ansattId'")
+    fun navIdentURI(ansattId: String) =
+        identURI( "$NAVIDENT eq '$ansattId'")
 
-    fun userTidentURI(ansattId: String) =
-        userIdentURI( "$T_IDENT eq '$ansattId'")
+    fun tIdentURI(ansattId: String) =
+        identURI( "$T_IDENT eq '$ansattId'")
 
-    fun ansattesGrupperURI(oid: String) =
+    fun ansatteGruppeURI(oid: String) =
         grupperURI(oid, SECENABLED)
 
-    private fun userIdentURI(filter: String) =
+    private fun identURI(filter: String) =
         builder().apply {
             path(USERS_PATH)
             queryParams(this, T_IDENT_NAVIDENT, filter)

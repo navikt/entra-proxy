@@ -24,25 +24,21 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun enheter(ansattOid: String) =
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
-    fun ansattesGrupper(ansattOid: String) =
-        tilganger(cf.ansattesGrupperURI(ansattOid),  ::EntraGruppe )
+    fun ansatteGrupper(ansattOid: String) =
+        tilganger(cf.ansatteGruppeURI(ansattOid),  ::EntraGruppe )
 
     fun gruppeMedlemmer(gruppeOid: String) =
         pagedTransformedAndSorted(
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) }
-        )
+            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) })
 
     fun utvidetAnsatt(ansattId: String) =
-        utvidetAnsatt(cf.userNavIdentURI(ansattId))
-
+        utvidetAnsatt(cf.navIdentURI(ansattId))
 
     fun utvidetAnsattTident(ansattId: String) =
-        utvidetAnsatt(cf.userTidentURI(ansattId))
-
-
+        utvidetAnsatt(cf.tIdentURI(ansattId))
 
     private fun utvidetAnsatt(uri: URI)  =
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
@@ -52,8 +48,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<Tilganger>(uri),
             { it.next?.let(::get) },
             { it.value },
-            { constructorOn(it.displayName) }
-        )
+            { constructorOn(it.displayName) })
 
     private inline fun <T, V, R> pagedTransformedAndSorted(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
         generateSequence(firstPage) { nextPage(it) }

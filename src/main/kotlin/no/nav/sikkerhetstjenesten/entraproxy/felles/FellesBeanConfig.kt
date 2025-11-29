@@ -19,6 +19,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -134,7 +136,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         schemas["Ansatt"] = Schema<Ansatt>().apply {
             type = "string"
             description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"), "Tore Tang", "Tore", "Tang")
+            example = Ansatt(AnsattId("A123456"), Navn("Tore Tang", "Tore", "Tang"))
         }
         schemas["NavIdent"] = Schema<Ansatt>().apply {
             type = "string"

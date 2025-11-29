@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensi
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -63,7 +64,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
-    fun ansattesGrupper(oid: UUID, navIdent: AnsattId) =
+    fun ansatteGrupper(oid: UUID, navIdent: AnsattId) =
         tidOgLog(log) {
             adapter.ansatteGrupper("$oid")
         }
@@ -74,9 +75,8 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
                 with(it) {
                     UtvidetAnsatt(
                         AnsattId(onPremisesSamAccountName),
-                        displayName,
-                        givenName,
-                        surname,
+                        Navn(displayName,
+                            givenName, surname),
                         TIdent(jobTitle),
                         mail,
                         Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))

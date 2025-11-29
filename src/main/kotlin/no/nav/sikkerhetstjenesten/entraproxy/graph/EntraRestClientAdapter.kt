@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -33,7 +33,8 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
             { it.next?.let(::get) },
             { it.value },
-            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) })
+            { Ansatt(AnsattId(it.onPremisesSamAccountName),
+                Navn(it.displayName, it.givenName, it.surname)) })
 
     fun utvidetAnsatt(ansattId: String) =
         utvidetAnsatt(cf.navIdentURI(ansattId))
@@ -56,25 +57,19 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         crossinline nesteSide: (T) -> T?,
         crossinline verdier: (T) -> Iterable<V>,
         noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
-        sorter(transformer(elementer(førsteSide, nesteSide), verdier, transform))
+        sorter(transformer(elementer(førsteSide, nesteSide), transform, verdier))
 
     private inline fun <T> elementer(førsteSide: T, crossinline nesteSide: (T) -> T?)  =
         generateSequence(førsteSide) { nesteSide(it) }
 
     private inline fun <T, V, R> transformer(
         elementer: Sequence<T>,
-        crossinline verdier: (T) -> Iterable<V>,
-        noinline transform: (V) -> R) =
+        noinline transform: (V) -> R,
+        crossinline verdier: (T) -> Iterable<V>) =
         elementer.flatMap { verdier(it) }.map(transform)
 
     private fun <R : Comparable<R>> sorter(items: Sequence<R>) =
         items.toSortedSet()
 
-    fun AnsattRespons.tilAnsatt(): Ansatt =
-        with(this) {
-            Ansatt(
-                AnsattId(onPremisesSamAccountName),
-                displayName, givenName, surname)
-        }
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

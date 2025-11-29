@@ -31,9 +31,9 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
             entraTjeneste.tema(navIdent, it)
         }
     @GetMapping("tilganger/ansatt/{navIdent}")
-    fun ansattesGrupper(@PathVariable navIdent: AnsattId) =
+    fun ansatteGrupper(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.ansattesGrupper( it, navIdent)
+            entraTjeneste.ansatteGrupper( it, navIdent)
         }
 
     @GetMapping("enhet/{enhetsnummer}")

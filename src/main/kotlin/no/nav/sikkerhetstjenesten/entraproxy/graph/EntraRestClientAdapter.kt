@@ -31,10 +31,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     fun gruppeMedlemmer(gruppeOid: String) =
         pagedTransformedAndSorted(
             get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
-            { it.next?.let(::get) },
-            { it.value },
-            { Ansatt(AnsattId(it.onPremisesSamAccountName),
-                Navn(it.displayName, it.givenName, it.surname)) })
+            {
+                it.next?.let(::get)
+            },
+            {
+                it.value
+            },
+            {
+                Ansatt(AnsattId(it.onPremisesSamAccountName),
+                Navn(it.displayName, it.givenName, it.surname))
+            })
 
     fun utvidetAnsatt(ansattId: String) =
         utvidetAnsatt(cf.navIdentURI(ansattId))
@@ -48,9 +54,15 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
     private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),
-            { it.next?.let(::get) },
-            { it.value },
-            { stringTransformer(it.displayName) })
+            {
+                it.next?.let(::get)
+            },
+            {
+                it.value
+            },
+            {
+                stringTransformer(it.displayName)
+            })
 
     private inline fun <T, V, R> pagedTransformedAndSorted(
         førsteSide: T,
@@ -60,13 +72,14 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         sorter(transformer(elementer(førsteSide, nesteSide), transform, verdier))
 
     private inline fun <T> elementer(førsteSide: T, crossinline nesteSide: (T) -> T?)  =
-        generateSequence(førsteSide) { nesteSide(it) }
+        generateSequence(førsteSide) {
+            nesteSide(it)
+        }
 
-    private inline fun <T, V, R> transformer(
-        elementer: Sequence<T>,
-        noinline transform: (V) -> R,
-        crossinline verdier: (T) -> Iterable<V>) =
-        elementer.flatMap { verdier(it) }.map(transform)
+    private inline fun <T, V, R> transformer(elementer: Sequence<T>, noinline transform: (V) -> R,crossinline verdier: (T) -> Iterable<V>) =
+        elementer.flatMap {
+            verdier(it)
+        }.map(transform)
 
     private fun <R : Comparable<R>> sorter(items: Sequence<R>) =
         items.toSortedSet()

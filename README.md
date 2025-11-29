@@ -5,7 +5,6 @@ Tjeneste for å hente ut:
 3) Medlemmer i en bestemt enhet
 4) Medlemmer i en bestemt arkivtema-gruppe
 
-
 Swagger:
 
 DEV: https://entraproxy.intern.dev.nav.no/swagger-ui/index.html#/

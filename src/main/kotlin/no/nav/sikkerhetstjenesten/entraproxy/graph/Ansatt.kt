@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 open class Ansatt(
                   val navIdent: AnsattId,
-                  val visningNavn: String, val fornavn: String, val etternavn: String): Comparable<Ansatt> {
+                  val visningNavn: String = UKJENT, val fornavn: String = UKJENT, val etternavn: String = UKJENT): Comparable<Ansatt> {
 
 
     override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)

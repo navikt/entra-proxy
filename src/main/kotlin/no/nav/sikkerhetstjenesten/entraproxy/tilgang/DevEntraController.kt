@@ -33,7 +33,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     @GetMapping("tilganger/ansatt/{navIdent}")
     fun ansattesGrupper(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.ansattesGrupper( it)
+            entraTjeneste.ansattesGrupper( it, navIdent)
         }
 
     @GetMapping("enhet/{enhetsnummer}")

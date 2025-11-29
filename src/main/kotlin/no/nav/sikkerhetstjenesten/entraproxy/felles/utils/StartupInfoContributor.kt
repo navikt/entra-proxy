@@ -17,7 +17,7 @@ class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, pr
     override fun contribute(builder: Builder) {
         with(ctx) {
             builder.withDetail(
-                "extra-info", mapOf(
+                "runtime", mapOf(
                     "Cluster" to current.clusterName,
                     "Startup" to startupDate.local(),
                     "Java version" to environment.getProperty("java.version"),

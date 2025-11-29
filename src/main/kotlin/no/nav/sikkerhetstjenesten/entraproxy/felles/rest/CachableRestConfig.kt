@@ -9,7 +9,7 @@ interface CachableRestConfig {
 }
 
 @Component
-class MedlemmerCachableRestConfig : CachableRestConfig {
+class MedlemmerCachableRestConfig() : CachableRestConfig {
     override val varighet = Duration.ofHours(3)
     override val navn = MEDLEMMER
 

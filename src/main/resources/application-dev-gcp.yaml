@@ -20,6 +20,3 @@ management:
 
 oppfolging:
   enabled: true
-
-  graph:
-    varighet: 2h

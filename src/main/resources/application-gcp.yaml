@@ -80,6 +80,7 @@ springdoc:
 
 graph:
   scope: https://graph.microsoft.com/.default
+  varighet: 2h
 
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}

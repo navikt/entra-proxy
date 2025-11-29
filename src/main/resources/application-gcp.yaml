@@ -85,6 +85,9 @@ graph:
 norg:
   varighet: 23h
 
+medlemmer:
+    varighet: 21h
+
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}
   password: ${valkey.password.${nais.cluster.cache}}

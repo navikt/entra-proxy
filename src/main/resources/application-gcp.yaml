@@ -80,13 +80,16 @@ springdoc:
 
 graph:
   scope: https://graph.microsoft.com/.default
-  varighet: 2h
+  varighet: 3h
 
 norg:
-  varighet: 23h
+  varighet: 3h
 
 medlemmer:
-    varighet: 21h
+    varighet: 3h
+
+entraoid:
+  varighet: 361d
 
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}

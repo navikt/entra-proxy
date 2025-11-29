@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.MedlemmerCachableRestConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer

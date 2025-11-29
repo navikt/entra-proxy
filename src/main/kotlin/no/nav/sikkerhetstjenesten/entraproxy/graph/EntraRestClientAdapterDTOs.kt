@@ -35,7 +35,7 @@ data class EntraSaksbehandlerRespons(
     data class AnsattRespons(
         val id: UUID,
         val onPremisesSamAccountName: String,
-        val displayName: String,
+        val displayName: String = UKJENT,
         val givenName: String,
         val surname: String,
         val jobTitle: String = TIDENT_DEFAULT,

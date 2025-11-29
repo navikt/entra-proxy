@@ -73,8 +73,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             block()?.let {
                 with(it) {
                     UtvidetAnsatt(
-                        AnsattId(onPremisesSamAccountName), displayName,
-                            givenName, surname,
+                        AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
                         TIdent(jobTitle),
                         mail,
                         Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))

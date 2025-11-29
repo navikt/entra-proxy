@@ -35,12 +35,12 @@ data class EntraSaksbehandlerRespons(
     data class AnsattRespons(
         val id: UUID,
         val onPremisesSamAccountName: String,
-        val displayName: String = UKJENT,
-        val givenName: String = UKJENT,
-        val surname: String = UKJENT,
-        val jobTitle: String = TIDENT_DEFAULT,
-        val mail: String = UKJENT,
-        val streetAddress: String = UKJENT_ENHET
+        val displayName: String? = UKJENT,
+        val givenName: String? = UKJENT,
+        val surname: String? = UKJENT,
+        val jobTitle: String? = TIDENT_DEFAULT,
+        val mail: String? = UKJENT,
+        val streetAddress: String? = UKJENT_ENHET
     )
 }
 

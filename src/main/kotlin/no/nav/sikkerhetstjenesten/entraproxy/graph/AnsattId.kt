@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.Requirements.requireDigits
 
 
-@JvmInline
-value class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
+//@JvmInline
+data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
     init {
         with(verdi) {
             require(length == ANSATTID_LENGTH) { "Ugyldig lengde $length for $this, forventet $ANSATTID_LENGTH" }

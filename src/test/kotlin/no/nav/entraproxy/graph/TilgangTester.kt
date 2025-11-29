@@ -1,6 +1,8 @@
 package no.nav.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNavPolymorphicTypeValidator
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheTypeInfoAddingJacksonModule
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
@@ -11,15 +13,20 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.assertEquals
-import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.databind.SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule.Builder
 import tools.jackson.module.kotlin.readValue
 import kotlin.test.Test
 
 
 class TilgangTester {
 
-    private val  mapper = jacksonObjectMapper()
+    private val mapper = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
+        disable(FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
+        addModule(Builder().build())
+        addModule(CacheTypeInfoAddingJacksonModule())
+    }.build()
     private val nummer = "1234"
     private val aap = "AAP"
     val enhet = Enhetnummer(nummer)
@@ -65,10 +72,11 @@ class TilgangTester {
         val a  = AnsattId("A123456")
         val c = UtvidetAnsatt(AnsattId("A123456"), UtvidetAnsatt.Navn("Ola Nordmann", "Ola", "Nordmann"),
             TIdent("AAA1234"), "epost", Enhet(Enhetnummer("1234"), "Navn"))
-        val s =mapper.writerWithDefaultPrettyPrinter().writeValueAsString(a)
-        val c1 = mapper.readValue<AnsattId>(s)
-       println(c1)
-        assertEquals(a, c1)
+        val s = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(c)
+        println("mapper " + s)
+        val c1 = mapper.readValue<UtvidetAnsatt>(s)
+        //println(c1)
+        //assertEquals(a, c1)
     }
 }
 

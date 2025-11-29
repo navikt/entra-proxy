@@ -3,7 +3,6 @@ package no.nav.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonUnwrapped
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNavPolymorphicTypeValidator
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheTypeInfoAddingJacksonModule
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
@@ -12,7 +11,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
-import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 import org.assertj.core.api.Assertions.assertThat
 import tools.jackson.databind.SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS
 import tools.jackson.databind.json.JsonMapper
@@ -70,7 +68,7 @@ class TilgangTester {
     }
     @Test
     fun test1() {
-        val c = UtvidetAnsatt(AnsattId("A123456"), Navn("Ola Nordmann", "Ola", "Nordmann"),
+        val c = UtvidetAnsatt(AnsattId("A123456"), "Ola Nordmann", "Ola", "Nordmann",
             TIdent("AAA1234"), "epost", Enhet(Enhetnummer("1234"), "Navn"))
         val s =mapper.writerWithDefaultPrettyPrinter().writeValueAsString(c)
         println(s)

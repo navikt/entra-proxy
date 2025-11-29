@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -39,7 +38,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             },
             {
                 Ansatt(AnsattId(it.onPremisesSamAccountName),
-                Navn(it.displayName, it.givenName, it.surname))
+                it.displayName, it.givenName, it.surname)
             })
 
     fun utvidetAnsatt(ansattId: String) =

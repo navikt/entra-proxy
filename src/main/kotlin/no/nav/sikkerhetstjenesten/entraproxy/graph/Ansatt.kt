@@ -1,16 +1,14 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt.Navn
 
 open class Ansatt(
                   val navIdent: AnsattId,
-                  val navn: Navn): Comparable<Ansatt> {
+                  val visningNavn: String, val fornavn: String, val etternavn: String): Comparable<Ansatt> {
 
 
-    override fun compareTo(other: Ansatt): Int = navn.etternavn.compareTo(other.navn.etternavn)
+    override fun compareTo(other: Ansatt): Int = etternavn.compareTo(other.etternavn)
 
 }
 
-class UtvidetAnsatt(navIdent: AnsattId,navn: Navn, val tIdent: TIdent, val epost: String, val enhet: Enhet) : Ansatt(navIdent,navn) {
-    data class Navn (val visningNavn: String, val fornavn: String, val etternavn: String)
+class UtvidetAnsatt(navIdent: AnsattId, visningNavn: String,  fornavn: String,  etternavn: String, val tIdent: TIdent, val epost: String, val enhet: Enhet) : Ansatt(navIdent,visningNavn,fornavn,etternavn) {
 }

@@ -12,5 +12,5 @@ open class Ansatt(
 }
 
 class UtvidetAnsatt(navIdent: AnsattId,navn: Navn, val tIdent: TIdent, val epost: String, val enhet: Enhet) : Ansatt(navIdent,navn) {
-    data class Navn (val navn: String,val fornavn: String, val etternavn: String)
+    data class Navn (val visningNavn: String, val fornavn: String, val etternavn: String)
 }

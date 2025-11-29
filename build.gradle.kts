@@ -1,4 +1,5 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import kotlin.KotlinVersion.Companion.CURRENT
 
 val javaVersion = JavaLanguageVersion.of(21)
 val springdocVersion = "3.0.0"
@@ -15,7 +16,8 @@ version = "1.0.1"
 
 
 plugins {
-    val kotlinVersion = "2.2.21"
+    val kotlinVersion = KotlinVersion.CURRENT.toString()
+    id("org.jetbrains.dokka") version "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("java")
@@ -29,7 +31,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                "kotlin.version" to "2.2.21",
+                "kotlin.version" to CURRENT.toString(),
                 "jdk.version" to java.toolchain.languageVersion.get().toString(),
                 "jdk.vendor" to System.getProperty("java.vendor")
             )

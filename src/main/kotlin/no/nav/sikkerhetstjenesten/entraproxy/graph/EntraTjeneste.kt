@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -48,37 +49,39 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
-        tidOgLog(log) {
+        ansatt  {
             adapter.utvidetAnsatt(ansattId.verdi)
-                ?.let {
-                with(it) {
-                    UtvidetAnsatt(
-                        AnsattId(onPremisesSamAccountName ), displayName,
-                        givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
-                }
-            }
-
         }
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
-        tidOgLog(log) {
+        ansatt  {
             adapter.utvidetAnsattTident(ansattId.verdi)
-                ?.let {
-                    with(it) {
-                        UtvidetAnsatt(
-                            AnsattId(onPremisesSamAccountName ), displayName,
-                            givenName, surname, TIdent(jobTitle), mail, Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
-                    }
-                }
         }
+
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
-    fun ansattesGrupper(navIdent: AnsattId, oid: UUID) =
+    fun ansattesGrupper(oid: UUID) =
         tidOgLog(log) {
             adapter.ansatteGrupper("$oid")
+        }
+
+    private fun ansatt(block: () -> AnsattRespons?) =
+        tidOgLog(log) {
+            block()?.let {
+                with(it) {
+                    UtvidetAnsatt(
+                        AnsattId(onPremisesSamAccountName),
+                        displayName,
+                        givenName,
+                        surname,
+                        TIdent(jobTitle),
+                        mail,
+                        Enhet(Enhetnummer(streetAddress), norg.navnFor(Enhetnummer(streetAddress))))
+                }
+            }
         }
 
     override fun toString() =

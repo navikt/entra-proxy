@@ -26,29 +26,30 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
 
     fun ansatteGrupper(ansattOid: String) =
-        tilganger(cf.ansatteGrupperURI(ansattOid),  ::EntraGruppe )
+        tilganger(cf.ansatteGruppeURI(ansattOid),  ::EntraGruppe )
 
-    fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
-        sorter(elementer(get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid))) { it.next?.let(::get) }
-                .flatMap(GruppeMedlemmer::value)
-                .map { medlem -> medlem.tilAnsatt() })
+    fun gruppeMedlemmer(gruppeOid: String) =
+        pagedTransformedAndSorted(
+            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
+            { it.next?.let(::get) },
+            { it.value },
+            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) })
 
     fun utvidetAnsatt(ansattId: String) =
         utvidetAnsatt(cf.navIdentURI(ansattId))
 
-    fun utvidetAnsattTident(tIdent: String) =
-        utvidetAnsatt(cf.tIdentURI(tIdent))
+    fun utvidetAnsattTident(ansattId: String) =
+        utvidetAnsatt(cf.tIdentURI(ansattId))
 
     private fun utvidetAnsatt(uri: URI)  =
         get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
 
-    private inline fun <T> tilganger(uri: URI, crossinline constructorOn: (String) -> T): Set<T> where T : Comparable<T> =
+    private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(
             get<Tilganger>(uri),
             { it.next?.let(::get) },
             { it.value },
-            { constructorOn(it.displayName) }
-        )
+            { stringTransformer(it.displayName) })
 
     private inline fun <T, V, R> pagedTransformedAndSorted(
         førsteSide: T,

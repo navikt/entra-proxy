@@ -3,7 +3,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.Requirements.requireDigits
 
-data class TIdent (@JsonValue val verdi: String)  {
+@JvmInline
+value class TIdent (@JsonValue val verdi: String)  {
     init {
         with(verdi) {
             require(length == TIDENT_LENGTH) { "Ugyldig lengde $length for $this, forventet $TIDENT_LENGTH" }

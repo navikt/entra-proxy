@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertEquals
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
 import kotlin.test.Test
@@ -61,10 +62,13 @@ class TilgangTester {
     }
     @Test
     fun test1() {
+        val a  = AnsattId("A123456")
         val c = UtvidetAnsatt(AnsattId("A123456"), UtvidetAnsatt.Navn("Ola Nordmann", "Ola", "Nordmann"),
             TIdent("AAA1234"), "epost", Enhet(Enhetnummer("1234"), "Navn"))
-        val s =mapper.writerWithDefaultPrettyPrinter().writeValueAsString(c)
-        println(s)
+        val s =mapper.writerWithDefaultPrettyPrinter().writeValueAsString(a)
+        val c1 = mapper.readValue<AnsattId>(s)
+       println(c1)
+        assertEquals(a, c1)
     }
 }
 

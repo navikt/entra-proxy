@@ -15,10 +15,10 @@ class EntraConfig(
     baseUri: URI = DEFAULT_BASE_URI,
     pingPath: String = DEFAULT_PING_PATH,
     private val size: Int = DEFAULT_BATCH_SIZE,
+    override val varighet : Duration = Duration.ofHours(3),
     enabled: Boolean = true) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, GRAPH, enabled) {
 
     override val navn = name
-    override val varighet = Duration.ofHours(3)
 
     fun userURI(ansattId: String) =
         builder().apply {

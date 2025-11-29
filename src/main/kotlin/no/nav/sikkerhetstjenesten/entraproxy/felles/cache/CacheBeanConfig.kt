@@ -61,6 +61,5 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
             .entryTtl(cfg.varighet)
             .serializeKeysWith(fromSerializer(StringRedisSerializer()))
             .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(mapper)))
-
 }
 

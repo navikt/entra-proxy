@@ -21,9 +21,5 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
         }
     }
 
-    protected fun <T> somLeder(default: T, block: () -> T ) : T =
-        if (erLeder) {
-            block()
-        }
-        else default
+    protected fun <T> somLeder(default: T, block: () -> T): T = if (erLeder) block() else default
 }

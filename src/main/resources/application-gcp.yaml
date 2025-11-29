@@ -89,7 +89,7 @@ medlemmer:
     varighet: 3h
 
 entraoid:
-  varighet: 361d
+  varighet: 365d
 
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}

@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient
@@ -50,11 +51,30 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             { it.value },
             { stringTransformer(it.displayName) })
 
-    private inline fun <T, V, R> pagedTransformedAndSorted(firstPage: T, crossinline nextPage: (T) -> T?, crossinline values: (T) -> Iterable<V>, noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
-        generateSequence(firstPage) { nextPage(it) }
-            .flatMap { values(it) }
-            .map(transform)
-            .toSortedSet()
+    private inline fun <T, V, R> pagedTransformedAndSorted(
+        førsteSide: T,
+        crossinline nesteSide: (T) -> T?,
+        crossinline verdier: (T) -> Iterable<V>,
+        noinline transform: (V) -> R): Set<R> where R : Comparable<R> =
+        sorter(transformer(elementer(førsteSide, nesteSide), verdier, transform))
 
+    private inline fun <T> elementer(førsteSide: T, crossinline nesteSide: (T) -> T?)  =
+        generateSequence(førsteSide) { nesteSide(it) }
+
+    private inline fun <T, V, R> transformer(
+        elementer: Sequence<T>,
+        crossinline verdier: (T) -> Iterable<V>,
+        noinline transform: (V) -> R) =
+        elementer.flatMap { verdier(it) }.map(transform)
+
+    private fun <R : Comparable<R>> sorter(items: Sequence<R>) =
+        items.toSortedSet()
+
+    fun AnsattRespons.tilAnsatt(): Ansatt =
+        with(this) {
+            Ansatt(
+                AnsattId(onPremisesSamAccountName),
+                displayName, givenName, surname)
+        }
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

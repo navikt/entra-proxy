@@ -82,6 +82,9 @@ graph:
   scope: https://graph.microsoft.com/.default
   varighet: 2h
 
+norg:
+  varighet: 24h
+  
 valkey:
   username: ${valkey.username.${nais.cluster.cache}}
   password: ${valkey.password.${nais.cluster.cache}}

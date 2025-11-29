@@ -11,6 +11,7 @@ class NorgConfig(
     baseUri: URI = DEFAULT_URI,
     private val enhetPath: String = DEFAULT_ENHET_PATH,
     pingPath: String = DEFAULT_PING_PATH,
+    override val varighet : Duration,
     enabled: Boolean = true) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, NORG, enabled) {
 
     fun enhetURI(enhetsnummer: String) =
@@ -19,7 +20,6 @@ class NorgConfig(
         }.build(enhetsnummer)
 
     override val navn = name
-    override val varighet = Duration.ofDays(1)
     companion object {
         private val DEFAULT_URI = URI.create("http://norg2.org")
         private val DEFAULT_ENHET_PATH = "/norg2/api/v1/enhet/{enhetsnummer}"

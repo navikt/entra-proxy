@@ -72,10 +72,10 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         tidOgLog(log) {
             block()?.let {
                 with(it) {
-                    val enhetsNummer =Enhetnummer(safeStreetAddress)
+                    val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
                     UtvidetAnsatt(
                         AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
-                        TIdent(safeJobTitle),
+                        TIdent(jobTitle?: TIDENT_DEFAULT),
                         mail,
                         Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
                 }

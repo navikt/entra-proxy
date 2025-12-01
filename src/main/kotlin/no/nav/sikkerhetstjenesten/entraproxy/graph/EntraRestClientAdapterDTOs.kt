@@ -42,12 +42,6 @@ data class EntraSaksbehandlerRespons(
         val mail: String? = UKJENT,
         val streetAddress: String? = null
     )
-    {
-        val safeJobTitle: String
-            get() = if (jobTitle.isNullOrBlank()) TIDENT_DEFAULT else jobTitle
-        val safeStreetAddress: String
-            get() = if (streetAddress.isNullOrBlank()) UKJENT_ENHET else streetAddress
-    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

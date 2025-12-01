@@ -38,10 +38,16 @@ data class EntraSaksbehandlerRespons(
         val displayName: String? = UKJENT,
         val givenName: String? = UKJENT,
         val surname: String? = UKJENT,
-        val jobTitle: String? = TIDENT_DEFAULT,
+        val jobTitle: String? = null,
         val mail: String? = UKJENT,
-        val streetAddress: String? = UKJENT_ENHET
+        val streetAddress: String? = null
     )
+    {
+        val safeJobTitle: String
+            get() = if (jobTitle.isNullOrBlank()) TIDENT_DEFAULT else jobTitle
+        val safeStreetAddress: String
+            get() = if (streetAddress.isNullOrBlank()) UKJENT_ENHET else streetAddress
+    }
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)

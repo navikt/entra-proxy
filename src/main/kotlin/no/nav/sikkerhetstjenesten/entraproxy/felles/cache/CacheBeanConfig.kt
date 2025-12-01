@@ -27,11 +27,7 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
 
-    private val mapper = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
-        disable(FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
-        addModule(Builder().build())
-        addModule(CacheTypeInfoAddingJacksonModule())
-    }.build()
+
 
     @Bean
     fun redisTemplate() =
@@ -60,6 +56,15 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
         defaultCacheConfig()
             .entryTtl(cfg.varighet)
             .serializeKeysWith(fromSerializer(StringRedisSerializer()))
-            .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(mapper)))
+            .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(MAPPER)))
+
+
+    companion object {
+         val MAPPER = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
+            disable(FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
+            addModule(Builder().build())
+            addModule(CacheTypeInfoAddingJacksonModule())
+        }.build()
+    }
 }
 

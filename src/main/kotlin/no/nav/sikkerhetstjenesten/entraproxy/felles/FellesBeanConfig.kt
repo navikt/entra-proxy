@@ -7,8 +7,6 @@ import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
 import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
-import jakarta.servlet.http.HttpServletRequest
-import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
@@ -22,12 +20,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.springframework.boot.actuate.web.exchanges.HttpExchangeRepository
-import org.springframework.boot.actuate.web.exchanges.InMemoryHttpExchangeRepository
-import org.springframework.boot.actuate.web.exchanges.Include.defaultIncludes
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.restclient.RestClientCustomizer
-import org.springframework.boot.servlet.actuate.web.exchanges.HttpExchangesFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -73,17 +67,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: Token) =
         TimedAspect(meterRegistry, Function { pjp -> Tags.of("cluster", token.cluster, "method", pjp.signature.name, "client", token.systemNavn) })
 
-    @Bean
-    @ConditionalOnNotProd
-    fun traceRepository() = InMemoryHttpExchangeRepository()
-
-
-    @Bean
-    @ConditionalOnNotProd
-    fun httpExchangesFilter(repository: HttpExchangeRepository) =
-        object : HttpExchangesFilter(repository, defaultIncludes()) {
-            override fun shouldNotFilter(request: HttpServletRequest) = request.servletPath.contains("monitoring")
-        }
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(ansattIdAddingInterceptor)

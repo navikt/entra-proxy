@@ -38,9 +38,9 @@ data class EntraSaksbehandlerRespons(
         val displayName: String? = UKJENT,
         val givenName: String? = UKJENT,
         val surname: String? = UKJENT,
-        val jobTitle: String = TIDENT_DEFAULT,
+        val jobTitle: String? = TIDENT_DEFAULT,
         val mail: String? = UKJENT,
-        val streetAddress: String = UKJENT_ENHET
+        val streetAddress: String? = UKJENT_ENHET
     )
 }
 

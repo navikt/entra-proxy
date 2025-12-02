@@ -8,8 +8,16 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<En
 
     override fun compareTo(other: Enhet): Int = enhetnummer.compareTo(other.enhetnummer)
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Enhet) return false
+        return enhetnummer == other.enhetnummer &&
+                navn == other.navn
+    }
 
-    class Enhetnummer(nummer: String) : Comparable<Enhetnummer> {
+    override fun hashCode() = enhetnummer.hashCode()
+
+    class Enhetnummer(private val nummer: String) : Comparable<Enhetnummer> {
 
         @JsonValue
         val verdi = nummer.removePrefix(ENHET_PREFIX)
@@ -20,6 +28,14 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<En
         val gruppeNavn = "${ENHET_PREFIX}$verdi"
 
         override fun compareTo(other: Enhetnummer): Int = verdi.compareTo(other.verdi)
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Enhetnummer) return false
+            return nummer == other.nummer
+        }
+
+        override fun hashCode() = nummer.hashCode()
 
     }
     companion object {

@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair.fromSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
-import tools.jackson.databind.SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule.Builder
 
@@ -25,9 +24,6 @@ import tools.jackson.module.kotlin.KotlinModule.Builder
 @ConditionalOnGCP
 class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
-
-
-
 
     @Bean
     fun redisTemplate() =
@@ -61,7 +57,6 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
 
     companion object {
          val MAPPER = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
-            disable(FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
             addModule(Builder().build())
             addModule(CacheTypeInfoAddingJacksonModule())
         }.build()

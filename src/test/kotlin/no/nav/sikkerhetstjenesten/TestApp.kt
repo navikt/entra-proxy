@@ -4,7 +4,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.C
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-
 class TestApp {
     @SpringBootApplication
     class TestApp

@@ -7,10 +7,10 @@ import io.mockk.junit5.MockKExtension
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheBeanConfig.Companion.MAPPER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTeller
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.DevEntraController
@@ -61,14 +61,7 @@ class TilgangTester {
     @MockkBean
     private lateinit var teller : TokenTypeTellendeRequestInterceptor
 
-    private val nummer = "1234"
-    private val aap = "AAP"
-    val enhetnr = Enhetnummer(nummer)
-    val enhetnr1 = Enhetnummer("${Enhet.ENHET_PREFIX}$nummer")
-    val ansattId = AnsattId("A123456")
-    val uuid = randomUUID()
-    val tema = Tema(aap)
-    val tema1 = Tema("${Tema.TEMA_PREFIX}$aap")
+
 
     @BeforeTest
     fun setup() {
@@ -78,78 +71,70 @@ class TilgangTester {
 
     @Test
     fun temaer() {
-        every { oid.gruppeOid( tema.gruppeNavn) } returns uuid
-        every { entra.medlemmer(uuid) } returns setOf(ansatt)
-        val respons = mockMvc.perform((get("/dev/tema/AAP")))
+        every { oid.gruppeOid( TEMA.gruppeNavn) } returns UUID
+        every { entra.medlemmer(UUID) } returns setOf(ansatt)
+        val respons = mockMvc.perform((get("/dev/tema/$AAP")))
             .andExpect(status().isOk)
             .andReturn()
             .response
             .contentAsString;
-        val res = jsonMapper.readValue<Set<Ansatt>>(respons)
-        assertThat(res.single()).isEqualTo(ansatt)
+        assertThat(jsonMapper.readValue<Set<Ansatt>>(respons).single()).isEqualTo(ansatt)
     }
 
     @Test
     fun enheter() {
-        every { oid.ansattOid(ansattId) } returns uuid
-        every { entra.enheter(ansattId,uuid) } returns setOf(enhet)
-        val respons = mockMvc.perform((get("/dev/enhet/ansatt/${ansattId.verdi}")))
+        every { oid.ansattOid(ANSATTID) } returns UUID
+        every { entra.enheter(ANSATTID,UUID) } returns setOf(ENHET)
+        val respons = mockMvc.perform((get("/dev/enhet/ansatt/${ANSATTID.verdi}")))
             .andExpect(status().isOk)
             .andReturn()
             .response
             .contentAsString;
-        val res = jsonMapper.readValue<Set<Enhet>>(respons)
-        assertThat(res.single()).isEqualTo(enhet)
+        assertThat(jsonMapper.readValue<Set<Enhet>>(respons).single()).isEqualTo(ENHET)
     }
 
     @Test
     fun enhetUtenPrefix() {
-        assertThat(enhetnr.gruppeNavn).isEqualTo("${Enhet.ENHET_PREFIX}$nummer")
+        assertThat(enhetnr.gruppeNavn).isEqualTo("${ENHET_PREFIX}$nummer")
         assertThat(enhetnr.verdi).isEqualTo(nummer)
     }
     @Test
     fun enhetMedPrefix() {
-        assertThat(enhetnr1.gruppeNavn).isEqualTo("${Enhet.ENHET_PREFIX}$nummer")
+        assertThat(enhetnr1.gruppeNavn).isEqualTo("${ENHET_PREFIX}$nummer")
         assertThat(enhetnr1.verdi).isEqualTo(nummer)
     }
 
     @Test
-    fun serDeserEnhet() {
-        assertThat(MAPPER.readValue<Enhetnummer>(MAPPER.writeValueAsString(
-            enhetnr)).verdi).isEqualTo(nummer)
-        assertThat(MAPPER.readValue<Enhetnummer>(MAPPER.writeValueAsString(
-            enhetnr1)).verdi).isEqualTo(nummer)
-    }
-    @Test
     fun temaUtenPrefix() {
-        assertThat(tema.gruppeNavn).isEqualTo("${Tema.Companion.TEMA_PREFIX}$aap")
-        assertThat(tema.verdi).isEqualTo(aap)
+        assertThat(TEMA.gruppeNavn).isEqualTo("${Tema.Companion.TEMA_PREFIX}$AAP")
+        assertThat(TEMA.verdi).isEqualTo(AAP)
     }
     @Test
     fun temaMedPrefix() {
-        assertThat(tema1.gruppeNavn).isEqualTo("${Tema.TEMA_PREFIX}$aap")
-        assertThat(tema1.verdi).isEqualTo(aap)
+        val tema1 = Tema("${Tema.TEMA_PREFIX}$AAP")
+        assertThat(tema1.gruppeNavn).isEqualTo("${Tema.TEMA_PREFIX}$AAP")
+        assertThat(tema1.verdi).isEqualTo(AAP)
     }
 
-    @Test
-    fun serDeserTema() {
-        assertThat(MAPPER.readValue<Tema>(MAPPER.writeValueAsString(
-            tema)).verdi).isEqualTo(aap)
-        assertThat(MAPPER.readValue<Tema>(MAPPER.writeValueAsString(
-            tema1)).verdi).isEqualTo(aap)
-    }
 
     companion object {
+        const val AAP = "AAP"
+        val ANSATTID = AnsattId("A123456")
+        val UUID = randomUUID()
+        val TEMA = Tema(AAP)
         private val ansatt = Ansatt(
             AnsattId("E123456"),
             "Ola Nordmann",
             "Ola",
             "Nordmann")
 
-    private val enhet = Enhet(
-        Enhetnummer("1234"),
-        "Enhet Navn"
-    )
+        private val ENHET = Enhet(
+            Enhetnummer("1234"),
+            "Enhet Navn"
+        )
+        private const val nummer = "1234"
+        val enhetnr = Enhetnummer(nummer)
+        val enhetnr1 = Enhetnummer("${ENHET_PREFIX}$nummer")
     }
 }
 

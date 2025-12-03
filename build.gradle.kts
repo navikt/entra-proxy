@@ -25,6 +25,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.cyclonedx.bom") version "3.0.0"
     id("com.google.cloud.tools.jib") version "3.4.5"
+    id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application
 }
 springBoot {

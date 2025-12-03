@@ -1,4 +1,7 @@
 management:
+  info:
+    git:
+      mode: simple
   observations:
     annotations:
       enabled: true

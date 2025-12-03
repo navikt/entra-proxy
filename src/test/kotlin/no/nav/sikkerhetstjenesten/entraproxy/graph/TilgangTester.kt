@@ -101,7 +101,7 @@ class TilgangTester {
         val res = jsonMapper.readValue<Set<Enhet>>(respons)
         assertThat(res.single()).isEqualTo(enhet)
     }
-    
+
     @Test
     fun enhetUtenPrefix() {
         assertThat(enhetnr.gruppeNavn).isEqualTo("${Enhet.ENHET_PREFIX}$nummer")

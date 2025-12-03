@@ -1,5 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import kotlin.hashCode
+
 
 open class Ansatt(
                   val navIdent: AnsattId,
@@ -7,6 +9,23 @@ open class Ansatt(
 
 
     override fun compareTo(other: Ansatt): Int = navIdent.compareTo(other.navIdent)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Ansatt) return false
+
+        return navIdent == other.navIdent &&
+                visningNavn == other.visningNavn &&
+                fornavn == other.fornavn &&
+                etternavn == other.etternavn
+    }
+
+    override fun hashCode(): Int {
+        var result = navIdent.hashCode()
+        result = 31 * result + (visningNavn?.hashCode() ?: 0)
+        result = 31 * result + (fornavn?.hashCode() ?: 0)
+        result = 31 * result + (etternavn?.hashCode() ?: 0)
+        return result
+    }
 
 }
 

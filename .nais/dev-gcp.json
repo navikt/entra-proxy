@@ -99,6 +99,11 @@
       "name": "gosys-oppgavebehandling-api-q1",
       "namespace": "oppgavehandtering",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "hm-saksbehandling",
+      "namespace": "teamdigihot",
+      "cluster": "dev-gcp"
     }
   ],
   "nais": {

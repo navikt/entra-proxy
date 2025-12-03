@@ -116,7 +116,7 @@ class TilgangTester {
     @Test
     fun serDeserEnhet() {
         assertThat(MAPPER.readValue<Enhetnummer>(MAPPER.writeValueAsString(
-            enhet)).verdi).isEqualTo(nummer)
+            enhetnr)).verdi).isEqualTo(nummer)
         assertThat(MAPPER.readValue<Enhetnummer>(MAPPER.writeValueAsString(
             enhetnr1)).verdi).isEqualTo(nummer)
     }

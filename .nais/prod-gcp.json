@@ -32,6 +32,11 @@
       "name": "gosys-oppgavebehandling-api",
       "namespace": "oppgavehandtering",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "hm-saksbehandling",
+      "namespace": "teamdigihot",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "etterlatte-behandling",
+      "namespace": "etterlatte",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "opprett-oppgave-frontend-q1",
       "namespace": "isa",
       "cluster": "dev-gcp"

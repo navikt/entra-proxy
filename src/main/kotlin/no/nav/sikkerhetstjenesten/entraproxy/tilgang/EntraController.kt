@@ -12,6 +12,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -61,6 +62,31 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @Operation(summary = "Hent alle medlemmer for et gitt tema")
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)
+
+    @GetMapping("ansatt/{navIdent}")
+    @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
+    fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
+        entraTjeneste.utvidetAnsatt(navIdent)
+
+    @GetMapping("ansatt/tident/{tIdent}")
+    @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234")
+    fun utvidetAnsatt(@PathVariable tIdent: TIdent) =
+        entraTjeneste.utvidetAnsatt(tIdent)
+
+    @GetMapping("/ansatt/tilganger/{navIdent}")
+    @Operation(summary = "Hent informasjon om ansatts tilganger")
+    fun ansatteGrupper(@PathVariable navIdent: AnsattId) =
+        oidTjeneste.ansattOid(navIdent)?.let {
+            entraTjeneste.ansatteGrupper( it, navIdent)
+        }
+
+    @GetMapping("gruppe/medlemmer")
+    @Operation(summary = "Hent ansatte i en gitt gruppe")
+    fun medlemmeriGittGruppe(gruppeNavn: String) =
+        oidTjeneste.gruppeOid(gruppeNavn)?.let {
+            entraTjeneste.medlemmer( it)
+        }
+
 
     private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T) =
         with(token.oboFields) {

@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "application": "saf",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "prod-fss"
+    },
+    {
       "name": "etterlatte-behandling",
       "namespace": "etterlatte",
       "cluster": "prod-gcp"

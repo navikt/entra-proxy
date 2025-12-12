@@ -6,6 +6,31 @@
 
   "inbound": [
     {
+      "application": "saf-q0",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "application": "saf-q1",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "application": "saf",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "application": "saf-q4",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
+      "application": "saf-q5",
+      "namespace": "teamdokumenthandtering",
+      "cluster": "dev-fss"
+    },
+    {
       "name": "etterlatte-behandling",
       "namespace": "etterlatte",
       "cluster": "dev-gcp"

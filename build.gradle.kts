@@ -7,7 +7,7 @@ val tokenSupportVersion = "6.0.0"
 val mockkVersion = "1.14.6"
 val logstashEncoderVersion = "9.0"
 val springMockVersion = "4.0.2"
-val conditionalsVersion = "5.1.11"
+val conditionalsVersion = "6.0.0"
 val coroutinesVersion = "1.10.2"
 val otelVersion = "2.22.0"
 
@@ -33,7 +33,7 @@ springBoot {
         properties {
             additional = mapOf(
                 "kotlin.version" to CURRENT.toString(),
-                "jdk.version" to java.toolchain.languageVersion.get().toString(),
+                "jdk.version" to javaVersion.toString(),
                 "jdk.vendor" to System.getProperty("java.vendor")
             )
         }

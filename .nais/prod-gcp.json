@@ -54,13 +54,13 @@
   },
   "mem": {
     "min": "1Gi",
-    "max": "1Gi"
+    "max": "2Gi"
   },
   "cpu": {
     "min": "100m"
   },
   "replica": {
-    "min": 2,
-    "max": 6
+    "min": 4,
+    "max": 8
   }
 }

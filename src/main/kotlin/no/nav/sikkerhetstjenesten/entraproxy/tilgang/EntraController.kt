@@ -75,14 +75,14 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatts tilganger")
-    fun ansatteGrupper(@PathVariable navIdent: AnsattId) =
+    fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.ansatteGrupper( it, navIdent)
         }
 
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")
-    fun medlemmeriGittGruppe(gruppeNavn: String) =
+    fun gruppeMedlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }

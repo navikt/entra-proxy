@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "application": "oppgavestatistikk",
+      "namespace": "oppgavehandtering",
+      "cluster": "prod-fss"
+    },
+    {
       "application": "saf",
       "namespace": "teamdokumenthandtering",
       "cluster": "prod-fss"

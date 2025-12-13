@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "application": "oppgavestatistikk",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-fss"
+    },
+    {
       "application": "saf-q0",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"

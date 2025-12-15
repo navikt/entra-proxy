@@ -38,7 +38,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             },
             {
                 Ansatt(AnsattId(it.onPremisesSamAccountName),
-                it.displayName, it.givenName, it.surname)
+                it.displayName, it.givenName, it.surname, it.mail)
             })
 
     fun utvidetAnsatt(ansattId: String) =

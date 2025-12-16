@@ -53,6 +53,11 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }
+    @GetMapping("gruppe/medlemmer/utvidet")
+    fun medlemmerUtvidet(gruppeNavn: String) =
+        oidTjeneste.gruppeOid(gruppeNavn)?.let {
+            entraTjeneste.medlemerUtvidetInfo( it)
+        }
 
     @GetMapping("ansatt/{navIdent}")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =

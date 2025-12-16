@@ -38,7 +38,27 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             },
             {
                 Ansatt(AnsattId(it.onPremisesSamAccountName),
-                it.displayName, it.givenName, it.surname, it.mail)
+                it.displayName, it.givenName, it.surname,)
+            })
+    fun gruppeUtvidetMedlemmer(gruppeOid: String) =
+        pagedTransformedAndSorted(
+            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
+            {
+                it.next?.let(::get)
+            },
+            {
+                it.value
+            },
+            {
+                UtvidetAnsatt(
+                    AnsattId(it.onPremisesSamAccountName),
+                    it.displayName,
+                    it.givenName,
+                    it.surname,
+                    null,
+                    it.mail,
+                    Enhet(Enhetnummer(it.streetAddress ?: ""), "")
+                )
             })
 
     fun utvidetAnsatt(ansattId: String) =

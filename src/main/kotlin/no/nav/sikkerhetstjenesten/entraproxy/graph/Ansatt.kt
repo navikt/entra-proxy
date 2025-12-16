@@ -5,7 +5,7 @@ import kotlin.hashCode
 
 open class Ansatt(
                   val navIdent: AnsattId,
-                  val visningNavn: String? = UKJENT, val fornavn: String? = UKJENT, val etternavn: String? = UKJENT, val epost: String? = UKJENT): Comparable<Ansatt> {
+                  val visningNavn: String? = UKJENT, val fornavn: String? = UKJENT, val etternavn: String? = UKJENT): Comparable<Ansatt> {
 
 
     override fun compareTo(other: Ansatt): Int = navIdent.compareTo(other.navIdent)
@@ -29,6 +29,6 @@ open class Ansatt(
 
 }
 
-class UtvidetAnsatt(navIdent: AnsattId, visningNavn: String?, fornavn: String?, etternavn: String?, val tIdent: TIdent,
-                    epost:String?, val enhet: Enhet) : Ansatt(navIdent,visningNavn,fornavn,etternavn,epost) {
+class UtvidetAnsatt(navIdent: AnsattId, visningNavn: String?, fornavn: String?, etternavn: String?, val tIdent: TIdent?,
+                    val epost:String?, val enhet: Enhet?) : Ansatt(navIdent,visningNavn,fornavn,etternavn) {
 }

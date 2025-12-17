@@ -110,6 +110,7 @@
       "namespace": "teampensjon",
       "cluster": "dev-fss"
     },
+
     {
       "name": "oppgave",
       "namespace": "oppgavehandtering",

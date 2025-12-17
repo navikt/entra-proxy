@@ -4,11 +4,6 @@
   ],
   "inbound": [
     {
-      “name”: “navansatt”,
-      “namespace”: “pensjondeployer”,
-      “cluster”: “prod-gcp”
-    },
-    {
       "name":"oppgavestatistikk",
       "namespace": "oppgavehandtering",
       "cluster": "prod-fss"
@@ -62,7 +57,12 @@
       "name": "pdl-web",
       "namespace": "pdl",
       "cluster": "prod-fss"
-    }
+    },
+    {
+      "name": "navansatt",
+      "namespace": "pensjondeployer",
+      "cluster": "prod-gcp"
+  }
   ],
   "nais": {
     "cluster": {

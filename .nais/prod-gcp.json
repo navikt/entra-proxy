@@ -9,12 +9,12 @@
       “cluster”: “prod-gcp”
     },
     {
-      "application": "oppgavestatistikk",
+      "name":"oppgavestatistikk",
       "namespace": "oppgavehandtering",
       "cluster": "prod-fss"
     },
     {
-      "application": "saf",
+      "name": "saf",
       "namespace": "teamdokumenthandtering",
       "cluster": "prod-fss"
     },

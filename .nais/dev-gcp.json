@@ -6,32 +6,32 @@
 
   "inbound": [
     {
-      "application": "oppgavestatistikk",
+      "name": "oppgavestatistikk",
       "namespace": "oppgavehandtering",
       "cluster": "dev-fss"
     },
     {
-      "application": "saf-q0",
+      "name": "saf-q0",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "application": "saf-q1",
+      "name": "saf-q1",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "application": "saf",
+      "name":: "saf",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "application": "saf-q4",
+      "name":: "saf-q4",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "application": "saf-q5",
+      "name":: "saf-q5",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },

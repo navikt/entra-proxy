@@ -21,17 +21,17 @@
       "cluster": "dev-fss"
     },
     {
-      "name":: "saf",
+      "name": "saf",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "name":: "saf-q4",
+      "name": "saf-q4",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },
     {
-      "name":: "saf-q5",
+      "name": "saf-q5",
       "namespace": "teamdokumenthandtering",
       "cluster": "dev-fss"
     },

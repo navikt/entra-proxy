@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      “name”: “navansatt”,
+      “namespace”: “pensjondeployer”,
+      “cluster”: “prod-gcp”
+    },
+    {
       "application": "oppgavestatistikk",
       "namespace": "oppgavehandtering",
       "cluster": "prod-fss"

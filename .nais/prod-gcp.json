@@ -52,6 +52,11 @@
       "name": "hm-saksbehandling",
       "namespace": "teamdigihot",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "pdl-web",
+      "namespace": "pdl",
+      "cluster": "prod-fss"
     }
   ],
   "nais": {

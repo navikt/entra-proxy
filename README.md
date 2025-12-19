@@ -4,6 +4,8 @@ Tjeneste for å hente ut:
 2) Ansatts enhetstilhørighet
 3) Medlemmer i en bestemt enhet
 4) Medlemmer i en bestemt arkivtema-gruppe
+5) Hente utvidet informasjon om ansatt basert på navIdent eller T-ident
+6) Hente Ansattes grupper (bare SecEnabled)
 
 Swagger:
 

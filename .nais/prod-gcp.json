@@ -62,7 +62,12 @@
       "name": "navansatt",
       "namespace": "pensjondeployer",
       "cluster": "prod-gcp"
-  }
+  },
+    {
+      "name": "tilbakekreving-backend",
+      "namespace": "tilbake",
+      "cluster": "prod-gcp"
+    }
   ],
   "nais": {
     "cluster": {

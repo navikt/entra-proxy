@@ -1,7 +1,7 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import kotlin.KotlinVersion.Companion.CURRENT
 
-val javaVersion = JavaLanguageVersion.of(21)
+val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.0"
 val tokenSupportVersion = "6.0.0"
 val mockkVersion = "1.14.6"
@@ -16,7 +16,7 @@ version = "1.0.1"
 
 
 plugins {
-    val kotlinVersion = KotlinVersion.CURRENT.toString()
+    val kotlinVersion = "2.3.0"
     id("org.jetbrains.dokka") version "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion

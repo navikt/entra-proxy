@@ -46,6 +46,11 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             adapter.gruppeMedlemmer("$gruppeId")
         }
 
+    fun medlemerUtvidetInfo(gruppeId: UUID) =
+        tidOgLog(log, "utvidetinfo medlem(mer) for gruppe $gruppeId") {
+            adapter.gruppeUtvidetMedlemmer("$gruppeId")
+        }
+
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =

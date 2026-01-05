@@ -29,5 +29,6 @@ open class Ansatt(
 
 }
 
-class UtvidetAnsatt(navIdent: AnsattId, visningNavn: String?,  fornavn: String?,  etternavn: String?, val tIdent: TIdent, val epost: String? = UKJENT, val enhet: Enhet) : Ansatt(navIdent,visningNavn,fornavn,etternavn) {
+class UtvidetAnsatt(navIdent: AnsattId, visningNavn: String?, fornavn: String?, etternavn: String?, val tIdent: TIdent?,
+                    val epost:String?, val enhet: Enhet?) : Ansatt(navIdent,visningNavn,fornavn,etternavn) {
 }

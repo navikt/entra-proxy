@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "app": "tiltaksgjennomforing-api",
+      "namespace": "arbeidsgiver",
+      "cluster": "prod-fss"
+    },
+    {
       "name":"oppgavestatistikk",
       "namespace": "oppgavehandtering",
       "cluster": "prod-fss"

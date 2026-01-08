@@ -4,7 +4,7 @@
   ],
   "inbound": [
     {
-      "app": "tiltaksgjennomforing-api",
+      "name": "tiltaksgjennomforing-api",
       "namespace": "arbeidsgiver",
       "cluster": "prod-fss"
     },

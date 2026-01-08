@@ -64,11 +64,6 @@
       "cluster": "prod-fss"
     },
     {
-      "name": "navansatt",
-      "namespace": "pensjondeployer",
-      "cluster": "prod-gcp"
-  },
-    {
       "name": "tilbakekreving-backend",
       "namespace": "tilbake",
       "cluster": "prod-gcp"

@@ -106,16 +106,6 @@
       "cluster": "dev-gcp"
     },
     {
-      "name": "navansatt",
-      "namespace": "teampensjon",
-      "cluster": "dev-gcp"
-    },
-    {
-      "name": "navansatt",
-      "namespace": "teampensjon",
-      "cluster": "dev-fss"
-    },
-    {
       "name": "oppgave",
       "namespace": "oppgavehandtering",
       "cluster": "dev-fss"

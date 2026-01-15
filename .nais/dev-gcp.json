@@ -144,6 +144,11 @@
       "name": "tilbakekreving-backend",
       "namespace": "tilbake",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "rpa-nos-robot",
+      "namespace": "team-rpa",
+      "cluster": "dev-fss"
     }
   ],
   "nais": {

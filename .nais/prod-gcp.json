@@ -67,6 +67,11 @@
       "name": "tilbakekreving-backend",
       "namespace": "tilbake",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "rpa-nos-robot",
+      "namespace": "team-rpa",
+      "cluster": "prod-fss"
     }
   ],
   "nais": {

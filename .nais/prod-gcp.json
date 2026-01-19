@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "name": "populasjonstilgangskontroll",
+      "namespace": "tilgangsmaskin",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "tiltaksgjennomforing-api",
       "namespace": "arbeidsgiver",
       "cluster": "prod-fss"

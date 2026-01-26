@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "gjenlevende-bs-sak",
+      "namespace": "etterlatte",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "tiltaksgjennomforing-api",
       "namespace": "arbeidsgiver",
       "cluster": "dev-fss"

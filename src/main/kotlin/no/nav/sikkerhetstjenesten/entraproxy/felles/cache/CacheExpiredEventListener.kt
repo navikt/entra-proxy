@@ -24,7 +24,7 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
                     oppfrisk(elementer)
                     teller.tell(of("cache", elementer.cacheName, "result", "expired", "method", elementer.metode ?: "ingen"))
                 } ?:
-                    log.warn("Ingen oppfrisker funnet for cache '${elementer.cacheName}' ved utløpt innslag")
+                    log.info("Ingen oppfrisker funnet for cache '${elementer.cacheName}' ved utløpt innslag")
             }
         }
     }

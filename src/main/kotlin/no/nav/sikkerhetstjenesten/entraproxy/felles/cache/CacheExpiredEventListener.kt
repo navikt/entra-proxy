@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.micrometer.core.instrument.Tags.of
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheElementUtløptLytter.CacheInnslagFjernetHendelse
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.SmartLifecycle
@@ -14,7 +15,7 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
     private val log = getLogger(javaClass)
     private var running = false
     @EventListener
-    fun cacheInnslagFjernet(hendelse: CacheElementUtløptLytter.CacheInnslagFjernetHendelse) {
+    fun cacheInnslagFjernet(hendelse: CacheInnslagFjernetHendelse) {
         somLeder(Unit) {
             if (isRunning()) {
                 val elementer = CacheNøkkelElementer(hendelse.nøkkel)
@@ -22,7 +23,8 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
                 oppfriskere.firstOrNull { it.cacheName == elementer.cacheName }?.run {
                     oppfrisk(elementer)
                     teller.tell(of("cache", elementer.cacheName, "result", "expired", "method", elementer.metode ?: "ingen"))
-                }
+                } ?:
+                    log.warn("Ingen oppfrisker funnet for cache '${elementer.cacheName}' ved utløpt innslag")
             }
         }
     }

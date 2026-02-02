@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
+import org.springframework.web.client.body
 import java.net.URI
 
 abstract class AbstractRestClientAdapter(
@@ -24,7 +25,7 @@ abstract class AbstractRestClientAdapter(
             .headers { it.setAll(headers) }
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler::handle)
-            .body(T::class.java) ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
+            .body<T>() ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
 
     override val name = cfg.name
 

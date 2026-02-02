@@ -11,7 +11,7 @@ import java.time.Duration
 
 @Component
 class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter,  val handler: CacheNøkkelHandler,vararg val cfgs: CachableRestConfig)  {
-    val conn = client.connect().apply {
+    private val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)
         if (isLocalOrTest) {
             sync().configSet("notify-keyspace-events", "Exd")
@@ -21,6 +21,7 @@ class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdap
     @WithSpan
     fun delete(id: String,cache: CachableConfig) =
         conn.sync().del(handler.tilNøkkel(cache, id))
+
 
     fun cacheStørrelser() =
         cfgs.associate {

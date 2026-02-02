@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component
 class CacheStørrelseMeterBinder(private val client: CacheClient) : MeterBinder {
 
     override fun bindTo(registry: MeterRegistry) {
+     /*
         client.cfgs.forEach { cfg ->
             registry.gauge("cache.size", Tags.of("navn", cfg.navn), client) { handler ->
                 client.cacheStørrelse(cfg.navn)
             }
         }
+        */
     }
 }

@@ -76,7 +76,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
+        oidTjeneste.ansattOid(navIdent).let {
             entraTjeneste.grupperForAnsatt( it, navIdent)
         }
 
@@ -95,7 +95,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
         }
 
     private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T) =
-        oidTjeneste.ansattOid(navIdent)?.let { hent(navIdent, it) } ?: empty()
+        hent(navIdent, oidTjeneste.ansattOid(navIdent)) ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {

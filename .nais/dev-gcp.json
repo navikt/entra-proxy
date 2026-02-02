@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "klage-lookup",
+      "namespace": "klage",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "gjenlevende-bs-sak",
       "namespace": "etterlatte",
       "cluster": "dev-gcp"

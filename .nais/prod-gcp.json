@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "name": "klage-lookup",
+      "namespace": "klage",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "populasjonstilgangskontroll",
       "namespace": "tilgangsmaskin",
       "cluster": "prod-gcp"

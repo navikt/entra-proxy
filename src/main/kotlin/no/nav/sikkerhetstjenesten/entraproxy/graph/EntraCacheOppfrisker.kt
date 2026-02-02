@@ -18,11 +18,11 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
 
     override val cacheName: String = GRAPH
 
-    override fun doOppfrisk(elementer: `CacheNøkkelElementer`) =
-        if (elementer.metode == TEMA || elementer.metode == ENHETER)
-            oppfriskMedMetode(elementer, elementer.metode)
+    override fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer) =
+        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER)
+            oppfriskMedMetode(nøkkelElementer, nøkkelElementer.metode)
         else
-            log.warn("Ukjent metode ${elementer.metode} i nøkkel ${elementer.nøkkel}")
+            log.warn("Ukjent nøkkel $nøkkelElementer")
 
 
     private fun oppfriskMedMetode(elementer: CacheNøkkelElementer, metode: String) {

@@ -21,7 +21,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
             log.info("Fant $size oids i Entra for $navIdent")
             when (size) {
                 0 -> throw EntraOidException(navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
-                1 -> single().id
+                1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }
         }

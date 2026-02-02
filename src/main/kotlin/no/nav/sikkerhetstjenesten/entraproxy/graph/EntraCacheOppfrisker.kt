@@ -30,14 +30,14 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         MDC.put(USER_ID, ansattId.verdi)
         val oid  = oidTjeneste.ansattOid(ansattId)
         runCatching {
-            invoke(metode, ansattId, oid)
+         //   invoke(metode, ansattId, oid)
         }.getOrElse {
             if (it is IrrecoverableRestException && it.statusCode == NOT_FOUND) {
                 log.warn("Ansatt {} med oid {} ikke funnet i Entra, sletter og refresher cache entry", ansattId.verdi, oid)
                 cache.delete(elementer.id,OID_CACHE)
                 val nyoid = oidTjeneste.ansattOid(ansattId)
                 log.info("Refresh oid OK for ansatt {}, ny verdi er {}", ansattId.verdi, nyoid)
-                invoke(metode, ansattId, nyoid)
+              //  invoke(metode, ansattId, nyoid)
             }
             else {
                 loggOppfriskingFeilet(elementer, it)

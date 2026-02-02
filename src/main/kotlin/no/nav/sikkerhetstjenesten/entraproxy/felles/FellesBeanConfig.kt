@@ -9,6 +9,7 @@ import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
@@ -25,6 +26,7 @@ import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
+import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.format.FormatterRegistry
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -49,6 +51,11 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private interface IgnoreUnknownMixin
+
+
+    @Bean
+    fun cacheNøkkelHandler(mgr: RedisCacheManager) =
+        CacheNøkkelHandler(mgr.cacheConfigurations)
 
     @Bean
     fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =

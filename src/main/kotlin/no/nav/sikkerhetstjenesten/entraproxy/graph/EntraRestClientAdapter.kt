@@ -1,10 +1,13 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
+import org.springframework.web.ErrorResponseException
 import org.springframework.web.client.RestClient
 import java.net.URI
 
@@ -12,8 +15,16 @@ import java.net.URI
 class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: EntraConfig) :
     AbstractRestClientAdapter(restClient, cf) {
 
+
     fun ansattOid(navIdent: String) =
-        get<AnsattOids>(cf.userURI(navIdent)).oids.singleOrNull()?.id
+        with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
+            log.info("Fant $size oids i Entra for $navIdent")
+            when (size) {
+                0 -> throw EntraOidException(navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                1 -> single().id
+                else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
+            }
+        }
 
     fun gruppeOid(gruppeNavn: String) =
         get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
@@ -84,4 +95,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         items.toSortedSet()
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
+}
+
+class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {
+    init {
+        body.title = TITLE
+        body.detail = msg
+        body.properties = mapOf("navIdent" to ansattId,"traceId" to Span.current().spanContext.traceId)
+    }
+
+    companion object   {
+        const val TITLE = "Uventet respons fra Entra"
+    }
 }

@@ -1,9 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
@@ -99,5 +101,6 @@ class EntraConfig(
         private const val TILGANG_EGENSKAPER = "id,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
         private const val TOP = "\$top"
+        val OID_CACHE = CachableConfig(ENTRA_OID)
     }
 }

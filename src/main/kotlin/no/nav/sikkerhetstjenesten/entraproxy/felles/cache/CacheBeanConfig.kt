@@ -26,6 +26,10 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
     @Bean
+    fun cacheNøkkelHandler(mgr: RedisCacheManager) =
+        CacheNøkkelHandler(mgr.cacheConfigurations)
+
+    @Bean
     fun redisTemplate() =
         RedisTemplate<String, Any?>().apply {
             connectionFactory = cf

@@ -15,15 +15,15 @@ abstract class AbstractCacheOppfrisker : CacheOppfrisker {
         val duration = measureTimeMillis {
             runCatching {
                 doOppfrisk(nøkkelElementer)
-                log.info("Oppfrisking av ${nøkkelElementer.cacheName}::${nøkkelElementer.id} OK")
+                log.info("Oppfrisking av $nøkkelElementer OK")
             }.getOrElse {
-                loggOppfriskingFeilet(`nøkkelElementer`, it)
+                loggOppfriskingFeilet(nøkkelElementer, it)
             }
         }
-        log.info("Oppfrisking tok ${duration}ms for ${nøkkelElementer.cacheName}::${nøkkelElementer.id}")
+        log.info("Oppfrisking tok ${duration}ms for $nøkkelElementer")
     }
     protected fun loggOppfriskingFeilet(elementer: CacheNøkkelElementer, feil: Throwable) {
-        log.warn("Oppfrisking av ${elementer.cacheName}::${elementer.id} feilet", feil)
+        log.warn("Oppfrisking av $elementer feilet", feil)
     }
 }
 

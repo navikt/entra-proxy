@@ -26,11 +26,11 @@ class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdap
 
     fun cacheStørrelser() =
         cfgs.associate {
-            it.navn to "${cacheStørrelse(it.navn).toLong()} innslag, ttl: ${it.varighet.format()}"
+            it.navn to "${cacheStørrelse(it.navn)} innslag, ttl: ${it.varighet.format()}"
         }
     fun cacheStørrelse(cache: String)  =
-        somLeder(0.0,"henting av cache størrelse for $cache") {
-            adapter.størrelse(cache).toDouble()
+        somLeder(0L,"henting av cache størrelse for $cache") {
+            adapter.størrelse(cache)
         }
 }
 

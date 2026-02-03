@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 import io.lettuce.core.RedisClient
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
 import org.springframework.stereotype.Component
@@ -10,7 +11,7 @@ import java.time.Duration
 
 
 @Component
-class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter,  val handler: CacheNøkkelHandler,vararg val cfgs: CachableRestConfig)  {
+class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter,  val handler: CacheNøkkelHandler,vararg val cfgs: CachableRestConfig) : LeaderAware() {
     private val conn = client.connect().apply {
         timeout = Duration.ofSeconds(30)
         if (isLocalOrTest) {
@@ -27,8 +28,10 @@ class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdap
         cfgs.associate {
             it.navn to "${cacheStørrelse(it.navn).toLong()} innslag, ttl: ${it.varighet.format()}"
         }
-    fun cacheStørrelse(cache: String) =
-        adapter.størrelse(cache).toDouble()
+    fun cacheStørrelse(cache: String)  =
+        somLeder(0.0,"henting av cache størrelse for $cache") {
+            adapter.størrelse(cache).toDouble()
+        }
 }
 
 data class CachableConfig(val name: String, val extraPrefix: String? = null)

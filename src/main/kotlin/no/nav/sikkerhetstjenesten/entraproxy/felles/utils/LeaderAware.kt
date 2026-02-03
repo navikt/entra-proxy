@@ -6,10 +6,11 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.event.EventListener
 import java.net.InetAddress
 
-abstract class LeaderAware(private var erLeder: Boolean) {
+abstract class LeaderAware {
     private val hostname = InetAddress.getLocalHost().hostName
     protected fun doHandleLeaderChange()  = Unit
 
+    private var erLeder: Boolean = false
     private val log = getLogger(javaClass)
 
     @EventListener(LeaderChangedEvent::class)

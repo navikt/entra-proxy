@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Boolean = false, private vararg val oppfriskere: CacheOppfrisker = emptyArray()) :
-    LeaderAware(erLeder), SmartLifecycle {
+    LeaderAware(), SmartLifecycle {
     private val log = getLogger(javaClass)
     private var running = false
     @EventListener

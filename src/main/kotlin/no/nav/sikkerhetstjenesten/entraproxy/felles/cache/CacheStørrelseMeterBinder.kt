@@ -21,5 +21,6 @@ class CacheStørrelseMeterBinder(private val client: CacheClient) :  LeaderAware
                     }
                 }
             }
+        }
     }
-}
+}  

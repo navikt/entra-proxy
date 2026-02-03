@@ -11,7 +11,7 @@ import java.time.Duration
 import kotlin.time.measureTime
 
 @Component
-class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, Any?>) : LeaderAware() {
+class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, Any?>)  {
     private val log = getLogger(javaClass)
 
     fun størrelse(cache: String) =

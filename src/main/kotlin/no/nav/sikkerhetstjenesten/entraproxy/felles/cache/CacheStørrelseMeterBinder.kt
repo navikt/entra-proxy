@@ -12,7 +12,8 @@ class CacheStørrelseMeterBinder(private val client: CacheClient) :  LeaderAware
     private val log = getLogger(javaClass)
 
     override fun bindTo(registry: MeterRegistry)   {
-        somLeder(0L) {
+      //  somLeder(0L) {
+        log.info("Binding to registry for cache størrelser")
             client.cfgs.forEach { cfg ->
                 registry.gauge("cache.size", Tags.of("navn", cfg.navn), client) { _ ->
                     client.cacheStørrelse(cfg.navn).also {
@@ -20,6 +21,6 @@ class CacheStørrelseMeterBinder(private val client: CacheClient) :  LeaderAware
                     }
                 }
             }
-        }
+       // }
     }
 }

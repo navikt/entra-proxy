@@ -28,20 +28,21 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
     private fun oppfriskMedMetode(elementer: CacheNøkkelElementer, metode: String) {
         val ansattId = AnsattId(elementer.id)
         MDC.put(USER_ID, ansattId.verdi)
-        val oid  = oidTjeneste.ansattOid(ansattId)
         runCatching {
-         //   invoke(metode, ansattId, oid)
-        }.getOrElse {
-            if (it is IrrecoverableRestException && it.statusCode == NOT_FOUND) {
-                log.warn("Ansatt {} med oid {} ikke funnet i Entra, sletter og refresher cache entry", ansattId.verdi, oid)
+            var oid  = oidTjeneste.ansattOid(ansattId)
+            if (oid == null) {
+                log.info("INgen oid i cache for ansatt $ansattId, henter på nytt fra Entra og oppfrisker OID-cache")
                 cache.delete(elementer.id,OID_CACHE)
-                val nyoid = oidTjeneste.ansattOid(ansattId)
-                log.info("Refresh oid OK for ansatt {}, ny verdi er {}", ansattId.verdi, nyoid)
-              //  invoke(metode, ansattId, nyoid)
+                oid  = oidTjeneste.ansattOid(ansattId)
+            }
+            if (oid != null) {
+                invoke(metode, ansattId, oid)
             }
             else {
-                loggOppfriskingFeilet(elementer, it)
+                throw IllegalStateException("Kunne ikke finne oid for ansatt $ansattId, kan ikke oppfriske cache for $metode")
             }
+        }.getOrElse {
+                loggOppfriskingFeilet(elementer, it)
         }
     }
 
@@ -49,7 +50,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         when (metode) {
             TEMA -> entra.tema(ansattId, oid)
             ENHETER -> entra.enheter(ansattId, oid)
-            else -> log.warn("Ukjent metode $metode for ansatt ${ansattId.verdi} og oid $oid")
+            else -> log.trace("Ukjent metode {} for ansatt {} og oid {}", metode, ansattId.verdi, oid)
         }
     }
 

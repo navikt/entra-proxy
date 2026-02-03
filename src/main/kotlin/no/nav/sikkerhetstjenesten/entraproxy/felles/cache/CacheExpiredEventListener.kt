@@ -16,7 +16,7 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
     private var running = false
     @EventListener
     fun cacheInnslagFjernet(hendelse: CacheInnslagFjernetHendelse) {
-        somLeder(Unit) {
+        somLeder(Unit,"cache innslag fjerning") {
             if (isRunning()) {
                 val elementer = CacheNøkkelElementer(hendelse.nøkkel)
                 log.info("Cache innslag utløpt for cache '${elementer.cacheName}' med nøkkel '${hendelse.nøkkel}'")

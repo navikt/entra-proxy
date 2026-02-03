@@ -15,23 +15,22 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
     private val log = getLogger(javaClass)
 
     fun størrelse(cache: String) =
-        somLeder(0L) {
-                runBlocking {
-                    var størrelse = 0L
-                    runCatching {
-                        val timeUsed = measureTime {
-                            størrelse = withTimeout(Duration.ofMillis(500).toMillis()) {
-                                redisTemplate.execute(SCRIPT, emptyList(),cache) ?: størrelse
-                            }
-                        }
-                        log.info("Cache størrelse $størrelse for cache $cache på ${timeUsed.inWholeMilliseconds}ms" )
-                        størrelse
-                    }.getOrElse { e ->
-                        log.warn("Feil ved henting av størrelse for $cache", e)
-                        størrelse
+        runBlocking {
+            var størrelse = 0L
+            runCatching {
+                val timeUsed = measureTime {
+                    størrelse = withTimeout(Duration.ofMillis(500).toMillis()) {
+                        redisTemplate.execute(SCRIPT, emptyList(),cache) ?: størrelse
                     }
                 }
+                log.info("Cache størrelse $størrelse for cache $cache på ${timeUsed.inWholeMilliseconds}ms" )
+                størrelse
+            }.getOrElse { e ->
+                log.warn("Feil ved henting av størrelse for $cache", e)
+                størrelse
             }
+        }
+
 
     companion object {
         private const val CACHE_SIZE_SCRIPT = """

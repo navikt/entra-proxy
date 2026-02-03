@@ -18,7 +18,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
     fun ansattOid(navIdent: String) =
         with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
-            log.info("Fant $size oids i Entra for $navIdent")
+            log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
                 0 -> throw EntraOidException(navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id

@@ -79,7 +79,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.grupperForAnsatt( it, navIdent)
         }
-    
+
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")
     fun gruppeMedlemmer(gruppeNavn: String) =

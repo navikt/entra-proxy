@@ -19,7 +19,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
     override val cacheName: String = GRAPH
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer) =
-        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER)
+        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDETANSATT)
             oppfriskMedMetode(nøkkelElementer, nøkkelElementer.metode)
         else
             log.warn("Ukjent nøkkel $nøkkelElementer")
@@ -57,5 +57,6 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
     companion object {
         private const val TEMA = "tema"
         private const val ENHETER = "enheter"
+        private const val UTVIDETANSATT = "utvideantAnsatt"
     }
 }

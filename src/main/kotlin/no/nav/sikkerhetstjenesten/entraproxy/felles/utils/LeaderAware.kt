@@ -23,10 +23,10 @@ abstract class LeaderAware {
     }
 
     protected fun <T> somLeder(default: T, beskrivelse : String,block: () -> T): T = if (erLeder) {
-       log.info("Kjører $beskrivelse som leder")
+       log.trace("Kjører $beskrivelse som leder")
         block()
     } else {
-        log.info("Kjører ikke $beskrivelse som leder, returnerer default")
+        log.trace("Kjører ikke $beskrivelse som leder, returnerer default")
         default
     }
 }

@@ -14,7 +14,7 @@ class CacheStørrelseMeterBinder(private val client: CacheClient) :   MeterBinde
         log.info("Binding to registry for cache størrelser")
         client.cfgs.forEach { cfg ->
             registry.gauge("cache.size", Tags.of("navn", cfg.navn), client) { _ ->
-                client.cacheStørrelse(cfg.navn).also {
+                client.cacheStørrelse(cfg.navn).toDouble().also {
                     log.info("Cache størrelse for cache '${cfg.navn}': $it innslag" )
                 }
             }

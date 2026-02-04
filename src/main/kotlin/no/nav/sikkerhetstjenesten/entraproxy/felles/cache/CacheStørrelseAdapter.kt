@@ -23,7 +23,7 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
                         redisTemplate.execute(SCRIPT, emptyList(),cache) ?: størrelse
                     }
                 }
-                log.info("Cache størrelse $størrelse for cache $cache på ${timeUsed.inWholeMilliseconds}ms" )
+                log.trace("Cache størrelse $størrelse for cache $cache på ${timeUsed.inWholeMilliseconds}ms" )
                 størrelse
             }.getOrElse { e ->
                 log.warn("Feil ved henting av størrelse for $cache", e)

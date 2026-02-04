@@ -57,6 +57,6 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
     companion object {
         private const val TEMA = "tema"
         private const val ENHETER = "enheter"
-        private const val UTVIDETANSATT = "utvideantAnsatt"
+        private const val UTVIDETANSATT = "utvidetAnsatt"
     }
 }

@@ -64,7 +64,7 @@ spec:
               namespace: '{{app.namespace}}'
               cluster: '{{app.cluster}}'
        {{/each}}
-            - application: monitoring-prometheus-blackbox-exporter
+            - application: alloy
               namespace: nais-system
   env:
     - name: NAIS_CLUSTER_TYPE

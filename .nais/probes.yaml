@@ -7,8 +7,8 @@ spec:
   interval: 60s
   module: http_2xx
   prober:
-    path: /probe
-    url: monitoring-prometheus-blackbox-exporter.nais-system:80
+    path: /api/v0/component/prometheus.exporter.blackbox.blackbox_exporter/probe
+    url: alloy.nais-system:12345
   targets:
     staticConfig:
       static:

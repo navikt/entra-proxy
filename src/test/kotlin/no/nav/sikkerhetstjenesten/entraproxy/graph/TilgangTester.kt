@@ -31,7 +31,6 @@ import java.util.UUID.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-
 @WebMvcTest(controllers = [DevEntraController::class])
 @Import(TestConfig::class)
 @ExtendWith(MockKExtension::class)

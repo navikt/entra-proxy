@@ -47,8 +47,16 @@ repositories {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
     maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/navikt/*")
+        name = "GitHubPackages-boot"
+        url = uri("https://maven.pkg.github.com/navikt/boot-cluster-conditionals")
+        credentials {
+            username = project.findProperty("githubUser") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("githubPassword") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+    maven {
+        name = "GitHubPackages-token"
+        url = uri("https://maven.pkg.github.com/navikt/token-support")
         credentials {
             username = project.findProperty("githubUser") as String? ?: System.getenv("GITHUB_ACTOR")
             password = project.findProperty("githubPassword") as String? ?: System.getenv("GITHUB_TOKEN")

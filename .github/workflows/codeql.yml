@@ -1,3 +1,6 @@
+# This workflow requires "advanced setup" to be enabled for CodeQL in the repository settings.
+# To enable: Settings → Code security → CodeQL analysis → Switch to advanced
+# This replaces the default autobuild which fails with SSL certificate errors when using Java 25.
 name: "CodeQL"
 
 on:

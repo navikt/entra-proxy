@@ -7,7 +7,7 @@ val tokenSupportVersion = "6.0.3"
 val mockkVersion = "1.14.6"
 val logstashEncoderVersion = "9.0"
 val springMockVersion = "4.0.2"
-val conditionalsVersion = "6.0.1"
+val conditionalsVersion = "6.0.3"
 val coroutinesVersion = "1.10.2"
 val otelVersion = "2.22.0"
 

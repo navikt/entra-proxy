@@ -20,6 +20,17 @@ https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy
 Slackkanal for spørsmål og support:
 #team-sikkerhetstjenesten
 
+## CodeQL Code Scanning
+
+This repository uses Java 25, which is not supported by the default CodeQL autobuild.
+A custom CodeQL workflow (`.github/workflows/codeql.yml`) is configured with manual build mode to handle this.
+
+**If you see failing "Code Quality: CodeQL Setup" runs**, the default CodeQL setup needs to be disabled:
+
+1. Go to **Settings → Code security and analysis**
+2. Under **Code scanning → CodeQL analysis**, click **Switch to advanced**
+3. This disables the default setup and lets the custom workflow in `.github/workflows/codeql.yml` handle analysis
+
 
 Løsningen har flere cacher
 * Kobling mellom _navident_ og _entraOid_ caches i 365 dager. 

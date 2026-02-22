@@ -43,10 +43,10 @@ class TilgangTester {
     @MockkBean
     private lateinit var token: Token
     @MockkBean
-    private lateinit var i: OAuth2ClientRequestInterceptor
+    private lateinit var oAuth2ClientRequestInterceptor: OAuth2ClientRequestInterceptor
 
     @MockkBean
-    private lateinit var c: ClientConfigurationProperties
+    private lateinit var clientConfigurationProperties: ClientConfigurationProperties
 
     @MockkBean
     private lateinit var entra: EntraTjeneste
@@ -76,7 +76,7 @@ class TilgangTester {
             .andExpect(status().isOk)
             .andReturn()
             .response
-            .contentAsString;
+            .contentAsString
         assertThat(jsonMapper.readValue<Set<Ansatt>>(respons).single()).isEqualTo(ansatt)
     }
 
@@ -88,7 +88,7 @@ class TilgangTester {
             .andExpect(status().isOk)
             .andReturn()
             .response
-            .contentAsString;
+            .contentAsString
         assertThat(jsonMapper.readValue<Set<Enhet>>(respons).single()).isEqualTo(ENHET)
     }
 
@@ -137,7 +137,7 @@ class TilgangTester {
     }
 }
 
-@Configuration(proxyBeanMethods = true)
+@Configuration(proxyBeanMethods = false)
 class TestConfig {
     @Bean
     fun meterRegistry() = SimpleMeterRegistry()

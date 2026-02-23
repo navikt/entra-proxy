@@ -68,7 +68,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: build/reports/jacoco/test
+          path: build/reports/jacoco/test/html
 
       - name: Attest and sign
         uses: nais/attest-sign@v1.5.20

@@ -17,6 +17,7 @@ version = "1.0.1"
 
 plugins {
     val kotlinVersion = "2.3.0"
+    id("jacoco")
     id("org.jetbrains.dokka") version "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -27,6 +28,10 @@ plugins {
     id("com.google.cloud.tools.jib") version "3.4.5"
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
 }
 springBoot {
     buildInfo {

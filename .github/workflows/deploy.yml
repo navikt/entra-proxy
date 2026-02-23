@@ -49,7 +49,7 @@ jobs:
         id: kompiler
         run: |
           echo "image=${{ env.IMAGE }}:${{ env.TAG }}" >> $GITHUB_OUTPUT          
-          ./gradlew --warning-mode all test cyclonedxBom jib -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
+          ./gradlew --warning-mode all test cyclonedxBom jib jacocoTestReport -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
           echo "DIGEST=$(cat build/jib-image.digest)" >> $GITHUB_ENV
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
@@ -63,6 +63,12 @@ jobs:
           include_passed: 'true'
           detailed_summary: 'true'
           report_paths: '**/build/test-results/test/TEST-*.xml'
+
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test
 
       - name: Attest and sign
         uses: nais/attest-sign@v1.5.20

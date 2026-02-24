@@ -1,6 +1,11 @@
-# This workflow requires "advanced setup" to be enabled for CodeQL in the repository settings.
-# To enable: Settings → Code security → CodeQL analysis → Switch to advanced
-# This replaces the default autobuild which fails with SSL certificate errors when using Java 25.
+# CodeQL Advanced Setup for Java 25
+#
+# The default CodeQL setup (autobuild) does not support Java 25 and will fail.
+# This workflow uses manual build mode with explicit Java 25 and Gradle configuration.
+#
+# IMPORTANT: The default CodeQL setup must be disabled in repository settings,
+# otherwise it will continue to run and fail alongside this workflow.
+# To switch: Settings → Code security → Code scanning → CodeQL analysis → Switch to advanced
 name: "CodeQL"
 
 on:

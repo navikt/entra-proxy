@@ -82,6 +82,11 @@
       "name": "rpa-nos-robot",
       "namespace": "team-rpa",
       "cluster": "prod-fss"
+    },
+    {
+      "name": "loggkamel",
+      "namespace": "sikkerhetstjenesten",
+      "cluster": "dev-gcp"
     }
   ],
   "nais": {

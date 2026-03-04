@@ -87,6 +87,11 @@
       "name": "loggkamel",
       "namespace": "sikkerhetstjenesten",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "bidrag-organisasjon",
+      "namespace": "bidrag",
+      "cluster": "prod-fss"
     }
   ],
   "nais": {

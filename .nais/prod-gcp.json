@@ -93,6 +93,12 @@
       "namespace": "bidrag",
       "cluster": "prod-fss"
     }
+  ,
+    {
+      "name": "bidrag:bidrag-tilgangskontroll",
+      "namespace": "bidrag",
+      "cluster": "prod-gcp"
+    }
   ],
   "nais": {
     "cluster": {

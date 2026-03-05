@@ -175,6 +175,17 @@
       "namespace": "bidrag",
       "cluster": "dev-fss"
     }
+  ,
+    {
+      "name": "bidrag-tilgangskontroll-feature",
+      "namespace": "bidrag",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "bidrag:bidrag-tilgangskontroll",
+      "namespace": "bidrag",
+      "cluster": "dev-gcp"
+    }
   ],
   "nais": {
     "cluster": {

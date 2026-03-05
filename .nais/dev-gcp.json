@@ -182,7 +182,7 @@
       "cluster": "dev-gcp"
     },
     {
-      "name": "bidrag:bidrag-tilgangskontroll",
+      "name": "bidrag-tilgangskontroll",
       "namespace": "bidrag",
       "cluster": "dev-gcp"
     }

@@ -95,7 +95,7 @@
     }
   ,
     {
-      "name": "bidrag:bidrag-tilgangskontroll",
+      "name": "bidrag-tilgangskontroll",
       "namespace": "bidrag",
       "cluster": "prod-gcp"
     }

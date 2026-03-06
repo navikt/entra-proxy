@@ -185,7 +185,13 @@
       "name": "bidrag-tilgangskontroll",
       "namespace": "bidrag",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "spesialist",
+      "namespace": "tbd",
+      "cluster": "dev-gcp"
     }
+
   ],
   "nais": {
     "cluster": {

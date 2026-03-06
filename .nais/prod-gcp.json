@@ -92,6 +92,11 @@
       "name": "bidrag-organisasjon",
       "namespace": "bidrag",
       "cluster": "prod-fss"
+    },
+    {
+      "name": "spesialist",
+      "namespace": "tbd",
+      "cluster": "prod-gcp"
     }
   ,
     {

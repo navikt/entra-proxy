@@ -77,7 +77,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.grupperForAnsatt( it, navIdent)
+            entraTjeneste.grupperForAnsatt(navIdent, it)
         }
 
     @GetMapping("gruppe/medlemmer")

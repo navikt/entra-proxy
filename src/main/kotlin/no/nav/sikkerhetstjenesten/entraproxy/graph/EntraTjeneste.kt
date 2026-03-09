@@ -63,7 +63,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
-    fun grupperForAnsatt(oid: UUID, navIdent: AnsattId) =
+    fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         tidOgLog(log) {
             adapter.ansatteGrupper("$oid")
         }

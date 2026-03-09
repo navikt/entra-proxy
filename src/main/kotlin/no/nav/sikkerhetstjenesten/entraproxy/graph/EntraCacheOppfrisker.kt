@@ -5,11 +5,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelElementer
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.IrrecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
 import org.slf4j.MDC
-import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import java.util.UUID
 
@@ -19,7 +17,10 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
     override val cacheName: String = GRAPH
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer) =
-        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDETANSATT)
+        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDETANSATT || nøkkelElementer.metode ==GRUPPERFORANSATT
+
+
+    )
             oppfriskMedMetode(nøkkelElementer, nøkkelElementer.metode)
         else
             log.warn("Ukjent nøkkel $nøkkelElementer")
@@ -50,6 +51,8 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         when (metode) {
             TEMA -> entra.tema(ansattId, oid)
             ENHETER -> entra.enheter(ansattId, oid)
+            UTVIDETANSATT -> entra.utvidetAnsatt(ansattId)
+            GRUPPERFORANSATT -> entra.grupperForAnsatt(ansattId, oid)
             else -> log.trace("Ukjent metode {} for ansatt {} og oid {}", metode, ansattId.verdi, oid)
         }
     }
@@ -58,5 +61,6 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         private const val TEMA = "tema"
         private const val ENHETER = "enheter"
         private const val UTVIDETANSATT = "utvidetAnsatt"
+        private const val GRUPPERFORANSATT = "grupperForAnsatt"
     }
 }

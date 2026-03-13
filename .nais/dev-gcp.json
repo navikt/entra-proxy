@@ -190,6 +190,11 @@
       "name": "spesialist",
       "namespace": "tbd",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "superhelt",
+      "namespace": "historisk",
+      "cluster": "dev-gcp"
     }
 
   ],

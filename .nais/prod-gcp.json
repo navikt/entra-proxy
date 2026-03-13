@@ -103,6 +103,11 @@
       "name": "bidrag-tilgangskontroll",
       "namespace": "bidrag",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "superhelt",
+      "namespace": "historisk",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

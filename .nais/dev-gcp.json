@@ -195,6 +195,16 @@
       "name": "superhelt",
       "namespace": "historisk",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "saas-proxy",
+      "namespace": "teamcrm",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "saas-proxy",
+      "namespace": "platforce",
+      "cluster": "dev-gcp"
     }
 
   ],

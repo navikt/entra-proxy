@@ -97,8 +97,7 @@
       "name": "spesialist",
       "namespace": "tbd",
       "cluster": "prod-gcp"
-    }
-  ,
+    },
     {
       "name": "bidrag-tilgangskontroll",
       "namespace": "bidrag",
@@ -107,6 +106,16 @@
     {
       "name": "superhelt",
       "namespace": "historisk",
+      "cluster": "prod-gcp"
+    },
+    {
+      "name": "saas-proxy",
+      "namespace": "teamcrm",
+      "cluster": "prod-gcp"
+    },
+    {
+      "name": "saas-proxy",
+      "namespace": "platforce",
       "cluster": "prod-gcp"
     }
   ],

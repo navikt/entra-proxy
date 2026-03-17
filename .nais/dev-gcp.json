@@ -205,6 +205,11 @@
       "name": "saas-proxy",
       "namespace": "platforce",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "tilbakekreving",
+      "namespace": "utenlandsadresser",
+      "cluster": "dev-gcp"
     }
 
   ],

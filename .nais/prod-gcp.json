@@ -117,6 +117,11 @@
       "name": "saas-proxy",
       "namespace": "platforce",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "tilbakekreving",
+      "namespace": "utenlandsadresser",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

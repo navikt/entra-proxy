@@ -1,4 +1,5 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import java.lang.System.getProperty
 import kotlin.KotlinVersion.Companion.CURRENT
 
 val javaVersion = JavaLanguageVersion.of(25)
@@ -37,9 +38,9 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                "kotlin.version" to CURRENT.toString(),
-                "jdk.version" to javaVersion.toString(),
-                "jdk.vendor" to System.getProperty("java.vendor")
+                "kotlin.version" to "$CURRENT",
+                "jdk.version" to "$javaVersion",
+                "jdk.vendor" to getProperty("java.vendor")
             )
         }
     }

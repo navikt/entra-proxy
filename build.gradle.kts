@@ -23,9 +23,9 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("java")
-    id("org.springframework.boot") version "4.0.4"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.cyclonedx.bom") version "3.0.0"
+    id("org.cyclonedx.bom") version "3.2.4"
     id("com.google.cloud.tools.jib") version "3.4.5"
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application

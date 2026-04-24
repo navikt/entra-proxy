@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import org.springframework.beans.factory.annotation.Qualifier
@@ -20,7 +21,7 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
         with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
-                0 -> throw EntraOidException(navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                0 -> throw NotFoundRestException(cf.userURI(navIdent),navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }

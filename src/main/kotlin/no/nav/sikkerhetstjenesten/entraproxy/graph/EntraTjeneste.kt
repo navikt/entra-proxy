@@ -39,6 +39,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             }
         }
 
+
     @WithSpan
     @Cacheable(MEDLEMMER)
     fun medlemmer(gruppeId: UUID) =

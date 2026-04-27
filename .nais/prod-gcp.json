@@ -122,6 +122,11 @@
       "name": "tilbakekreving",
       "namespace": "utenlandsadresser",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "arbeid-og-ytelser",
+      "namespace": "team-rpa",
+      "cluster": "prod-fss"
     }
   ],
   "nais": {

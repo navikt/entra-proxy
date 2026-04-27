@@ -29,7 +29,11 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         tidOgLog(log, "tema for $ansattId") {
-            withNotFoundFallbackArg(oid, { adapter.tema("$it") }) { refreshOid(ansattId) }
+            withNotFoundFallbackArg(oid, {
+                adapter.tema("$it")
+            }) {
+                refreshOid(ansattId)
+            }
         }
 
 
@@ -37,7 +41,9 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         tidOgLog(log, "enhet(er) for $ansattId") {
-            withNotFoundFallbackArg(oid, ::enheter) { refreshOid(ansattId) }
+            withNotFoundFallbackArg(oid, ::enheter) {
+                refreshOid(ansattId)
+            }
         }
 
 
@@ -78,11 +84,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         if (it is NotFoundRestException) main(fallbackArg(arg)) else throw it
     }
 
-    private fun enheter(oid: UUID) =  buildSet {
-        adapter.enheter("$oid").forEach {
-            add(Enhet(it, norg.navnFor(it)))
+    private fun enheter(oid: UUID) =
+        buildSet {
+            adapter.enheter("$oid").forEach {
+                add(Enhet(it, norg.navnFor(it)))
+            }
         }
-    }
 
 
     private fun ansatt(block: () -> AnsattRespons?) =
@@ -104,7 +111,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             log.info("Slettet cache innslag for $navIdent")
         }
         return oid.ansattOid(navIdent)
-            ?: throw NotFoundRestException(URI.create(""), "Fant ikke ${navIdent.verdi} i Entra, selv etter cache-opprydding")
+            ?: throw NotFoundRestException(adapter.baseURI, "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
     }
 
     override fun toString() =

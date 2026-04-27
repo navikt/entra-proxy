@@ -1,6 +1,8 @@
+
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.ninjasquad.springmockk.MockkBean
+import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
 import io.mockk.junit5.MockKExtension
@@ -146,6 +148,6 @@ class TestConfig {
     fun cacheManager() = NoOpCacheManager()
 
     @Bean
-    fun teller() = TokenTypeTellendeRequestInterceptor(TokenTypeTeller(meterRegistry(),
+    fun teller(reg: MeterRegistry) = TokenTypeTellendeRequestInterceptor(TokenTypeTeller(reg,
         Token(SpringTokenValidationContextHolder())))
 }

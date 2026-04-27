@@ -5,6 +5,7 @@ import kotlin.KotlinVersion.Companion.CURRENT
 val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.0"
 val tokenSupportVersion = "6.0.3"
+val kotestVersion = "6.1.11"
 val mockkVersion = "1.14.6"
 val logstashEncoderVersion = "9.0"
 val springMockVersion = "4.0.2"
@@ -26,6 +27,7 @@ plugins {
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.cyclonedx.bom") version "3.2.4"
+    id("io.kotest") version "6.1.11"
     id("com.google.cloud.tools.jib") version "3.4.5"
     id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application
@@ -87,7 +89,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-
+    testImplementation("io.kotest:kotest-runner-junit5:${kotestVersion}")
+    testImplementation("io.kotest:kotest-assertions-core:${kotestVersion}")
+    testImplementation("io.kotest:kotest-extensions-spring:${kotestVersion}")
     testImplementation(kotlin("test"))
 }
 

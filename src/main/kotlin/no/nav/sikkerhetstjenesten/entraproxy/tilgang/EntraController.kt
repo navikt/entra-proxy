@@ -7,15 +7,12 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.security.token.support.spring.ProtectedRestController
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +24,6 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 class EntraController(private val entraTjeneste: EntraTjeneste,
                       private val oidTjeneste: EntraOidTjeneste,
-                      private val cache: CacheClient,
                       private val token: Token) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
@@ -81,24 +77,9 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
-        runCatching {
-            grupperFor(navIdent)
-        }.getOrElse {
-            if (it is NotFoundRestException) {
-                it.identifikator?.let { id ->
-                    cache.delete(id,OID_CACHE)
-                    grupperFor(navIdent)
-                }
-            } else {
-                throw it
-            }
-        }
-
-    private fun grupperFor(navIdent: AnsattId): Set<EntraGruppe>? =
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.grupperForAnsatt(navIdent, it)
         }
-
 
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")

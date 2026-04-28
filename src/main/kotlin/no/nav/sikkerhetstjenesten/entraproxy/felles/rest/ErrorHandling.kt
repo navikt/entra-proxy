@@ -22,8 +22,8 @@ class DefaultRestErrorHandler : ErrorHandler {
     override fun handle(req: HttpRequest, res: ClientHttpResponse) {
         when {
             res.statusCode == NOT_FOUND -> {
-                log.info("Irrecoverable exception etter ${res.statusCode.value()} fra ${req.uri}")
-                throw IrrecoverableRestException(res.statusCode, req.uri, res.statusText)
+                log.info("Not found fra ${req.uri}")
+                throw NotFoundRestException(req.uri, res.statusText)
             }
             res.statusCode.is4xxClientError -> {
                 log.warn("Irrecoverable exception etter ${res.statusCode.value()} fra ${req.uri}")
@@ -35,11 +35,20 @@ class DefaultRestErrorHandler : ErrorHandler {
             }
         }
     }
+    companion object {
+        const val IDENTIFIKATOR =  "X-Identifikator"
+    }
 }
 
 open class IrrecoverableRestException(
     status: HttpStatusCode, uri: URI, msg: String = (status as HttpStatus).reasonPhrase,
     cause: Throwable? = null) : ErrorResponseException(status, problemDetail(status, msg, uri), cause)
+
+class NotFoundRestException(
+    val uri: URI,
+    val msg: String,
+    val identifikator: String? = null,
+    cause: Throwable? = null) : IrrecoverableRestException(NOT_FOUND, uri, msg, cause)
 
 open class RecoverableRestException(
     status: HttpStatusCode,

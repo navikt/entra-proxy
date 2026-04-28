@@ -2,6 +2,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestClientAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler.Companion.IDENTIFIKATOR
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import org.springframework.beans.factory.annotation.Qualifier
@@ -17,10 +19,10 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
 
 
     fun ansattOid(navIdent: String) =
-        with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
+        with(get<AnsattOids>(cf.userURI(navIdent), mapOf(IDENTIFIKATOR to navIdent)).oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
-                0 -> throw EntraOidException(navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                0 -> throw NotFoundRestException(cf.userURI(navIdent),navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }
@@ -52,14 +54,16 @@ class EntraRestClientAdapter(@Qualifier(GRAPH) restClient: RestClient, val cf: E
                 it.displayName, it.givenName, it.surname)
             })
 
+    val baseURI = cf.baseUri
+
     fun utvidetAnsatt(ansattId: String) =
-        utvidetAnsatt(cf.navIdentURI(ansattId))
+        utvidetAnsatt(cf.navIdentURI(ansattId), ansattId)
 
     fun utvidetAnsattTident(ansattId: String) =
-        utvidetAnsatt(cf.tIdentURI(ansattId))
+        utvidetAnsatt(cf.tIdentURI(ansattId),ansattId)
 
-    private fun utvidetAnsatt(uri: URI)  =
-        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
+    private fun utvidetAnsatt(uri: URI,ident: String)  =
+        get<EntraSaksbehandlerRespons>(uri,mapOf(IDENTIFIKATOR to ident)).ansatte.firstOrNull()
 
     private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
         pagedTransformedAndSorted(

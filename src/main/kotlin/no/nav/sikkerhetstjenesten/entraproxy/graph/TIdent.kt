@@ -12,7 +12,7 @@ data class TIdent (@JsonValue val verdi: String)  {
         }
     }
 
-    companion object {
+    private companion object {
         private const val TIDENT_LENGTH = 7
     }
 

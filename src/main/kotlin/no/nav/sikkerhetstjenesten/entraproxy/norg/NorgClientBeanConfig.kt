@@ -15,6 +15,6 @@ class NorgClientBeanConfig {
         createClient<NorgProxyClient>(cfg, b, errorHandler)
 
     @Bean
-    fun norgHealthIndicator(client: NorgProxyClient) =  PingableHealthIndicator(client)
+    fun norgHealthIndicator(client: NorgTjeneste) =  PingableHealthIndicator(client)
 }
 

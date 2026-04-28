@@ -31,9 +31,9 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.util.UriComponentsBuilder.fromUriString
 
 
-@RestClientTest(components = [NorgClientBeanConfig::class, NorgTjeneste::class, NorgConfig::class,NorgProxyClient::class, DefaultRestErrorHandler::class])
+@RestClientTest(components = [NorgClientBeanConfig::class,NorgTjeneste::class, NorgConfig::class,NorgProxyClient::class, DefaultRestErrorHandler::class])
 @ApplyExtension(SpringExtension::class)
-@EnableResilientMethods
+@EnableResilientMethods(proxyTargetClass = true)
 class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,
                        @param:Autowired private val server: MockRestServiceServer) : BehaviorSpec() {
 

@@ -6,13 +6,13 @@ import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.HttpExchange
 
 @HttpExchange
-interface NorgProxyClient : Pingable {
+interface NorgProxyClient  {
 
     @GetExchange(ENHET_PATH)
     fun navnFor(@PathVariable enhetsnummer: String): NorgEnhetRespons
 
     @GetExchange(PING_PATH)
-    override fun ping(): Any?
+    fun ping(): Any?
 
     companion object {
         const val ENHET_PATH = "/norg2/api/v1/enhet/{enhetsnummer}"

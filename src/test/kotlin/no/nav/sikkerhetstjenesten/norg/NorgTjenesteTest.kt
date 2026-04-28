@@ -21,7 +21,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.BASE_URI
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_BASE_URI
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
@@ -89,7 +89,7 @@ class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,
         private const val NAVN = "NAV Testkontor"
         private const val NUMMER = "4242"
         private val ENHETSNUMMER = Enhetnummer(NUMMER)
-        private val ENHET_URI = fromUriString("${BASE_URI}$ENHET_PATH")
+        private val ENHET_URI = fromUriString("${NORG_BASE_URI}$ENHET_PATH")
             .buildAndExpand(ENHETSNUMMER.verdi).toUri()
     }
 }

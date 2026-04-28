@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.norg
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.extensions.spring.SpringExtension
@@ -17,20 +18,27 @@ import org.springframework.http.HttpMethod.GET
 import org.springframework.http.MediaType.APPLICATION_JSON
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgClientBeanConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.IrrecoverableRestException
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.BASE_URI
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.resilience.annotation.EnableResilientMethods
+import org.springframework.test.web.client.ExpectedCount.times
+import org.springframework.test.web.client.response.MockRestResponseCreators.withStatus
 import org.springframework.web.util.UriComponentsBuilder.fromUriString
 
 
 @RestClientTest(components = [NorgClientBeanConfig::class, NorgTjeneste::class, NorgConfig::class,NorgProxyClient::class, DefaultRestErrorHandler::class])
 @ApplyExtension(SpringExtension::class)
-class NorgTjenesteTest : BehaviorSpec() {
+@EnableResilientMethods
+class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,
+                       @param:Autowired private val server: MockRestServiceServer) : BehaviorSpec() {
 
-    @Autowired
-    lateinit var tjeneste: NorgTjeneste
-    @Autowired
-    lateinit var server: MockRestServiceServer
 
     init {
         afterEach { server.verify() }
@@ -42,60 +50,48 @@ class NorgTjenesteTest : BehaviorSpec() {
                         .andExpect(method(GET))
                         .andRespond(withSuccess("""
                            {
-                             "enhetNr": 4242,
-                             "navn": "NAV Testkontor"
+                             "enhetNr": "$NUMMER",
+                             "navn": "$NAVN"
                            } 
                         """.trimIndent(), APPLICATION_JSON))
 
-                    tjeneste.navnFor(Enhetnummer("4242")) shouldBe "NAV Testkontor"
+                    tjeneste.navnFor(ENHETSNUMMER) shouldBe NAVN
                 }
             }
         }
-
-/*
-        Given("feilhaandtering") {
+        Given("enhet finnes ikke") {
             When("tjenesten returnerer 404") {
                 Then("kaster NotFoundRestException uten retry") {
-                    server.expect(requestTo(ANSATT_URI))
+                    server.expect(requestTo(ENHET_URI))
                         .andExpect(method(GET))
-                        .andRespond(withStatus(HttpStatus.NOT_FOUND))
+                        .andRespond(withStatus(NOT_FOUND))
 
                     shouldThrow<NotFoundRestException> {
-                        tjeneste.enhet(ANSATTID)
-                    }
-                }
-            }
-
-            When("tjenesten returnerer 401") {
-                Then("kaster IrrecoverableRestException uten retry") {
-                    server.expect(requestTo(ANSATT_URI))
-                        .andExpect(method(GET))
-                        .andRespond(withStatus(HttpStatus.UNAUTHORIZED))
-
-                    shouldThrow<IrrecoverableRestException> {
-                        tjeneste.enhet(ANSATTID)
-                    }
-                }
-            }
-
-            When("tjenesten returnerer 500") {
-                Then("kaster RecoverableRestException etter 4 forsøk") {
-                    server.expect(times(4), requestTo(ANSATT_URI))
-                        .andExpect(method(GET))
-                        .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR))
-
-                    shouldThrow<RecoverableRestException> {
-                        tjeneste.enhet(ANSATTID)
+                        tjeneste.navnFor(ENHETSNUMMER)
                     }
                 }
             }
         }
+        Given("feilhåndtering med retry") {
+            When("tjenesten returnerer 500") {
+                Then("prøver 4 ganger") {
+                    server.expect(times(4),requestTo(ENHET_URI))
+                        .andExpect(method(GET))
+                        .andRespond(withStatus(INTERNAL_SERVER_ERROR))
 
- */
+                    shouldThrow<RecoverableRestException> {
+                        tjeneste.navnFor(ENHETSNUMMER)
+                    }
+                }
+            }
+        }
     }
 
     companion object  {
+        private const val NAVN = "NAV Testkontor"
+        private const val NUMMER = "4242"
+        private val ENHETSNUMMER = Enhetnummer(NUMMER)
         private val ENHET_URI = fromUriString("${BASE_URI}$ENHET_PATH")
-            .buildAndExpand("4242").toUri()
+            .buildAndExpand(ENHETSNUMMER.verdi).toUri()
     }
 }

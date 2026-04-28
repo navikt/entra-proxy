@@ -8,12 +8,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.C
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
 import org.springframework.stereotype.Component
 import java.time.Duration
+import java.time.Duration.ofSeconds
 
 
 @Component
 class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter,  val handler: CacheNøkkelHandler,vararg val cfgs: CachableRestConfig) : LeaderAware() {
     private val conn = client.connect().apply {
-        timeout = Duration.ofSeconds(30)
+        timeout = ofSeconds(30)
         if (isLocalOrTest) {
             sync().configSet("notify-keyspace-events", "Exd")
         }

@@ -18,7 +18,6 @@ import org.springframework.http.HttpMethod.GET
 import org.springframework.http.MediaType.APPLICATION_JSON
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgClientBeanConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.IrrecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer

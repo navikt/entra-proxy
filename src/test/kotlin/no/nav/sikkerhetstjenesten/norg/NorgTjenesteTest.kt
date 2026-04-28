@@ -24,7 +24,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RecoverableRestExceptio
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.BASE_URI
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.resilience.annotation.EnableResilientMethods

@@ -108,9 +108,11 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
 
     private fun refreshOid(navIdent: AnsattId): UUID {
         cache.delete(navIdent.verdi, OID_CACHE).also {
-            log.info("Slettet cache innslag for $navIdent")
+            log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
-        return oid.ansattOid(navIdent)
+        return oid.ansattOid(navIdent).also {
+            log.info("Hentet  ny oid $it for $navIdent")
+        }
             ?: throw NotFoundRestException(adapter.baseURI, "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
     }
 

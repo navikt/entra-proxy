@@ -14,9 +14,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableOAuth2Client(cacheEnabled = true)
-@EnableCaching(proxyTargetClass = true)
-@EnableResilientMethods(proxyTargetClass = true)
-@EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableCaching
+@EnableResilientMethods
+@EnableAspectJAutoProxy
 @EnableScheduling
 @EnableJwtTokenValidation(ignore = ["org.springdoc", "org.springframework"])
 class EntraProxyApplication

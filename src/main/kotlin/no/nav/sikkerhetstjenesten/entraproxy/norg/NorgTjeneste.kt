@@ -11,12 +11,9 @@ import org.springframework.stereotype.Service
 
 @RetryingWhenRecoverable
 @Service
-class NorgTjeneste(private val client: NorgProxyClient, private val cfg: NorgConfig) : Pingable {
+class NorgTjeneste(private val client: NorgProxyClient) {
     @WithSpan
     @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
     fun navnFor(enhetnummer: Enhetnummer) = client.navnFor(enhetnummer.verdi).navn
-    override fun ping() = client.ping()
 
-    override val pingEndpoint = cfg.pingEndpoint.toString()
-    override val name = NORG
 }

@@ -12,20 +12,12 @@ class PingableHealthIndicator(private val pingable: Pingable) : HealthIndicator 
 
     override fun health() : Health =
         runCatching {
-            if (!pingable.isEnabled) {
-                return disabled()
-            }
             pingable.ping()
             up()
         }.getOrElse {
             log.warn("Kunne ikke pinge ${pingable.pingEndpoint}", it)
             down(it)
         }
-
-    private fun disabled() =
-        Health.outOfService()
-            .withDetail(ENDPOINT, pingable.pingEndpoint)
-            .build()
 
     private fun up() =
         with(pingable) {

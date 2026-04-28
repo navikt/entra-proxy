@@ -2,28 +2,20 @@ package no.nav.sikkerhetstjenesten.entraproxy.norg
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.PING_PATH
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.stereotype.Component
 import java.net.URI
 import java.time.Duration
 
-@ConfigurationProperties(NORG)
-class NorgConfig(
-    baseUri: URI = DEFAULT_URI,
-    private val enhetPath: String = DEFAULT_ENHET_PATH,
-    pingPath: String = DEFAULT_PING_PATH,
-    override val varighet : Duration,
-    enabled: Boolean = true) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, NORG, enabled) {
-
-    fun enhetURI(enhetsnummer: String) =
-        builder().apply {
-            path(enhetPath)
-        }.build(enhetsnummer)
-
+@Component
+class NorgConfig : CachableRestConfig, AbstractRestConfig(BASE_URI, PING_PATH, NORG) {
+    override val varighet = Duration.ofHours(3)
     override val navn = name
+
     companion object {
-        private val DEFAULT_URI = URI.create("http://norg2.org")
-        private val DEFAULT_ENHET_PATH = "/norg2/api/v1/enhet/{enhetsnummer}"
-        private const val DEFAULT_PING_PATH = "/norg2/internal/health/liveness"
+        val BASE_URI = URI.create("http://norg2.org")
         const val NORG = "norg"
     }
 

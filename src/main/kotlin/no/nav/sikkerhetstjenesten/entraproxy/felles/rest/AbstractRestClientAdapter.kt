@@ -16,7 +16,7 @@ abstract class AbstractRestClientAdapter(
     protected val errorHandler: ErrorHandler = DefaultRestErrorHandler()) : Pingable {
 
     protected val log = getLogger(javaClass)
-    override fun ping() = if (cfg.isEnabled) get<Any>(cfg.pingEndpoint) else "disabled"
+    override fun ping() = get<Any>(cfg.pingEndpoint)
 
     protected inline fun <reified T: Any> get(uri: URI, headers: Map<String, String> = emptyMap()) =
         restClient.get()
@@ -30,7 +30,6 @@ abstract class AbstractRestClientAdapter(
     override val name = cfg.name
 
     override val pingEndpoint = "${cfg.pingEndpoint}"
-    override val isEnabled = cfg.isEnabled
     override fun toString() = "restClient=$restClient, cfg=$cfg, baseUri=${cfg.baseUri}"
 
 }

@@ -1,0 +1,21 @@
+package no.nav.sikkerhetstjenesten.entraproxy.norg
+
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
+
+@HttpExchange
+interface NorgProxyClient : Pingable {
+
+    @GetExchange(ENHET_PATH)
+    fun navnFor(@PathVariable enhetsnummer: String): NorgEnhetRespons
+
+    @GetExchange(PING_PATH)
+    override fun ping(): Any?
+
+    companion object {
+        const val ENHET_PATH = "/norg2/api/v1/enhet/{enhetsnummer}"
+        const val PING_PATH = "/norg2/internal/health/liveness"
+    }
+}

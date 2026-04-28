@@ -9,7 +9,8 @@ import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelHandler
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
+import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
@@ -21,13 +22,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
+import org.springframework.web.client.support.RestClientAdapter.create
+import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
+import org.springframework.boot.actuate.endpoint.SanitizingFunction
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
-import org.springframework.data.redis.cache.RedisCacheManager
+import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
@@ -37,6 +42,10 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
+import kotlin.annotation.AnnotationRetention.BINARY
+import kotlin.annotation.AnnotationTarget.CLASS
+import kotlin.annotation.AnnotationTarget.CONSTRUCTOR
+import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
@@ -65,6 +74,11 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 it.add(tokenInterceptor)
             }
         }
+
+    @Bean
+    fun sanitizingFunction() = SanitizingFunction { data ->
+        if (SENSITIVE_KEYS.any { data.key.contains(it, ignoreCase = true) }) data.withValue("******") else data
+    }
 
     @Bean
     fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: Token) =
@@ -99,6 +113,15 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
+        private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
+        fun createProxyFactory(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) = builderFor(create(b.baseUrl(cfg.baseUri)
+            .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
+            .build()))
+            .build()
+
+        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) =
+            createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
+
     }
     class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
         override fun convert(source: String): Enhetnummer = Enhetnummer(source)
@@ -135,4 +158,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 }
 
+@Retention(BINARY)  // = CLASS in bytecode — enough for JaCoCo
+@Target(FUNCTION, CONSTRUCTOR, CLASS)
+annotation class Generated
 

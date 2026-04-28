@@ -39,17 +39,26 @@ import java.util.UUID.randomUUID
 @Import(TestConfig::class)
 @ApplyExtension(SpringExtension::class)
 class TilgangTester(
-    @param:Autowired private val jsonMapper: JsonMapper,
-    @param:Autowired private val mockMvc: MockMvc,
-    @MockkBean(relaxed = true) private val token: Token,
-    @MockkBean(relaxed = true) private val oAuth2ClientRequestInterceptor: OAuth2ClientRequestInterceptor,
-    @MockkBean(relaxed = true) private val clientConfigurationProperties: ClientConfigurationProperties,
-    @MockkBean private val entraAdapter: EntraRestClientAdapter,
-    @MockkBean private val oid: EntraOidTjeneste,
-    @MockkBean(relaxed = true) private val norg: NorgTjeneste,
-    @MockkBean(relaxed = true) private val cache: CacheClient,
-    @MockkBean(relaxed = true) private val teller: TokenTypeTellendeRequestInterceptor,
-) : BehaviorSpec({
+    @param:Autowired
+    private val jsonMapper: JsonMapper,
+    @param:Autowired
+    private val mockMvc: MockMvc,
+    @MockkBean(relaxed = true)
+    private val token: Token,
+    @MockkBean(relaxed = true)
+    private val oAuth2ClientRequestInterceptor: OAuth2ClientRequestInterceptor,
+    @MockkBean(relaxed = true)
+    private val clientConfigurationProperties: ClientConfigurationProperties,
+    @MockkBean
+    private val entraAdapter: EntraRestClientAdapter,
+    @MockkBean
+    private val oid: EntraOidTjeneste,
+    @MockkBean(relaxed = true)
+    private val norg: NorgTjeneste,
+    @MockkBean(relaxed = true)
+    private val cache: CacheClient,
+    @MockkBean(relaxed = true)
+    private val teller: TokenTypeTellendeRequestInterceptor, ) : BehaviorSpec({
 
     beforeSpec {
         every { token.systemAndNs } returns "test:ns"
@@ -122,7 +131,7 @@ class TilgangTester(
     }
 }
 
-@Configuration(proxyBeanMethods = false)
+@Configuration(proxyBeanMethods = true)
 class TestConfig {
     @Bean
     fun meterRegistry() = SimpleMeterRegistry()
@@ -131,8 +140,7 @@ class TestConfig {
     fun cacheManager() = NoOpCacheManager()
 
     @Bean
-    fun entra(adapter: EntraRestClientAdapter, norg: NorgTjeneste,
-              oid: EntraOidTjeneste, cache: CacheClient) =
+    fun entra(adapter: EntraRestClientAdapter, norg: NorgTjeneste, oid: EntraOidTjeneste, cache: CacheClient) =
         EntraTjeneste(adapter, norg, oid, cache)
 
     @Bean

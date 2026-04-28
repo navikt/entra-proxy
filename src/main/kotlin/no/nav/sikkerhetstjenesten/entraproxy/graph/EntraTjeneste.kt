@@ -15,7 +15,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.net.URI
 import java.util.*
 
 @RetryingWhenRecoverable
@@ -29,7 +28,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         tidOgLog(log, "tema for $ansattId") {
-            withNotFoundFallbackArg(oid, {
+            medNotFoundFallback(oid, {
                 adapter.tema("$it")
             }) {
                 refreshOid(ansattId)
@@ -41,7 +40,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         tidOgLog(log, "enhet(er) for $ansattId") {
-            withNotFoundFallbackArg(oid, ::enheter) {
+            medNotFoundFallback(oid, ::enheter) {
                 refreshOid(ansattId)
             }
         }
@@ -73,15 +72,16 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         tidOgLog(log) {
-            withNotFoundFallbackArg(oid, { adapter.ansatteGrupper(it.toString()) }) { refreshOid(navIdent) }
+            medNotFoundFallback(oid, { adapter.ansatteGrupper(it.toString()) }) { refreshOid(navIdent) }
         }
 
-    private inline fun <T> withNotFoundFallbackArg(
-        arg: UUID,
-        main: (UUID) -> T,
-        fallbackArg: (UUID) -> UUID
-    ): T = runCatching { main(arg) }.getOrElse {
-        if (it is NotFoundRestException) main(fallbackArg(arg)) else throw it
+    private inline fun <T> medNotFoundFallback(arg: UUID, main: (UUID) -> T, nyOid: (UUID) -> UUID)
+            = runCatching { main(arg) }.getOrElse {
+        if (it is NotFoundRestException) {
+            main(nyOid(arg))
+        } else{
+            throw it
+        }
     }
 
     private fun enheter(oid: UUID) =

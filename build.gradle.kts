@@ -20,6 +20,7 @@ version = "1.0.1"
 plugins {
     val kotlinVersion = "2.3.0"
     id("jacoco")
+    id("org.ajoberstar.grgit") version "5.2.2"
     id("org.jetbrains.dokka") version "2.1.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
@@ -28,20 +29,23 @@ plugins {
     id("org.cyclonedx.bom") version "3.2.4"
     id("io.kotest") version "6.1.11"
     id("com.google.cloud.tools.jib") version "3.4.5"
-    id("com.gorylenko.gradle-git-properties") version "2.5.4"
+    //id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application
 }
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 }
+val git = grgit
 springBoot {
     buildInfo {
         properties {
             additional = mapOf(
                 "kotlin.version" to "$CURRENT",
                 "jdk.version" to "$javaVersion",
-                "jdk.vendor" to getProperty("java.vendor")
+                "jdk.vendor" to getProperty("java.vendor"),
+                "git.commit" to git.head().id,
+                "git.branch" to git.branch.current().name
             )
         }
     }

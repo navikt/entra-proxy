@@ -8,6 +8,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgPingable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
@@ -31,7 +32,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.util.UriComponentsBuilder.fromUriString
 
 
-@RestClientTest(components = [NorgClientBeanConfig::class,NorgTjeneste::class, NorgConfig::class,NorgProxyClient::class, DefaultRestErrorHandler::class])
+@RestClientTest(components = [NorgClientBeanConfig::class,NorgTjeneste::class, NorgConfig::class,NorgPingable::class,NorgProxyClient::class, DefaultRestErrorHandler::class])
 @ApplyExtension(SpringExtension::class)
 @EnableResilientMethods
 class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,

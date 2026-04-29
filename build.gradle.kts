@@ -12,13 +12,14 @@ val springMockVersion = "4.0.2"
 val conditionalsVersion = "6.0.3"
 val coroutinesVersion = "1.10.2"
 val otelVersion = "2.22.0"
+val git = grgit
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
 
 
 plugins {
-    val kotlinVersion = "2.3.0"
+    val kotlinVersion = "2.3.20"
     id("jacoco")
     id("org.ajoberstar.grgit") version "5.2.2"
     id("org.jetbrains.dokka") version "2.1.0"
@@ -35,7 +36,6 @@ plugins {
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 }
-val git = grgit
 springBoot {
     buildInfo {
         properties {

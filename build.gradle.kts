@@ -29,7 +29,6 @@ plugins {
     id("org.cyclonedx.bom") version "3.2.4"
     id("io.kotest") version "6.1.11"
     id("com.google.cloud.tools.jib") version "3.4.5"
-    //id("com.gorylenko.gradle-git-properties") version "2.5.4"
     application
 }
 
@@ -44,8 +43,9 @@ springBoot {
                 "kotlin.version" to "$CURRENT",
                 "jdk.version" to "$javaVersion",
                 "jdk.vendor" to getProperty("java.vendor"),
-                "git.commit" to git.head().id,
-                "git.branch" to git.branch.current().name
+                "git.branch" to git.branch.current().name,
+                "git.commit.id" to git.head().abbreviatedId,
+                "git.commit.time" to git.head().dateTime.toString()
             )
         }
     }

@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.service.annotation.GetExchange
 import org.springframework.web.service.annotation.HttpExchange
@@ -9,7 +8,7 @@ import org.springframework.web.service.annotation.HttpExchange
 interface NorgProxyClient  {
 
     @GetExchange(ENHET_PATH)
-    fun navnFor(@PathVariable enhetsnummer: String): NorgEnhetRespons
+    fun enhetFor(@PathVariable enhetsnummer: String): NorgEnhetRespons
 
     @GetExchange(PING_PATH)
     fun ping(): Any?

@@ -13,7 +13,7 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "hourly"
+      interval: "daily"
     open-pull-requests-limit: 10
     cooldown:
-      default-days: 2
+      default-days: 7

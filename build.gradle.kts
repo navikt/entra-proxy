@@ -11,7 +11,7 @@ val logstashEncoderVersion = "9.0"
 val springMockVersion = "4.0.2"
 val conditionalsVersion = "6.0.3"
 val coroutinesVersion = "1.10.2"
-val otelVersion = "2.22.0"
+val otelVersion = "2.27.0"
 val git = grgit
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"

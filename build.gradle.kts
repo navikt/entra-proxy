@@ -22,7 +22,7 @@ plugins {
     val kotlinVersion = "2.3.10"
     id("jacoco")
     id("org.ajoberstar.grgit") version "5.2.2"
-    id("org.jetbrains.dokka") version "2.1.0"
+    id("org.jetbrains.dokka") version "2.2.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "4.0.6"

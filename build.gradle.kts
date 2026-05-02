@@ -4,7 +4,7 @@ import kotlin.KotlinVersion.Companion.CURRENT
 
 val javaVersion = JavaLanguageVersion.of(25)
 val springdocVersion = "3.0.3"
-val tokenSupportVersion = "6.0.3"
+val tokenSupportVersion = "6.0.6"
 val kotestVersion = "6.1.11"
 val mockkVersion = "1.14.9"
 val logstashEncoderVersion = "9.0"

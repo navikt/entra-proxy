@@ -127,6 +127,11 @@
       "name": "arbeid-og-ytelser",
       "namespace": "team-rpa",
       "cluster": "prod-fss"
+    },
+    {
+      "name": "pensjon-revisjon",
+      "namespace": "kiss",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

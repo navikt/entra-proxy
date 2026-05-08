@@ -19,7 +19,7 @@ version = "1.0.1"
 
 
 plugins {
-    val kotlinVersion = "2.3.10"
+    val kotlinVersion = "2.3.21"
     id("jacoco")
     id("org.ajoberstar.grgit") version "5.3.3"
     id("org.jetbrains.dokka") version "2.2.0"

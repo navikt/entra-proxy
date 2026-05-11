@@ -10,6 +10,7 @@ jobs:
       BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
     name: build
     permissions:
+      pages: write
       checks: write
       contents: write
       id-token: write
@@ -40,6 +41,12 @@ jobs:
         with:
           team: sikkerhetstjenesten
 
+      - name: Configure Gradle for GPR
+        run: |
+            mkdir -p ~/.gradle
+            echo "gpr.user=${{ github.actor }}" >> ~/.gradle/gradle.properties
+            echo "gpr.key=${{ secrets.GITHUB_TOKEN }}" >> ~/.gradle/gradle.properties     
+
       - name: Test og bygg
         id: kompiler
         run: |
@@ -50,20 +57,43 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
-        if: always() # always run even if the previous step fails
-        with:
-          include_time_in_summary: 'true'
-          include_passed: 'true'
-          detailed_summary: 'true'
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+      - name: Prepare Pages artifact
+        run: |
+            echo "--- JaCoCo report ---"
+            ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
+            echo "--- Test report ---"
+            ls build/reports/tests/test/ || echo "Missing test report"
+            mkdir -p build/reports/pages/jacoco
+            mkdir -p build/reports/pages/tests
+            cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
+            cp -r build/reports/tests/test/. build/reports/pages/tests/
+            cat > build/reports/pages/index.html << 'EOF'
+            <!DOCTYPE html>
+            <html>
+            <body>
+            <h1>Test & Coverage</h1>
+            <ul>
+             <li><a href="jacoco/index.html">JaCoCo Coverage</a></li>
+             <li><a href="tests/index.html">Test Report</a></li>
+            </ul>
+            </body>
+            </html>
+            EOF
 
-      - name: Upload JaCoCo report
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          name: jacoco-report
-          path: build/reports/jacoco/test/html
+          path: build/reports/pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
 
       - name: Attest and sign
         uses: nais/attest-sign@2582340c642c3fd834a0f0f0773bf3a70d30a227 # v2.0.8

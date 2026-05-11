@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelElementer
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkel
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
@@ -16,7 +16,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
 
     override val cacheName: String = GRAPH
 
-    override fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer) =
+    override fun doOppfrisk(nøkkelElementer: CacheNøkkel) =
         if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDETANSATT || nøkkelElementer.metode ==GRUPPERFORANSATT
 
 
@@ -26,14 +26,14 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
             log.warn("Ukjent nøkkel $nøkkelElementer")
 
 
-    private fun oppfriskMedMetode(elementer: CacheNøkkelElementer, metode: String) {
+    private fun oppfriskMedMetode(elementer: CacheNøkkel, metode: String) {
         val ansattId = AnsattId(elementer.id)
         MDC.put(USER_ID, ansattId.verdi)
         runCatching {
             var oid  = oidTjeneste.ansattOid(ansattId)
             if (oid == null) {
                 log.info("INgen oid i cache for ansatt $ansattId, henter på nytt fra Entra og oppfrisker OID-cache")
-                cache.delete(elementer.id,OID_CACHE)
+                cache.delete(OID_CACHE,elementer.id)
                 oid  = oidTjeneste.ansattOid(ansattId)
             }
             if (oid != null) {

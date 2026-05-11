@@ -107,7 +107,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     private fun refreshOid(navIdent: AnsattId): UUID {
-        cache.delete(navIdent.verdi, OID_CACHE).also {
+        cache.delete(OID_CACHE,navIdent.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
         return oid.ansattOid(navIdent).also {

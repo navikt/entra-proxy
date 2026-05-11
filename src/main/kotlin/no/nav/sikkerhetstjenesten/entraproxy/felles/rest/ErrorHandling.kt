@@ -35,9 +35,6 @@ class DefaultRestErrorHandler : ErrorHandler {
             }
         }
     }
-    companion object {
-        //const val IDENTIFIKATOR =  "X-Identifikator"
-    }
 }
 
 open class IrrecoverableRestException(

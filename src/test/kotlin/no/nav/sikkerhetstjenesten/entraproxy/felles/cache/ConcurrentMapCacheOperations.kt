@@ -15,7 +15,7 @@ class ConcurrentMapCacheOperations(private val mgr: CacheManager) : CacheOperati
         c.evict(key)
         return if (existed) 1L else 0L
     }
-    
+
     override fun tilNøkkel(cache: CachableConfig, id: String) =
         cache.extraPrefix ?.let { "$it:$id"  } ?: id
 }

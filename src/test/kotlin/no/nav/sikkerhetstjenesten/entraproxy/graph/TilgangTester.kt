@@ -1,68 +1,46 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import com.ninjasquad.springmockk.MockkBean
-import io.kotest.core.extensions.ApplyExtension
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
-import no.nav.security.token.support.client.spring.ClientConfigurationProperties
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
-import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTeller
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.DevEntraController
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
-import org.springframework.cache.support.NoOpCacheManager
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Import
+import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import java.net.URI
 import java.util.UUID.randomUUID
 
-@WebMvcTest(controllers = [DevEntraController::class])
-@Import(TestConfig::class)
-@ApplyExtension(SpringExtension::class)
-class TilgangTester(
-    @param:Autowired
-    private val jsonMapper: JsonMapper,
-    @param:Autowired
-    private val mockMvc: MockMvc,
-    @MockkBean(relaxed = true)
-    private val token: Token,
-    @MockkBean(relaxed = true)
-    private val oAuth2ClientRequestInterceptor: OAuth2ClientRequestInterceptor,
-    @MockkBean(relaxed = true)
-    private val clientConfigurationProperties: ClientConfigurationProperties,
-    @MockkBean
-    private val entraAdapter: EntraRestClientAdapter,
-    @MockkBean
-    private val oid: EntraOidTjeneste,
-    @MockkBean(relaxed = true)
-    private val norg: NorgTjeneste,
-    @MockkBean(relaxed = true)
-    private val cache: CacheClient,
-    @MockkBean(relaxed = true)
-    private val teller: TokenTypeTellendeRequestInterceptor, ) : BehaviorSpec({
+class TilgangTester : BehaviorSpec({
+
+    val token: Token = mockk(relaxed = true)
+    val entraAdapter: EntraRestClientAdapter = mockk()
+    val oid: EntraOidTjeneste = mockk()
+    val norg: NorgTjeneste = mockk(relaxed = true)
+    val cache: CacheClient = mockk(relaxed = true)
+    val entra = EntraTjeneste(entraAdapter, norg, oid, cache)
+    val controller = EntraController(entra, oid, token)
+    val mockMvc: MockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+    val jsonMapper: JsonMapper = JsonMapper.builder().findAndAddModules().build()
 
     beforeSpec {
         every { token.systemAndNs } returns "test:ns"
         every { token.systemNavn } returns "Test"
+        every { token.erCC } returns true
+        every { token.assert<Any>(any(), any()) } answers {
+            @Suppress("UNCHECKED_CAST")
+            (secondArg<() -> Set<Any>>())()
+        }
     }
 
     Given("tema-endepunkt") {
@@ -70,7 +48,7 @@ class TilgangTester(
             Then("skal responsen inneholde forventet ansatt") {
                 every { oid.gruppeOid(TEMA.gruppeNavn) } returns UUID
                 every { entraAdapter.gruppeMedlemmer("$UUID") } returns setOf(ansatt)
-                val respons = mockMvc.perform(get("/dev/tema/$AAP"))
+                val respons = mockMvc.perform(get("/api/v1/tema/$AAP"))
                     .andExpect(status().isOk)
                     .andReturn().response.contentAsString
                 jsonMapper.readValue<Set<Ansatt>>(respons).single() shouldBe ansatt
@@ -85,12 +63,11 @@ class TilgangTester(
                 every { entraAdapter.enheter("$UUID") } throws
                     NotFoundRestException(URI.create(""), "ikke funnet") andThen setOf(ENHET.enhetnummer)
                 every { norg.navnFor(ENHET.enhetnummer) } returns ENHET.navn
-                val respons = mockMvc.perform(get("/dev/enhet/ansatt/${ANSATTID.verdi}"))
+                val respons = mockMvc.perform(get("/api/v1/enhet/ansatt/${ANSATTID.verdi}"))
                     .andExpect(status().isOk)
                     .andReturn().response.contentAsString
                 jsonMapper.readValue<Set<Enhet>>(respons).single() shouldBe ENHET
                 verify(exactly = 2)  { entraAdapter.enheter("$UUID") }
-
             }
         }
     }
@@ -129,21 +106,4 @@ class TilgangTester(
         val enhetnr = Enhetnummer(nummer)
         val enhetnr1 = Enhetnummer("${ENHET_PREFIX}$nummer")
     }
-}
-
-@Configuration(proxyBeanMethods = true)
-class TestConfig {
-    @Bean
-    fun meterRegistry() = SimpleMeterRegistry()
-
-    @Bean
-    fun cacheManager() = NoOpCacheManager()
-
-    @Bean
-    fun entra(adapter: EntraRestClientAdapter, norg: NorgTjeneste, oid: EntraOidTjeneste, cache: CacheClient) =
-        EntraTjeneste(adapter, norg, oid, cache)
-
-    @Bean
-    fun teller(reg: MeterRegistry) =
-        TokenTypeTellendeRequestInterceptor(TokenTypeTeller(reg, Token(SpringTokenValidationContextHolder())))
 }

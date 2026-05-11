@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisOperations
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Component
 import java.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.measureTime
 
 @Component
@@ -19,7 +20,7 @@ class CacheStørrelseAdapter(private val redisTemplate: RedisOperations<String, 
             var størrelse = 0L
             runCatching {
                 val timeUsed = measureTime {
-                    størrelse = withTimeout(Duration.ofMillis(500).toMillis()) {
+                    størrelse = withTimeout(Duration.ofMillis(500).toMillis().milliseconds) {
                         redisTemplate.execute(SCRIPT, emptyList(),cache) ?: størrelse
                     }
                 }

@@ -18,7 +18,7 @@ class CacheExpiredEventListener(val teller: CacheOppfriskerTeller, erLeder: Bool
     fun cacheInnslagFjernet(hendelse: CacheInnslagFjernetHendelse) {
         somLeder(Unit,"cache innslag fjerning") {
             if (isRunning()) {
-                val elementer = CacheNøkkelElementer(hendelse.nøkkel)
+                val elementer = CacheNøkkel(hendelse.nøkkel)
                 log.info("Cache innslag utløpt for cache '${elementer.cacheName}' med nøkkel '${hendelse.nøkkel}'")
                 oppfriskere.firstOrNull { it.cacheName == elementer.cacheName }?.run {
                     oppfrisk(elementer)

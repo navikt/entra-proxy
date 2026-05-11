@@ -35,9 +35,6 @@ class DefaultRestErrorHandler : ErrorHandler {
             }
         }
     }
-    companion object {
-        const val IDENTIFIKATOR =  "X-Identifikator"
-    }
 }
 
 open class IrrecoverableRestException(
@@ -47,7 +44,6 @@ open class IrrecoverableRestException(
 class NotFoundRestException(
     val uri: URI,
     val msg: String,
-    val identifikator: String? = null,
     cause: Throwable? = null) : IrrecoverableRestException(NOT_FOUND, uri, msg, cause)
 
 open class RecoverableRestException(

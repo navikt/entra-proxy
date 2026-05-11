@@ -56,11 +56,11 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
         defaultCacheConfig()
             .entryTtl(cfg.varighet)
             .serializeKeysWith(fromSerializer(StringRedisSerializer()))
-            .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(MAPPER)))
+            .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(VALKEY_MAPPER)))
 
 
     companion object {
-         val MAPPER = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
+         val VALKEY_MAPPER = JsonMapper.builder().polymorphicTypeValidator(CacheNavPolymorphicTypeValidator()).apply {
             addModule(Builder().build())
             addModule(CacheTypeInfoAddingJacksonModule())
         }.build()

@@ -8,12 +8,15 @@ env:
   IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/sikkerhetstjenesten/${{ github.event.repository.name }}
 jobs:
   build:
+    environment: github-pages
     name: build
     permissions:
       checks: write
       contents: write
       id-token: write
+      pages: write
     runs-on: ubuntu-latest
+
     steps:
       - name: Sjekker ut kode
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -55,20 +58,46 @@ jobs:
         id: kompiler
         run: |
           echo "image=${{ env.IMAGE }}:${{ env.TAG }}" >> $GITHUB_OUTPUT          
-          ./gradlew --warning-mode all test cyclonedxBom jib -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
+          ./gradlew --warning-mode all test cyclonedxBom jib jacocoTestReport -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
           echo "DIGEST=$(cat build/jib-image.digest)" >> $GITHUB_ENV
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v6.4.0
-        if: always() # always run even if the previous step fails
+      - name: Prepare Pages artifact
+        run: |
+          echo "--- JaCoCo report ---"
+          ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
+          echo "--- Test report ---"
+          ls build/reports/tests/test/ || echo "Missing test report"
+          mkdir -p build/reports/pages/jacoco
+          mkdir -p build/reports/pages/tests
+          cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
+          cp -r build/reports/tests/test/. build/reports/pages/tests/
+          cat > build/reports/pages/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <body>
+          <h1>Test & Coverage</h1>
+          <ul>
+           <li><a href="jacoco/index.html">JaCoCo Coverage</a></li>
+           <li><a href="tests/index.html">Test Report</a></li>
+          </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          include_time_in_summary: 'true'
-          include_passed: 'true'
-          detailed_summary: 'true'
-          report_paths: '**/build/test-results/test/TEST-*.xml'
+          path: build/reports/pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0

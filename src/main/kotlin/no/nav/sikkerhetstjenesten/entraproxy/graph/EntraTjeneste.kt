@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.micrometer.core.annotation.Timed
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
@@ -20,7 +20,7 @@ import java.util.*
 @RetryingWhenRecoverable
 @Service
 @Timed(value = GRAPH, histogram = true)
-class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheClient)  {
+class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
     private val log = getLogger(javaClass)
 
@@ -107,7 +107,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     private fun refreshOid(navIdent: AnsattId): UUID {
-        cache.delete(navIdent.verdi, OID_CACHE).also {
+        cache.delete(OID_CACHE,navIdent.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
         return oid.ansattOid(navIdent).also {

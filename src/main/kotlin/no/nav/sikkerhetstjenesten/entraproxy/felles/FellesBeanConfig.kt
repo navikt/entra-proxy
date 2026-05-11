@@ -12,6 +12,7 @@ import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
@@ -119,7 +120,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             .build()))
             .build()
 
-        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) =
+        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler = DefaultRestErrorHandler()) =
             createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
 
     }

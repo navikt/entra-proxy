@@ -8,10 +8,10 @@ import kotlin.system.measureTimeMillis
 abstract class AbstractCacheOppfrisker : CacheOppfrisker {
     protected val log = getLogger(javaClass)
 
-    protected abstract fun doOppfrisk(nøkkelElementer: CacheNøkkelElementer)
+    protected abstract fun doOppfrisk(nøkkelElementer: CacheNøkkel)
 
     @WithSpan
-    final override fun oppfrisk(nøkkelElementer: CacheNøkkelElementer) {
+    final override fun oppfrisk(nøkkelElementer: CacheNøkkel) {
         val duration = measureTimeMillis {
             runCatching {
                 doOppfrisk(nøkkelElementer)
@@ -22,12 +22,12 @@ abstract class AbstractCacheOppfrisker : CacheOppfrisker {
         }
         log.info("Oppfrisking tok ${duration}ms for $nøkkelElementer")
     }
-    protected fun loggOppfriskingFeilet(elementer: CacheNøkkelElementer, feil: Throwable) {
+    protected fun loggOppfriskingFeilet(elementer: CacheNøkkel, feil: Throwable) {
         log.warn("Oppfrisking av $elementer feilet", feil)
     }
 }
 
 interface CacheOppfrisker {
     val cacheName: String
-    fun oppfrisk(nøkkelElementer: CacheNøkkelElementer)
+    fun oppfrisk(nøkkelElementer: CacheNøkkel)
 }

@@ -15,8 +15,8 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 class NorgClientBeanConfig {
 
     @Bean
-    fun norgProxyClient( cfg: NorgConfig,b: Builder, errorHandler: ErrorHandler) =
-        createClient<NorgProxyClient>(cfg, b, errorHandler)
+    fun norgProxyClient( cfg: NorgConfig,b: Builder) =
+        createClient<NorgProxyClient>(cfg, b)
     @Bean
     fun norgHealthIndicator(pingable: NorgPingable) =
         PingableHealthIndicator(pingable)

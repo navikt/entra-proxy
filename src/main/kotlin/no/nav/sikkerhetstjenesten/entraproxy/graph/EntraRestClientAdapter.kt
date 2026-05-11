@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler.Companion.IDENTIFIKATOR
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.IrrecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
@@ -37,10 +36,10 @@ class EntraRestClientAdapter(
     val baseURI = cf.baseUri
 
     fun ansattOid(navIdent: String) =
-        with(get<AnsattOids>(cf.userURI(navIdent), mapOf(IDENTIFIKATOR to navIdent)).oids) {
+        with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
-                0 -> throw NotFoundRestException(cf.userURI(navIdent), navIdent, "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }
@@ -72,7 +71,7 @@ class EntraRestClientAdapter(
         utvidetAnsatt(cf.tIdentURI(ansattId), ansattId)
 
     private fun utvidetAnsatt(uri: URI, ident: String) =
-        get<EntraSaksbehandlerRespons>(uri, mapOf(IDENTIFIKATOR to ident)).ansatte.firstOrNull()
+        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
 
     final inline fun <reified T : Any> get(uri: URI, headers: Map<String, String> = emptyMap()) =
         restClient.get()

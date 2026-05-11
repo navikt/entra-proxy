@@ -35,6 +35,18 @@ plugins {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude("**/tilgang/*Swagger*.class", "**/tilgang/dev/*.class")
+            }
+        })
+    )
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
 }
 springBoot {
     buildInfo {

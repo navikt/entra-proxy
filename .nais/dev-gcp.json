@@ -215,6 +215,26 @@
       "name": "pensjon-revisjon",
       "namespace": "kiss",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "pensjon-revisjon-q1",
+      "namespace": "kiss",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "pensjon-revisjon-q2",
+      "namespace": "kiss",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "pensjon-revisjon-q3",
+      "namespace": "kiss",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "ekspertbistand-backend",
+      "namespace": "fager",
+      "cluster": "dev-gcp"
     }
 
   ],

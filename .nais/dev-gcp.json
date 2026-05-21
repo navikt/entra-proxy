@@ -235,6 +235,11 @@
       "name": "ekspertbistand-backend",
       "namespace": "fager",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "oh-oppgavefordeling-job",
+      "namespace": "oppgavehandtering",
+      "cluster": "dev-gcp"
     }
 
   ],

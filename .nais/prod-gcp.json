@@ -137,6 +137,11 @@
       "name": "ekspertbistand-backend",
       "namespace": "fager",
       "cluster": "prod-gcp"
+    },
+    {
+      "name": "oh-oppgavefordeling-job",
+      "namespace": "oppgavehandtering",
+      "cluster": "prod-gcp"
     }
   ],
   "nais": {

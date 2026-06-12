@@ -240,6 +240,11 @@
       "name": "oh-oppgavefordeling-job",
       "namespace": "oppgavehandtering",
       "cluster": "dev-gcp"
+    },
+    {
+      "name": "eien-tilganger-poc",
+      "namespace": "eien",
+      "cluster": "dev-gcp"
     }
 
   ],

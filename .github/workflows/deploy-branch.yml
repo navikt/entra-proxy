@@ -8,13 +8,11 @@ env:
   IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/sikkerhetstjenesten/${{ github.event.repository.name }}
 jobs:
   build:
-    environment: github-pages
     name: build
     permissions:
       checks: write
       contents: write
       id-token: write
-      pages: write
     runs-on: ubuntu-latest
 
     steps:
@@ -67,7 +65,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare Pages artifact
+      - name: Prepare test report bundle
         run: |
           echo "--- JaCoCo report ---"
           ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
@@ -90,17 +88,6 @@ jobs:
           </html>
           EOF
 
-      - name: Setup Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: build/reports/pages
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0

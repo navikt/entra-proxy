@@ -52,8 +52,11 @@ jobs:
         id: kompiler
         run: |
           echo "image=${{ env.IMAGE }}:${{ env.TAG }}" >> $GITHUB_OUTPUT          
-          ./gradlew --warning-mode all test cyclonedxBom jib jacocoTestReport -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
-          echo "DIGEST=$(cat build/jib-image.digest)" >> $GITHUB_ENV
+          ./gradlew --warning-mode all test cyclonedxBom bootJar jacocoTestReport
+          docker build --build-arg BASE_IMAGE=${BASE} -t ${{ env.IMAGE }}:${{ env.TAG }} -t ${{ env.IMAGE }}:latest .
+          docker push ${{ env.IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.IMAGE }}:latest
+          echo "DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE }}:${{ env.TAG }} --format '{{.Manifest.Digest}}')" >> $GITHUB_ENV
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

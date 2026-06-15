@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
+ARG BASE_IMAGE=europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-26
 FROM ${BASE_IMAGE}
 ENV TZ="Europe/Oslo"
 WORKDIR /app

@@ -6,23 +6,18 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.stereotype.Component
-import java.time.Duration
 import java.time.Duration.ofSeconds
-import kotlin.reflect.KClass
 
 
 @Component
-class CacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter,  val handler: CacheNøkkelHandler,vararg val cfgs: CachableRestConfig) : LeaderAware(), CacheOperations {
+class ValkeyCacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter, val handler: CacheNøkkelHandler, vararg val cfgs: CachableRestConfig) : LeaderAware(), CacheOperations {
     private val conn = client.connect().apply {
         timeout = ofSeconds(30)
         if (isLocalOrTest) {
             sync().configSet("notify-keyspace-events", "Exd")
         }
     }
-
-    private val log = getLogger(javaClass)
 
 
     override fun tilNøkkel(cache: CachableConfig, id: String) = handler.tilNøkkel(cache, id)

@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
@@ -27,7 +27,7 @@ class TilgangTester : BehaviorSpec({
     val entraAdapter: EntraRestClientAdapter = mockk()
     val oid: EntraOidTjeneste = mockk()
     val norg: NorgTjeneste = mockk(relaxed = true)
-    val cache: CacheClient = mockk(relaxed = true)
+    val cache: ValkeyCacheClient = mockk(relaxed = true)
     val entra = EntraTjeneste(entraAdapter, norg, oid, cache)
     val controller = EntraController(entra, oid, token)
     val mockMvc: MockMvc = MockMvcBuilders.standaloneSetup(controller).build()

@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.AbstractCacheOppfrisker
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkel
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller

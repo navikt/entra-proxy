@@ -10,12 +10,10 @@ jobs:
       BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
     name: build
     permissions:
-      pages: write
       checks: write
       contents: write
       id-token: write
     runs-on: ubuntu-latest
-    environment: github-pages
     steps:
       - name: Sjekker ut kode
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -52,13 +50,16 @@ jobs:
         id: kompiler
         run: |
           echo "image=${{ env.IMAGE }}:${{ env.TAG }}" >> $GITHUB_OUTPUT          
-          ./gradlew --warning-mode all test cyclonedxBom jib jacocoTestReport -Djib.to.tags=latest,${TAG} -Djib.from.image=${BASE} -Djib.to.image=${{ env.IMAGE }}:${{ env.TAG }}
-          echo "DIGEST=$(cat build/jib-image.digest)" >> $GITHUB_ENV
+          ./gradlew --warning-mode all test cyclonedxBom bootJar jacocoTestReport
+          docker build --build-arg BASE_IMAGE=${BASE} -t ${{ env.IMAGE }}:${{ env.TAG }} -t ${{ env.IMAGE }}:latest .
+          docker push ${{ env.IMAGE }}:${{ env.TAG }}
+          docker push ${{ env.IMAGE }}:latest
+          echo "DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE }}:${{ env.TAG }} --format '{{.Manifest.Digest}}')" >> $GITHUB_ENV
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare Pages artifact
+      - name: Prepare test report bundle
         run: |
             echo "--- JaCoCo report ---"
             ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
@@ -81,17 +82,6 @@ jobs:
             </html>
             EOF
 
-      - name: Setup Pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: build/reports/pages
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0

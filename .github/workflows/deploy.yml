@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Sjekker ut kode
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
@@ -43,18 +45,18 @@ jobs:
       - name: Configure Gradle for GPR
         run: |
             mkdir -p ~/.gradle
-            echo "gpr.user=${{ github.actor }}" >> ~/.gradle/gradle.properties
+            echo "gpr.user=${GITHUB_ACTOR}" >> ~/.gradle/gradle.properties
             echo "gpr.key=${{ secrets.GITHUB_TOKEN }}" >> ~/.gradle/gradle.properties     
 
       - name: Test og bygg
         id: kompiler
         run: |
-          echo "image=${{ env.IMAGE }}:${{ env.TAG }}" >> $GITHUB_OUTPUT          
+          echo "image=${IMAGE}:${TAG}" >> $GITHUB_OUTPUT          
           ./gradlew --warning-mode all test cyclonedxBom bootJar jacocoTestReport
-          docker build --build-arg BASE_IMAGE=${BASE} -t ${{ env.IMAGE }}:${{ env.TAG }} -t ${{ env.IMAGE }}:latest .
-          docker push ${{ env.IMAGE }}:${{ env.TAG }}
-          docker push ${{ env.IMAGE }}:latest
-          echo "DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE }}:${{ env.TAG }} --format '{{.Manifest.Digest}}')" >> $GITHUB_ENV
+          docker build --build-arg BASE_IMAGE=${BASE} -t ${IMAGE}:${TAG} -t ${IMAGE}:latest .
+          docker push ${IMAGE}:${TAG}
+          docker push ${IMAGE}:latest
+          echo "DIGEST=$(docker buildx imagetools inspect ${IMAGE}:${TAG} --format '{{.Manifest.Digest}}')" >> $GITHUB_ENV
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
@@ -115,4 +117,6 @@ jobs:
       IMAGE: ${{needs.build.outputs.image}}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - uses: nais/deploy/actions/deploy@5fdd91aaf69bb0d6dd5e5118cdacb639f487b93b # v2

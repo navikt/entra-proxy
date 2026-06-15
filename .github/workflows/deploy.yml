@@ -7,7 +7,7 @@ jobs:
   build:
     env:
       IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/sikkerhetstjenesten/${{ github.event.repository.name }}
-      BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
+      BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-26
     name: build
     permissions:
       checks: write

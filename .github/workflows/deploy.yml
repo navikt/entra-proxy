@@ -26,6 +26,7 @@ jobs:
     with:
       publish-pages: true
       cache-read-only: true
+      environment: github-pages
 
   deploy:
     permissions:

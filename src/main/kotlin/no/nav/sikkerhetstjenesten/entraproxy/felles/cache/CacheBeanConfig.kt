@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import io.lettuce.core.RedisClient
+import io.micrometer.core.instrument.MeterRegistry
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
@@ -22,7 +23,7 @@ import tools.jackson.module.kotlin.KotlinModule.Builder
 @Configuration(proxyBeanMethods = true)
 @EnableCaching(proxyTargetClass = true)
 @ConditionalOnGCP
-class CacheBeanConfig(private val cf: RedisConnectionFactory,
+class CacheBeanConfig(private val cf: RedisConnectionFactory,private val meterRegistry: MeterRegistry,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
     @Bean
@@ -56,7 +57,9 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
         defaultCacheConfig()
             .entryTtl(cfg.varighet)
             .serializeKeysWith(fromSerializer(StringRedisSerializer()))
-            .serializeValuesWith(fromSerializer(GenericJacksonJsonRedisSerializer(VALKEY_MAPPER)))
+            .serializeValuesWith(fromSerializer(
+                ResilientValkeySerializer(GenericJacksonJsonRedisSerializer(VALKEY_MAPPER), meterRegistry)))
+
 
 
     companion object {

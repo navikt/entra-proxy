@@ -38,3 +38,4 @@ class ValkeyCacheClient(client: RedisClient, private val adapter : CacheStørrel
 }
 
 data class CachableConfig(val name: String, val extraPrefix: String? = null)
+

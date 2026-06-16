@@ -1,0 +1,65 @@
+[versions]
+java = "26"
+kotlin = "2.4.0"
+springBoot = "4.1.0"
+springDependencyManagement = "1.1.7"
+grgit = "5.3.3"
+dokka = "2.2.0"
+cyclonedx = "3.2.4"
+kotest = "6.1.11"
+springdoc = "3.0.3"
+tokenSupport = "6.0.6"
+mockk = "1.14.9"
+logstashEncoder = "9.0"
+springMockk = "5.0.1"
+conditionals = "6.0.5"
+coroutines = "1.10.2"
+otel = "2.28.0"
+otelAlpha = "2.28.0-alpha"
+
+[libraries]
+kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+opentelemetryInstrumentationAnnotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations" }
+opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0", version.ref = "otelAlpha" }
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
+logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
+bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
+tokenClientSpring = { module = "no.nav.security:token-client-spring", version.ref = "tokenSupport" }
+tokenValidationSpring = { module = "no.nav.security:token-validation-spring", version.ref = "tokenSupport" }
+httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
+kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
+springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
+springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
+springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
+springBootStarterWebclient = { module = "org.springframework.boot:spring-boot-starter-webclient" }
+springBootStarterWebflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+springAspects = { module = "org.springframework:spring-aspects" }
+springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
+springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
+springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
+springBootStarterRestclientTest = { module = "org.springframework.boot:spring-boot-starter-restclient-test" }
+kotestRunnerJunit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotestAssertionsCore = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
+kotestExtensionsSpring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
+
+[bundles]
+springBootTest = ["springBootStarterTest", "springBootStarterWebmvcTest", "springBootStarterRestclientTest"]
+kotest = ["kotestRunnerJunit5", "kotestAssertionsCore", "kotestExtensionsSpring"]
+
+[plugins]
+grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
+cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
+

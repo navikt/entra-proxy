@@ -3,115 +3,46 @@ on:
   push:
     branches:
       - main
+
+# Hindre parallelle deploys av samme branch — køes opp i stedet.
+# cancel-in-progress: false fordi en pågående deploy ikke skal avbrytes midt i.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+# Deny-by-default på workflow-nivå; jobs åpner kun det de trenger.
+permissions:
+  contents: read
+
 jobs:
   build:
-    env:
-      IMAGE: europe-north1-docker.pkg.dev/nais-management-233d/sikkerhetstjenesten/${{ github.event.repository.name }}
-      BASE: europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-26
     name: build
     permissions:
-      checks: write
-      contents: write
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sjekker ut kode
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          persist-credentials: false
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
-      - name: Install Java 26
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
-        with:
-          java-version: 26
-          distribution: temurin
-
-      - name: Installer cosign
-        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-        with:
-          cosign-release: v2.4.1
-
-      - name: Setter tag-navn
-        run: echo "TAG=$(date +%Y.%m.%d.%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-
-      - name: Login GAR
-        uses: nais/login@d6ab5d83f735e9f155eb9d7d29cd20ae46820ea9 # v0
-        with:
-          team: sikkerhetstjenesten
-
-      - name: Configure Gradle for GPR
-        run: |
-            mkdir -p ~/.gradle
-            echo "gpr.user=${GITHUB_ACTOR}" >> ~/.gradle/gradle.properties
-            echo "gpr.key=${{ secrets.GITHUB_TOKEN }}" >> ~/.gradle/gradle.properties     
-
-      - name: Test og bygg
-        id: kompiler
-        run: |
-          echo "image=${IMAGE}:${TAG}" >> $GITHUB_OUTPUT          
-          ./gradlew --warning-mode all test cyclonedxBom bootJar jacocoTestReport
-          docker build --build-arg BASE_IMAGE=${BASE} -t ${IMAGE}:${TAG} -t ${IMAGE}:latest .
-          docker push ${IMAGE}:${TAG}
-          docker push ${IMAGE}:latest
-          echo "DIGEST=$(docker buildx imagetools inspect ${IMAGE}:${TAG} --format '{{.Manifest.Digest}}')" >> $GITHUB_ENV
-        env:
-          ORG_GRADLE_PROJECT_githubUser: x-access-token
-          ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare test report bundle
-        run: |
-            echo "--- JaCoCo report ---"
-            ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
-            echo "--- Test report ---"
-            ls build/reports/tests/test/ || echo "Missing test report"
-            mkdir -p build/reports/pages/jacoco
-            mkdir -p build/reports/pages/tests
-            cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
-            cp -r build/reports/tests/test/. build/reports/pages/tests/
-            cat > build/reports/pages/index.html << 'EOF'
-            <!DOCTYPE html>
-            <html>
-            <body>
-            <h1>Test & Coverage</h1>
-            <ul>
-             <li><a href="jacoco/index.html">JaCoCo Coverage</a></li>
-             <li><a href="tests/index.html">Test Report</a></li>
-            </ul>
-            </body>
-            </html>
-            EOF
-
-
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
-      - name: Attest and sign
-        uses: nais/attest-sign@47aaa4acd4986b43cf388640e14fb87761119c7b # v2.0.13
-        with:
-          image_ref: ${{env.IMAGE}}@${{env.DIGEST}}
-          sbom:  build/reports/cyclonedx/application.cdx.json
-
-    outputs:
-      image: ${{ steps.kompiler.outputs.image }}
+      pages: write     # actions/deploy-pages publiserer JaCoCo + testrapport
+      checks: write    # publisere test-resultater til Checks API
+      contents: read   # checkout kode
+      id-token: write  # nais/docker-build-push + nais/attest-sign (OIDC mot GAR + Sigstore)
+    uses: ./.github/workflows/build.yml
+    with:
+      publish-pages: true
+      cache-read-only: true
 
   deploy:
     permissions:
-      contents: write
-      id-token: write
+      contents: read
+      id-token: write  # nais/deploy/actions/deploy (OIDC mot Nais)
     strategy:
       matrix:
-        cluster: [dev-gcp, prod-gcp]
+        cluster: [ dev-gcp, prod-gcp ]
     name: Deploy til ${{matrix.cluster}}
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     environment: ${{matrix.cluster}}:sikkerhetstjenesten
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m
-      RESOURCE: .nais/naiserator.yaml,.nais/probes.yaml,.nais/probe-alerts.yaml,.nais/serviceintegration.yaml,.nais/alerts.yaml
+      RESOURCE: .nais/naiserator.yaml,.nais/probes.yaml,.nais/probe-alerts.yaml,.nais/valkey.yaml,.nais/serviceintegration.yaml,.nais/alerts.yaml
       CLUSTER: ${{matrix.cluster}}
       VARS: .nais/${{matrix.cluster}}.json
       IMAGE: ${{needs.build.outputs.image}}

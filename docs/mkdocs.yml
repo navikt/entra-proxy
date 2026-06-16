@@ -1,0 +1,14 @@
+site_name: entra_proxy
+docs_dir: adr
+site_dir: ../build/reports/pages/adr
+
+theme:
+  name: material
+  language: "nb"
+  palette:
+    scheme: default
+
+nav:
+  - Oversikt: README.md
+  - ADR-006 Gradle versjonskatalog: ADR-001-gradle-versjonskatalog.md
+  - ADR-007 GitHub Actions-gjenbruk: ADR-002-gjenbrukbare-github-workflows.md

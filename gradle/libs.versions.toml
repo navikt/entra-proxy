@@ -1,5 +1,5 @@
 [versions]
-java = "26"
+java = "25"
 kotlin = "2.3.21"
 springBoot = "4.1.0"
 springDependencyManagement = "1.1.7"

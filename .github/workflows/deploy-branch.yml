@@ -41,8 +41,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    environment:
-      ${{matrix.cluster}}:sikkerhetstjenesten
+    environment: "${{ matrix.cluster }}:sikkerhetstjenesten"
     env:
       PRINT_PAYLOAD: true
       TIMEOUT: 30m

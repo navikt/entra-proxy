@@ -4,7 +4,7 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
 import kotlin.KotlinVersion.Companion.CURRENT
 
-val javaVersion = JavaLanguageVersion.of(26)
+val javaVersion = JavaLanguageVersion.of(25)
 val git = grgit
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"

@@ -106,7 +106,7 @@ jobs:
           mkdir -p build/reports/pages/tests
           cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
           cp -r build/reports/tests/test/. build/reports/pages/tests/
-          pip install mkdocs-material
+          pip install mkdocs-material==9.7.6
           mkdocs build -f docs/mkdocs.yml
           cat > build/reports/pages/index.html << 'EOF'
           <!DOCTYPE html>

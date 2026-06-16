@@ -10,5 +10,8 @@ theme:
 
 nav:
   - Oversikt: README.md
-  - ADR-006 Gradle versjonskatalog: ADR-001-gradle-versjonskatalog.md
-  - ADR-007 GitHub Actions-gjenbruk: ADR-002-gjenbrukbare-github-workflows.md
+  - ADR-001 Synkron fasade: ADR-001-synkron-fasade-for-entra-og-norg.md
+  - ADR-002 Cache som lesearkitektur: ADR-002-cache-som-del-av-lesearkitekturen.md
+  - ADR-003 Produksjons-API og dev-endepunkter: ADR-003-separasjon-mellom-produksjons-api-og-dev-endepunkter.md
+  - ADR-004 Sikkerhetsmodell for OBO og CC: ADR-004-sikkerhetsmodell-for-obo-og-cc.md
+  - ADR-005 Resiliens mot Entra og NORG: ADR-005-resiliens-mot-entra-og-norg.md

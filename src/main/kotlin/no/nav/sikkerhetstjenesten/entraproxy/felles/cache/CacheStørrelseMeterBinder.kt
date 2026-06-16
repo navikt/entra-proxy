@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.stereotype.Component
 
 @Component
-class CacheStørrelseMeterBinder(private val client: ValkeyCacheClient) :   MeterBinder {
+class CacheStørrelseMeterBinder(private val client: ValkeyCacheOperations) :   MeterBinder {
     private val log = getLogger(javaClass)
 
     override fun bindTo(registry: MeterRegistry)   {

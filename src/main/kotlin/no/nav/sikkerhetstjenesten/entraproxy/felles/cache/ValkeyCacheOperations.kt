@@ -11,7 +11,7 @@ import java.time.Duration.ofSeconds
 
 
 @Component
-class ValkeyCacheClient(client: RedisClient, private val adapter : CacheStørrelseAdapter, val handler: CacheNøkkelHandler, vararg val cfgs: CachableRestConfig) : LeaderAware(), CacheOperations {
+class ValkeyCacheOperations(client: RedisClient, private val adapter : CacheStørrelseAdapter, val handler: CacheNøkkelHandler, vararg val cfgs: CachableRestConfig) : LeaderAware(), CacheOperations {
     private val conn = client.connect().apply {
         timeout = ofSeconds(30)
         if (isLocalOrTest) {

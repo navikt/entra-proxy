@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheClient
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.current
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
 import org.springframework.boot.SpringBootVersion
@@ -11,7 +11,7 @@ import org.springframework.core.SpringVersion
 import org.springframework.stereotype.Component
 
 @Component
-class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: ValkeyCacheClient) :
+class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: ValkeyCacheOperations) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {

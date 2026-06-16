@@ -10,7 +10,7 @@ val mockkVersion = "1.14.9"
 val logstashEncoderVersion = "9.0"
 val springMockVersion = "5.0.1"
 val conditionalsVersion = "6.0.5"
-val coroutinesVersion = "1.10.2"
+val coroutinesVersion = "1.11.0"
 val otelVersion = "2.28.0"
 val git = grgit
 

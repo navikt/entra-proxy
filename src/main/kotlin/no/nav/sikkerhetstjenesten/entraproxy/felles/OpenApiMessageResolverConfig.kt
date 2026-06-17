@@ -4,10 +4,11 @@ import io.swagger.v3.oas.models.Operation
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import java.util.Locale
 
-@Component
+@Configuration
 class OpenApiMessageResolverConfig(private val messageSource: MessageSource) {
 
     @Bean

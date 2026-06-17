@@ -6,7 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.OID_CACHE
 import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import java.util.UUID

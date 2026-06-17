@@ -13,6 +13,7 @@ version = "1.0.1"
 
 plugins {
     id("jacoco")
+    id("org.asciidoctor.jvm.convert") version "4.0.4"
     alias(libs.plugins.grgit)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinJvm)
@@ -103,12 +104,27 @@ dependencies {
     implementation(libs.springAspects)
 
     // Testing
+    testImplementation(libs.caffeine)
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
     testImplementation(libs.junitJupiter)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
+    testImplementation(libs.springRestdocsMockmvc)
     testImplementation(kotlin("test"))
+}
+
+val snippetsDir = file("build/generated-snippets")
+
+tasks.named("asciidoctor") {
+    dependsOn("test")
+    inputs.dir(snippetsDir)
+}
+
+tasks.named<org.asciidoctor.gradle.jvm.AsciidoctorTask>("asciidoctor") {
+    sourceDir("src/docs/asciidoc")
+    attributes(mapOf("snippets" to snippetsDir.absolutePath))
+    setOutputDir(file("build/docs/restdocs"))
 }
 
 dependencyManagement {

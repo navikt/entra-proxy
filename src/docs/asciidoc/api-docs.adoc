@@ -1,0 +1,58 @@
+= Entra Proxy API
+:doctype: book
+:toc: left
+:toclevels: 2
+:snippets: {snippets}
+
+== Oversikt
+
+REST API for oppslag mot Entra og NORG.
+
+== Tema
+
+Hent medlemmer for et gitt tema.
+
+=== Request
+
+include::{snippets}/tema/medlemmer/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/tema/medlemmer/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/tema/medlemmer/curl-request.adoc[]
+
+== Enhet for ansatt
+
+Hent alle tilgjengelige enheter for en ansatt.
+
+=== Request
+
+include::{snippets}/enhet/ansatt/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/enhet/ansatt/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/enhet/ansatt/curl-request.adoc[]
+
+== Utvidet ansatt
+
+Hent utvidet informasjon om en ansatt, inkludert enhetsnavn fra NORG.
+
+=== Request
+
+include::{snippets}/ansatt/utvidet/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/ansatt/utvidet/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/ansatt/utvidet/curl-request.adoc[]
+

@@ -86,7 +86,7 @@ jobs:
 
 
       - name: Test og bygg
-        run: ./gradlew --warning-mode all test jacocoTestReport cyclonedxBom bootJar
+        run: ./gradlew --warning-mode all test jacocoTestReport cyclonedxBom bootJar asciidoctor
 
       - name: Bygg og push Docker-image
         id: docker-push
@@ -104,8 +104,10 @@ jobs:
           ls build/reports/tests/test/ || echo "Missing test report"
           mkdir -p build/reports/pages/jacoco
           mkdir -p build/reports/pages/tests
+          mkdir -p build/reports/pages/restdocs
           cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
           cp -r build/reports/tests/test/. build/reports/pages/tests/
+          cp -r build/docs/restdocs/. build/reports/pages/restdocs/
           pip install mkdocs-material==9.7.6
           mkdocs build -f docs/mkdocs.yml
           cat > build/reports/pages/index.html << 'EOF'
@@ -116,6 +118,7 @@ jobs:
             <ul>
               <li><a href="jacoco/index.html">JaCoCo Coverage</a></li>
               <li><a href="tests/index.html">Test Report</a></li>
+              <li><a href="restdocs/api-docs.html">REST API Documentation</a></li>
               <li><a href="adr/">Architecture Decision Records</a></li>
             </ul>
           </body>

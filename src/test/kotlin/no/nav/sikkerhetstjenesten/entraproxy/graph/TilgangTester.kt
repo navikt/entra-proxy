@@ -95,6 +95,109 @@ class TilgangTester : BehaviorSpec({
         }
     }
 
+    Given("enheter OBO-endepunkt") {
+        When("ansatt har enheter via OBO") {
+            Then("skal dokumentere responsen") {
+                every { token.erObo } returns true
+                every { token.assert<Any>(any(), any()) } answers {
+                    @Suppress("UNCHECKED_CAST")
+                    (secondArg<() -> Set<Any>>())()
+                }
+                every { token.oboFields } returns (ANSATTID to UUID)
+                every { entraAdapter.enheter("$UUID") } returns setOf(ENHET.enhetnummer)
+                every { norg.navnFor(ENHET.enhetnummer) } returns ENHET.navn
+
+                mockMvc.perform(get("/api/v1/enhet"))
+                    .andExpect(status().isOk)
+                    .andDo(document("enhet/obo", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("tema CC-endepunkt") {
+        When("ansatt har tema-tilganger") {
+            Then("skal dokumentere responsen") {
+                every { oid.ansattOid(ANSATTID) } returns UUID
+                every { entraAdapter.tema("$UUID") } returns setOf(TEMA)
+
+                mockMvc.perform(get("/api/v1/tema/ansatt/${ANSATTID.verdi}"))
+                    .andExpect(status().isOk)
+                    .andDo(document("tema/ansatt", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("tema OBO-endepunkt") {
+        When("ansatt har tema-tilganger via OBO") {
+            Then("skal dokumentere responsen") {
+                every { token.erObo } returns true
+                every { token.assert<Any>(any(), any()) } answers {
+                    @Suppress("UNCHECKED_CAST")
+                    (secondArg<() -> Set<Any>>())()
+                }
+                every { token.oboFields } returns (ANSATTID to UUID)
+                every { entraAdapter.tema("$UUID") } returns setOf(TEMA)
+
+                mockMvc.perform(get("/api/v1/tema"))
+                    .andExpect(status().isOk)
+                    .andDo(document("tema/obo", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("medlemmer for enhet-endepunkt") {
+        When("enheten har medlemmer") {
+            Then("skal dokumentere responsen") {
+                every { oid.gruppeOid(ENHET.enhetnummer.gruppeNavn) } returns UUID
+                every { entraAdapter.gruppeMedlemmer("$UUID") } returns setOf(ansatt)
+
+                mockMvc.perform(get("/api/v1/enhet/${ENHET.enhetnummer.verdi}"))
+                    .andExpect(status().isOk)
+                    .andDo(document("enhet/medlemmer", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("ansatt tident-endepunkt") {
+        When("ansatt finnes") {
+            Then("skal dokumentere responsen") {
+                every { entraAdapter.utvidetAnsattTident(TIDENT.verdi) } returns ANSATT_RESPONS
+                every { norg.navnFor(ENHETNUMMER) } returns ENHETSNAVN
+
+                mockMvc.perform(get("/api/v1/ansatt/tident/${TIDENT.verdi}"))
+                    .andExpect(status().isOk)
+                    .andDo(document("ansatt/tident", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("tilganger-endepunkt") {
+        When("ansatt har grupper") {
+            Then("skal dokumentere responsen") {
+                every { oid.ansattOid(ANSATTID) } returns UUID
+                every { entraAdapter.ansatteGrupper("$UUID") } returns setOf(GRUPPE)
+
+                mockMvc.perform(get("/api/v1/ansatt/tilganger/${ANSATTID.verdi}"))
+                    .andExpect(status().isOk)
+                    .andDo(document("ansatt/tilganger", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
+    Given("gruppe medlemmer-endepunkt") {
+        When("gruppe finnes") {
+            Then("skal dokumentere responsen") {
+                val gruppeNavn = "0000-GA-ENHET_1234"
+                every { oid.gruppeOid(gruppeNavn) } returns UUID
+                every { entraAdapter.gruppeMedlemmer("$UUID") } returns setOf(ansatt)
+
+                mockMvc.perform(get("/api/v1/gruppe/medlemmer").param("gruppeNavn", gruppeNavn))
+                    .andExpect(status().isOk)
+                    .andDo(document("gruppe/medlemmer", preprocessResponse(prettyPrint())))
+            }
+        }
+    }
+
     Given("NorgTjeneste ved henting av flere enheter") {
         When("ansatt har flere enheter") {
             Then("skal kalle Norg for hver enhet") {
@@ -191,6 +294,7 @@ class TilgangTester : BehaviorSpec({
     companion object {
         const val AAP = "AAP"
         val ANSATTID = AnsattId("A123456")
+        val TIDENT = TIdent("AAA1234")
         val UUID = randomUUID()
         val TEMA = Tema(AAP)
         val ansatt = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
@@ -200,6 +304,7 @@ class TilgangTester : BehaviorSpec({
         const val nummer = "1234"
         val enhetnr = Enhetnummer(nummer)
         val enhetnr1 = Enhetnummer("${ENHET_PREFIX}$nummer")
+        val GRUPPE = EntraGruppe("0000-GA-ENHET_1234")
         val ANSATT_RESPONS = AnsattRespons(
             randomUUID(),
             "A123456",

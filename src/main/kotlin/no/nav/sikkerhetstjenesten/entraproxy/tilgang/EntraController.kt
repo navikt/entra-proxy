@@ -20,68 +20,68 @@ import java.util.UUID
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "EntraController", description = "msg:api.entra.tag.description")
 class EntraController(private val entraTjeneste: EntraTjeneste,
                       private val oidTjeneste: EntraOidTjeneste,
                       private val token: Token) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
-    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
+    @Operation(summary = "msg:api.entra.enheter-cc.summary")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entraTjeneste::enheter) { emptySet() }
         })
 
     @GetMapping("enhet")
-    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "msg:api.entra.enheter-obo.summary")
     fun enheterOBO() =
         token.assert({ erObo }, {
             hentForObo(entraTjeneste::enheter)
         })
 
     @GetMapping("tema/ansatt/{navIdent}")
-    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
+    @Operation(summary = "msg:api.entra.tema-cc.summary")
     fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
             hentForAnsatt(navIdent, entraTjeneste::tema) { emptySet() }
         })
 
     @GetMapping("tema")
-    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "msg:api.entra.tema-obo.summary")
     fun temaOBO() =
         token.assert( {erObo}, {
             hentForObo(entraTjeneste::tema)
         })
 
     @GetMapping("enhet/{enhetsnummer}")
-    @Operation(summary = "Hent alle medlemmer for en gitt enhet")
+    @Operation(summary = "msg:api.entra.enhet-medlemmer.summary")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
             medlemmer(enhetsnummer.gruppeNavn)
 
     @GetMapping("tema/{tema}")
-    @Operation(summary = "Hent alle medlemmer for et gitt tema")
+    @Operation(summary = "msg:api.entra.tema-medlemmer.summary")
     fun medlemmer(@PathVariable tema: Tema) =
             medlemmer(tema.gruppeNavn)
 
     @GetMapping("ansatt/{navIdent}")
-    @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
+    @Operation(summary = "msg:api.entra.ansatt-navident.summary")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
         entraTjeneste.utvidetAnsatt(navIdent)
 
     @GetMapping("ansatt/tident/{tIdent}")
-    @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234")
+    @Operation(summary = "msg:api.entra.ansatt-tident.summary")
     fun utvidetAnsatt(@PathVariable tIdent: TIdent) =
         entraTjeneste.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
-    @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
+    @Operation(summary = "msg:api.entra.ansatt-tilganger.summary")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.grupperForAnsatt(navIdent, it)
         }
 
     @GetMapping("gruppe/medlemmer")
-    @Operation(summary = "Hent ansatte i en gitt gruppe")
+    @Operation(summary = "msg:api.entra.gruppe-medlemmer.summary")
     fun gruppeMedlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)

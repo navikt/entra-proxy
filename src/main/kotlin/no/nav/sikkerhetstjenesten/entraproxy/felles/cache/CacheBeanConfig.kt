@@ -26,17 +26,6 @@ import tools.jackson.module.kotlin.KotlinModule.Builder
 class CacheBeanConfig(private val cf: RedisConnectionFactory,private val meterRegistry: MeterRegistry,
                       private vararg val cfgs: CachableRestConfig) : CachingConfigurer {
 
-    @Bean
-    fun cacheNøkkelHandler(mgr: RedisCacheManager) =
-        CacheNøkkelHandler(mgr.cacheConfigurations)
-
-    @Bean
-    fun redisTemplate() =
-        RedisTemplate<String, Any?>().apply {
-            connectionFactory = cf
-            keySerializer = StringRedisSerializer()
-            valueSerializer = StringRedisSerializer()
-        }
 
     @Bean
     override fun cacheManager()  =

@@ -5,8 +5,6 @@ import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
-import org.springdoc.core.customizers.OpenApiCustomizer
-import io.swagger.v3.oas.models.media.Schema
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
@@ -15,11 +13,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -108,7 +102,14 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     override fun addFormatters(registry: FormatterRegistry) {
         registry.addConverter(StringToEnhetnummerConverter())
     }
+    class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
+        override fun convert(source: String): Enhetnummer = Enhetnummer(source)
+    }
+
+
+
     companion object {
+
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
@@ -124,39 +125,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
 
     }
-    class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
-        override fun convert(source: String): Enhetnummer = Enhetnummer(source)
-    }
-
-    @Bean
-    fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
-        val schemas = openApi.components.schemas
-        schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
-            type = "string"
-            description = "Enhetnummer (4 siffer)"
-            example = Enhetnummer("1234")
-        }
-        schemas["Enhet"] = Schema<Enhet>().apply {
-            type = "object"
-            description = "Enhetnummer (4 siffer) og navn"
-            example = Enhet(Enhetnummer("1234"),"Nav Avdeling Sydpolen")
-        }
-        schemas["Ansatt"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"), "Tore Tang", "Tore", "Tang")
-        }
-        schemas["NavIdent"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "NavIdent (7 siffer)"
-            example = AnsattId("A123456")
-        }
-        schemas["Tema"] = Schema<Tema>().apply {
-            type = "string"
-            description = "Tema (3 store bokstaver)"
-            example = Tema("AAP")
-        }
-    }
 }
 
 
@@ -164,4 +132,5 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 @Target(FUNCTION, CONSTRUCTOR, CLASS)
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
+
 

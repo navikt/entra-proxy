@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CacheSizeAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.current
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
 import org.springframework.boot.SpringBootVersion
@@ -11,7 +12,7 @@ import org.springframework.core.SpringVersion
 import org.springframework.stereotype.Component
 
 @Component
-class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private  val cache: ValkeyCacheOperations) :
+class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, private val caches : CacheSizeAware) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {
@@ -25,7 +26,7 @@ class StartupInfoContributor(private val ctx: ConfigurableApplicationContext, pr
                     "Java vendor" to environment.getProperty("java.vm.vendor"),
                     "Client ID" to environment.getProperty("azure.app.client.id"),
                     "Name" to environment.getProperty("spring.application.name"),
-                    "Caches" to cache.cacheStørrelser(),
+                    "Caches" to caches.sizes(),
                     "Spring Boot version" to SpringBootVersion.getVersion(),
                     "Spring Framework version" to SpringVersion.getVersion()))
 

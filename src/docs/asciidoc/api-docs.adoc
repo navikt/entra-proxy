@@ -1,0 +1,170 @@
+= Entra Proxy API
+:doctype: book
+:toc: left
+:toclevels: 2
+:snippets: {snippets}
+
+== Oversikt
+
+REST API for oppslag mot Entra og NORG.
+
+== Enheter for ansatt (CC)
+
+Hent alle tilgjengelige enheter for en ansatt (client credentials).
+
+=== Request
+
+include::{snippets}/enhet/ansatt/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/enhet/ansatt/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/enhet/ansatt/curl-request.adoc[]
+
+== Enheter for ansatt (OBO)
+
+Hent alle tilgjengelige enheter for innlogget ansatt (on-behalf-of).
+
+=== Request
+
+include::{snippets}/enhet/obo/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/enhet/obo/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/enhet/obo/curl-request.adoc[]
+
+== Tema for ansatt (CC)
+
+Hent alle tilgjengelige tema for en ansatt (client credentials).
+
+=== Request
+
+include::{snippets}/tema/ansatt/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/tema/ansatt/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/tema/ansatt/curl-request.adoc[]
+
+== Tema for ansatt (OBO)
+
+Hent alle tilgjengelige tema for innlogget ansatt (on-behalf-of).
+
+=== Request
+
+include::{snippets}/tema/obo/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/tema/obo/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/tema/obo/curl-request.adoc[]
+
+== Medlemmer for tema
+
+Hent medlemmer for et gitt tema.
+
+=== Request
+
+include::{snippets}/tema/medlemmer/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/tema/medlemmer/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/tema/medlemmer/curl-request.adoc[]
+
+== Medlemmer for enhet
+
+Hent alle medlemmer i en gitt enhet.
+
+=== Request
+
+include::{snippets}/enhet/medlemmer/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/enhet/medlemmer/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/enhet/medlemmer/curl-request.adoc[]
+
+== Utvidet ansatt (navIdent)
+
+Hent utvidet informasjon om en ansatt ved bruk av NavIdent, inkludert enhetsnavn fra NORG.
+
+=== Request
+
+include::{snippets}/ansatt/utvidet/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/ansatt/utvidet/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/ansatt/utvidet/curl-request.adoc[]
+
+== Utvidet ansatt (tIdent)
+
+Hent utvidet informasjon om en ansatt ved bruk av tIdent (AAA1234).
+
+=== Request
+
+include::{snippets}/ansatt/tident/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/ansatt/tident/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/ansatt/tident/curl-request.adoc[]
+
+== Tilganger for ansatt
+
+Hent informasjon om en ansatts tilganger (grupper).
+
+=== Request
+
+include::{snippets}/ansatt/tilganger/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/ansatt/tilganger/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/ansatt/tilganger/curl-request.adoc[]
+
+== Gruppe medlemmer
+
+Hent ansatte i en gitt gruppe.
+
+=== Request
+
+include::{snippets}/gruppe/medlemmer/http-request.adoc[]
+
+=== Response
+
+include::{snippets}/gruppe/medlemmer/http-response.adoc[]
+
+=== cURL
+
+include::{snippets}/gruppe/medlemmer/curl-request.adoc[]
+

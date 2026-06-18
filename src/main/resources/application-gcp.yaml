@@ -101,4 +101,6 @@ valkey:
   port: ${valkey.port.${nais.cluster.cache}}
   host: ${valkey.host.${nais.cluster.cache}}
 info:
+  cluster: ${nais.cluster.name:local}
+  name: ${spring.application.name}
   image: ${nais.app.image:unknown}

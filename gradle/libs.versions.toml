@@ -39,6 +39,7 @@ springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-s
 springBootStarterWebclient = { module = "org.springframework.boot:spring-boot-starter-webclient" }
 springBootStarterWebflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 springAspects = { module = "org.springframework:spring-aspects" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
@@ -48,6 +49,7 @@ springBootStarterRestclientTest = { module = "org.springframework.boot:spring-bo
 kotestRunnerJunit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotestAssertionsCore = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestExtensionsSpring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
+springRestdocsMockmvc = { module = "org.springframework.restdocs:spring-restdocs-mockmvc" }
 
 [bundles]
 springBootTest = ["springBootStarterTest", "springBootStarterWebmvcTest", "springBootStarterRestclientTest"]

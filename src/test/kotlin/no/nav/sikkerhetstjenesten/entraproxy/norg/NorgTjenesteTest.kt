@@ -6,7 +6,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ConcurrentMapCacheOperations
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CaffeineCacheOperations
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.test.web.client.MockRestServiceServer
@@ -23,8 +23,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_BASE_URI
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjenesteTest.NorgTestConfig
-import org.springframework.cache.CacheManager
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -47,15 +46,15 @@ class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,
     @org.springframework.cache.annotation.EnableCaching
     class NorgTestConfig {
         @Bean fun cacheManager() =
-            ConcurrentMapCacheManager(NORG)
+            CaffeineCacheManager(NORG)
 
         @Bean
-        fun cacheOperations(cacheManager: CacheManager)  =
-            ConcurrentMapCacheOperations(cacheManager)
+        fun cacheOperations(cacheManager: CaffeineCacheManager)  =
+            CaffeineCacheOperations(cacheManager)
     }
 
     @Autowired
-    private lateinit var cacheManager: CacheManager
+    private lateinit var cacheManager: CaffeineCacheManager
     @Autowired
     private lateinit var cache: CacheOperations
 

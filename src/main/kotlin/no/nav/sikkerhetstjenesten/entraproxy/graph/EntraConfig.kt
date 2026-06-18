@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableConfig
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
@@ -20,6 +20,8 @@ class EntraConfig(
     override val varighet : Duration) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, GRAPH) {
 
     override val navn = name
+
+    override val caches = setOf(GRAPH_CACHE)
 
     fun userURI(ansattId: String) =
         builder().apply {
@@ -100,6 +102,7 @@ class EntraConfig(
         private const val TILGANG_EGENSKAPER = "id,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
         private const val TOP = "\$top"
-        val OID_CACHE = CachableConfig(ENTRA_OID)
+        val GRAPH_CACHE = CacheNøkkelConfig(GRAPH)
+
     }
 }

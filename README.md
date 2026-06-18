@@ -21,7 +21,6 @@ https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy
 Slackkanal for spørsmål og support:
 #team-sikkerhetstjenesten
 
-
 Løsningen har flere cacher
 * Kobling mellom _navident_ og _entraOid_ caches i 365 dager. 
 * En ansatts enhetstilhørighet caches i 3 timer.

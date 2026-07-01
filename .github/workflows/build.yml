@@ -90,7 +90,7 @@ jobs:
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@05dbb6091b30bd84279c6d64a45ef8782fd410a5 # v0
+        uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512 # v0
         with:
           team: sikkerhetstjenesten
           tag: ${{ env.TAG }}

@@ -1,11 +1,10 @@
 [versions]
-java = "25"
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 springBoot = "4.1.0"
 springDependencyManagement = "1.1.7"
 grgit = "5.3.3"
 dokka = "2.2.0"
-cyclonedx = "3.2.4"
+cyclonedx = "3.3.0"
 kotest = "6.2.2"
 springdoc = "3.0.3"
 tokenSupport = "6.0.11"
@@ -14,7 +13,7 @@ logstashEncoder = "9.0"
 springMockk = "5.0.1"
 conditionals = "6.0.7"
 coroutines = "1.10.2"
-otel = "2.28.0"
+otel = "2.29.0"
 otelAlpha = "2.29.0-alpha"
 
 [libraries]

@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name": "localauth",
+      "namespace": "isa",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "gosys-backend-q2",
       "namespace": "isa",
       "cluster": "dev-gcp"

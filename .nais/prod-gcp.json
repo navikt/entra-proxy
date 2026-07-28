@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "name": "gosys-backend",
+      "namespace": "isa",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "klage-lookup",
       "namespace": "klage",
       "cluster": "prod-gcp"

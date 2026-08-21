@@ -1,11 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableConfig
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.web.util.UriBuilder
@@ -19,7 +18,12 @@ class EntraConfig(
     private val size: Int = DEFAULT_BATCH_SIZE,
     override val varighet : Duration) : CachableRestConfig, AbstractRestConfig(baseUri, pingPath, GRAPH) {
 
-    override val navn = name
+    override val navn = GRAPH
+    override val caches = setOf(
+        CacheNøkkelConfig(navn, ENHETER_CACHE),
+        CacheNøkkelConfig(navn, GRUPPER_FOR_ANSATT_CACHE),
+        CacheNøkkelConfig(navn, UTVIDET_ANSATT_CACHE),
+        CacheNøkkelConfig(navn, TEMA_CACHE))
 
     fun userURI(ansattId: String) =
         builder().apply {
@@ -81,6 +85,10 @@ class EntraConfig(
     companion object {
         const val GRAPH = "graph"
         const val NAVIDENT = "onPremisesSamAccountName"
+        const val ENHETER_CACHE = "enheter"
+        const val GRUPPER_FOR_ANSATT_CACHE = "grupperForAnsatt"
+        const val UTVIDET_ANSATT_CACHE = "utvidetAnsatt"
+        const val TEMA_CACHE = "tema"
         private val DEFAULT_BASE_URI = URI.create("https://graph.microsoft.com/v1.0")
         private const val T_IDENT = "jobTitle"
         private const val T_IDENT_NAVIDENT = "$T_IDENT,$NAVIDENT,id, givenName, surname,displayName,mail,streetAddress"
@@ -100,6 +108,5 @@ class EntraConfig(
         private const val TILGANG_EGENSKAPER = "id,displayName"
         private const val DEFAULT_PING_PATH = "/organization"
         private const val TOP = "\$top"
-        val OID_CACHE = CachableConfig(ENTRA_OID)
     }
 }

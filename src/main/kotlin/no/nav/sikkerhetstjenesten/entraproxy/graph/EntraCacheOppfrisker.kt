@@ -6,7 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ANSATT_OID_CACHE
 import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import java.util.UUID
@@ -33,7 +33,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
             var oid  = oidTjeneste.ansattOid(ansattId)
             if (oid == null) {
                 log.info("INgen oid i cache for ansatt $ansattId, henter på nytt fra Entra og oppfrisker OID-cache")
-                cache.delete(OID_CACHE,elementer.id)
+                cache.delete(ANSATT_OID_CACHE,elementer.id)
                 oid  = oidTjeneste.ansattOid(ansattId)
             }
             if (oid != null) {

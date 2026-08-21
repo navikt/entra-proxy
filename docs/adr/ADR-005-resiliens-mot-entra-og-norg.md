@@ -23,7 +23,7 @@ Samtidig er ikke alle feil like:
 Dagens løsning har allerede flere mekanismer for dette:
 
 - `DefaultRestErrorHandler` klassifiserer feil i recoverable og irrecoverable kategorier
-- `RetryingWhenRecoverable` brukes på tjenestelag mot Entra og NORG
+- `RetryingWhenRecoverableService` brukes på tjenestelag mot Entra og NORG
 - `PingableHealthIndicator` brukes for å eksponere helse for integrasjonene
 - caching reduserer last og skjermer delvis mot kortvarige problemer
 - `EntraTjeneste` har eksplisitt fallback for å rydde OID-cache og hente ny OID ved `NotFound`
@@ -57,7 +57,7 @@ Eksempler fra dagens løsning:
 - `DefaultRestErrorHandler` oversetter `404` til `NotFoundRestException`
 - øvrige `4xx` blir `IrrecoverableRestException`
 - `5xx` og tilsvarende feil blir `RecoverableRestException`
-- `RetryingWhenRecoverable` inkluderer også `ResourceAccessException`
+- `RetryingWhenRecoverableService` inkluderer også `ResourceAccessException`
 - både Entra og NORG kan pinges via egne health-indikatorer
 
 ## Alternativer vurdert
@@ -119,7 +119,7 @@ Eksempler fra dagens løsning:
 ## Aksjonspunkter
 
 - [x] Behold sentral feilklassifisering i `DefaultRestErrorHandler`
-- [x] Behold `RetryingWhenRecoverable` som felles retry-abstraksjon for recoverable feil
+- [x] Behold `RetryingWhenRecoverableService` som felles retry-abstraksjon for recoverable feil
 - [x] Behold health-indikatorer for Entra og NORG
 - [x] Behold målrettet fallback for fornying av OID ved `NotFound`
 - [ ] Vurder å dokumentere retry-parametere og forventet operasjonell adferd eksplisitt

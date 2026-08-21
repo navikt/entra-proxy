@@ -5,11 +5,11 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverableService
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ANSATT_OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
@@ -17,7 +17,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
 
-@RetryingWhenRecoverable
+@RetryingWhenRecoverableService
 @Service
 @Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
@@ -107,7 +107,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
     private fun refreshOid(navIdent: AnsattId): UUID {
-        cache.delete(OID_CACHE,navIdent.verdi).also {
+        cache.delete(ANSATT_OID_CACHE,navIdent.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
         return oid.ansattOid(navIdent).also {

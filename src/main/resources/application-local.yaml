@@ -16,6 +16,35 @@ no.nav.security.jwt:
 spring:
   cache:
     type: caffeine
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${azure.app.well.known.url}
+          audiences: client id
+      client:
+        provider:
+          azuread:
+            issuer-uri: ${azure.app.well.known.url}
+        registration:
+          graph:
+            provider: azuread
+            authorization-grant-type: client_credentials
+            client-id: client id
+            client-authentication-method: private_key_jwt
+            scope:
+              - https://graph.microsoft.com/.default
+          norg2:
+            provider: azuread
+            authorization-grant-type: client_credentials
+            client-id: client id
+            client-authentication-method: private_key_jwt
+            scope:
+              - https://graph.microsoft.com/.default
+  http:
+    serviceclient:
+      norg2:
+        base-url: http://norg2.org
 
 microsoft:
   graph:

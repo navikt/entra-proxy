@@ -51,6 +51,35 @@ spring:
     default-property-inclusion: non_null
     mapper:
       accept-case-insensitive-properties: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${azure.app.well.known.url}
+          audiences: ${azure.app.client.id}
+      client:
+        provider:
+          azuread:
+            issuer-uri: ${azure.app.well.known.url}
+        registration:
+          graph:
+            provider: azuread
+            authorization-grant-type: client_credentials
+            client-id: ${azure.app.client.id}
+            client-authentication-method: private_key_jwt
+            scope:
+              - https://graph.microsoft.com/.default
+          norg2:
+            provider: azuread
+            authorization-grant-type: client_credentials
+            client-id: ${azure.app.client.id}
+            client-authentication-method: private_key_jwt
+            scope:
+              - ${graph.scope}
+  http:
+    serviceclient:
+      norg:
+        base-url: http://norg2.org
 no.nav.security.jwt:
   issuer:
     azuread:
@@ -100,5 +129,8 @@ valkey:
   uri: ${valkey.uri.${nais.cluster.cache}}
   port: ${valkey.port.${nais.cluster.cache}}
   host: ${valkey.host.${nais.cluster.cache}}
+
 info:
+  cluster: ${nais.cluster.name:local}
+  name: ${spring.application.name}
   image: ${nais.app.image:unknown}

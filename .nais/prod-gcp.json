@@ -4,6 +4,11 @@
   ],
   "inbound": [
     {
+      "name":  "sp-vilkarsproving",
+      "namespace": "tbd",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "gosys-backend",
       "namespace": "isa",
       "cluster": "prod-gcp"

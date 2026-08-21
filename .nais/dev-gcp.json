@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name":  "sp-vilkarsproving",
+      "namespace": "tbd",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "localauth",
       "namespace": "isa",
       "cluster": "dev-gcp"

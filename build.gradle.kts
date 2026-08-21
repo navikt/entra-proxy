@@ -73,6 +73,7 @@ configurations.configureEach {
 dependencies {
     // Kotlin
     implementation(libs.kotlinxCoroutinesCore)
+    implementation(libs.kotlinModuleJackson)
     implementation(libs.kotlinReflect)
 
     // Observability and logging
@@ -80,11 +81,11 @@ dependencies {
     implementation(libs.opentelemetryLogbackMdc)
     implementation(libs.micrometerRegistryPrometheus)
     implementation(libs.logstashLogbackEncoder)
+    implementation(libs.logbookSpringBootStarter)
 
     // NAV and security
     implementation(libs.bootConditionals)
-    implementation(libs.tokenClientSpring)
-    implementation(libs.tokenValidationSpring)
+    implementation(libs.caffeine)
 
     // HTTP and API documentation
     implementation(libs.httpclient5)
@@ -94,6 +95,8 @@ dependencies {
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterCache)
     implementation(libs.springBootStarterDataRedis)
+    implementation(libs.springBootStarterOauth2Client)
+    implementation(libs.springBootStarterOauth2ResourceServer)
     implementation(libs.springBootStarterJetty)
     implementation(libs.springBootStarterRestclient)
     implementation(libs.springBootStarterValidation)

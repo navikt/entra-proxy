@@ -31,7 +31,7 @@ class EntraRestClientAdapter(
 
     override fun ping() = get<Any>(cf.pingEndpoint)
     override val name = cf.name
-    override val pingEndpoint = "${cf.pingEndpoint}"
+    override val pingEndpoint = cf.pingEndpoint
 
     val baseURI = cf.baseUri
 

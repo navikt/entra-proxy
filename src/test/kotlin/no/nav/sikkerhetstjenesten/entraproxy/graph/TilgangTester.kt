@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.CCF
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
@@ -36,11 +37,7 @@ class TilgangTester : BehaviorSpec({
     beforeSpec {
         every { token.systemAndNs } returns "test:ns"
         every { token.systemNavn } returns "Test"
-        every { token.erCC } returns true
-        every { token.assert<Any>(any(), any()) } answers {
-            @Suppress("UNCHECKED_CAST")
-            (secondArg<() -> Set<Any>>())()
-        }
+        every { token.type } returns CCF
     }
 
     Given("tema-endepunkt") {

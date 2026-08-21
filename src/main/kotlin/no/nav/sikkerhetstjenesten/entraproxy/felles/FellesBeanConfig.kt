@@ -7,41 +7,41 @@ import io.micrometer.core.instrument.Tags
 import io.micrometer.core.instrument.Timer
 import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
+import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.security.OSLO
+import org.apache.hc.core5.util.Timeout.ofSeconds
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.springframework.web.client.support.RestClientAdapter.create
-import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
-import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.zalando.logbook.HttpRequest
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
+import java.util.Date
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -50,7 +50,10 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
-class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
+class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor,
+                       private val handler: ErrorHandler,
+                       private val logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>)
+    : WebMvcConfigurer {
 
 
     @Bean
@@ -64,16 +67,26 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
 
     @Bean
-    fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
+    fun restClientCustomizer() =
         RestClientCustomizer { c ->
-            c.requestFactory(HttpComponentsClientHttpRequestFactory().apply {
-                setConnectionRequestTimeout(2000)
-                setReadTimeout(2000)
-            })
             c.requestInterceptors {
-                it.addFirst(interceptor)
-                it.add(tokenInterceptor)
+                logbookInterceptor.ifAvailable { interceptor -> it.add(interceptor) }
             }
+            c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
+        }
+
+    @Bean
+    fun httpComponentsBuilderCustomizer():
+            ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder> =
+        ClientHttpRequestFactoryBuilderCustomizer { builder ->
+            builder
+                .withConnectionManagerCustomizer { cm ->
+                    cm.setMaxConnTotal(300)
+                    cm.setMaxConnPerRoute(50)
+                }
+                .withConnectionConfigCustomizer { cfg ->
+                    cfg.setValidateAfterInactivity(2.sekunder)
+                }
         }
 
     @Bean
@@ -97,7 +110,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     @Component
     class TimingAspect(private val meterRegistry: MeterRegistry) {
 
-        @Around("execution(* no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor.intercept(..))")
+        @Around("execution(* org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.intercept(..))")
         fun timeMethod(joinPoint: ProceedingJoinPoint) = Timer.builder("mslogin")
             .description("Timer med histogram for mslogin")
             .tags("method", joinPoint.signature.name)
@@ -115,13 +128,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 next.execute(request, body)
             }
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
-        fun createProxyFactory(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) = builderFor(create(b.baseUrl(cfg.baseUri)
-            .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
-            .build()))
-            .build()
-
-        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler = DefaultRestErrorHandler()) =
-            createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
 
     }
     class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
@@ -165,3 +171,20 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
 
+val BRUKER_ID_REGEX = Regex("""(?<!\d)\d{11}(?!\d)""")
+
+internal fun Map<String, Any>.withTimestampsInCurrentTimezone() =
+    mapValues {
+            (_, value) -> (value as? Date)?.toInstant()?.atZone(OSLO) ?: value
+    }
+
+internal fun String.shouldIgnoreGraphQlIntrospectionQuery() =
+    GRAPHQL_INTROSPECTION_QUERY_BODY.matches(this)
+
+internal fun HttpRequest.shouldIgnoreGraphQlIntrospectionQuery() =
+    getBodyAsString().shouldIgnoreGraphQlIntrospectionQuery()
+
+private val GRAPHQL_INTROSPECTION_QUERY_BODY =
+    Regex("""(?s)^\s*\{\s*"query"\s*:\s*"\{\s*__typename\s*}"\s*}\s*$""")
+
+val Int.sekunder get() = ofSeconds(toLong())

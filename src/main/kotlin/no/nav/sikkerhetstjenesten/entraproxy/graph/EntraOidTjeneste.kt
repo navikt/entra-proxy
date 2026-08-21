@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ENTRA_OID
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
@@ -13,7 +12,6 @@ class EntraOidTjeneste(private val adapter: EntraRestClientAdapter)  {
      fun ansattOid(ansattId: AnsattId) =
          adapter.ansattOid(ansattId.verdi)
 
-    @WithSpan
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
         adapter.gruppeOid(gruppeNavn)

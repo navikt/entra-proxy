@@ -1,44 +1,49 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 
 
-import no.nav.boot.conditionals.Cluster.LOCAL
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.CCF
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.OBO
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.UNAUTHENTICATED
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import org.springframework.security.core.context.SecurityContextHolder.getContext
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class Token(private val contextHolder: TokenValidationContextHolder) {
+class Token {
 
 
-    val system get() = stringClaim(AZP_NAME)  ?: UTILGJENGELIG
+    val system get() = stringClaim(AZP_NAME) ?: UTILGJENGELIG
     val oid get() = stringClaim(OID)?.let { runCatching { UUID.fromString(it) }.getOrNull() }
     val ansattId get() = stringClaim(NAVIDENT)?.let { AnsattId(it) }
-    private fun stringClaim(name: String) = claimSet()?.getStringClaim(name)
-    private fun claimSet() = runCatching { contextHolder.getTokenValidationContext().getClaims(AAD_ISSUER) }.getOrNull()
-    val clusterAndSystem get() = system.split(":").let { parts ->
-        if (parts.size == 3) "${parts[2]}:${parts[0]}" else system
+    private fun stringClaim(name: String) = jwt()?.claims?.get(name)?.toString()
+    private fun jwt() = getContext().authentication?.let { authentication ->
+        when (val principal = authentication.principal) {
+            is Jwt -> principal
+            else -> null
+        }
     }
+    val clusterAndSystem
+        get() = system.split(":").let { parts ->
+            if (parts.size == 3) "${parts[2]}:${parts[0]}" else system
+        }
 
-    fun <T> assert(predikat: Token.() -> Boolean, block: () -> Set<T>): Set<T> {
-        require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen " }
-        return block()
-    }
-
-    val oboFields  get() =
-        ansattId?.let { id -> oid?.let { o -> id to o } }
-            ?: error("ansattId og oid må være satt for OBO")
-
-    val type get() = TokenType.from(this).name.lowercase()
     val systemNavn get() = system.split(":").last()
     val systemAndNs get() = system.split(":").drop(1).joinToString(separator = ":")
     val cluster get() = system.split(":").first()
-    val erCC get() = stringClaim(IDTYP) == APP
-    val erObo get()  = !erCC && oid != null
+    private val erCC get() = stringClaim(IDTYP) == APP
+    private val erObo get() = !erCC && oid != null
+    val type
+        get() = when {
+            erObo -> OBO
+            erCC -> CCF
+            else -> UNAUTHENTICATED
+        }
+
     companion object {
-        private const val FLOW = "flow"
-        const val AAD_ISSUER: String = "azuread"
+        const val AAD_ISSUER = "azuread"
         const val APP = "app"
         const val OID = "oid"
         const val IDTYP = "idtyp"
@@ -48,13 +53,5 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
 }
 
 enum class TokenType {
-    OBO, CCF, UNAUTHENTICATED;
-
-    companion object {
-        fun from(token: Token): TokenType = when {
-            token.erObo -> OBO
-            token.erCC -> CCF
-            else -> UNAUTHENTICATED
-        }
-    }
+    OBO, CCF, UNAUTHENTICATED
 }

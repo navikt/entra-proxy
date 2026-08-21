@@ -8,9 +8,9 @@ dokka = "2.2.0"
 cyclonedx = "3.4.1"
 kotest = "6.2.3"
 springdoc = "3.0.3"
-tokenSupport = "6.0.11"
 mockk = "1.14.9"
 logstashEncoder = "9.0"
+logbook = "4.1.0"
 springMockk = "5.0.1"
 conditionals = "6.0.7"
 coroutines = "1.10.2"
@@ -19,18 +19,21 @@ otelAlpha = "2.30.0-alpha"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinModuleJackson = { module = "tools.jackson.module:jackson-module-kotlin" }
 opentelemetryInstrumentationAnnotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations" }
 opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0", version.ref = "otelAlpha" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
+logbookSpringBootStarter = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
-tokenClientSpring = { module = "no.nav.security:token-client-spring", version.ref = "tokenSupport" }
-tokenValidationSpring = { module = "no.nav.security:token-validation-spring", version.ref = "tokenSupport" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
+springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
@@ -62,4 +65,3 @@ springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
 cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
-

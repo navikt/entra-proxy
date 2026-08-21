@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import com.github.benmanes.caffeine.cache.Cache
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.CacheManager
 import java.time.Duration
@@ -46,7 +47,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
     }
     override fun clear(cache: CacheNøkkelConfig): Long {
         val springCache = cacheManager.getCache(cache.name) ?: return 0L
-        val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
+        val nativeCache = springCache.nativeCache as Cache<*, *>
         return if (cache.extraPrefix == null) {
             val deleted = nativeCache.estimatedSize()
             springCache.clear()
@@ -65,7 +66,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
     override fun clearAll(): Long {
         val deleted = cacheManager.cacheNames.sumOf { cacheName ->
             val springCache = cacheManager.getCache(cacheName) ?: return@sumOf 0L
-            val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
+            val nativeCache = springCache.nativeCache as Cache<*, *>
             val count = nativeCache.estimatedSize()
             springCache.clear()
             count
@@ -77,7 +78,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         caches.associate { cache ->
             val springCache = cacheManager.getCache(cache.name) ?: error("Cache $cache ikke funnet")
             val count = run {
-                val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
+                val nativeCache = springCache.nativeCache as Cache<*, *>
                 if (cache.extraPrefix == null) {
                     nativeCache.estimatedSize()
                 } else {

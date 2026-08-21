@@ -21,11 +21,10 @@ import java.net.URI
 @Component
 @ImportHttpServices(group = GRAPH, types = [EntraProxyClient::class])
 class EntraRestClientAdapter(
-    @Qualifier(GRAPH) private val restClient: RestClient,
+    private val restClient: RestClient,
     private val client: EntraProxyClient,
     val cf: EntraConfig,
-    private val norg: NorgTjeneste,
-) : Pingable {
+    private val norg: NorgTjeneste) : Pingable {
 
     private val log = getLogger(javaClass)
 

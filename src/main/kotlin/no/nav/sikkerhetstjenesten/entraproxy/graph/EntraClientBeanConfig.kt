@@ -13,7 +13,6 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 class EntraClientBeanConfig {
 
     @Bean
-    @Qualifier(GRAPH)
     fun entraRestClient(b: RestClient.Builder, cfg: EntraConfig) =
         b.baseUrl(cfg.baseUri)
             .requestInterceptors {

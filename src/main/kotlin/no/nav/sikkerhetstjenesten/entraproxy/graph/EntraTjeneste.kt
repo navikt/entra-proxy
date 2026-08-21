@@ -10,16 +10,16 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensi
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ANSATT_OID_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import org.springframework.web.service.registry.ImportHttpServices
 import java.util.*
 
 @RetryingWhenRecoverableService
-@Service
-@Timed(value = GRAPH, histogram = true)
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
     private val log = getLogger(javaClass)
@@ -92,19 +92,8 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
 
 
-    private fun ansatt(block: () -> AnsattRespons?) =
-        tidOgLog(log) {
-            block()?.let {
-                with(it) {
-                    val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
-                    UtvidetAnsatt(
-                        AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
-                        TIdent(jobTitle?: TIDENT_DEFAULT),
-                        mail,
-                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
-                }
-            }
-        }
+    private fun ansatt(block: () -> UtvidetAnsatt?) =
+        tidOgLog(log) { block() }
 
     private fun refreshOid(navIdent: AnsattId): UUID {
         cache.delete(ANSATT_OID_CACHE,navIdent.verdi).also {
@@ -119,4 +108,3 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     override fun toString() =
         "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
 }
-

@@ -1,42 +1,42 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.IrrecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
-import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.body
+import org.springframework.web.service.registry.ImportHttpServices
 import java.net.URI
 
 @Component
+@ImportHttpServices(group = GRAPH, types = [EntraProxyClient::class])
 class EntraRestClientAdapter(
-    @param:Qualifier(GRAPH) val restClient: RestClient,
+    @Qualifier(GRAPH) private val restClient: RestClient,
+    private val client: EntraProxyClient,
     val cf: EntraConfig,
-    val errorHandler: ErrorHandler = DefaultRestErrorHandler()
+    private val norg: NorgTjeneste,
 ) : Pingable {
 
-    val log = getLogger(javaClass)
+    private val log = getLogger(javaClass)
 
-    override fun ping() = get<Any>(cf.pingEndpoint)
+    override fun ping() = client.ping()
     override val name = cf.name
     override val pingEndpoint = cf.pingEndpoint
 
     val baseURI = cf.baseUri
 
     fun ansattOid(navIdent: String) =
-        with(get<AnsattOids>(cf.userURI(navIdent)).oids) {
+        with(client.ansattOid("$NAVIDENT eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
                 0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
@@ -46,61 +46,95 @@ class EntraRestClientAdapter(
         }
 
     fun gruppeOid(gruppeNavn: String) =
-        get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
+        client.gruppeOid("displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
-    fun tema(ansattOid: String) =
-        tilganger(cf.temaURI(ansattOid), ::Tema)
+    fun tema(ansattOid: String): Set<Tema> =
+        run {
+            val resultat = mutableSetOf<Tema>()
+            var side = client.tema(ansattOid)
+            while (true) {
+                side.value.forEach { resultat.add(Tema(it.displayName)) }
+                val nesteSide = side.next ?: break
+                side = get(nesteSide)
+            }
+            resultat.toSortedSet()
+        }
 
-    fun enheter(ansattOid: String) =
-        tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
+    fun enheter(ansattOid: String): Set<Enhetnummer> =
+        run {
+            val resultat = mutableSetOf<Enhetnummer>()
+            var side = client.enheter(ansattOid)
+            while (true) {
+                side.value.forEach { resultat.add(Enhetnummer(it.displayName)) }
+                val nesteSide = side.next ?: break
+                side = get(nesteSide)
+            }
+            resultat.toSortedSet()
+        }
 
-    fun ansatteGrupper(ansattOid: String) =
-        tilganger(cf.ansatteGruppeURI(ansattOid), ::EntraGruppe)
+    fun ansatteGrupper(ansattOid: String): Set<EntraGruppe> =
+        run {
+            val resultat = mutableSetOf<EntraGruppe>()
+            var side = client.ansatteGrupper(ansattOid)
+            while (true) {
+                side.value.forEach { resultat.add(EntraGruppe(it.displayName)) }
+                val nesteSide = side.next ?: break
+                side = get(nesteSide)
+            }
+            resultat.toSortedSet()
+        }
 
-    fun gruppeMedlemmer(gruppeOid: String) =
-        pagedTransformedAndSorted(
-            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
-            { it.next?.let(::get) },
-            { it.value },
-            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) })
+    fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
+        run {
+            val resultat = mutableSetOf<Ansatt>()
+            var side = client.gruppeMedlemmer(gruppeOid)
+            while (true) {
+                side.value.forEach {
+                    resultat.add(Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname))
+                }
+                val nesteSide = side.next ?: break
+                side = get(nesteSide)
+            }
+            resultat.toSortedSet()
+        }
 
     fun utvidetAnsatt(ansattId: String) =
-        utvidetAnsatt(cf.navIdentURI(ansattId), ansattId)
+        ansatt {
+            client.utvidetAnsattNavIdent("$NAVIDENT eq '$ansattId'").ansatte.firstOrNull()
+        }
 
     fun utvidetAnsattTident(ansattId: String) =
-        utvidetAnsatt(cf.tIdentURI(ansattId), ansattId)
+        ansatt {
+            client.utvidetAnsattTIdent("$T_IDENT eq '$ansattId'").ansatte.firstOrNull()
+        }
 
-    private fun utvidetAnsatt(uri: URI, ident: String) =
-        get<EntraSaksbehandlerRespons>(uri).ansatte.firstOrNull()
-
-    final inline fun <reified T : Any> get(uri: URI, headers: Map<String, String> = emptyMap()) =
+    private inline fun <reified T : Any> get(uri: URI) =
         restClient.get()
             .uri(uri)
             .accept(APPLICATION_JSON)
-            .headers { it.setAll(headers) }
             .retrieve()
-            .onStatus(HttpStatusCode::isError, errorHandler::handle)
-            .body<T>() ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
+            .body<T>() ?: throw NotFoundRestException(uri, msg = "Fant tomt svar fra nextLink")
 
-    private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
-        pagedTransformedAndSorted(
-            get<Tilganger>(uri),
-            { it.next?.let(::get) },
-            { it.value },
-            { stringTransformer(it.displayName) })
+    private fun ansatt(block: () -> AnsattRespons?) =
+        block()?.let {
+            with(it) {
+                val enhetsNummer = Enhetnummer(streetAddress ?: UKJENT_ENHET)
+                UtvidetAnsatt(
+                    AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
+                    TIdent(jobTitle ?: TIDENT_DEFAULT),
+                    mail,
+                    Enhet(enhetsNummer, norg.navnFor(enhetsNummer)),
+                )
+            }
+        }
 
-    private inline fun <T, V, R> pagedTransformedAndSorted(
-        førsteSide: T,
-        crossinline nesteSide: (T) -> T?,
-        crossinline verdier: (T) -> Iterable<V>,
-        noinline transform: (V) -> R
-    ): Set<R> where R : Comparable<R> =
-        generateSequence(førsteSide) { nesteSide(it) }
-            .flatMap { verdier(it) }
-            .map(transform)
-            .toSortedSet()
+    override fun toString() =
+        "${javaClass.simpleName} [client=$client, config=$cf]"
 
-    override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
+    private companion object {
+        const val NAVIDENT = "onPremisesSamAccountName"
+        const val T_IDENT = "jobTitle"
+    }
 }
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {

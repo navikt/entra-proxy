@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 
 @Configuration
 class EntraClientBeanConfig {
@@ -18,6 +19,16 @@ class EntraClientBeanConfig {
             .requestInterceptors {
                 it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
             }.build()
+
+    @Bean
+    fun entraHttpServiceGroupConfigurer() =
+        RestClientHttpServiceGroupConfigurer { groups ->
+            groups.filterByName(GRAPH).forEachClient { _, builder ->
+                builder.requestInterceptors {
+                    it.addFirst(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
+                }
+            }
+        }
 
 
     @Bean

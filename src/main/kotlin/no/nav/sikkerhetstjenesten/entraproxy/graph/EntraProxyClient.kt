@@ -9,68 +9,61 @@ import org.springframework.web.service.annotation.HttpExchange
 
 @HttpExchange
 @ClientRegistrationId(GRAPH)
-@Suppress("unused")
 interface EntraProxyClient {
 
     @GetExchange(USERS_PATH)
     fun ansattOid(
-        @RequestParam("\$filter") filter: String,
-        @RequestParam("\$select") select: String = SELECT_USER,
-        @RequestParam("\$count") count: Boolean = true,
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$select") select: String = SELECT_USER,
+        @RequestParam($$"$count") count: Boolean = true,
     ): AnsattOids
 
     @GetExchange(GROUPS_PATH)
     fun gruppeOid(
-        @RequestParam("\$filter") filter: String,
-        @RequestParam("\$select") select: String = TILGANG_EGENSKAPER,
-        @RequestParam("\$count") count: Boolean = true,
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$select") select: String = TILGANG_EGENSKAPER,
+        @RequestParam($$"$count") count: Boolean = true,
     ): Grupper
 
     @GetExchange(USER_MEMBER_OF_PATH)
     fun tema(
         @PathVariable oid: String,
-        @RequestParam("\$select") select: String = TILGANG_EGENSKAPER,
-        @RequestParam("\$count") count: Boolean = true,
-        @RequestParam("\$filter") filter: String = TEMA_QUERY,
-        @RequestParam("\$top") top: Int = DEFAULT_BATCH_SIZE,
+        @RequestParam($$"$select") select: String = TILGANG_EGENSKAPER,
+        @RequestParam($$"$count") count: Boolean = true,
+        @RequestParam($$"$filter") filter: String = TEMA_QUERY,
+        @RequestParam($$"$top") top: Int = DEFAULT_BATCH_SIZE,
     ): Tilganger
 
     @GetExchange(USER_MEMBER_OF_PATH)
     fun enheter(
         @PathVariable oid: String,
-        @RequestParam("\$select") select: String = TILGANG_EGENSKAPER,
-        @RequestParam("\$count") count: Boolean = true,
-        @RequestParam("\$filter") filter: String = ENHET_QUERY,
-        @RequestParam("\$top") top: Int = DEFAULT_BATCH_SIZE,
+        @RequestParam($$"$select") select: String = TILGANG_EGENSKAPER,
+        @RequestParam($$"$count") count: Boolean = true,
+        @RequestParam($$"$filter") filter: String = ENHET_QUERY,
+        @RequestParam($$"$top") top: Int = DEFAULT_BATCH_SIZE,
     ): Tilganger
 
     @GetExchange(USER_MEMBER_OF_PATH)
     fun ansatteGrupper(
         @PathVariable oid: String,
-        @RequestParam("\$select") select: String = TILGANG_EGENSKAPER,
-        @RequestParam("\$count") count: Boolean = true,
-        @RequestParam("\$filter") filter: String = SECENABLED,
-        @RequestParam("\$top") top: Int = DEFAULT_BATCH_SIZE,
+        @RequestParam($$"$select") select: String = TILGANG_EGENSKAPER,
+        @RequestParam($$"$count") count: Boolean = true,
+        @RequestParam($$"$filter") filter: String = SECENABLED,
+        @RequestParam($$"$top") top: Int = DEFAULT_BATCH_SIZE,
     ): Tilganger
 
     @GetExchange(GROUP_MEMBERS_PATH)
     fun gruppeMedlemmer(
         @PathVariable gruppeId: String,
-        @RequestParam("\$select") select: String = ANSATT_EGENSKAPER,
-        @RequestParam("\$count") count: Boolean = true,
-        @RequestParam("\$top") top: Int = DEFAULT_BATCH_SIZE,
+        @RequestParam($$"$select") select: String = ANSATT_EGENSKAPER,
+        @RequestParam($$"$count") count: Boolean = true,
+        @RequestParam($$"$top") top: Int = DEFAULT_BATCH_SIZE,
     ): GruppeMedlemmer
 
     @GetExchange(USERS_PATH)
-    fun utvidetAnsattNavIdent(
-        @RequestParam("\$filter") filter: String,
-        @RequestParam("\$select") select: String = UTVIDET_ANSATT_EGENSKAPER,
-    ): EntraSaksbehandlerRespons
-
-    @GetExchange(USERS_PATH)
-    fun utvidetAnsattTIdent(
-        @RequestParam("\$filter") filter: String,
-        @RequestParam("\$select") select: String = UTVIDET_ANSATT_EGENSKAPER,
+    fun utvidetAnsatt(
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$select") select: String = UTVIDET_ANSATT_EGENSKAPER,
     ): EntraSaksbehandlerRespons
 
     @GetExchange(PING_PATH)

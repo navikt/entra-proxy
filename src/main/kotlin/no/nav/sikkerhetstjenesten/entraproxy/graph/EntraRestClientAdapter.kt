@@ -8,7 +8,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
@@ -98,21 +97,22 @@ class EntraRestClientAdapter(
         }
 
     fun utvidetAnsatt(ansattId: String) =
-        ansatt {
-            client.utvidetAnsattNavIdent("$NAVIDENT eq '$ansattId'").ansatte.firstOrNull()
-        }
+        hentUtvidetAnsatt("$NAVIDENT eq '$ansattId'")
 
     fun utvidetAnsattTident(ansattId: String) =
-        ansatt {
-            client.utvidetAnsattTIdent("$T_IDENT eq '$ansattId'").ansatte.firstOrNull()
-        }
+        hentUtvidetAnsatt("$T_IDENT eq '$ansattId'")
 
     private inline fun <reified T : Any> get(uri: URI) =
         restClient.get()
             .uri(uri)
             .accept(APPLICATION_JSON)
             .retrieve()
-            .body<T>() ?: throw NotFoundRestException(uri, msg = "Fant tomt svar fra nextLink")
+            .body<T>() ?: throw NotFoundRestException(uri, "Fant tomt svar fra nextLink")
+
+    private fun hentUtvidetAnsatt(filter: String) =
+        ansatt {
+            client.utvidetAnsatt(filter).ansatte.firstOrNull()
+        }
 
     private fun ansatt(block: () -> AnsattRespons?) =
         block()?.let {

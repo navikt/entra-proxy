@@ -17,7 +17,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<En
 
     override fun hashCode() = enhetnummer.hashCode()
 
-    class Enhetnummer(private val nummer: String) : Comparable<Enhetnummer> {
+    class Enhetnummer(private val nummer: String? = UKJENT_ENHET) : Comparable<Enhetnummer> {
 
         @JsonValue
         val verdi = nummer.removePrefix(ENHET_PREFIX)

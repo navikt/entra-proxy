@@ -47,54 +47,32 @@ class EntraRestClientAdapter(
         client.gruppeOid("displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
     fun tema(ansattOid: String): Set<Tema> =
-        run {
-            val resultat = mutableSetOf<Tema>()
-            var side = client.tema(ansattOid)
-            while (true) {
-                side.value.forEach { resultat.add(Tema(it.displayName)) }
-                val nesteSide = side.next ?: break
-                side = get(nesteSide)
-            }
-            resultat.toSortedSet()
-        }
+        buildSet {
+            generateSequence(client.tema(ansattOid)) { it.next?.let(::get) }
+                .forEach { side -> side.value.forEach { add(Tema(it.displayName)) } }
+        }.toSortedSet()
 
     fun enheter(ansattOid: String): Set<Enhetnummer> =
-        run {
-            val resultat = mutableSetOf<Enhetnummer>()
-            var side = client.enheter(ansattOid)
-            while (true) {
-                side.value.forEach { resultat.add(Enhetnummer(it.displayName)) }
-                val nesteSide = side.next ?: break
-                side = get(nesteSide)
-            }
-            resultat.toSortedSet()
-        }
+        buildSet {
+            generateSequence(client.enheter(ansattOid)) { it.next?.let(::get) }
+                .forEach { side -> side.value.forEach { add(Enhetnummer(it.displayName)) } }
+        }.toSortedSet()
 
     fun ansatteGrupper(ansattOid: String): Set<EntraGruppe> =
-        run {
-            val resultat = mutableSetOf<EntraGruppe>()
-            var side = client.ansatteGrupper(ansattOid)
-            while (true) {
-                side.value.forEach { resultat.add(EntraGruppe(it.displayName)) }
-                val nesteSide = side.next ?: break
-                side = get(nesteSide)
-            }
-            resultat.toSortedSet()
-        }
+        buildSet {
+            generateSequence(client.ansatteGrupper(ansattOid)) { it.next?.let(::get) }
+                .forEach { side -> side.value.forEach { add(EntraGruppe(it.displayName)) } }
+        }.toSortedSet()
 
     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
-        run {
-            val resultat = mutableSetOf<Ansatt>()
-            var side = client.gruppeMedlemmer(gruppeOid)
-            while (true) {
-                side.value.forEach {
-                    resultat.add(Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname))
+        buildSet {
+            generateSequence(client.gruppeMedlemmer(gruppeOid)) { it.next?.let(::get) }
+                .forEach { side ->
+                    side.value.forEach {
+                    add(Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname))
+                    }
                 }
-                val nesteSide = side.next ?: break
-                side = get(nesteSide)
-            }
-            resultat.toSortedSet()
-        }
+        }.toSortedSet()
 
     fun utvidetAnsatt(ansattId: String) =
         hentUtvidetAnsatt("$NAVIDENT eq '$ansattId'")
@@ -117,10 +95,10 @@ class EntraRestClientAdapter(
     private fun ansatt(block: () -> AnsattRespons?) =
         block()?.let {
             with(it) {
-                val enhetsNummer = Enhetnummer(streetAddress ?: UKJENT_ENHET)
+                val enhetsNummer = Enhetnummer(streetAddress)
                 UtvidetAnsatt(
                     AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
-                    TIdent(jobTitle ?: TIDENT_DEFAULT),
+                    TIdent(jobTitle),
                     mail,
                     Enhet(enhetsNummer, norg.navnFor(enhetsNummer)),
                 )
@@ -138,12 +116,8 @@ class EntraRestClientAdapter(
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {
     init {
-        body.title = TITLE
+        body.title = "Uventet respons fra Entra"
         body.detail = msg
         body.properties = mapOf("navIdent" to ansattId, "traceId" to Span.current().spanContext.traceId)
-    }
-
-    companion object {
-        const val TITLE = "Uventet respons fra Entra"
     }
 }

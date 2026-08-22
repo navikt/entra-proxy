@@ -1,7 +1,7 @@
 {
   "ingresses": [
-    "https://entraproxy.intern.dev.nav.no",
-    "https://entraproxy.ansatt.dev.nav.no"
+    "https://entraproxy-v2.intern.dev.nav.no",
+    "https://entraproxy-v2.ansatt.dev.nav.no"
   ],
 
   "inbound": [

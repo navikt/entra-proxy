@@ -3,7 +3,7 @@ kind: Application
 metadata:
   labels:
     team: sikkerhetstjenesten
-  name: entra-proxy
+  name: entra-proxy-v2
   namespace: sikkerhetstjenesten
 spec:
   strategy:

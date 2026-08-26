@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name":  "syk-dig-backend",
+      "namespace": "teamsykmelding",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "localauth",
       "namespace": "isa",
       "cluster": "dev-gcp"

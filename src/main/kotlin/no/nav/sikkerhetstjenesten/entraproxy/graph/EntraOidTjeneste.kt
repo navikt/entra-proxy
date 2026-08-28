@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class EntraOidTjeneste(private val adapter: EntraRestClientAdapter)  {
 
-    @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
+    @Cacheable(cacheNames = [ENTRA_OID], key = "#ansattId.verdi")
      fun ansattOid(ansattId: AnsattId) =
          adapter.ansattOid(ansattId.verdi)
 

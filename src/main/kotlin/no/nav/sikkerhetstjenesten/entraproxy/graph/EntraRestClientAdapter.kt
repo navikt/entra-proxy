@@ -37,7 +37,7 @@ class EntraRestClientAdapter(
         with(client.ansattOid("$NAVIDENT eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
-                0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                0 -> throw NotFoundRestException(cf.userURI(navIdent), "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }
@@ -95,10 +95,10 @@ class EntraRestClientAdapter(
     private fun ansatt(block: () -> AnsattRespons?) =
         block()?.let {
             with(it) {
-                val enhetsNummer = Enhetnummer(streetAddress)
+                val enhetsNummer = Enhetnummer(streetAddress?:UKJENT_ENHET)
                 UtvidetAnsatt(
                     AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
-                    TIdent(jobTitle),
+                    TIdent(jobTitle!!),
                     mail,
                     Enhet(enhetsNummer, norg.navnFor(enhetsNummer)),
                 )

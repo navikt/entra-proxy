@@ -65,7 +65,6 @@ repositories {
 
 configurations.configureEach {
     resolutionStrategy {
-        failOnNonReproducibleResolution()
     }
     exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
 }
@@ -108,6 +107,7 @@ dependencies {
     // Testing
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
+    testImplementation(libs.mockOauth2Server)
     testImplementation(libs.junitJupiter)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)

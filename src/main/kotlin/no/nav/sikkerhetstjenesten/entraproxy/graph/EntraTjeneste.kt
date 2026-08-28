@@ -1,75 +1,72 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import io.micrometer.core.annotation.Timed
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverableService
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ANSATT_OID_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.stereotype.Service
-import org.springframework.web.service.registry.ImportHttpServices
 import java.util.*
+import kotlin.time.measureTimedValue
 
 @RetryingWhenRecoverableService
 class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
     private val log = getLogger(javaClass)
 
-    @WithSpan
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun tema(ansattId: AnsattId, oid: UUID) =
-        tidOgLog(log, "tema for $ansattId") {
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
+    fun tema(ansattId: AnsattId, oid: UUID): Set<Tema> {
+        val (result, duration) = measureTimedValue {
             medNotFoundFallback(oid, {
                 adapter.tema("$it")
             }) {
                 refreshOid(ansattId)
             }
         }
+        log.info("Hentet ${result.size} ${"tema for $ansattId"} på ${duration.inWholeMilliseconds}ms")
+        return result
+    }
 
 
-    @WithSpan
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun enheter(ansattId: AnsattId, oid: UUID) =
-        tidOgLog(log, "enhet(er) for $ansattId") {
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
+    fun enheter(ansattId: AnsattId, oid: UUID): Set<Enhet> {
+        val (result, duration) = measureTimedValue {
             medNotFoundFallback(oid, ::enheter) {
                 refreshOid(ansattId)
             }
         }
+        log.info("Hentet ${result.size} ${"enhet(er) for $ansattId"} på ${duration.inWholeMilliseconds}ms")
+        return result
+    }
 
 
-    @WithSpan
     @Cacheable(MEDLEMMER)
-    fun medlemmer(gruppeId: UUID) =
-        tidOgLog(log, "medlem(mer) for gruppe $gruppeId") {
+    fun medlemmer(gruppeId: UUID): Set<Ansatt> {
+        val (result, duration) = measureTimedValue {
             adapter.gruppeMedlemmer("$gruppeId")
         }
+        log.info("Hentet ${result.size} ${"medlem(mer) for gruppe $gruppeId"} på ${duration.inWholeMilliseconds}ms")
+        return result
+    }
 
-    @WithSpan
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
         ansatt  {
             adapter.utvidetAnsatt(ansattId.verdi)
         }
 
-    @WithSpan
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
         ansatt  {
             adapter.utvidetAnsattTident(ansattId.verdi)
         }
 
 
-    @WithSpan
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         tidOgLog(log) {
             medNotFoundFallback(oid, { adapter.ansatteGrupper(it.toString()) }) { refreshOid(navIdent) }

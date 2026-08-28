@@ -9,6 +9,7 @@ cyclonedx = "3.4.1"
 kotest = "6.2.3"
 springdoc = "3.0.3"
 mockk = "1.14.9"
+mockOauth2Server = "6.0.0"
 logstashEncoder = "9.0"
 logbook = "4.1.0"
 springMockk = "5.0.1"
@@ -44,6 +45,7 @@ springBootStarterWebflux = { module = "org.springframework.boot:spring-boot-star
 springAspects = { module = "org.springframework:spring-aspects" }
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockOauth2Server = { module = "no.nav.security:mock-oauth2-server", version.ref = "mockOauth2Server" }
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
 springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
 springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }

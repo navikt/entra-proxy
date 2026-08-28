@@ -45,18 +45,15 @@ class OAuth2SecurityBeanConfig {
                             entryPoint: AuthenticationEntryPoint) =
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers( *UNPROTECTED_ENDPOINTS).permitAll()
-            requests.anyRequest().permitAll()  // TODO: Change to authenticated() when we have replaced the old security with the new one.
-        }
-            .exceptionHandling {
-                it.accessDeniedHandler(deniedHandler)
+            requests.anyRequest().authenticated()
+        }.exceptionHandling {
+            it.accessDeniedHandler(deniedHandler)
+        }.oauth2ResourceServer { oauth2 ->
+            oauth2.jwt { jwt ->
+                converter.ifAvailable?.let(jwt::jwtAuthenticationConverter)
             }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    converter.ifAvailable?.let(jwt::jwtAuthenticationConverter)
-                }
-                oauth2.authenticationEntryPoint(entryPoint)
-            }
-            .statelessApiDefaults()
+            oauth2.authenticationEntryPoint(entryPoint)
+        }.stateless()
             .build()
 
     @Bean
@@ -64,37 +61,7 @@ class OAuth2SecurityBeanConfig {
         SecurityObservationSettings.withDefaults().shouldObserveRequests(false)
             .build()
 
-    @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
-        RestClientHttpServiceGroupConfigurer { groups ->
-            from(manager).configureGroups(groups)
-            groups.forEachClient { _, builder ->
-                builder.requestInterceptors {
-                    it.addFirst(OAuth2DownstreamURICapturingInterceptor())
-                }
-            }
-        }
-
-    @Bean
-    fun oauth2AuthorizationFailureHandler(service: OAuth2AuthorizedClientService) =
-        OAuth2LoggingAuthorizationFailureHandler(authorizationFailureHandler(service))
-
-    @Bean
-    fun oauth2AuthorizationSuccessHandler(service: OAuth2AuthorizedClientService) =
-        OAuth2LoggingAuthorizationSuccessHandler(service) { client, principal, _ ->
-            service.saveAuthorizedClient(client, principal)
-        }
-
-    @Bean
-    fun oauth2AuthorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
-        AuthorizedClientServiceOAuth2AuthorizedClientManager(
-            repo, service).apply {
-            setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build())
-            setAuthorizationSuccessHandler(successHandler)
-            setAuthorizationFailureHandler(failureHandler)
-        }
-
-    private fun HttpSecurity.statelessApiDefaults() =
+    private fun HttpSecurity.stateless() =
         requestCache { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(STATELESS) }
             .csrf { it.disable() }
@@ -104,6 +71,7 @@ class OAuth2SecurityBeanConfig {
 }
 
 
+internal const val FEIL_AUDIENCE = "An error occurred while attempting to decode the Jwt: The aud claim is not valid"
 internal const val MANGLER_BEARER_TOKEN = "Bruker er ikke logget inn. Mangler Bearer token i Authorization header."
 val TYPE_URI = URI.create("https://confluence.adeo.no/display/TM/Tilgangsmaskin+API+og+regelsett")
 val OSLO = ZoneId.of("Europe/Oslo")

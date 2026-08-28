@@ -9,7 +9,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.CLASS
 
@@ -33,7 +31,10 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @OAuth2RequireCCF
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
-        hentForAnsatt(navIdent, entraTjeneste::enheter) { emptySet() }
+        oidTjeneste.ansattOid(navIdent)?.let {
+            entraTjeneste.enheter(navIdent,
+                it)
+        } ?: emptySet()
 
     @GetMapping("enhet")
     @OAuth2RequireOBO
@@ -58,12 +59,16 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
     fun medlemmer(@PathVariable enhetsnummer: Enhetnummer) =
-            medlemmer(enhetsnummer.gruppeNavn)
+        oidTjeneste.gruppeOid(enhetsnummer.gruppeNavn)?.let {
+            entraTjeneste.medlemmer(it)
+        } ?: emptySet()
 
     @GetMapping("tema/{tema}")
     @Operation(summary = "Hent alle medlemmer for et gitt tema")
     fun medlemmer(@PathVariable tema: Tema) =
-            medlemmer(tema.gruppeNavn)
+        oidTjeneste.gruppeOid(tema.gruppeNavn)?.let {
+            entraTjeneste.medlemmer(it)
+        } ?: emptySet()
 
     @GetMapping("ansatt/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
@@ -84,18 +89,10 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
 
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")
-    fun gruppeMedlemmer(gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmer( it)
-        }
+    fun gruppeMedlemmer(gruppeNavn: String) = oidTjeneste.gruppeOid(gruppeNavn)?.let {
+        entraTjeneste.medlemmer(it)
+    } ?: emptySet()
 
-    private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T) =
-        oidTjeneste.ansattOid(navIdent)?.let { hent(navIdent, it) } ?: empty()
-
-    private fun medlemmer(gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmer( it)
-        } ?: emptySet()
 
 }
 

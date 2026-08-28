@@ -33,17 +33,9 @@ object TimeExtensions {
     )
         .format(DateTimeFormatter.ofPattern(fmt))
 
-    inline fun <T> tidOgLog(log: Logger, tekst: String, block: () -> Set<T>): Set<T> {
-        val (result, duration) = timedResult(block)
-        log.info("Hentet ${result.size} $tekst på ${duration.inWholeMilliseconds}ms")
-        return result
-    }
-
     inline fun <reified T> tidOgLog(log: Logger, block: () -> T?): T? {
-        val (result, duration) = timedResult(block)
+        val (result, duration) = measureTimedValue(block)
         log.info("Hentet $result på ${duration.inWholeMilliseconds}ms")
         return result
     }
-    inline fun <T> timedResult(block: () -> T) =
-        measureTimedValue(block)
 }

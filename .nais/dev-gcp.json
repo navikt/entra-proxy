@@ -6,6 +6,11 @@
 
   "inbound": [
     {
+      "name":  "grunn-og-hjelpestonad",
+      "namespace": "grunn-og-hjelp",
+      "cluster": "dev-gcp"
+    },
+    {
       "name":  "syk-dig-backend",
       "namespace": "teamsykmelding",
       "cluster": "dev-gcp"

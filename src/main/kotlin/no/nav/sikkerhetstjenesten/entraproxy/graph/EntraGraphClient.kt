@@ -26,6 +26,7 @@ interface EntraGraphClient {
     fun memberOf(
         @PathVariable ansattId: String,
         @RequestParam($$"$select") select: String,
+        @RequestParam($$"$filter", required = false) filter: String? = null,
         @RequestParam($$"$top") top: Int = 250,
         @RequestParam($$"$count") count: String = "true"
     ): Tilganger

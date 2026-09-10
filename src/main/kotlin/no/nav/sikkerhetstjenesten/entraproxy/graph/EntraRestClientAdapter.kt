@@ -3,7 +3,9 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
@@ -34,21 +36,21 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
         graphClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
     fun tema(ansattOid: String): Set<Tema> =
-        graphClient.memberOf(ansattOid, "id,displayName")
-            .value
-            .map { Tema(it.displayName) }
-            .toSortedSet()
+        memberOfFiltered(ansattOid, TEMA_PREFIX) { Tema(it) }
 
     fun enheter(ansattOid: String): Set<Enhetnummer> =
-        graphClient.memberOf(ansattOid, "id,displayName")
-            .value
-            .map { Enhetnummer(it.displayName) }
-            .toSortedSet()
+        memberOfFiltered(ansattOid, ENHET_PREFIX) { Enhetnummer(it) }
 
     fun ansatteGrupper(ansattOid: String): Set<EntraGruppe> =
         graphClient.memberOf(ansattOid, "id,displayName")
             .value
             .map { EntraGruppe(it.displayName) }
+            .toSortedSet()
+
+    private fun <T : Comparable<T>> memberOfFiltered(ansattOid: String, prefix: String, transform: (String) -> T): Set<T> =
+        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$prefix')")
+            .value
+            .map { transform(it.displayName) }
             .toSortedSet()
 
     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
@@ -67,13 +69,13 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
     fun utvidetAnsatt(ansattId: String) =
         graphClient.usersByFilter(
             "jobTitle,onPremisesSamAccountName,id,givenName,surname,displayName,mail,streetAddress",
-            filter = "onPremisesSamAccountName eq '$ansattId'"
+            "onPremisesSamAccountName eq '$ansattId'"
         ).ansatte.firstOrNull()
 
     fun utvidetAnsattTident(ansattId: String) =
         graphClient.usersByFilter(
             "jobTitle,onPremisesSamAccountName,id,givenName,surname,displayName,mail,streetAddress",
-            filter = "jobTitle eq '$ansattId'"
+            "jobTitle eq '$ansattId'"
         ).ansatte.firstOrNull()
 
     override fun toString() = "${javaClass.simpleName} [client=$graphClient, config=$cf]"

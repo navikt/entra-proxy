@@ -24,7 +24,7 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
     val baseURI = cf.baseUri
 
     fun oidForAnsatt(navIdent: String) =
-        with(client.users("id", filter = "onPremisesSamAccountName eq '$navIdent'").oids) {
+        with(client.users("id", filter = "$NAVIDENT eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
                 0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")

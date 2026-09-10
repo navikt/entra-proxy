@@ -53,7 +53,7 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
         graphClient.members(gruppeOid, "id, givenName, surname,displayName, onPremisesSamAccountName")
             .value
-            .map { medlem ->
+            .mapTo(sortedSetOf()) { medlem ->
                 Ansatt(
                     AnsattId(medlem.onPremisesSamAccountName),
                     medlem.displayName,
@@ -61,7 +61,6 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
                     medlem.surname
                 )
             }
-            .toSortedSet()
 
     fun utvidetAnsatt(ansattId: String) =
         graphClient.usersByFilter(

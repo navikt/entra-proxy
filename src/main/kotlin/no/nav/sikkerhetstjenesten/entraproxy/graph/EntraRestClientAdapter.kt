@@ -36,22 +36,19 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
         graphClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
     fun tema(ansattOid: String): Set<Tema> =
-        memberOfFiltered(ansattOid, TEMA_PREFIX) { Tema(it) }
+        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')")
+            .value
+            .mapTo(sortedSetOf()) { Tema(it.displayName) }
 
     fun enheter(ansattOid: String): Set<Enhetnummer> =
-        memberOfFiltered(ansattOid, ENHET_PREFIX) { Enhetnummer(it) }
+        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')")
+            .value
+            .mapTo(sortedSetOf()) { Enhetnummer(it.displayName) }
 
     fun ansatteGrupper(ansattOid: String): Set<EntraGruppe> =
         graphClient.memberOf(ansattOid, "id,displayName")
             .value
-            .map { EntraGruppe(it.displayName) }
-            .toSortedSet()
-
-    private fun <T : Comparable<T>> memberOfFiltered(ansattOid: String, prefix: String, transform: (String) -> T): Set<T> =
-        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$prefix')")
-            .value
-            .map { transform(it.displayName) }
-            .toSortedSet()
+            .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
 
     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
         graphClient.members(gruppeOid, "id, givenName, surname,displayName, onPremisesSamAccountName")

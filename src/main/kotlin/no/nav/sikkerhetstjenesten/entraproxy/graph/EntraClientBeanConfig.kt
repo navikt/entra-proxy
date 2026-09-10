@@ -1,9 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestClient
@@ -12,16 +11,13 @@ import org.springframework.web.client.RestClient
 class EntraClientBeanConfig {
 
     @Bean
-    @Qualifier(GRAPH)
-    fun entraRestClient(b: RestClient.Builder, cfg: EntraConfig) =
-        b.baseUrl(cfg.baseUri)
-            .requestInterceptors {
-                it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
-            }.build()
-
+    fun entraGraphClient(b: RestClient.Builder, cfg: EntraConfig): EntraGraphClient =
+        FellesBeanConfig.createClient(cfg, b.requestInterceptors {
+            it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
+        })
 
     @Bean
-    fun entraHealthIndicator(a: EntraRestClientAdapter) =  PingableHealthIndicator(a)
+    fun entraHealthIndicator(a: EntraRestClientAdapter) = PingableHealthIndicator(a)
 
     companion object {
         private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"

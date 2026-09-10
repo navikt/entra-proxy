@@ -23,7 +23,7 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
 
     val baseURI = cf.baseUri
 
-    fun ansattOid(navIdent: String) =
+    fun oidForAnsatt(navIdent: String) =
         with(graphClient.users("id", filter = "onPremisesSamAccountName eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
@@ -33,34 +33,27 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
             }
         }
 
-    fun gruppeOid(gruppeNavn: String) =
+    fun oidForGruppenavn(gruppeNavn: String) =
         graphClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
-    fun tema(ansattOid: String) =
-        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')")
-            .value
+    fun temaerForAnsatt(ansattOid: String) =
+        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')").value
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
 
-    fun enheter(ansattOid: String)  =
-        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')")
-            .value
+    fun enheterForAnsatt(ansattOid: String)  =
+        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')").value
             .mapTo(sortedSetOf()) { Enhetnummer(it.displayName) }
 
-    fun ansatteGrupper(ansattOid: String)  =
-        graphClient.memberOf(ansattOid, "id,displayName")
-            .value
+    fun grupperForAnsatt(ansattOid: String)  =
+        graphClient.memberOf(ansattOid, "id,displayName").value
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
 
     fun gruppeMedlemmer(gruppeOid: String)  =
-        graphClient.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT")
-            .value
-            .mapTo(sortedSetOf()) { medlem ->
-                Ansatt(
-                    AnsattId(medlem.onPremisesSamAccountName),
-                    medlem.displayName,
-                    medlem.givenName,
-                    medlem.surname
-                )
+        graphClient.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT").value
+            .mapTo(sortedSetOf()) {
+                with(it) {
+                    Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
+                }
             }
 
     fun utvidetAnsatt(ansattId: String) =

@@ -60,14 +60,14 @@ class TilgangTester : BehaviorSpec({
         When("adapter feiler første gang og lykkes etter refreshOid") {
             Then("skal responsen inneholde forventet enhet") {
                 every { oid.ansattOid(ANSATTID) } returns UUID
-                every { entraAdapter.enheter("$UUID") } throws
+                every { entraAdapter.enheterForAnsatt("$UUID") } throws
                     NotFoundRestException(URI.create(""), "ikke funnet") andThen setOf(ENHET.enhetnummer)
                 every { norg.navnFor(ENHET.enhetnummer) } returns ENHET.navn
                 val respons = mockMvc.perform(get("/api/v1/enhet/ansatt/${ANSATTID.verdi}"))
                     .andExpect(status().isOk)
                     .andReturn().response.contentAsString
                 jsonMapper.readValue<Set<Enhet>>(respons).single() shouldBe ENHET
-                verify(exactly = 2)  { entraAdapter.enheter("$UUID") }
+                verify(exactly = 2)  { entraAdapter.enheterForAnsatt("$UUID") }
             }
         }
     }

@@ -24,8 +24,7 @@ import java.net.URI
 class EntraRestClientAdapter(
     @param:Qualifier(GRAPH) val restClient: RestClient,
     val cf: EntraConfig,
-    val errorHandler: ErrorHandler = DefaultRestErrorHandler()
-) : Pingable {
+    val errorHandler: ErrorHandler = DefaultRestErrorHandler()) : Pingable {
 
     val log = getLogger(javaClass)
 
@@ -48,21 +47,43 @@ class EntraRestClientAdapter(
     fun gruppeOid(gruppeNavn: String) =
         get<Grupper>(cf.gruppeURI(gruppeNavn)).value.firstOrNull()?.id
 
-    fun tema(ansattOid: String) =
-        tilganger(cf.temaURI(ansattOid), ::Tema)
+    fun tema(ansattOid: String): Set<Tema> =
+        generateSequence(get<Tilganger>(cf.temaURI(ansattOid))) { page ->
+            page.next?.let { uri -> get<Tilganger>(uri) }
+        }
+            .flatMap { it.value }
+            .map { Tema(it.displayName) }
+            .toSortedSet()
 
-    fun enheter(ansattOid: String) =
-        tilganger(cf.enheterURI(ansattOid), ::Enhetnummer)
+    fun enheter(ansattOid: String): Set<Enhetnummer> =
+        generateSequence(get<Tilganger>(cf.enheterURI(ansattOid))) { page ->
+            page.next?.let {
+                uri -> get<Tilganger>(uri)
+            }
+        }.flatMap { it.value }
+            .map { Enhetnummer(it.displayName) }
+            .toSortedSet()
 
-    fun ansatteGrupper(ansattOid: String) =
-        tilganger(cf.ansatteGruppeURI(ansattOid), ::EntraGruppe)
+    fun ansatteGrupper(ansattOid: String): Set<EntraGruppe> =
+        generateSequence(get<Tilganger>(cf.ansatteGruppeURI(ansattOid))) { page ->
+            page.next?.let { uri -> get<Tilganger>(uri) }
+        }.flatMap { it.value }
+            .map { EntraGruppe(it.displayName) }
+            .toSortedSet()
 
-    fun gruppeMedlemmer(gruppeOid: String) =
-        pagedTransformedAndSorted(
-            get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid)),
-            { it.next?.let(::get) },
-            { it.value },
-            { Ansatt(AnsattId(it.onPremisesSamAccountName), it.displayName, it.givenName, it.surname) })
+    fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
+        generateSequence(get<GruppeMedlemmer>(cf.gruppeMedlemmerURI(gruppeOid))) { page ->
+            page.next?.let { uri -> get<GruppeMedlemmer>(uri) }
+        }.flatMap { it.value }
+            .map { medlem ->
+                Ansatt(
+                    AnsattId(medlem.onPremisesSamAccountName),
+                    medlem.displayName,
+                    medlem.givenName,
+                    medlem.surname
+                )
+            }
+            .toSortedSet()
 
     fun utvidetAnsatt(ansattId: String) =
         utvidetAnsatt(cf.navIdentURI(ansattId), ansattId)
@@ -81,24 +102,6 @@ class EntraRestClientAdapter(
             .retrieve()
             .onStatus(HttpStatusCode::isError, errorHandler::handle)
             .body<T>() ?: throw IrrecoverableRestException(INTERNAL_SERVER_ERROR, uri)
-
-    private inline fun <T> tilganger(uri: URI, crossinline stringTransformer: (String) -> T): Set<T> where T : Comparable<T> =
-        pagedTransformedAndSorted(
-            get<Tilganger>(uri),
-            { it.next?.let(::get) },
-            { it.value },
-            { stringTransformer(it.displayName) })
-
-    private inline fun <T, V, R> pagedTransformedAndSorted(
-        førsteSide: T,
-        crossinline nesteSide: (T) -> T?,
-        crossinline verdier: (T) -> Iterable<V>,
-        noinline transform: (V) -> R
-    ): Set<R> where R : Comparable<R> =
-        generateSequence(førsteSide) { nesteSide(it) }
-            .flatMap { verdier(it) }
-            .map(transform)
-            .toSortedSet()
 
     override fun toString() = "${javaClass.simpleName} [client=$restClient, config=$cf, errorHandler=$errorHandler]"
 }

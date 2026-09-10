@@ -40,7 +40,7 @@ interface EntraGraphClient {
     ): GruppeMedlemmer
 
     @GetExchange("/users")
-    fun usersByFilter(
+    fun bruker(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
         @RequestParam($$"$count") count: String = "true"

@@ -57,13 +57,13 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
             }
 
     fun utvidetAnsatt(ansattId: String) =
-        graphClient.usersByFilter(
+        graphClient.bruker(
             "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
             "onPremisesSamAccountName eq '$ansattId'"
         ).ansatte.firstOrNull()
 
     fun utvidetAnsattTident(ansattId: String) =
-        graphClient.usersByFilter(
+        graphClient.bruker(
             "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
             "jobTitle eq '$ansattId'"
         ).ansatte.firstOrNull()

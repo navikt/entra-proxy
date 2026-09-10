@@ -90,7 +90,7 @@ jobs:
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@8e41f1f58749b9248e376c25d33bfbdd2b1163c0 # v0
+        uses: nais/docker-build-push@0e73849f69ff260ee27597553c0a7848ca4e9795 # v0
         with:
           team: sikkerhetstjenesten
           tag: ${{ env.TAG }}
@@ -135,4 +135,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: ${{ inputs.publish-pages }}
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

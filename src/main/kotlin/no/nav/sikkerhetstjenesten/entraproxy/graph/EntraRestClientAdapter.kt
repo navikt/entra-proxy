@@ -13,18 +13,18 @@ import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
 
 @Component
-class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: EntraConfig) : Pingable {
+class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: EntraConfig) : Pingable {
 
     val log = getLogger(javaClass)
 
-    override fun ping() = graphClient.ping()
+    override fun ping() = client.ping()
     override val name = cf.name
     override val pingEndpoint = "${cf.pingEndpoint}"
 
     val baseURI = cf.baseUri
 
     fun oidForAnsatt(navIdent: String) =
-        with(graphClient.users("id", filter = "onPremisesSamAccountName eq '$navIdent'").oids) {
+        with(client.users("id", filter = "onPremisesSamAccountName eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
                 0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
@@ -34,22 +34,22 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
         }
 
     fun oidForGruppenavn(gruppeNavn: String) =
-        graphClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
+        client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
     fun temaerForAnsatt(ansattOid: String) =
-        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')").value
+        client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')").value
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
 
     fun enheterForAnsatt(ansattOid: String)  =
-        graphClient.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')").value
+        client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')").value
             .mapTo(sortedSetOf()) { Enhetnummer(it.displayName) }
 
     fun grupperForAnsatt(ansattOid: String)  =
-        graphClient.memberOf(ansattOid, "id,displayName").value
+        client.memberOf(ansattOid, "id,displayName").value
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
 
     fun gruppeMedlemmer(gruppeOid: String)  =
-        graphClient.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT").value
+        client.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT").value
             .mapTo(sortedSetOf()) {
                 with(it) {
                     Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
@@ -57,18 +57,18 @@ class EntraRestClientAdapter(private val graphClient: EntraGraphClient, val cf: 
             }
 
     fun utvidetAnsatt(ansattId: String) =
-        graphClient.bruker(
+        client.bruker(
             "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
             "onPremisesSamAccountName eq '$ansattId'"
         ).ansatte.firstOrNull()
 
     fun utvidetAnsattTident(ansattId: String) =
-        graphClient.bruker(
+        client.bruker(
             "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
             "jobTitle eq '$ansattId'"
         ).ansatte.firstOrNull()
 
-    override fun toString() = "${javaClass.simpleName} [client=$graphClient, config=$cf]"
+    override fun toString() = "${javaClass.simpleName} [client=$client, config=$cf]"
 }
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {

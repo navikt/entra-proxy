@@ -40,7 +40,7 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
         client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')").value
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
 
-    fun enheterForAnsatt(ansattOid: String)  =
+    fun enheterForAnsatt(ansattOid: String) : Set<Enhetnummer> =
         client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')").value
             .mapTo(sortedSetOf()) { Enhetnummer(it.displayName) }
 
@@ -48,7 +48,7 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
         client.memberOf(ansattOid, "id,displayName").value
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
 
-    fun gruppeMedlemmer(gruppeOid: String)  =
+    fun gruppeMedlemmer(gruppeOid: String) : Set<Ansatt> =
         client.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT").value
             .mapTo(sortedSetOf()) {
                 with(it) {

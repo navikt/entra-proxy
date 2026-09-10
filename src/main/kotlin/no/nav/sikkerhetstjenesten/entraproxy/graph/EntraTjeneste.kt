@@ -84,9 +84,9 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
     }
 
-    private fun enheter(oid: UUID) =
+    private fun enheter(ansattOid: UUID) =
         buildSet {
-            adapter.enheter("$oid").forEach {
+            adapter.enheter("$ansattOid").forEach {
                 add(Enhet(it, norg.navnFor(it)))
             }
         }

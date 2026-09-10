@@ -10,39 +10,39 @@ interface EntraGraphClient {
 
     @GetExchange("/users")
     fun users(
-        @RequestParam("\$select") select: String,
-        @RequestParam("\$count") count: String = "true",
-        @RequestParam("\$filter") filter: String
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$count") count: String = "true"
     ): AnsattOids
 
     @GetExchange("/groups")
     fun groups(
-        @RequestParam("\$select") select: String,
-        @RequestParam("\$count") count: String = "true",
-        @RequestParam("\$filter") filter: String
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$count") count: String = "true"
     ): Grupper
 
     @GetExchange("/users/{ansattId}/memberOf")
     fun memberOf(
         @PathVariable ansattId: String,
-        @RequestParam("\$select") select: String,
-        @RequestParam("\$count") count: String = "true",
-        @RequestParam("\$top") top: Int = 250
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$top") top: Int = 250,
+        @RequestParam($$"$count") count: String = "true"
     ): Tilganger
 
     @GetExchange("/groups/{gruppeId}/members")
     fun members(
         @PathVariable gruppeId: String,
-        @RequestParam("\$select") select: String,
-        @RequestParam("\$count") count: String = "true",
-        @RequestParam("\$top") top: Int = 250
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$top") top: Int = 250,
+        @RequestParam($$"$count") count: String = "true"
     ): GruppeMedlemmer
 
     @GetExchange("/users")
     fun usersByFilter(
-        @RequestParam("\$select") select: String,
-        @RequestParam("\$count") count: String = "true",
-        @RequestParam("\$filter") filter: String
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$filter") filter: String,
+        @RequestParam($$"$count") count: String = "true"
     ): EntraSaksbehandlerRespons
 
     @GetExchange("/organization")

@@ -16,7 +16,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import java.util.UUID
+
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
 @ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
 @SecurityRequirement(name = "bearerAuth")
@@ -29,28 +29,28 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     fun enheterCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(navIdent, entraTjeneste::enheter) { emptySet() }
+            oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.enheter(navIdent, it) } ?: emptySet()
         })
 
     @GetMapping("enhet")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() =
         token.assert({ erObo }, {
-            hentForObo(entraTjeneste::enheter)
+            with(token.oboFields) { entraTjeneste.enheter(first, second) }
         })
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     fun temaCC(@PathVariable navIdent: AnsattId) =
         token.assert({ erCC }, {
-            hentForAnsatt(navIdent, entraTjeneste::tema) { emptySet() }
+            oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.tema(navIdent, it) } ?: emptySet()
         })
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
     fun temaOBO() =
-        token.assert( {erObo}, {
-            hentForObo(entraTjeneste::tema)
+        token.assert({ erObo }, {
+            with(token.oboFields) { entraTjeneste.tema(first, second) }
         })
 
     @GetMapping("enhet/{enhetsnummer}")
@@ -87,14 +87,6 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
             entraTjeneste.medlemmer( it)
         }
 
-
-    private inline fun <T> hentForObo(hent: (AnsattId, UUID) -> T) =
-        with(token.oboFields) {
-            hent(first, second)
-        }
-
-    private inline fun <T> hentForAnsatt(navIdent: AnsattId, crossinline hent: (AnsattId, UUID) -> T, empty: () -> T) =
-        oidTjeneste.ansattOid(navIdent)?.let { hent(navIdent, it) } ?: empty()
 
     private fun medlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {

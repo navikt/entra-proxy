@@ -76,6 +76,8 @@ spring:
             client-id: ${azure.app.client.id}
             client-secret: ${azure.app.client.secret}
             authorization-grant-type: client_credentials
+            scope:
+              - "api://${nais.cluster.type}-gcp.org.norg2/.default"
 
         provider:
           azuread:

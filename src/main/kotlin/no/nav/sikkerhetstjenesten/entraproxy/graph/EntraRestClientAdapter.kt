@@ -8,13 +8,16 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
 import org.springframework.web.service.registry.ImportHttpServices
+
+
+private const val MINIMUM_FELTER = "id,displayName"
+private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$NAVIDENT,givenName,surname,mail,streetAddress"
+
 
 @Component
 @ImportHttpServices(types = [EntraGraphClient::class], group = GRAPH)
@@ -39,22 +42,22 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
         }
 
     fun oidForGruppenavn(gruppeNavn: String) =
-        client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
+        client.groups(MINIMUM_FELTER, "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 
     fun temaerForAnsatt(ansattOid: String) =
-        client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$TEMA_PREFIX')").value
+        client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')").value
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
 
     fun enheterForAnsatt(ansattOid: String) : Set<Enhetnummer> =
-        client.memberOf(ansattOid, "id,displayName", "startswith(displayName,'$ENHET_PREFIX')").value
+        client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')").value
             .mapTo(sortedSetOf()) { Enhetnummer(it.displayName) }
 
     fun grupperForAnsatt(ansattOid: String)  =
-        client.memberOf(ansattOid, "id,displayName").value
+        client.memberOf(ansattOid, MINIMUM_FELTER).value
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
 
     fun gruppeMedlemmer(gruppeOid: String) : Set<Ansatt> =
-        client.members(gruppeOid, "id,givenName,surname,displayName, $NAVIDENT").value
+        client.members(gruppeOid, ANSATTE_FELTER).value
             .mapTo(sortedSetOf()) {
                 with(it) {
                     Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
@@ -63,13 +66,13 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
 
     fun utvidetAnsatt(ansattId: String) =
         client.bruker(
-            "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
-            "onPremisesSamAccountName eq '$ansattId'"
+            ANSATTE_FELTER,
+            "$NAVIDENT eq '$ansattId'"
         ).ansatte.firstOrNull()
 
     fun utvidetAnsattTident(ansattId: String) =
         client.bruker(
-            "jobTitle,$NAVIDENT,id,givenName,surname,displayName,mail,streetAddress",
+            ANSATTE_FELTER,
             "jobTitle eq '$ansattId'"
         ).ansatte.firstOrNull()
 

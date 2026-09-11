@@ -18,6 +18,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import org.slf4j.LoggerFactory
 import org.apache.hc.core5.util.TimeValue
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.web.client.support.RestClientAdapter.create
@@ -33,6 +34,8 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -87,6 +90,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 logbookInterceptor.ifAvailable {
                     interceptor -> it.add(interceptor)
                 }
+                it.add(downstreamHeaderLoggingInterceptor())
                 it.add(tokenInterceptor)
             }
             c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
@@ -194,9 +198,19 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         registry.addConverter(StringToEnhetnummerConverter())
     }
     companion object {
+        private val LOG = LoggerFactory.getLogger(FellesBeanConfig::class.java)
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
+                next.execute(request, body)
+            }
+        fun downstreamHeaderLoggingInterceptor() =
+            ClientHttpRequestInterceptor { request, body, next ->
+                val safeHeaders = HttpHeaders().apply { putAll(request.headers) }
+                if (safeHeaders.getFirst(AUTHORIZATION) != null) {
+                    safeHeaders.set(AUTHORIZATION, "Bearer ******")
+                }
+                LOG.info("Downstream request {} {} headers={}", request.method, request.uri, safeHeaders)
                 next.execute(request, body)
             }
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")

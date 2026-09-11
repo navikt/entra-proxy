@@ -11,6 +11,7 @@ import org.zalando.logbook.core.DefaultSink
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.zalando.logbook.HttpLogFormatter
+import org.zalando.logbook.Sink
 
 @Configuration
 @NoCoverageAnalysis
@@ -18,18 +19,24 @@ import org.zalando.logbook.HttpLogFormatter
 class LogbookBeanConfiguration {
 
     @Bean
-    fun logbook(formatter: HttpLogFormatter, jwtClaimsExtractor: AttributeExtractor) =
+    fun logbook(jwtClaimsExtractor: AttributeExtractor, sink: Sink) =
         Logbook.builder()
             .condition(
                 exclude(
                     requestTo("**/internal/**"),
                     requestTo("**/monitoring/**"),
                     requestTo("**/actuator/**"),
-                    requestTo("https://graph.microsoft.com/v1.0/organization"),
+                   // requestTo("https://graph.microsoft.com/v1.0/organization"),
                 ),
             )
             .attributeExtractor(jwtClaimsExtractor)
-            .sink(DefaultSink(formatter, DefaultHttpLogWriter()))
+            .sink(sink)
             .build()
+
+    @Bean
+    fun logbookSink(formatter: HttpLogFormatter) = DefaultSink(
+        formatter,
+        DefaultHttpLogWriter()
+    )
 
 }

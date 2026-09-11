@@ -9,6 +9,7 @@
     </appender>
 
     <springProfile name="dev">
+        <logger name="org.zalando.logbook" level="trace"/>
         <logger name="io.lettuce.core.protocol.ReconnectionHandler" level="warn"/>
         <logger name="no.nav.sikkerhetstjenesten" level="trace"/>
     </springProfile>

@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
+import no.nav.sikkerhetstjenesten.entraproxy.felles.LogbookBeanConfiguration.LogbookPrettyPrintingFormatter
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
@@ -49,8 +50,15 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.zalando.logbook.Logbook
+import org.zalando.logbook.attributes.AttributeExtractor
+import org.zalando.logbook.core.Conditions.exclude
+import org.zalando.logbook.core.Conditions.requestTo
+import org.zalando.logbook.core.DefaultHttpLogWriter
+import org.zalando.logbook.core.DefaultSink
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
+import tools.jackson.databind.json.JsonMapper
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -221,5 +229,23 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
 
+@Bean
+    fun logbookPrettyPrintingFormatter(mapper: JsonMapper) =
+        LogbookPrettyPrintingFormatter(mapper)
 
+    @Bean
+    fun logbook(formatter: LogbookPrettyPrintingFormatter, jwtClaimsExtractor: AttributeExtractor) =
+        Logbook.builder()
+            //.strategy(LogbookStatusAtLeastExcluding(NOT_FOUND))
+            .condition(
+                exclude(
+                    requestTo("**/internal/**"),
+                    requestTo("**/monitoring/**"),
+                    requestTo("**/actuator/**"),
+                    requestTo("https://graph.microsoft.com/v1.0/organization"),
+                ),
+            )
+            .attributeExtractor(jwtClaimsExtractor)
+            .sink(DefaultSink(formatter, DefaultHttpLogWriter()))
+            .build()
 

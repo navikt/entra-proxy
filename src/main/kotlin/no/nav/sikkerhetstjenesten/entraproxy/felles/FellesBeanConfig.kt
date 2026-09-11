@@ -105,8 +105,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         registry.addConverter(StringToEnhetnummerConverter())
     }
     companion object {
-        private val LOG = LoggerFactory.getLogger(FellesBeanConfig::class.java)
-        val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
@@ -116,38 +114,8 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
 
     }
-    class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
-        override fun convert(source: String): Enhetnummer = Enhetnummer(source)
-    }
-
-    @Bean
-    fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
-        val schemas = openApi.components.schemas
-        schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
-            type = "string"
-            description = "Enhetnummer (4 siffer)"
-            example = Enhetnummer("1234")
-        }
-        schemas["Enhet"] = Schema<Enhet>().apply {
-            type = "object"
-            description = "Enhetnummer (4 siffer) og navn"
-            example = Enhet(Enhetnummer("1234"),"Nav Avdeling Sydpolen")
-        }
-        schemas["Ansatt"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"), "Tore Tang", "Tore", "Tang")
-        }
-        schemas["NavIdent"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "NavIdent (7 siffer)"
-            example = AnsattId("A123456")
-        }
-        schemas["Tema"] = Schema<Tema>().apply {
-            type = "string"
-            description = "Tema (3 store bokstaver)"
-            example = Tema("AAP")
-        }
+    private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
+        override fun convert(source: String) = Enhetnummer(source)
     }
 }
 
@@ -157,7 +125,3 @@ annotation class Generated
 typealias NoCoverageAnalysis = Generated
 
 
-fun Map<String, Any>.withTimestampsInCurrentTimezone() =
-    mapValues {
-            (_, value) -> (value as? Date)?.toInstant()?.atZone(OSLO) ?: value
-    }

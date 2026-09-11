@@ -10,7 +10,7 @@ import org.zalando.logbook.core.DefaultHttpLogWriter
 import org.zalando.logbook.core.DefaultSink
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import tools.jackson.databind.json.JsonMapper
+import org.zalando.logbook.HttpLogFormatter
 
 @Configuration
 @NoCoverageAnalysis
@@ -18,7 +18,7 @@ import tools.jackson.databind.json.JsonMapper
 class LogbookBeanConfiguration {
 
     @Bean
-    fun logbook(formatter: LogbookPrettyPrintingFormatter, jwtClaimsExtractor: AttributeExtractor) =
+    fun logbook(formatter: HttpLogFormatter, jwtClaimsExtractor: AttributeExtractor) =
         Logbook.builder()
             .condition(
                 exclude(

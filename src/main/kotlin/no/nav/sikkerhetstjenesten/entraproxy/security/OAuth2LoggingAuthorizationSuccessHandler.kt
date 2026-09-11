@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHand
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 
+
 class OAuth2LoggingAuthorizationSuccessHandler(
     private val service: OAuth2AuthorizedClientService,
     private val delegate: OAuth2AuthorizationSuccessHandler

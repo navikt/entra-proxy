@@ -1,6 +1,4 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
-
-import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamUriCapturingInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
@@ -83,3 +81,5 @@ class SecurityBeanConfig {
             setAuthorizationFailureHandler(failureHandler)
         }
 }
+
+private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"

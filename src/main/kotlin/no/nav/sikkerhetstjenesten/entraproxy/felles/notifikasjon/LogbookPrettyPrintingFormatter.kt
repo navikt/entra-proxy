@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.notifikasjon
 
+import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 import org.zalando.logbook.Correlation
 import org.zalando.logbook.HttpLogFormatter
@@ -10,6 +11,7 @@ import org.zalando.logbook.json.JsonHttpLogFormatter
 import tools.jackson.databind.json.JsonMapper
 
 @Component
+@Primary
 class LogbookPrettyPrintingFormatter(private val mapper: JsonMapper) : HttpLogFormatter {
     private val delegate = JsonHttpLogFormatter(mapper, true)
 

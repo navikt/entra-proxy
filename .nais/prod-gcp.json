@@ -2,6 +2,9 @@
   "ingresses": [
     "https://entraproxy.intern.nav.no"
   ],
+  "groups" : {
+    "disabled": "23429545-36e9-446e-8927-211e2929b6a4"
+  },
   "inbound": [
     {
       "name":  "syk-dig-backend",
@@ -156,6 +159,7 @@
   ],
   "nais": {
     "cluster": {
+      "type": "prod",
       "cache": "cache",
       "endpoint": "76685598-1048-4f56-b34a-9769ef747a92"
     }

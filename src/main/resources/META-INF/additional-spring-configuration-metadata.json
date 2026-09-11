@@ -9,5 +9,10 @@
       "name": "no.nav.security.jwt.issuer.azuread.discoveryurl",
       "type": "java.lang.String",
       "description": "Description for no.nav.security.jwt.issuer.azuread.discoveryurl."
+    },
+    {
+      "name": "spring.security.oauth2.client.provider.azuread.issuer-uri",
+      "type": "java.lang.String",
+      "description": "Description for spring.security.oauth2.client.provider.azuread.issuer-uri."
     }
   ] }

@@ -70,6 +70,8 @@ spec:
             - application: alloy
               namespace: nais-system
   env:
+    - name: GROUPS_DISABLED
+      value: {{groups.disabled}}
     - name: NAIS_CLUSTER_TYPE
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE

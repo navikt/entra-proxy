@@ -29,7 +29,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     fun tema(ansattId: AnsattId, oid: UUID) =
         tidOgLog(log, "tema for $ansattId") {
             medNotFoundFallback(oid, {
-                adapter.tema("$it")
+                adapter.temaerForAnsatt("$it")
             }) {
                 refreshOid(ansattId)
             }
@@ -72,7 +72,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         tidOgLog(log) {
-            medNotFoundFallback(oid, { adapter.ansatteGrupper(it.toString()) }) { refreshOid(navIdent) }
+            medNotFoundFallback(oid, { adapter.grupperForAnsatt(it.toString()) }) { refreshOid(navIdent) }
         }
 
     private inline fun <T> medNotFoundFallback(arg: UUID, main: (UUID) -> T, nyOid: (UUID) -> UUID)
@@ -84,9 +84,9 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         }
     }
 
-    private fun enheter(oid: UUID) =
+    private fun enheter(ansattOid: UUID) =
         buildSet {
-            adapter.enheter("$oid").forEach {
+            adapter.enheterForAnsatt("$ansattOid").forEach {
                 add(Enhet(it, norg.navnFor(it)))
             }
         }

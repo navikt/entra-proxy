@@ -11,11 +11,11 @@ class EntraOidTjeneste(private val adapter: EntraRestClientAdapter)  {
 
     @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
      fun ansattOid(ansattId: AnsattId) =
-         adapter.ansattOid(ansattId.verdi)
+         adapter.oidForAnsatt(ansattId.verdi)
 
     @WithSpan
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
-        adapter.gruppeOid(gruppeNavn)
+        adapter.oidForGruppenavn(gruppeNavn)
 }
 

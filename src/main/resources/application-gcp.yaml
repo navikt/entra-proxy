@@ -23,6 +23,15 @@ management:
     web:
       base-path: /monitoring
 spring:
+  http:
+    serviceclient:
+      norg:
+        base-url: "http://norg2.org"
+      graph:
+        base-url: "https://graph.microsoft.com/v1.0"
+    clients:
+      connect-timeout: 3s
+      read-timeout: 5s
   threads:
     virtual:
       enabled: true
@@ -51,29 +60,35 @@ spring:
     default-property-inclusion: non_null
     mapper:
       accept-case-insensitive-properties: true
+  security:
+    oauth2:
+      client:
+        registration:
+          graph:
+            provider: azuread
+            client-id: ${azure.app.client.id}
+            client-secret: ${azure.app.client.secret}
+            authorization-grant-type: client_credentials
+            scope:
+              - "https://graph.microsoft.com/.default"
+          norg:
+            provider: azuread
+            client-id: ${azure.app.client.id}
+            client-secret: ${azure.app.client.secret}
+            authorization-grant-type: client_credentials
+            scope:
+              - "api://${nais.cluster.type}-gcp.org.norg2/.default"
+
+        provider:
+          azuread:
+            issuer-uri: ${azure.openid.config.issuer}
+
+
 no.nav.security.jwt:
   issuer:
     azuread:
       discovery-url: ${azure.app.well.known.url}
       accepted_audience: ${azure.app.client.id}
-  client:
-    registration:
-      graph:
-        token-endpoint-url: ${azure.openid.config.token.endpoint}
-        grant-type: client_credentials
-        scope: ${graph.scope}
-        authentication:
-          client-id: ${azure.app.client.id}
-          client-jwk: ${azure.app.jwk}
-          client-auth-method: private_key_jwt
-      norg2:
-        token-endpoint-url: ${azure.openid.config.token.endpoint}
-        grant-type: client_credentials
-        scope: ${graph.scope}
-        authentication:
-          client-id: ${azure.app.client.id}
-          client-jwk: ${azure.app.jwk}
-          client-auth-method: private_key_jwt
 springdoc:
   swagger-ui:
     oauth:
@@ -82,7 +97,6 @@ springdoc:
       enabled: true
 
 graph:
-  scope: https://graph.microsoft.com/.default
   varighet: 3h
 
 norg:

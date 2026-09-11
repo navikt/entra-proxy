@@ -3,27 +3,20 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
-import no.nav.sikkerhetstjenesten.entraproxy.felles.LogbookBeanConfiguration.LogbookPrettyPrintingFormatter
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.OSLO
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import org.slf4j.LoggerFactory
 import org.apache.hc.core5.util.TimeValue
+import org.slf4j.LoggerFactory
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.beans.factory.ObjectProvider
-import org.springframework.web.client.support.RestClientAdapter.create
-import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
@@ -32,38 +25,16 @@ import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
-import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
 import org.springframework.http.HttpStatusCode
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
-import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
-import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
-import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
-import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
-import org.springframework.security.web.SecurityFilterChain
-import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
+import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.zalando.logbook.Logbook
-import org.zalando.logbook.attributes.AttributeExtractor
-import org.zalando.logbook.core.Conditions.exclude
-import org.zalando.logbook.core.Conditions.requestTo
-import org.zalando.logbook.core.DefaultHttpLogWriter
-import org.zalando.logbook.core.DefaultSink
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
-import tools.jackson.databind.json.JsonMapper
 import java.util.Date
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
@@ -91,7 +62,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 logbookInterceptor.ifAvailable {
                     interceptor -> it.add(interceptor)
                 }
-                it.add(downstreamHeaderLoggingInterceptor())
                 it.add(tokenInterceptor)
             }
             c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
@@ -111,89 +81,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 }
         }
 
-    @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
-        RestClientHttpServiceGroupConfigurer { groups ->
-            from(manager).configureGroups(groups)
-            groups.forEachClient { group, builder ->
-                builder.requestInterceptors {
-                    it.addFirst(OAuth2DownstreamUriCapturingInterceptor())
-                    if (group.name() == GRAPH) {
-                        it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
-                    }
-                }
 
-            }
-        }
-
-    @Bean
-    fun oauth2AuthorizationFailureHandler(service: OAuth2AuthorizedClientService) =
-        OAuth2LoggingAuthorizationFailureHandler(authorizationFailureHandler(service))
-
-    @Bean
-    fun oauth2AuthorizationSuccessHandler(service: OAuth2AuthorizedClientService) =
-        OAuth2LoggingAuthorizationSuccessHandler(service) { client, principal, _ ->
-            service.saveAuthorizedClient(client, principal)
-        }
-
-    @Bean
-    fun oauth2AuthorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
-        AuthorizedClientServiceOAuth2AuthorizedClientManager(
-            repo, service).apply {
-            setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build())
-            setAuthorizationSuccessHandler(successHandler)
-            setAuthorizationFailureHandler(failureHandler)
-        }
-
-    @Bean
-    fun logbookPrettyPrintingFormatter(mapper: JsonMapper) =
-        LogbookPrettyPrintingFormatter(mapper)
-
-    @Bean
-    fun logbook(formatter: LogbookPrettyPrintingFormatter, jwtClaimsExtractor: AttributeExtractor) =
-        Logbook.builder()
-            //.strategy(LogbookStatusAtLeastExcluding(NOT_FOUND))
-            .condition(
-                exclude(
-                    requestTo("**/internal/**"),
-                    requestTo("**/monitoring/**"),
-                    requestTo("**/actuator/**"),
-                    requestTo("https://graph.microsoft.com/v1.0/organization"),
-                ),
-            )
-            .attributeExtractor(jwtClaimsExtractor)
-            .sink(DefaultSink(formatter, DefaultHttpLogWriter()))
-            .build()
-    /*
-     * NAV token-support (@EnableJwtTokenValidation) validerer innkommende requests via en
-     * HandlerInterceptor. Denne filterkjeden erstatter Spring Boots default-kjede (som ellers
-     * ville krevd Basic/form-login på alt) med en stateless, åpen kjede.
-     */
-    @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
-        http
-            .authorizeHttpRequests {
-                it.anyRequest().permitAll()
-            }
-            .requestCache {
-                it.disable()
-            }
-            .sessionManagement {
-                it.sessionCreationPolicy(STATELESS)
-            }
-            .csrf {
-                it.disable()
-            }
-            .formLogin {
-                it.disable()
-            }
-            .httpBasic {
-                it.disable()
-            }
-            .logout {
-                it.disable()
-            }
-            .build()
 
     @Bean
     fun sanitizingFunction() = SanitizingFunction { data ->
@@ -218,21 +106,13 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
     companion object {
         private val LOG = LoggerFactory.getLogger(FellesBeanConfig::class.java)
-        private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
+        val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
-        fun downstreamHeaderLoggingInterceptor() =
-            ClientHttpRequestInterceptor { request, body, next ->
-                val safeHeaders = HttpHeaders().apply { putAll(request.headers) }
-                if (safeHeaders.getFirst(AUTHORIZATION) != null) {
-                    safeHeaders.set(AUTHORIZATION, "Bearer ******")
-                }
-                LOG.info("Downstream request {} {} headers={}", request.method, request.uri, safeHeaders)
-                next.execute(request, body)
-            }
+
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
 
     }

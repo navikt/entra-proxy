@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles
+package no.nav.sikkerhetstjenesten.entraproxy.security
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions
 import org.slf4j.LoggerFactory

@@ -1,6 +1,7 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles
+package no.nav.sikkerhetstjenesten.entraproxy.felles.notifikasjon
 
 import com.nimbusds.jwt.SignedJWT
+import no.nav.sikkerhetstjenesten.entraproxy.felles.withTimestampsInCurrentTimezone
 import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType
 import org.springframework.stereotype.Component

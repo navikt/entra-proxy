@@ -9,6 +9,8 @@
     </appender>
 
     <springProfile name="dev">
+        <logger name="org.springframework.security.oauth2.client" level="trace"/>
+        <logger name="ono.nav.sikkerhetstjenesten.entraproxy.felles" level="trace"/>
         <logger name="org.zalando.logbook" level="trace"/>
         <logger name="io.lettuce.core.protocol.ReconnectionHandler" level="warn"/>
         <logger name="no.nav.sikkerhetstjenesten" level="trace"/>

@@ -15,6 +15,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.OSLO
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
@@ -114,10 +115,14 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
-            groups.forEachClient { _, builder ->
+            groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
                     it.addFirst(OAuth2DownstreamUriCapturingInterceptor())
+                    if (group.name() == GRAPH) {
+                        it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
+                    }
                 }
+
             }
         }
 
@@ -199,6 +204,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
     companion object {
         private val LOG = LoggerFactory.getLogger(FellesBeanConfig::class.java)
+        private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
@@ -214,13 +220,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 next.execute(request, body)
             }
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
-        fun createProxyFactory(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) = builderFor(create(b.baseUrl(cfg.baseUri)
-            .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
-            .build()))
-            .build()
-
-        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler = DefaultRestErrorHandler()) =
-            createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
 
     }
     class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {

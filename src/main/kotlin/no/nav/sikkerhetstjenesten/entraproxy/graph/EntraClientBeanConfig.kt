@@ -11,15 +11,5 @@ import org.springframework.web.client.RestClient
 class EntraClientBeanConfig {
 
     @Bean
-    fun entraGraphClient(b: RestClient.Builder, cfg: EntraConfig): EntraGraphClient =
-        FellesBeanConfig.createClient(cfg, b.requestInterceptors {
-            it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
-        })
-
-    @Bean
     fun entraHealthIndicator(a: EntraRestClientAdapter) = PingableHealthIndicator(a)
-
-    companion object {
-        private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
-    }
 }

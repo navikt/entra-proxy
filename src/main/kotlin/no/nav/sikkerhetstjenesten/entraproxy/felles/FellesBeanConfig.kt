@@ -172,13 +172,27 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http
-            .authorizeHttpRequests { it.anyRequest().permitAll() }
-            .requestCache { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(STATELESS) }
-            .csrf { it.disable() }
-            .formLogin { it.disable() }
-            .httpBasic { it.disable() }
-            .logout { it.disable() }
+            .authorizeHttpRequests {
+                it.anyRequest().permitAll()
+            }
+            .requestCache {
+                it.disable()
+            }
+            .sessionManagement {
+                it.sessionCreationPolicy(STATELESS)
+            }
+            .csrf {
+                it.disable()
+            }
+            .formLogin {
+                it.disable()
+            }
+            .httpBasic {
+                it.disable()
+            }
+            .logout {
+                it.disable()
+            }
             .build()
 
     @Bean

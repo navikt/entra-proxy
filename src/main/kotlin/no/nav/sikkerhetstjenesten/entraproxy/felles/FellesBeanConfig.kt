@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
+import com.nimbusds.jwt.SignedJWT.parse
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
@@ -12,6 +13,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.OSLO
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
@@ -31,6 +33,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
 import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -45,13 +48,18 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
+import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.stereotype.Component
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.zalando.logbook.HttpRequest
 import org.zalando.logbook.Logbook
 import org.zalando.logbook.attributes.AttributeExtractor
+import org.zalando.logbook.attributes.HttpAttributes
+import org.zalando.logbook.attributes.HttpAttributes.EMPTY
 import org.zalando.logbook.core.Conditions.exclude
 import org.zalando.logbook.core.Conditions.requestTo
 import org.zalando.logbook.core.DefaultHttpLogWriter
@@ -59,6 +67,7 @@ import org.zalando.logbook.core.DefaultSink
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import tools.jackson.databind.json.JsonMapper
+import java.util.Date
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -134,6 +143,25 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
             setAuthorizationFailureHandler(failureHandler)
         }
 
+    @Bean
+    fun logbookPrettyPrintingFormatter(mapper: JsonMapper) =
+        LogbookPrettyPrintingFormatter(mapper)
+
+    @Bean
+    fun logbook(formatter: LogbookPrettyPrintingFormatter, jwtClaimsExtractor: AttributeExtractor) =
+        Logbook.builder()
+            //.strategy(LogbookStatusAtLeastExcluding(NOT_FOUND))
+            .condition(
+                exclude(
+                    requestTo("**/internal/**"),
+                    requestTo("**/monitoring/**"),
+                    requestTo("**/actuator/**"),
+                    requestTo("https://graph.microsoft.com/v1.0/organization"),
+                ),
+            )
+            .attributeExtractor(jwtClaimsExtractor)
+            .sink(DefaultSink(formatter, DefaultHttpLogWriter()))
+            .build()
     /*
      * NAV token-support (@EnableJwtTokenValidation) validerer innkommende requests via en
      * HandlerInterceptor. Denne filterkjeden erstatter Spring Boots default-kjede (som ellers
@@ -223,29 +251,22 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 }
 
-
 @Retention(BINARY)  // = CLASS in bytecode — enough for JaCoCo
 @Target(FUNCTION, CONSTRUCTOR, CLASS)
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
 
-@Bean
-    fun logbookPrettyPrintingFormatter(mapper: JsonMapper) =
-        LogbookPrettyPrintingFormatter(mapper)
 
-    @Bean
-    fun logbook(formatter: LogbookPrettyPrintingFormatter, jwtClaimsExtractor: AttributeExtractor) =
-        Logbook.builder()
-            //.strategy(LogbookStatusAtLeastExcluding(NOT_FOUND))
-            .condition(
-                exclude(
-                    requestTo("**/internal/**"),
-                    requestTo("**/monitoring/**"),
-                    requestTo("**/actuator/**"),
-                    requestTo("https://graph.microsoft.com/v1.0/organization"),
-                ),
-            )
-            .attributeExtractor(jwtClaimsExtractor)
-            .sink(DefaultSink(formatter, DefaultHttpLogWriter()))
-            .build()
+@Component
+class LogbookNimbusJwtClaimsExtractor : AttributeExtractor {
 
+    override fun extract(request: HttpRequest): HttpAttributes {
+        val auth = request.headers.getFirst(AUTHORIZATION) ?: return EMPTY
+        return HttpAttributes(parse(auth.removePrefix(BEARER.value) + " ").jwtClaimsSet.claims.withTimestampsInCurrentTimezone())
+    }
+}
+
+fun Map<String, Any>.withTimestampsInCurrentTimezone() =
+    mapValues {
+            (_, value) -> (value as? Date)?.toInstant()?.atZone(OSLO) ?: value
+    }

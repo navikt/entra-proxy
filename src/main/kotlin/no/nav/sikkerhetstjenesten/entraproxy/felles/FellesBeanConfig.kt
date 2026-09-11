@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
-import com.nimbusds.jwt.SignedJWT.parse
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
@@ -33,7 +32,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
 import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
-import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
@@ -48,18 +46,13 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
-import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER
 import org.springframework.security.web.SecurityFilterChain
-import org.springframework.stereotype.Component
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.zalando.logbook.HttpRequest
 import org.zalando.logbook.Logbook
 import org.zalando.logbook.attributes.AttributeExtractor
-import org.zalando.logbook.attributes.HttpAttributes
-import org.zalando.logbook.attributes.HttpAttributes.EMPTY
 import org.zalando.logbook.core.Conditions.exclude
 import org.zalando.logbook.core.Conditions.requestTo
 import org.zalando.logbook.core.DefaultHttpLogWriter
@@ -256,15 +249,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
 
-
-@Component
-class LogbookNimbusJwtClaimsExtractor : AttributeExtractor {
-
-    override fun extract(request: HttpRequest): HttpAttributes {
-        val auth = request.headers.getFirst(AUTHORIZATION) ?: return EMPTY
-        return HttpAttributes(parse(auth.removePrefix(BEARER.value) + " ").jwtClaimsSet.claims.withTimestampsInCurrentTimezone())
-    }
-}
 
 fun Map<String, Any>.withTimestampsInCurrentTimezone() =
     mapValues {

@@ -1,11 +1,12 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.service.annotation.GetExchange
-import org.springframework.web.service.annotation.HttpExchange
 
-@HttpExchange
+@ClientRegistrationId(GRAPH)
 interface EntraGraphClient {
 
     @GetExchange("/users")

@@ -11,6 +11,8 @@ import kotlin.time.toKotlinDuration
 
 object TimeExtensions {
 
+    val OSLO = ZoneId.of("Europe/Oslo")
+
     fun java.time.Duration.format() = this.toKotlinDuration().format()
 
     fun Duration.format(): String {
@@ -29,7 +31,7 @@ object TimeExtensions {
 
     fun Long.local(fmt: String = "yyyy-MM-dd HH:mm:ss") = LocalDateTime.ofInstant(
         Instant.ofEpochMilli(this),
-        ZoneId.of("Europe/Oslo")
+        OSLO
     )
         .format(DateTimeFormatter.ofPattern(fmt))
 

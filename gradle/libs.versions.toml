@@ -11,6 +11,7 @@ springdoc = "3.1.0"
 tokenSupport = "6.0.11"
 mockk = "1.14.9"
 logstashEncoder = "9.0"
+logbook = "4.1.0"
 springMockk = "5.0.1"
 conditionals = "6.0.7"
 coroutines = "1.10.2"
@@ -23,9 +24,11 @@ opentelemetryInstrumentationAnnotations = { module = "io.opentelemetry.instrumen
 opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0", version.ref = "otelAlpha" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
+logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
-tokenClientSpring = { module = "no.nav.security:token-client-spring", version.ref = "tokenSupport" }
 tokenValidationSpring = { module = "no.nav.security:token-validation-spring", version.ref = "tokenSupport" }
+springSecurityOauth2Client = { module = "org.springframework.security:spring-security-oauth2-client" }
+jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
@@ -62,4 +65,3 @@ springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
 cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
-

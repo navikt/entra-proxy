@@ -1,14 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import io.micrometer.core.instrument.Timer
 import org.springdoc.core.customizers.OpenApiCustomizer
 import io.swagger.v3.oas.models.media.Schema
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
@@ -20,12 +16,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation.Around
-import org.aspectj.lang.annotation.Aspect
+import org.apache.hc.core5.util.TimeValue
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.web.client.support.RestClientAdapter.create
 import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
 import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
@@ -36,11 +33,20 @@ import org.springframework.format.FormatterRegistry
 import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.stereotype.Component
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
+import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
+import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
@@ -50,31 +56,83 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
-class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
+class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor,
+                       private val handler: ErrorHandler,
+                       private val logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>) : WebMvcConfigurer {
 
 
     @Bean
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
-        it.addMixIn(OAuth2AccessTokenResponse::class.java, IgnoreUnknownMixin::class.java)
         it.enable(INCLUDE_SOURCE_IN_LOCATION)
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface IgnoreUnknownMixin
-
 
     @Bean
-    fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
+    fun restClientCustomizer(tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
         RestClientCustomizer { c ->
-            c.requestFactory(HttpComponentsClientHttpRequestFactory().apply {
-                setConnectionRequestTimeout(2000)
-                setReadTimeout(2000)
-            })
             c.requestInterceptors {
-                it.addFirst(interceptor)
+                logbookInterceptor.ifAvailable {
+                    interceptor -> it.add(interceptor)
+                }
                 it.add(tokenInterceptor)
             }
+            c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
         }
+
+    @Bean
+    fun httpComponentsBuilderCustomizer():
+            ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder> =
+        ClientHttpRequestFactoryBuilderCustomizer { builder ->
+            builder
+                .withConnectionManagerCustomizer { cm ->
+                    cm.setMaxConnTotal(300)
+                    cm.setMaxConnPerRoute(50)
+                }
+                .withConnectionConfigCustomizer { cfg ->
+                    cfg.setValidateAfterInactivity(TimeValue.ofSeconds(2))
+                }
+        }
+
+    @Bean
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
+        RestClientHttpServiceGroupConfigurer { groups ->
+            from(manager).configureGroups(groups)
+            groups.forEachClient { _, builder ->
+                builder.requestInterceptors {
+                    it.addFirst(OAuth2DownstreamUriCapturingInterceptor())
+                }
+            }
+        }
+
+    @Bean
+    fun oauth2AuthorizationFailureHandler(service: OAuth2AuthorizedClientService) =
+        OAuth2LoggingAuthorizationFailureHandler(authorizationFailureHandler(service))
+
+    @Bean
+    fun oauth2AuthorizationSuccessHandler(service: OAuth2AuthorizedClientService) =
+        OAuth2LoggingAuthorizationSuccessHandler(service) { client, principal, _ ->
+            service.saveAuthorizedClient(client, principal)
+        }
+
+    @Bean
+    fun oauth2AuthorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
+        AuthorizedClientServiceOAuth2AuthorizedClientManager(
+            repo, service).apply {
+            setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build())
+            setAuthorizationSuccessHandler(successHandler)
+            setAuthorizationFailureHandler(failureHandler)
+        }
+
+    /*
+    private fun HttpSecurity.stateless() =
+        requestCache { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(STATELESS) }
+            .csrf { it.disable() }
+            .formLogin { it.disable() }
+            .httpBasic { it.disable() }
+            .logout { it.disable() }
+
+     */
 
     @Bean
     fun sanitizingFunction() = SanitizingFunction { data ->
@@ -93,17 +151,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         configurer.defaultContentType(APPLICATION_JSON)
     }
 
-    @Aspect
-    @Component
-    class TimingAspect(private val meterRegistry: MeterRegistry) {
-
-        @Around("execution(* no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor.intercept(..))")
-        fun timeMethod(joinPoint: ProceedingJoinPoint) = Timer.builder("mslogin")
-            .description("Timer med histogram for mslogin")
-            .tags("method", joinPoint.signature.name)
-            .publishPercentileHistogram()
-            .register(meterRegistry).recordCallable { joinPoint.proceed() }
-    }
 
     override fun addFormatters(registry: FormatterRegistry) {
         registry.addConverter(StringToEnhetnummerConverter())
@@ -164,4 +211,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 @Target(FUNCTION, CONSTRUCTOR, CLASS)
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
+
+
 

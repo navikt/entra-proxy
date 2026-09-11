@@ -1,3 +1,4 @@
+
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -74,17 +75,19 @@ dependencies {
     // Kotlin
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
+    implementation(libs.jackson.module.kotlin)
 
     // Observability and logging
     implementation(libs.opentelemetryInstrumentationAnnotations)
     implementation(libs.opentelemetryLogbackMdc)
     implementation(libs.micrometerRegistryPrometheus)
     implementation(libs.logstashLogbackEncoder)
+    implementation(libs.logbook)
 
     // NAV and security
     implementation(libs.bootConditionals)
-    implementation(libs.tokenClientSpring)
     implementation(libs.tokenValidationSpring)
+    implementation(libs.springSecurityOauth2Client)
 
     // HTTP and API documentation
     implementation(libs.httpclient5)

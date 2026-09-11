@@ -3,12 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.norg
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.createClient
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClient.Builder
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 
 
 @Configuration

@@ -10,7 +10,7 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - https://graph.microsoft.com/.default
-          norg2:
+          norg:
             provider: azuread
             client-id: mock-client-id
             client-secret: mock-client-secret

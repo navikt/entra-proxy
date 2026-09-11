@@ -35,7 +35,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
-import java.util.Date
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
 import kotlin.annotation.AnnotationTarget.CLASS
@@ -45,8 +44,7 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 @Configuration
 class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor,
-                       private val handler: ErrorHandler,
-                       private val logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>) : WebMvcConfigurer {
+                       private val handler: ErrorHandler) : WebMvcConfigurer {
 
 
     @Bean
@@ -56,12 +54,13 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
 
     @Bean
-    fun restClientCustomizer(tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
+    fun restClientCustomizer(tokenInterceptor: TokenTypeTellendeRequestInterceptor, logbookInterceptor: /*ObjectProvider<*/LogbookClientHttpRequestInterceptor/*>*/) =
         RestClientCustomizer { c ->
             c.requestInterceptors {
-                logbookInterceptor.ifAvailable {
+               /* logbookInterceptor.ifAvailable {
                     interceptor -> it.add(interceptor)
-                }
+                }*/
+                it.addFirst(logbookInterceptor)
                 it.add(tokenInterceptor)
             }
             c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)

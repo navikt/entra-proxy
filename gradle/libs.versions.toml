@@ -27,7 +27,7 @@ logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encod
 logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
 tokenValidationSpring = { module = "no.nav.security:token-validation-spring", version.ref = "tokenSupport" }
-springSecurityOauth2Client = { module = "org.springframework.security:spring-security-oauth2-client" }
+springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }

@@ -87,7 +87,7 @@ dependencies {
     // NAV and security
     implementation(libs.bootConditionals)
     implementation(libs.tokenValidationSpring)
-    implementation(libs.springSecurityOauth2Client)
+    implementation(libs.springBootStarterOauth2Client)
 
     // HTTP and API documentation
     implementation(libs.httpclient5)

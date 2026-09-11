@@ -19,15 +19,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RecoverableRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_BASE_URI
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.ENHET_PATH
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjenesteTest.NorgTestConfig
 import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.resilience.annotation.EnableResilientMethods
@@ -44,12 +46,13 @@ class NorgTjenesteTest(@param:Autowired private val tjeneste: NorgTjeneste,
                        @param:Autowired private val server: MockRestServiceServer) : BehaviorSpec() {
 
     @Configuration
-    @org.springframework.cache.annotation.EnableCaching
+    @EnableCaching
     class NorgTestConfig {
         @Bean fun cacheManager() =
             ConcurrentMapCacheManager(NORG)
 
         @Bean
+        @Primary
         fun cacheOperations(cacheManager: CacheManager)  =
             ConcurrentMapCacheOperations(cacheManager)
     }

@@ -61,6 +61,9 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
+    maven {
+        url = uri("https://repo1.maven.org/maven2")
+    }
 }
 
 
@@ -86,8 +89,8 @@ dependencies {
 
     // NAV and security
     implementation(libs.bootConditionals)
-    implementation(libs.tokenValidationSpring)
     implementation(libs.springBootStarterOauth2Client)
+    implementation(libs.springBootStarterOauth2ResourceServer)
 
     // HTTP and API documentation
     implementation(libs.httpclient5)
@@ -108,6 +111,7 @@ dependencies {
     // Testing
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
+    testImplementation(libs.caffeine)
     testImplementation(libs.junitJupiter)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)

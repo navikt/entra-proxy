@@ -1,7 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamUriCapturingInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -15,37 +16,45 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
-import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
+
 
 @Configuration
 class SecurityBeanConfig {
 
+    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**")
+
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
-        http
-            .authorizeHttpRequests {
-                it.anyRequest().permitAll()
+    fun securityFilterChain(http: HttpSecurity,
+                            converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
+                            deniedHandler: AccessDeniedHandler,
+                            entryPoint: AuthenticationEntryPoint) =
+        http.authorizeHttpRequests { requests ->
+            requests.requestMatchers( *UNPROTECTED_ENDPOINTS).permitAll()
+            requests.anyRequest().authenticated()
+        }
+            .exceptionHandling {
+                it.accessDeniedHandler(deniedHandler)
             }
-            .requestCache {
-                it.disable()
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt { jwt ->
+                    jwt.jwtAuthenticationConverter(converter)
+                }
+                oauth2.authenticationEntryPoint(entryPoint)
             }
-            .sessionManagement {
-                it.sessionCreationPolicy(STATELESS)
-            }
-            .csrf {
-                it.disable()
-            }
-            .formLogin {
-                it.disable()
-            }
-            .httpBasic {
-                it.disable()
-            }
-            .logout {
-                it.disable()
-            }
+            .stateless()
             .build()
+
+    private fun HttpSecurity.stateless() =
+        requestCache { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(STATELESS) }
+            .csrf { it.disable() }
+            .formLogin { it.disable() }
+            .httpBasic { it.disable() }
+            .logout { it.disable() }
+
 
     @Bean
     fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
@@ -58,7 +67,6 @@ class SecurityBeanConfig {
                         it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
                     }
                 }
-
             }
         }
 
@@ -82,4 +90,11 @@ class SecurityBeanConfig {
         }
 }
 
+
+const val ROLES = "roles"
+const val CLIENT_CREDENTIALS = "access_as_application"
 private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
+
+
+
+

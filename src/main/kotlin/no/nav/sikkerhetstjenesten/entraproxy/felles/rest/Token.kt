@@ -2,21 +2,22 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 
 
 import no.nav.boot.conditionals.Cluster.LOCAL
-import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class Token(private val contextHolder: TokenValidationContextHolder) {
+class Token {
 
 
     val system get() = stringClaim(AZP_NAME)  ?: UTILGJENGELIG
     val oid get() = stringClaim(OID)?.let { runCatching { UUID.fromString(it) }.getOrNull() }
     val ansattId get() = stringClaim(NAVIDENT)?.let { AnsattId(it) }
-    private fun stringClaim(name: String) = claimSet()?.getStringClaim(name)
-    private fun claimSet() = runCatching { contextHolder.getTokenValidationContext().getClaims(AAD_ISSUER) }.getOrNull()
+    private fun stringClaim(name: String) = claimSet()?.getClaimAsString(name)
+    private fun claimSet() = SecurityContextHolder.getContext().authentication?.principal as? Jwt
     val clusterAndSystem get() = system.split(":").let { parts ->
         if (parts.size == 3) "${parts[2]}:${parts[0]}" else system
     }
@@ -37,13 +38,13 @@ class Token(private val contextHolder: TokenValidationContextHolder) {
     val erCC get() = stringClaim(IDTYP) == APP
     val erObo get()  = !erCC && oid != null
     companion object {
-        private const val FLOW = "flow"
-        const val AAD_ISSUER: String = "azuread"
         const val APP = "app"
         const val OID = "oid"
         const val IDTYP = "idtyp"
         const val AZP_NAME = "azp_name"
         const val NAVIDENT = "NAVident"
+        const val ROLES = "roles"
+        const val CLIENT_CREDENTIALS = "client_credentials"
     }
 }
 

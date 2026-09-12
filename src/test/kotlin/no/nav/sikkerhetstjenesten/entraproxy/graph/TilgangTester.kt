@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import java.net.URI
@@ -30,17 +31,12 @@ class TilgangTester : BehaviorSpec({
     val cache: ValkeyCacheOperations = mockk(relaxed = true)
     val entra = EntraTjeneste(entraAdapter, norg, oid, cache)
     val controller = EntraController(entra, oid, token)
-    val mockMvc: MockMvc = MockMvcBuilders.standaloneSetup(controller).build()
+    val mockMvc: MockMvc = standaloneSetup(controller).build()
     val jsonMapper: JsonMapper = JsonMapper.builder().findAndAddModules().build()
 
     beforeSpec {
         every { token.systemAndNs } returns "test:ns"
         every { token.systemNavn } returns "Test"
-        every { token.erCC } returns true
-        every { token.assert<Any>(any(), any()) } answers {
-            @Suppress("UNCHECKED_CAST")
-            (secondArg<() -> Set<Any>>())()
-        }
     }
 
     Given("tema-endepunkt") {

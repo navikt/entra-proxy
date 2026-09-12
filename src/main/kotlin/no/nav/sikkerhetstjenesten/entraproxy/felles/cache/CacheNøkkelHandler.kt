@@ -9,14 +9,14 @@ class CacheNøkkelHandler(val configs: Map<String, RedisCacheConfiguration?>,val
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun tilNøkkel(cache:  CachableConfig, nøkkel: String): String {
+    fun tilNøkkel(cache:  CacheNøkkelConfig, nøkkel: String): String {
         val prefix = prefixFor(cache)
         val extra = cache.extraPrefix?.let { "$it:" } ?: ""
         return "$prefix$extra$nøkkel"
     }
 
 
-    private fun prefixFor(cache: CachableConfig): String =
+    private fun prefixFor(cache: CacheNøkkelConfig): String =
         configs[cache.name]?.getKeyPrefixFor(cache.name)
             ?: error("Ingen cache med navn ${cache.name}")
 

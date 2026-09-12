@@ -5,53 +5,57 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType.HTTP
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.security.token.support.spring.ProtectedRestController
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AAD_ISSUER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireCCF
+import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireOBO
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
-@ProtectedRestController(value = ["/api/v1"], issuer = AAD_ISSUER, claimMap = [])
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
+@RestController
+@RequestMapping("/api/v1")
 class EntraController(private val entraTjeneste: EntraTjeneste,
                       private val oidTjeneste: EntraOidTjeneste,
                       private val token: Token) {
 
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
+    @OAuth2RequireCCF
     fun enheterCC(@PathVariable navIdent: AnsattId) =
-        token.assert({ erCC }, {
-            oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.enheter(navIdent, it) } ?: emptySet()
-        })
+        oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.enheter(navIdent, it) } ?: emptySet()
 
     @GetMapping("enhet")
+    @OAuth2RequireOBO
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
     fun enheterOBO() =
-        token.assert({ erObo }, {
-            with(token.oboFields) { entraTjeneste.enheter(first, second) }
-        })
+            with(token.oboFields) {
+                entraTjeneste.enheter(first, second)
+            }
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
+    @OAuth2RequireCCF
     fun temaCC(@PathVariable navIdent: AnsattId) =
-        token.assert({ erCC }, {
             oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.tema(navIdent, it) } ?: emptySet()
-        })
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
+    @OAuth2RequireOBO
     fun temaOBO() =
-        token.assert({ erObo }, {
-            with(token.oboFields) { entraTjeneste.tema(first, second) }
-        })
+        with(token.oboFields) {
+            entraTjeneste.tema(first, second)
+        }
+
 
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
@@ -69,11 +73,12 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
         entraTjeneste.utvidetAnsatt(navIdent)
 
     @GetMapping("ansatt/tident/{tIdent}")
-    @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234")
+    @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234)")
     fun utvidetAnsatt(@PathVariable tIdent: TIdent) =
         entraTjeneste.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
+    @OAuth2RequireCCF
     @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
@@ -86,7 +91,6 @@ class EntraController(private val entraTjeneste: EntraTjeneste,
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmer( it)
         }
-
 
     private fun medlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {

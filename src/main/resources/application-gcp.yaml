@@ -62,6 +62,11 @@ spring:
       accept-case-insensitive-properties: true
   security:
     oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${azure.openid.config.issuer}
+          audiences:
+            - ${azure.app.client.id}
       client:
         registration:
           graph:
@@ -82,7 +87,6 @@ spring:
         provider:
           azuread:
             issuer-uri: ${azure.openid.config.issuer}
-
 
 no.nav.security.jwt:
   issuer:

@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CachableRestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableRestConfig
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.Duration

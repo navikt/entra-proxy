@@ -1,9 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions
-import org.slf4j.LoggerFactory
+import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.OSLO
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
@@ -12,17 +12,12 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 
 class OAuth2LoggingAuthorizationSuccessHandler(
     private val service: OAuth2AuthorizedClientService,
-    private val delegate: OAuth2AuthorizationSuccessHandler
-) : OAuth2AuthorizationSuccessHandler {
+    private val delegate: OAuth2AuthorizationSuccessHandler) : OAuth2AuthorizationSuccessHandler {
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = getLogger(javaClass)
 
-    override fun onAuthorizationSuccess(
-        authorizedClient: OAuth2AuthorizedClient,
-        principal: Authentication,
-        attributes: Map<String, Any>
-    ) {
-        val uri = OAuth2DownstreamURIContext.currentUri() ?: DomainExtensions.UTILGJENGELIG
+    override fun onAuthorizationSuccess(authorizedClient: OAuth2AuthorizedClient, principal: Authentication, attributes: Map<String, Any>) {
+        val uri = currentUri() ?: UTILGJENGELIG
         val registrationId = authorizedClient.clientRegistration.registrationId
         val previousClient = service.loadAuthorizedClient<OAuth2AuthorizedClient>(registrationId, principal.name)
         val previousExpiry = previousClient?.expiry()
@@ -37,5 +32,5 @@ class OAuth2LoggingAuthorizationSuccessHandler(
     }
 
     private fun OAuth2AuthorizedClient.expiry() =
-        accessToken.expiresAt?.atZone(TimeExtensions.OSLO)
+        accessToken.expiresAt?.atZone(OSLO)
 }

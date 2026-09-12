@@ -8,7 +8,6 @@ dokka = "2.2.0"
 cyclonedx = "3.4.1"
 kotest = "6.2.3"
 springdoc = "3.1.0"
-tokenSupport = "6.0.11"
 mockk = "1.14.9"
 logstashEncoder = "9.0"
 logbook = "4.1.0"
@@ -26,14 +25,15 @@ micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-pro
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
 logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
-tokenValidationSpring = { module = "no.nav.security:token-validation-spring", version.ref = "tokenSupport" }
 springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
+springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }

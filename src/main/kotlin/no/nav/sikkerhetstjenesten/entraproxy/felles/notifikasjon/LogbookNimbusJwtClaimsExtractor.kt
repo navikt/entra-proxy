@@ -20,8 +20,8 @@ class LogbookNimbusJwtClaimsExtractor : AttributeExtractor {
         val auth = request.headers.getFirst(AUTHORIZATION) ?: return EMPTY
         return HttpAttributes(SignedJWT.parse(auth.removePrefix(BEARER.value) + " ").jwtClaimsSet.claims.withTimestampsInCurrentTimezone())
     }
+    private fun Map<String, Any>.withTimestampsInCurrentTimezone() =
+        mapValues {
+                (_, value) -> (value as? Date)?.toInstant()?.atZone(OSLO) ?: value
+        }
 }
-private fun Map<String, Any>.withTimestampsInCurrentTimezone() =
-    mapValues {
-            (_, value) -> (value as? Date)?.toInstant()?.atZone(OSLO) ?: value
-    }

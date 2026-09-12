@@ -47,10 +47,11 @@ interface EntraGraphClient {
         @RequestParam($$"$count") count: String = "true"
     ): EntraSaksbehandlerRespons
 
-    @GetExchange("/organization")
+    @GetExchange(ENTRA_PING_PATH)
     fun ping(): Any?
 
     companion object {
+        const val ENTRA_PING_PATH = "/organization"
         const val GRAPH = "graph"
     }
 }

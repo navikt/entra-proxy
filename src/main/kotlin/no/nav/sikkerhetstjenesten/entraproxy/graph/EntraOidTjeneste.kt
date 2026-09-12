@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidCachableRestConfig.Companion.ENTRA_OID
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENTRA_OID
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 

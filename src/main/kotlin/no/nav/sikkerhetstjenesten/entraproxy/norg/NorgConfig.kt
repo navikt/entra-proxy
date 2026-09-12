@@ -10,7 +10,7 @@ import java.net.URI
 import java.time.Duration.ofHours
 
 @Component
-class NorgConfig(@Value("\${spring.http.serviceclient.norg.base-url}") baseUrl: URI) : CachableRestConfig, AbstractRestConfig(baseUrl, PING_PATH, NORG) {
+class NorgConfig(@Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl: URI) : CachableRestConfig, AbstractRestConfig(baseUrl, PING_PATH, NORG) {
     override val varighet = ofHours(3)
     override val navn = name
     override val caches = setOf(CacheNøkkelConfig(NORG))

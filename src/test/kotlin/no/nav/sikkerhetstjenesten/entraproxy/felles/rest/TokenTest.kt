@@ -3,11 +3,14 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.APP
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.AZP_NAME
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.IDTYP
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.NAVIDENT
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.OID
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.APP
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.AZP_NAME
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.IDTYP
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.OID
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.CCF
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.OBO
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenType.UNAUTHENTICATED
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import org.springframework.security.authentication.TestingAuthenticationToken
@@ -26,7 +29,7 @@ private fun setClaims(vararg claims: Pair<String, String>) {
 
 class TokenTest : BehaviorSpec({
 
-    val token = Token()
+    val token = AuthContext()
 
     val oid = UUID.randomUUID()
 
@@ -219,19 +222,19 @@ class TokenTest : BehaviorSpec({
         When("token er OBO") {
             Then("returnerer OBO") {
                 setClaims(OID to oid.toString())
-                TokenType.from(token) shouldBe TokenType.OBO
+                TokenType.from(token) shouldBe OBO
             }
         }
         When("token er CC") {
             Then("returnerer CCF") {
                 setClaims(IDTYP to APP)
-                TokenType.from(token) shouldBe TokenType.CCF
+                TokenType.from(token) shouldBe CCF
             }
         }
         When("ingen claims finnes") {
             Then("returnerer UNAUTHENTICATED") {
                 SecurityContextHolder.clearContext()
-                TokenType.from(token) shouldBe TokenType.UNAUTHENTICATED
+                TokenType.from(token) shouldBe UNAUTHENTICATED
             }
         }
     }

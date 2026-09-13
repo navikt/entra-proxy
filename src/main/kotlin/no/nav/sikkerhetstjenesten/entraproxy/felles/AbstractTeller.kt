@@ -3,11 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 
 abstract class AbstractTeller(
     private val registry: MeterRegistry,
-    private val token: Token,
+    private val token: AuthContext,
     private val navn: String,
     private val beskrivelse: String) {
 

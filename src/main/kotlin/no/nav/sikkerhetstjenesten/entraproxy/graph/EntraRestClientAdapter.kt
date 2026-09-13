@@ -2,8 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Pingable
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
 import org.springframework.web.service.registry.ImportHttpServices
+import java.net.URI
 
 
 private const val MINIMUM_FELTER = "id,displayName"
@@ -21,21 +21,16 @@ private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$NAVIDENT,givenName
 
 @Component
 @ImportHttpServices(types = [EntraGraphClient::class], group = GRAPH)
-class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: EntraConfig) : Pingable {
+class EntraRestClientAdapter(private val client: EntraGraphClient) {
 
     val log = getLogger(javaClass)
 
-    override fun ping() = client.ping()
-    override val name = cf.name
-    override val pingEndpoint = "${cf.pingEndpoint}"
-
-    val baseURI = cf.baseUri
 
     fun oidForAnsatt(navIdent: String) =
         with(client.users("id", filter = "$NAVIDENT eq '$navIdent'").oids) {
             log.info("Fant $size oids ($this) i Entra for $navIdent")
             when (size) {
-                0 -> throw NotFoundRestException(cf.userURI(navIdent), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
+                0 -> throw NotFoundRestException(URI.create("http://www.vg.no"), msg = "Fant ingen oid for navident $navIdent, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id
                 else -> throw EntraOidException(navIdent, "Forventet nøyaktig én oid for navident $navIdent, fant $size (${joinToString(", ") { it.id.toString() }})")
             }
@@ -76,7 +71,7 @@ class EntraRestClientAdapter(private val client: EntraGraphClient, val cf: Entra
             "jobTitle eq '$ansattId'"
         ).ansatte.firstOrNull()
 
-    override fun toString() = "${javaClass.simpleName} [client=$client, config=$cf]"
+    override fun toString() = "${javaClass.simpleName} [client=$client]"
 }
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {

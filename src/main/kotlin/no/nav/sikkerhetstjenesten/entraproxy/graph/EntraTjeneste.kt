@@ -2,17 +2,18 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.net.URI
 import java.util.*
 
 @RetryingWhenRecoverable
@@ -104,7 +105,7 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
         return oid.ansattOid(navIdent).also {
             log.info("Hentet  ny oid $it for $navIdent")
         }
-            ?: throw NotFoundRestException(adapter.baseURI, "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
+            ?: throw NotFoundRestException(URI.create("http://www.vg.no"), "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
     }
 
     override fun toString() =

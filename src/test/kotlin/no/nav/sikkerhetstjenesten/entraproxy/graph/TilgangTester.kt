@@ -7,7 +7,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
@@ -15,7 +15,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
@@ -24,7 +23,7 @@ import java.util.UUID.randomUUID
 
 class TilgangTester : BehaviorSpec({
 
-    val token: Token = mockk(relaxed = true)
+    val token: AuthContext = mockk(relaxed = true)
     val entraAdapter: EntraRestClientAdapter = mockk()
     val oid: EntraOidTjeneste = mockk()
     val norg: NorgTjeneste = mockk(relaxed = true)

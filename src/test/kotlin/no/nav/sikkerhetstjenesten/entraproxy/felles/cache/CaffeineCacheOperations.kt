@@ -9,7 +9,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     private val log = getLogger(javaClass)
 
-    override fun delete(cache: CacheConfig, id: String) : Boolean {
+    override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
         val key = caffeineNøkkel(cache, id)
         val springCache = cacheManager.getCache(cache.name) ?: return false
         val existed = springCache.get(key) != null
@@ -18,15 +18,15 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> getOne(cache: CacheConfig, id: String, clazz: KClass<T>): T? =
+    override fun <T : Any> getOne(cache: CacheNøkkelConfig, id: String, clazz: KClass<T>): T? =
         cacheManager.getCache(cache.name)?.get(caffeineNøkkel(cache, id))?.get() as T?
 
-    override fun putOne(cache: CacheConfig, id: String, value: Any, ttl: Duration?) {
+    override fun putOne(cache: CacheNøkkelConfig, id: String, value: Any, ttl: Duration?) {
         cacheManager.getCache(cache.name)?.put(caffeineNøkkel(cache, id), value)
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> getMany(cache: CacheConfig, ids: Set<String>, clazz: KClass<T>): Map<String, T?> {
+    override fun <T : Any> getMany(cache: CacheNøkkelConfig, ids: Set<String>, clazz: KClass<T>): Map<String, T?> {
         if (ids.isEmpty()) return emptyMap()
         val springCache = cacheManager.getCache(cache.name) ?: return emptyMap()
         return ids.associateWith { id ->
@@ -34,18 +34,18 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         }.filterValues { it != null }
     }
 
-    override fun putMany(cache: CacheConfig, innslag: Map<String, Any>, ttl: Duration?) {
+    override fun putMany(cache: CacheNøkkelConfig, innslag: Map<String, Any>, ttl: Duration?) {
         val springCache = cacheManager.getCache(cache.name) ?: return
         log.trace("Caffeine bulk lagrer {} verdier for cache {}", innslag.size, cache.name)
         innslag.forEach { (id, value) -> springCache.put(caffeineNøkkel(cache, id), value) }
     }
 
-    private fun caffeineNøkkel(cache: CacheConfig, id: String): String {
+    private fun caffeineNøkkel(cache: CacheNøkkelConfig, id: String): String {
         val extra = cache.extraPrefix?.let { "$it:" } ?: ""
         return "$extra$id"
     }
 
-    override fun clear(cache: CacheConfig): Long {
+    override fun clear(cache: CacheNøkkelConfig): Long {
         val springCache = cacheManager.getCache(cache.name) ?: return 0L
         val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
         return if (cache.extraPrefix == null) {
@@ -74,7 +74,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         return deleted
     }
 
-    override fun sizes(vararg caches: CacheConfig): Map<String, Long> =
+    override fun sizes(vararg caches: CacheNøkkelConfig): Map<String, Long> =
         caches.associate { cache ->
             val springCache = cacheManager.getCache(cache.name) ?: error("Cache $cache ikke funnet")
             val count = run {

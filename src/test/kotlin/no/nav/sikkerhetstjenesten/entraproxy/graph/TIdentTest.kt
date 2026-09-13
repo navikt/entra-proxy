@@ -18,7 +18,9 @@ class TIdentTest : BehaviorSpec({
                 shouldThrow<IllegalArgumentException> { TIdent("ABC123") }
             }
             Then("for lang kaster IllegalArgumentException") {
-                shouldThrow<IllegalArgumentException> { TIdent("ABC12345") }
+                shouldThrow<IllegalArgumentException> {
+                    TIdent("ABC12345")
+                }
             }
             Then("tom string kaster IllegalArgumentException") {
                 shouldThrow<IllegalArgumentException> { TIdent("") }

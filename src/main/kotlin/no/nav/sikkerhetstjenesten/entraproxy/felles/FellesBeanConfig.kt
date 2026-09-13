@@ -3,20 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import io.swagger.v3.oas.models.media.Schema
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.OSLO
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.apache.hc.core5.util.TimeValue
-import org.slf4j.LoggerFactory
-import org.springdoc.core.customizers.OpenApiCustomizer
-import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
@@ -88,7 +79,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 
     @Bean
-    fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: Token) =
+    fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: AuthContext) =
         TimedAspect(meterRegistry, Function { pjp -> Tags.of("cluster", token.cluster, "method", pjp.signature.name, "client", token.systemNavn) })
 
 

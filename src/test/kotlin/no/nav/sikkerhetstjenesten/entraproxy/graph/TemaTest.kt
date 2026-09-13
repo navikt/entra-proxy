@@ -10,26 +10,40 @@ class TemaTest : BehaviorSpec({
     Given("Tema konstruksjon") {
         When("verdi har 3 bokstaver uten prefix") {
             val t = Tema("AAP")
-            Then("verdi er uendret") { t.verdi shouldBe "AAP" }
-            Then("gruppeNavn har prefix") { t.gruppeNavn shouldBe "${TEMA_PREFIX}AAP" }
+            Then("verdi er uendret") {
+                t.verdi shouldBe "AAP"
+            }
+            Then("gruppeNavn har prefix") {
+                t.gruppeNavn shouldBe "${TEMA_PREFIX}AAP"
+            }
         }
         When("verdi har prefix") {
             val t = Tema("${TEMA_PREFIX}AAP")
-            Then("verdi har prefix fjernet") { t.verdi shouldBe "AAP" }
-            Then("gruppeNavn har prefix") { t.gruppeNavn shouldBe "${TEMA_PREFIX}AAP" }
+            Then("verdi har prefix fjernet") {
+                t.verdi shouldBe "AAP"
+            }
+            Then("gruppeNavn har prefix") {
+                t.gruppeNavn shouldBe "${TEMA_PREFIX}AAP"
+            }
         }
         When("verdi etter prefix-fjerning ikke er 3 bokstaver") {
             Then("2 bokstaver kaster IllegalArgumentException") {
-                shouldThrow<IllegalArgumentException> { Tema("AA") }
+                shouldThrow<IllegalArgumentException> {
+                    Tema("AA")
+                }
             }
             Then("4 bokstaver kaster IllegalArgumentException") {
-                shouldThrow<IllegalArgumentException> { Tema("AAPA") }
+                shouldThrow<IllegalArgumentException> {
+                    Tema("AAPA")
+                }
             }
             Then("sifre kaster IllegalArgumentException") {
-                shouldThrow<IllegalArgumentException> { Tema("123") }
+                shouldThrow<IllegalArgumentException> {
+                    Tema("123") }
             }
             Then("blandet kaster IllegalArgumentException") {
-                shouldThrow<IllegalArgumentException> { Tema("A1P") }
+                shouldThrow<IllegalArgumentException> { Tema("A1P")
+                }
             }
         }
     }

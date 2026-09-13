@@ -11,5 +11,6 @@ import org.springframework.web.client.RestClient
 class EntraClientBeanConfig {
 
     @Bean
-    fun entraHealthIndicator(a: EntraRestClientAdapter) = PingableHealthIndicator(a)
+    fun entraProxyHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =
+        PingableHealthIndicator(cfg, client::ping)
 }

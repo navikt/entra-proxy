@@ -41,7 +41,7 @@ spring:
     redis:
       host: ${valkey.host}
       port: ${valkey.port}
-      connect-timeout: 10s
+      connect-timeout: 20s
       timeout: 5s
       username: ${valkey.username}
       password: ${valkey.password}

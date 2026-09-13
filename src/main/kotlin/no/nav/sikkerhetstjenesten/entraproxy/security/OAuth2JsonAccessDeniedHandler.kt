@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.security
 import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -15,7 +15,7 @@ import tools.jackson.databind.json.JsonMapper
 import java.net.URI
 
 @Component
-class OAuth2JsonAccessDeniedHandler(private val mapper: JsonMapper, private val authContext: Token) :
+class OAuth2JsonAccessDeniedHandler(private val mapper: JsonMapper, private val authContext: AuthContext) :
     AccessDeniedHandler {
 
     val TYPE_URI = URI.create("https://confluence.adeo.no/display/TM/Tilgangsmaskin+API+og+regelsett")

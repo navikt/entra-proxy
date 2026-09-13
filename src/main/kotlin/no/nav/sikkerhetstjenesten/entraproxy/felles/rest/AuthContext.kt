@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 
 
-import no.nav.boot.conditionals.Cluster.LOCAL
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import org.springframework.security.core.context.SecurityContextHolder
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class Token {
+class AuthContext {
 
 
     val system get() = stringClaim(AZP_NAME)  ?: UTILGJENGELIG
@@ -22,7 +21,7 @@ class Token {
         if (parts.size == 3) "${parts[2]}:${parts[0]}" else system
     }
 
-    fun <T> assert(predikat: Token.() -> Boolean, block: () -> Set<T>): Set<T> {
+    fun <T> assert(predikat: AuthContext.() -> Boolean, block: () -> Set<T>): Set<T> {
         require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen " }
         return block()
     }
@@ -52,7 +51,7 @@ enum class TokenType {
     OBO, CCF, UNAUTHENTICATED;
 
     companion object {
-        fun from(token: Token): TokenType = when {
+        fun from(token: AuthContext): TokenType = when {
             token.erObo -> OBO
             token.erCC -> CCF
             else -> UNAUTHENTICATED

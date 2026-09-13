@@ -16,6 +16,7 @@ conditionals = "6.0.7"
 coroutines = "1.10.2"
 otel = "2.28.0"
 otelAlpha = "2.30.0-alpha"
+testcontainers = "1.21.3"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -35,6 +36,7 @@ springBootStarterActuator = { module = "org.springframework.boot:spring-boot-sta
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
 springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
@@ -44,7 +46,10 @@ springBootStarterWebflux = { module = "org.springframework.boot:spring-boot-star
 springAspects = { module = "org.springframework:spring-aspects" }
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+# Testcontainers support for Redis-based integration tests
 junitJupiter = { module = "org.junit.jupiter:junit-jupiter" }
+testcontainersJunitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "2.2.4" }
 springBootStarterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
 springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 springBootStarterRestclientTest = { module = "org.springframework.boot:spring-boot-starter-restclient-test" }

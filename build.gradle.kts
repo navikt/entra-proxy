@@ -119,6 +119,8 @@ dependencies {
     testImplementation(libs.springBootStarterDataRedisTest)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
+    testImplementation("no.nav.security:mock-oauth2-server:6.0.2")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation(kotlin("test"))
 }
 
@@ -138,6 +140,27 @@ tasks.named<BootJar>("bootJar") {
 tasks.named<Test>("test") {
     jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
     useJUnitPlatform()
+    maxParallelForks = 1
+    description = "Runs the full test suite serially, including Redis/Testcontainers tests"
+}
+
+tasks.register<Test>("unitTest") {
+    group = "verification"
+    description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+    useJUnitPlatform()
+    maxParallelForks = 2
+    include("**/*Test.class")
+    exclude("**/felles/cache/**")
+}
+
+tasks.register<Test>("redisTest") {
+    group = "verification"
+    description = "Runs the Redis/Testcontainers cache tests serially"
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+    useJUnitPlatform()
+    maxParallelForks = 1
+    include("**/felles/cache/**")
 }
 
 java {

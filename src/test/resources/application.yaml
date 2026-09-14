@@ -1,0 +1,28 @@
+spring:
+  data:
+    redis:
+      timeout: 2s
+      connect-timeout: 2s
+  security:
+    oauth2:
+      client:
+        provider:
+          azuread:
+            token-uri: http://mock-oauth2-server/token
+        registration:
+          norg:
+            provider: azuread
+            client-id: test
+            client-secret: test
+            authorization-grant-type: client_credentials
+            scope:
+              - norg-scope
+          entra:
+            provider: azuread
+            client-id: test
+            client-secret: test
+            authorization-grant-type: client_credentials
+            scope:
+              - entra-scope
+
+

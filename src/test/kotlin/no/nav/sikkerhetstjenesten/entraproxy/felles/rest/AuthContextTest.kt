@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.APP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.AZP_NAME
@@ -27,12 +26,10 @@ private fun setClaims(vararg claims: Pair<String, String>) {
 }
 
 
-class TokenTest : BehaviorSpec({
+class AuthContextTest : BehaviorSpec({
 
-    val token = AuthContext()
-
+    val ctx = AuthContext()
     val oid = UUID.randomUUID()
-
     beforeEach {
         SecurityContextHolder.clearContext()
     }
@@ -41,18 +38,18 @@ class TokenTest : BehaviorSpec({
         When("idtyp er 'app'") {
             Then("CC er true") {
                 setClaims(IDTYP to APP)
-                token.erCC.shouldBeTrue()
+                ctx.erCC shouldBe true
             }
         }
         When("idtyp ikke er 'app'") {
             Then("CC er false") {
                 setClaims(IDTYP to "user")
-                token.erCC shouldBe false
+                ctx.erCC shouldBe false
             }
         }
         When("idtyp mangler") {
             Then("CC er false") {
-                token.erCC shouldBe false
+                ctx.erCC shouldBe false
             }
         }
     }
@@ -61,18 +58,18 @@ class TokenTest : BehaviorSpec({
         When("oid finnes og idtyp ikke er 'app'") {
             Then("OBO er true") {
                 setClaims(OID to oid.toString())
-                token.erObo.shouldBeTrue()
+                ctx.erObo shouldBe true
             }
         }
         When("token er CC (idtyp=app)") {
             Then("OBO er false") {
                 setClaims(IDTYP to APP, OID to oid.toString())
-                token.erObo shouldBe false
+                ctx.erObo shouldBe false
             }
         }
         When("oid mangler") {
             Then("OBO er false") {
-                token.erObo shouldBe false
+                ctx.erObo shouldBe false
             }
         }
     }
@@ -81,12 +78,12 @@ class TokenTest : BehaviorSpec({
         When("NAVident finnes") {
             Then("returnerer AnsattId") {
                 setClaims(NAVIDENT to "Z999999")
-                token.ansattId shouldBe AnsattId("Z999999")
+                ctx.ansattId shouldBe AnsattId("Z999999")
             }
         }
         When("NAVident mangler") {
             Then("AnsattId er null") {
-                token.ansattId shouldBe null
+                ctx.ansattId shouldBe null
             }
         }
     }
@@ -95,12 +92,12 @@ class TokenTest : BehaviorSpec({
         When("oid finnes") {
             Then("returnerer oid") {
                 setClaims(OID to oid.toString())
-                token.oid shouldBe oid
+                ctx.oid shouldBe oid
             }
         }
         When("oid mangler") {
             Then("oid er null") {
-                token.oid shouldBe null
+                ctx.oid shouldBe null
             }
         }
     }
@@ -109,12 +106,12 @@ class TokenTest : BehaviorSpec({
         When("azp_name finnes") {
             Then("returnerer azp_name") {
                 setClaims(AZP_NAME to "dev-gcp:team:app")
-                token.system shouldBe "dev-gcp:team:app"
+                ctx.system shouldBe "dev-gcp:team:app"
             }
         }
         When("azp_name mangler") {
             Then("returnerer UTILGJENGELIG") {
-                token.system shouldBe UTILGJENGELIG
+                ctx.system shouldBe UTILGJENGELIG
             }
         }
     }
@@ -123,18 +120,18 @@ class TokenTest : BehaviorSpec({
         When("azp_name har tre deler") {
             Then("returnerer siste del") {
                 setClaims(AZP_NAME to "dev-gcp:team:app")
-                token.systemNavn shouldBe "app"
+                ctx.systemNavn shouldBe "app"
             }
         }
         When("azp_name er ett ord uten kolon") {
             Then("returnerer azp_name uendret") {
                 setClaims(AZP_NAME to "app")
-                token.systemNavn shouldBe "app"
+                ctx.systemNavn shouldBe "app"
             }
         }
         When("azp_name mangler") {
             Then("returnerer UTILGJENGELIG") {
-                token.systemNavn shouldBe UTILGJENGELIG
+                ctx.systemNavn shouldBe UTILGJENGELIG
             }
         }
     }
@@ -143,18 +140,18 @@ class TokenTest : BehaviorSpec({
         When("azp_name har tre deler") {
             Then("returnerer første del") {
                 setClaims(AZP_NAME to "dev-gcp:team:app")
-                token.cluster shouldBe "dev-gcp"
+                ctx.cluster shouldBe "dev-gcp"
             }
         }
         When("azp_name er ett ord uten kolon") {
             Then("returnerer azp_name uendret") {
                 setClaims(AZP_NAME to "app")
-                token.cluster shouldBe "app"
+                ctx.cluster shouldBe "app"
             }
         }
         When("azp_name mangler") {
             Then("returnerer UTILGJENGELIG") {
-                token.cluster shouldBe UTILGJENGELIG
+                ctx.cluster shouldBe UTILGJENGELIG
             }
         }
     }
@@ -163,24 +160,24 @@ class TokenTest : BehaviorSpec({
         When("azp_name er cluster:namespace:app") {
             Then("returnerer namespace:app") {
                 setClaims(AZP_NAME to "dev-gcp:team:app")
-                token.systemAndNs shouldBe "team:app"
+                ctx.systemAndNs shouldBe "team:app"
             }
         }
         When("azp_name har to deler") {
             Then("returnerer siste del") {
                 setClaims(AZP_NAME to "dev-gcp:app")
-                token.systemAndNs shouldBe "app"
+                ctx.systemAndNs shouldBe "app"
             }
         }
         When("azp_name er ett ord uten kolon") {
             Then("returnerer tom streng") {
                 setClaims(AZP_NAME to "app")
-                token.systemAndNs shouldBe ""
+                ctx.systemAndNs shouldBe ""
             }
         }
         When("azp_name mangler") {
             Then("returnerer tom streng") {
-                token.systemAndNs shouldBe ""
+                ctx.systemAndNs shouldBe ""
             }
         }
     }
@@ -189,31 +186,28 @@ class TokenTest : BehaviorSpec({
         When("azp_name har tre deler") {
             Then("returnerer 'app:cluster'") {
                 setClaims(AZP_NAME to "dev-gcp:team:app")
-                token.clusterAndSystem shouldBe "app:dev-gcp"
+                ctx.clusterAndSystem shouldBe "app:dev-gcp"
             }
         }
         When("azp_name ikke har tre deler") {
             Then("returnerer system uendret") {
                 setClaims(AZP_NAME to "app")
-                token.clusterAndSystem shouldBe "app"
+                ctx.clusterAndSystem shouldBe "app"
             }
         }
     }
 
 
     Given("ingen gyldig token-kontekst") {
-        beforeEach {
-            SecurityContextHolder.clearContext()
-        }
         When("getClaims kaster exception") {
             Then("erCC er false") {
-                token.erCC shouldBe false
+                ctx.erCC shouldBe false
             }
             Then("erObo er false") {
-                token.erObo shouldBe false
+                ctx.erObo shouldBe false
             }
             Then("ansattId er null") {
-                token.ansattId shouldBe null
+                ctx.ansattId shouldBe null
             }
         }
     }
@@ -222,19 +216,18 @@ class TokenTest : BehaviorSpec({
         When("token er OBO") {
             Then("returnerer OBO") {
                 setClaims(OID to oid.toString())
-                TokenType.from(token) shouldBe OBO
+                TokenType.from(ctx) shouldBe OBO
             }
         }
         When("token er CC") {
             Then("returnerer CCF") {
                 setClaims(IDTYP to APP)
-                TokenType.from(token) shouldBe CCF
+                TokenType.from(ctx) shouldBe CCF
             }
         }
         When("ingen claims finnes") {
             Then("returnerer UNAUTHENTICATED") {
-                SecurityContextHolder.clearContext()
-                TokenType.from(token) shouldBe UNAUTHENTICATED
+                TokenType.from(ctx) shouldBe UNAUTHENTICATED
             }
         }
     }

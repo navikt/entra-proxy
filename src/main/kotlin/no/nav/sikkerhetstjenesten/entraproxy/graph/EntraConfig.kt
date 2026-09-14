@@ -12,7 +12,7 @@ import java.time.Duration
 
 @Component
 class EntraConfig(@Value($$"${spring.http.serviceclient.graph.base-url}") baseUri: URI,
-                  override val varighet : Duration) : CachableRestConfig, RestConfig(baseUri, ENTRA_PING_PATH, GRAPH) {
+                  @param:Value("\${graph.varighet:3h}") override val varighet : Duration) : CachableRestConfig, RestConfig(baseUri, ENTRA_PING_PATH, GRAPH) {
     override val navn = GRAPH
     override val caches = setOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE,UTVIDET_ANSATT_GRAPH_CACHE, ENHETER_GRAPH_CACHE,TEMA_GRAPH_CACHE)
 

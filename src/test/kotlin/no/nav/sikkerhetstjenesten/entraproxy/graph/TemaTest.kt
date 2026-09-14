@@ -25,6 +25,10 @@ class TemaTest : BehaviorSpec({
             Then("gruppeNavn har prefix") {
                 t.gruppeNavn shouldBe "${TEMA_PREFIX}AAP"
             }
+            Then("to Tema-verdier med samme kode er like") {
+                (t == Tema("AAP")) shouldBe true
+                (t.hashCode() == Tema("AAP").hashCode()) shouldBe true
+            }
         }
         When("verdi etter prefix-fjerning ikke er 3 bokstaver") {
             Then("2 bokstaver kaster IllegalArgumentException") {

@@ -22,9 +22,20 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.CacheSizeAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isProd
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT_GRAPH_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_GRAPH_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.UTVIDET_ANSATT_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.data.redis.test.autoconfigure.DataRedisTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -38,6 +49,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.serializer.RedisMessageConverters
 import org.springframework.test.context.ContextConfiguration
 import java.time.Duration.ofSeconds
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 @DataRedisTest
@@ -51,6 +63,16 @@ class ValkeyCacheOperationsTest(
     @TestConfiguration
     class ValkeyCacheTestConfig(private val cf: RedisConnectionFactory) : RedisListenerConfigurer{
 
+        private val allTestCaches = setOf(
+            GRUPPER_FOR_ANSATT_GRAPH_CACHE,
+            UTVIDET_ANSATT_GRAPH_CACHE,
+            ENHETER_GRAPH_CACHE,
+            TEMA_GRAPH_CACHE,
+            MEDLEMMER_CACHE,
+            OID_CACHE,
+            CacheNøkkelConfig(NORG),
+        )
+
         override fun configureMessageConverters(builder: RedisMessageConverters.Builder) {
             builder.addCustomConverter(CacheNøkkelMessageConverter())
         }
@@ -59,9 +81,14 @@ class ValkeyCacheOperationsTest(
         fun cacheManager() =
             builder(cf)
                 .withInitialCacheConfigurations(
-                    mapOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE.name to defaultCacheConfig()
-                        .prefixCacheNameWith(GRUPPER_FOR_ANSATT_GRAPH_CACHE.name)
-                        .disableCachingNullValues()))
+                    allTestCaches
+                        .groupBy { it.name }
+                        .mapValues { (_, caches) ->
+                            defaultCacheConfig()
+                                .prefixCacheNameWith(caches.first().name)
+                                .disableCachingNullValues()
+                        }
+                )
                 .build()
 
         @Bean
@@ -70,7 +97,7 @@ class ValkeyCacheOperationsTest(
                 valkey,
                 object : CachableRestConfig {
                     override val navn = "entra-test"
-                    override val caches = setOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
+                    override val caches = allTestCaches
                     override val varighet = ofSeconds(DEFAULT_TTL_SECONDS)
                 }
             )
@@ -81,7 +108,7 @@ class ValkeyCacheOperationsTest(
                 cache,
                 object : CachableRestConfig {
                     override val navn = "entra-test"
-                    override val caches = setOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
+                    override val caches = allTestCaches
                 })
     }
 
@@ -91,6 +118,49 @@ class ValkeyCacheOperationsTest(
     @MockkBean(relaxed = true)
     private lateinit var oppfrisker: CacheOppfrisker
 
+    private fun testValueFor(cacheConfig: CacheNøkkelConfig): Any = when (cacheConfig) {
+        GRUPPER_FOR_ANSATT_GRAPH_CACHE -> G1
+        UTVIDET_ANSATT_GRAPH_CACHE -> U1
+        ENHETER_GRAPH_CACHE -> setOf(E1)
+        TEMA_GRAPH_CACHE -> setOf(T1)
+        MEDLEMMER_CACHE -> setOf(M1)
+        OID_CACHE -> O1
+        CacheNøkkelConfig(NORG) -> "Norg 1"
+        else -> TEST_VALUE_1
+    }
+
+    private fun cacheEntriesFor(cacheConfig: CacheNøkkelConfig): Map<String, Any> = when (cacheConfig) {
+        GRUPPER_FOR_ANSATT_GRAPH_CACHE -> mapOf(I1 to G1, I2 to G2)
+        UTVIDET_ANSATT_GRAPH_CACHE -> mapOf(I1 to U1, I2 to U2)
+        ENHETER_GRAPH_CACHE -> mapOf(I1 to setOf(E1), I2 to setOf(E2))
+        TEMA_GRAPH_CACHE -> mapOf(I1 to setOf(T1), I2 to setOf(T2))
+        MEDLEMMER_CACHE -> mapOf(I1 to setOf(M1), I2 to setOf(M2))
+        OID_CACHE -> mapOf(I1 to O1, I2 to O2)
+        CacheNøkkelConfig(NORG) -> mapOf(I1 to "Norg 1", I2 to "Norg 2")
+        else -> mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2)
+    }
+
+    private fun readMany(cacheConfig: CacheNøkkelConfig, ids: Set<String>) = when (cacheConfig) {
+        GRUPPER_FOR_ANSATT_GRAPH_CACHE -> cache.getMany<EntraGruppe>(cacheConfig, ids)
+        UTVIDET_ANSATT_GRAPH_CACHE -> cache.getMany<UtvidetAnsatt>(cacheConfig, ids)
+        ENHETER_GRAPH_CACHE -> cache.getMany<Set<Enhet>>(cacheConfig, ids)
+        TEMA_GRAPH_CACHE -> cache.getMany<Set<Tema>>(cacheConfig, ids)
+        MEDLEMMER_CACHE -> cache.getMany<Set<Ansatt>>(cacheConfig, ids)
+        OID_CACHE -> cache.getMany<UUID>(cacheConfig, ids)
+        CacheNøkkelConfig(NORG) -> cache.getMany<String>(cacheConfig, ids)
+        else -> cache.getMany<String>(cacheConfig, ids)
+    }
+
+    private fun assertReadOne(cacheConfig: CacheNøkkelConfig, key: String, expected: Any?) = when (cacheConfig) {
+        GRUPPER_FOR_ANSATT_GRAPH_CACHE -> cache.getOne<EntraGruppe>(cacheConfig, key) shouldBe (expected as? EntraGruppe)
+        UTVIDET_ANSATT_GRAPH_CACHE -> cache.getOne<UtvidetAnsatt>(cacheConfig, key) shouldBe (expected as? UtvidetAnsatt)
+        ENHETER_GRAPH_CACHE -> cache.getOne<Set<Enhet>>(cacheConfig, key) shouldBe (expected as? Set<Enhet>)
+        TEMA_GRAPH_CACHE -> cache.getOne<Set<Tema>>(cacheConfig, key) shouldBe (expected as? Set<Tema>)
+        MEDLEMMER_CACHE -> cache.getOne<Set<Ansatt>>(cacheConfig, key) shouldBe (expected as? Set<Ansatt>)
+        OID_CACHE -> cache.getOne<UUID>(cacheConfig, key) shouldBe (expected as? UUID)
+        CacheNøkkelConfig(NORG) -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
+        else -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
+    }
 
     init {
 
@@ -99,117 +169,129 @@ class ValkeyCacheOperationsTest(
             every { authContext.clusterAndSystem } returns "test:dev-gcp"
             every { oppfrisker.cacheName } returns GRUPPER_FOR_ANSATT_GRAPH_CACHE.name
             every { oppfrisker.oppfrisk(any()) } returns Unit
-            cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
+            ALL_TEST_CACHES.forEach { cache.clear(it) }
         }
 
         Given("putMany og getMany") {
-            When("verdier legges i cache med kort TTL") {
-                Then("returneres ved oppslag og fjernes etter TTL") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to G1, I2 to G2), ofSeconds(1))
-                    val many = cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS)
-                    many.keys shouldBe IDS
-                    many.values shouldBe listOf(G1, G2)
-                    eventually(TIMEOUT) {
-                        cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS).shouldBeEmpty()
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("verdier legges i cache med kort TTL for ${cacheConfig.fullName}") {
+                    Then("returneres ved oppslag og fjernes etter TTL") {
+                        val values = cacheEntriesFor(cacheConfig)
+                        cache.putMany(cacheConfig, values, ofSeconds(1))
+                        val many = readMany(cacheConfig, IDS)
+                        many.keys shouldBe IDS
+                        many.values.toSet() shouldBe values.values.toSet()
+                        eventually(TIMEOUT) {
+                            readMany(cacheConfig, IDS).shouldBeEmpty()
+                        }
                     }
                 }
-            }
-            When("kalles med tomt set") {
-                Then("returnerer tomt map") {
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, emptySet()).shouldBeEmpty()
+                When("kalles med tomt set for ${cacheConfig.fullName}") {
+                    Then("returnerer tomt map") {
+                        readMany(cacheConfig, emptySet()).shouldBeEmpty()
+                    }
                 }
-            }
-            When("putMany kalles med tom map") {
-                Then("er kall et no-op uten sideeffekter") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, emptyMap(), ofSeconds(5))
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 0
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS).shouldBeEmpty()
+                When("putMany kalles med tom map for ${cacheConfig.fullName}") {
+                    Then("er kall et no-op uten sideeffekter") {
+                        cache.putMany(cacheConfig, emptyMap(), ofSeconds(5))
+                        cache.size(cacheConfig) shouldBe 0
+                        readMany(cacheConfig, IDS).shouldBeEmpty()
+                    }
                 }
             }
         }
 
         Given("putOne uten eksplisitt TTL") {
-            When("verdien lagres") {
-                Then("settes TTL fra CachableRestConfig") {
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, A1)
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("verdien lagres til ${cacheConfig.fullName}") {
+                    Then("settes TTL fra CachableRestConfig") {
+                        val value = testValueFor(cacheConfig)
+                        cache.putOne(cacheConfig, I1, value)
 
-                    val ttl = valkey.getExpire(GRUPPER_FOR_ANSATT_GRAPH_CACHE.tilNøkkel(I1))
-                    (ttl in 1..DEFAULT_TTL_SECONDS) shouldBe true
+                        val ttl = valkey.getExpire(cacheConfig.tilNøkkel(I1))
+                        (ttl in 1..DEFAULT_TTL_SECONDS) shouldBe true
+                    }
                 }
             }
         }
 
         Given("sletting av enkeltinnslag") {
-            When("nøkkelen eksisterer") {
-                Then("returnerer true og verdien er fjernet") {
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, G1, ofSeconds(2))
-                    assertSoftly {
-                        cache.getOne<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe G1
-                        cache.delete(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe true
-                        cache.getOne<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1).shouldBeNull()
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("nøkkelen eksisterer i ${cacheConfig.fullName}") {
+                    Then("returnerer true og verdien er fjernet") {
+                        val value = testValueFor(cacheConfig)
+                        cache.putOne(cacheConfig, I1, value, ofSeconds(2))
+                        assertSoftly {
+                            assertReadOne(cacheConfig, I1, value)
+                            cache.delete(cacheConfig, I1) shouldBe true
+                            assertReadOne(cacheConfig, I1, null)
+                        }
                     }
                 }
-            }
-            When("nøkkelen ikke eksisterer") {
-                Then("returnerer false") {
-                    assertSoftly {
-                        cache.getOne<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1).shouldBeNull()
-                        cache.delete(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe false
+                When("nøkkelen ikke eksisterer i ${cacheConfig.fullName}") {
+                    Then("returnerer false") {
+                        assertSoftly {
+                            assertReadOne(cacheConfig, I1, null)
+                            cache.delete(cacheConfig, I1) shouldBe false
+                        }
                     }
                 }
             }
         }
 
         Given("cache-utløp") {
-            When("TTL løper ut") {
-                Then("Valkey publiserer expired-event som håndteres av ValkeyListener") {
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("TTL løper ut for ${cacheConfig.fullName}") {
+                    Then("Valkey publiserer expired-event som håndteres av ValkeyListener") {
+                        every { oppfrisker.cacheName } returns cacheConfig.name
+                        cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(1))
 
+                        eventually(VALKEY_EVENT_TIMEOUTS) {
+                            verify {
+                                oppfrisker.oppfrisk(match {
+                                    it.cacheName == cacheConfig.name && it.id == I1
+                                })
+                            }
+                        }
+                    }
+                }
 
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, A1, ofSeconds(1))
+                When("nøkkel slettes i ${cacheConfig.fullName}") {
+                    Then("Valkey publiserer del-event som håndteres av ValkeyListener") {
+                        every { oppfrisker.cacheName } returns cacheConfig.name
+                        cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(10))
+                        cache.delete(cacheConfig, I1) shouldBe true
 
-                    eventually(VALKEY_EVENT_TIMEOUTS) {
-                        verify {
-                            oppfrisker.oppfrisk(match {
-                                it.cacheName == GRUPPER_FOR_ANSATT_GRAPH_CACHE.name && it.id == I1
-                            })
+                        eventually(VALKEY_EVENT_TIMEOUTS) {
+                            verify {
+                                oppfrisker.oppfrisk(match {
+                                    it.cacheName == cacheConfig.name && it.id == I1
+                                })
+                            }
                         }
                     }
                 }
             }
-
-            When("nøkkel slettes") {
-                Then("Valkey publiserer del-event som håndteres av ValkeyListener") {
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, A1, ofSeconds(10))
-                    cache.delete(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe true
-
-                    eventually(VALKEY_EVENT_TIMEOUTS) {
-                        verify {
-                            oppfrisker.oppfrisk(match {
-                                it.cacheName == GRUPPER_FOR_ANSATT_GRAPH_CACHE.name && it.id == I1
-                            })
-                        }
-                    }
-                }
-            }
-
         }
 
         Given("tømming av cache") {
-            When("cache inneholder verdier") {
-                Then("alle verdier i cachen fjernes") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to G1, I2 to G2), ofSeconds(1))
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 2
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS).keys shouldBe IDS
-                    cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS).shouldBeEmpty()
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 0
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("cache inneholder verdier for ${cacheConfig.fullName}") {
+                    Then("alle verdier i cachen fjernes") {
+                        cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(1))
+                        cache.size(cacheConfig) shouldBe 2
+                        cache.getMany<String>(cacheConfig, IDS).keys shouldBe IDS
+                        cache.clear(cacheConfig)
+                        cache.getMany<String>(cacheConfig, IDS).shouldBeEmpty()
+                        cache.size(cacheConfig) shouldBe 0
+                    }
                 }
-            }
-            When("cache er tom") {
-                Then("clear kaster ikke exception") {
-                    cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, IDS).shouldBeEmpty()
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 0
+                When("cache er tom for ${cacheConfig.fullName}") {
+                    Then("clear kaster ikke exception") {
+                        cache.clear(cacheConfig)
+                        cache.getMany<String>(cacheConfig, IDS).shouldBeEmpty()
+                        cache.size(cacheConfig) shouldBe 0
+                    }
                 }
             }
         }
@@ -290,61 +372,62 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("cache-metrikker") {
-            When("getOne treffer cache") {
-                Then("registreres varighet med cache, operasjon og hit-resultat") {
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, G1, ofSeconds(5))
-
-                    cache.getOne<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe G1
-
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("getOne treffer cache for ${cacheConfig.fullName}") {
+                    Then("registreres varighet med cache, operasjon og hit-resultat") {
+                        cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(5))
+                        cache.getOne<String>(cacheConfig, I1) shouldBe TEST_VALUE_1
+                    }
                 }
-            }
 
-            When("getMany gir både treff og miss") {
-                Then("registreres varighet med delvis-resultat") {
-                    cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, G1, ofSeconds(5))
-
-                    cache.getMany<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, setOf(I1, I2)).keys shouldBe setOf(I1)
+                When("getMany gir både treff og miss for ${cacheConfig.fullName}") {
+                    Then("registreres varighet med delvis-resultat") {
+                        cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(5))
+                        cache.getMany<String>(cacheConfig, setOf(I1, I2)).keys shouldBe setOf(I1)
+                    }
                 }
-            }
 
-            When("putOne feiler mot utilgjengelig Redis") {
-                Then("registreres varighet med feilet-resultat") {
-                    redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
-                    try {
-                        cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, G1, ofSeconds(30))
-                    } finally {
-                        redis.dockerClient.unpauseContainerCmd(redis.containerId).exec()
+                When("putOne feiler mot utilgjengelig Redis for ${cacheConfig.fullName}") {
+                    Then("registreres varighet med feilet-resultat") {
+                        redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
+                        try {
+                            cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(30))
+                        } finally {
+                            redis.dockerClient.unpauseContainerCmd(redis.containerId).exec()
+                        }
                     }
                 }
             }
         }
 
         Given("antall innslag i cache") {
-            When("cache er tom") {
-                Then("returnerer 0") {
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 0
+            ALL_TEST_CACHES.forEach { cacheConfig ->
+                When("cache er tom for ${cacheConfig.fullName}") {
+                    Then("returnerer 0") {
+                        cache.size(cacheConfig) shouldBe 0
+                    }
                 }
-            }
-            When("cache inneholder verdier") {
-                Then("returnerer antall innslag") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(5))
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 2
+                When("cache inneholder verdier for ${cacheConfig.fullName}") {
+                    Then("returnerer antall innslag") {
+                        cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
+                        cache.size(cacheConfig) shouldBe 2
+                    }
                 }
-            }
-            When("verdier fjernes") {
-                Then("size oppdateres") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(5))
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 2
-                    cache.delete(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1)
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 1
+                When("verdier fjernes fra ${cacheConfig.fullName}") {
+                    Then("size oppdateres") {
+                        cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
+                        cache.size(cacheConfig) shouldBe 2
+                        cache.delete(cacheConfig, I1)
+                        cache.size(cacheConfig) shouldBe 1
+                    }
                 }
-            }
-            When("clear kalles") {
-                Then("size blir 0") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(5))
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 2
-                    cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE)
-                    cache.size(GRUPPER_FOR_ANSATT_GRAPH_CACHE) shouldBe 0
+                When("clear kalles for ${cacheConfig.fullName}") {
+                    Then("size blir 0") {
+                        cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
+                        cache.size(cacheConfig) shouldBe 2
+                        cache.clear(cacheConfig)
+                        cache.size(cacheConfig) shouldBe 0
+                    }
                 }
             }
         }
@@ -352,13 +435,15 @@ class ValkeyCacheOperationsTest(
         Given("antall innslag via CacheSizeAware") {
             When("cache er tom") {
                 Then("returnerer cache-størrelse fra valkey") {
-                    cacheSizeAware.sizes() shouldBe mapOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE.fullName to 0L)
+                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { it.fullName to 0L }
                 }
             }
             When("cache inneholder verdier") {
                 Then("returnerer antall innslag fra valkey") {
-                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(5))
-                    cacheSizeAware.sizes() shouldBe mapOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE.fullName to 2L)
+                    cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
+                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { cache ->
+                        if (cache == GRUPPER_FOR_ANSATT_GRAPH_CACHE) cache.fullName to 2L else cache.fullName to 0L
+                    }
                 }
             }
         }
@@ -397,10 +482,32 @@ class ValkeyCacheOperationsTest(
         private val I1 = A1.verdi
         private val A2 = AnsattId("E654321")
         private val I2 = A2.verdi
-        private val G1 = EntraGruppe( "Gruppe 1")
-        private val G2 = EntraGruppe( "Gruppe 2")
+        private const val TEST_VALUE_1 = "test-value-1"
+        private const val TEST_VALUE_2 = "test-value-2"
+        private val G1 = EntraGruppe("Gruppe 1")
+        private val G2 = EntraGruppe("Gruppe 2")
+        private val T1 = Tema("ABC")
+        private val T2 = Tema("DEF")
+        private val E1 = Enhet(Enhet.Enhetnummer("1234"), "Enhet 1")
+        private val E2 = Enhet(Enhet.Enhetnummer("5678"), "Enhet 2")
+        private val U1 = UtvidetAnsatt(A1, "Visning 1", "Fornavn 1", "Etternavn 1", TIdent("ABC1234"), "e1@test", E1)
+        private val U2 = UtvidetAnsatt(A2, "Visning 2", "Fornavn 2", "Etternavn 2", TIdent("DEF5678"), "e2@test", E2)
+        private val M1 = Ansatt(A1, "Visning 1", "Fornavn 1", "Etternavn 1")
+        private val M2 = Ansatt(A2, "Visning 2", "Fornavn 2", "Etternavn 2")
+        private val O1 = java.util.UUID.fromString("11111111-1111-1111-1111-111111111111")
+        private val O2 = java.util.UUID.fromString("22222222-2222-2222-2222-222222222222")
 
-                private val IDS = setOf(I1, I2)
+        private val ALL_TEST_CACHES = setOf(
+            GRUPPER_FOR_ANSATT_GRAPH_CACHE,
+            UTVIDET_ANSATT_GRAPH_CACHE,
+            ENHETER_GRAPH_CACHE,
+            TEMA_GRAPH_CACHE,
+            MEDLEMMER_CACHE,
+            OID_CACHE,
+            CacheNøkkelConfig(NORG),
+        )
+
+        private val IDS = setOf(I1, I2)
         private val TIMEOUT = eventuallyConfig {
             duration = 2.seconds
             interval = 100.milliseconds

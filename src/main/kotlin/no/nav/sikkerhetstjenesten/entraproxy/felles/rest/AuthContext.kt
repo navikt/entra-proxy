@@ -4,6 +4,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.rest
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExtensions.UTILGJENGELIG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Component
 import java.util.*
@@ -15,16 +16,16 @@ class AuthContext {
     val system get() = stringClaim(AZP_NAME)  ?: UTILGJENGELIG
     val oid get() = stringClaim(OID)?.let { runCatching { UUID.fromString(it) }.getOrNull() }
     val ansattId get() = stringClaim(NAVIDENT)?.let { AnsattId(it) }
-    private fun stringClaim(name: String) = claimSet()?.getClaimAsString(name)
-    private fun claimSet() = SecurityContextHolder.getContext().authentication?.principal as? Jwt
+    private fun stringClaim(name: String): String? =
+        when (val principal = SecurityContextHolder.getContext().authentication?.principal) {
+            is Jwt -> principal.getClaimAsString(name)
+            is OAuth2AuthenticatedPrincipal -> principal.attributes[name]?.toString()
+            else -> null
+        }
     val clusterAndSystem get() = system.split(":").let { parts ->
         if (parts.size == 3) "${parts[2]}:${parts[0]}" else system
     }
 
-    fun <T> assert(predikat: AuthContext.() -> Boolean, block: () -> Set<T>): Set<T> {
-        require(predikat()) { "Feil i token: krever korrekt token-type for å utføre denne operasjonen " }
-        return block()
-    }
 
     val oboFields  get() =
         ansattId?.let { id -> oid?.let { o -> id to o } }

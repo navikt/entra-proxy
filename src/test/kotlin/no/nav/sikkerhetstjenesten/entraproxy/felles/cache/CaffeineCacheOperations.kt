@@ -89,3 +89,4 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
             cache.fullName to count
         }
 }
+

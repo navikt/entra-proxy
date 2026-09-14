@@ -8,11 +8,12 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController
+import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.MvcResult
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
@@ -21,17 +22,20 @@ import tools.jackson.module.kotlin.readValue
 import java.net.URI
 import java.util.UUID.randomUUID
 
-class TilgangTester : BehaviorSpec({
+private inline fun <reified T> MvcResult.bodyAs(mapper: JsonMapper): T =
+    mapper.readValue(response.contentAsString)
 
-    val token: AuthContext = mockk(relaxed = true)
+class EntraTjenesteTest : BehaviorSpec({
+
+    val token: AuthContext = mockk()
     val entraAdapter: EntraRestClientAdapter = mockk()
     val oid: EntraOidTjeneste = mockk()
-    val norg: NorgTjeneste = mockk(relaxed = true)
+    val norg: NorgTjeneste = mockk()
     val cache: ValkeyCacheOperations = mockk(relaxed = true)
     val entra = EntraTjeneste(entraAdapter, norg, oid, cache)
-    val controller = EntraController(entra, oid, token)
+    val controller = EntraController(entra, oid)
     val mockMvc: MockMvc = standaloneSetup(controller).build()
-    val jsonMapper: JsonMapper = JsonMapper.builder().findAndAddModules().build()
+    val mapper = JsonMapper.builder().findAndAddModules().build()
 
     beforeSpec {
         every { token.systemAndNs } returns "test:ns"
@@ -43,10 +47,9 @@ class TilgangTester : BehaviorSpec({
             Then("skal responsen inneholde forventet ansatt") {
                 every { oid.gruppeOid(TEMA.gruppeNavn) } returns UUID
                 every { entraAdapter.gruppeMedlemmer("$UUID") } returns setOf(ansatt)
-                val respons = mockMvc.perform(get("/api/v1/tema/$AAP"))
+                mockMvc.perform(get("${API_V1}/tema/${AAP}"))
                     .andExpect(status().isOk)
-                    .andReturn().response.contentAsString
-                jsonMapper.readValue<Set<Ansatt>>(respons).single() shouldBe ansatt
+                    .andReturn().bodyAs<Set<Ansatt>>(mapper).single() shouldBe ansatt
             }
         }
     }
@@ -58,47 +61,20 @@ class TilgangTester : BehaviorSpec({
                 every { entraAdapter.enheterForAnsatt("$UUID") } throws
                     NotFoundRestException(URI.create(""), "ikke funnet") andThen setOf(ENHET.enhetnummer)
                 every { norg.navnFor(ENHET.enhetnummer) } returns ENHET.navn
-                val respons = mockMvc.perform(get("/api/v1/enhet/ansatt/${ANSATTID.verdi}"))
+                mockMvc.perform(get("${API_V1}/enhet/ansatt/${ANSATTID.verdi}"))
                     .andExpect(status().isOk)
-                    .andReturn().response.contentAsString
-                jsonMapper.readValue<Set<Enhet>>(respons).single() shouldBe ENHET
+                    .andReturn().bodyAs<Set<Enhet>>(mapper).single() shouldBe ENHET
                 verify(exactly = 2)  { entraAdapter.enheterForAnsatt("$UUID") }
             }
         }
     }
-
-    Given("Enhetnummer") {
-        Then("gruppeNavn og verdi uten prefix") {
-            enhetnr.gruppeNavn shouldBe "${ENHET_PREFIX}$nummer"
-            enhetnr.verdi shouldBe nummer
-        }
-        Then("gruppeNavn og verdi med prefix") {
-            enhetnr1.gruppeNavn shouldBe "${ENHET_PREFIX}$nummer"
-            enhetnr1.verdi shouldBe nummer
-        }
-    }
-
-    Given("Tema") {
-        Then("gruppeNavn og verdi uten prefix") {
-            TEMA.gruppeNavn shouldBe "${Tema.TEMA_PREFIX}$AAP"
-            TEMA.verdi shouldBe AAP
-        }
-        Then("gruppeNavn og verdi med prefix") {
-            val tema1 = Tema("${Tema.TEMA_PREFIX}$AAP")
-            tema1.gruppeNavn shouldBe "${Tema.TEMA_PREFIX}$AAP"
-            tema1.verdi shouldBe AAP
-        }
-    }
 }) {
-    companion object {
-        const val AAP = "AAP"
-        val ANSATTID = AnsattId("A123456")
-        val UUID = randomUUID()
-        val TEMA = Tema(AAP)
-        val ansatt = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
-        val ENHET = Enhet(Enhetnummer("1234"), "Enhet Navn")
-        const val nummer = "1234"
-        val enhetnr = Enhetnummer(nummer)
-        val enhetnr1 = Enhetnummer("${ENHET_PREFIX}$nummer")
+    private companion object {
+        private const val AAP = "AAP"
+        private val ANSATTID = AnsattId("A123456")
+        private val UUID = randomUUID()
+        private val TEMA = Tema(AAP)
+        private val ansatt = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
+        private val ENHET = Enhet(Enhetnummer("1234"), "Enhet Navn")
     }
 }

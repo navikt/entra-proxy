@@ -22,7 +22,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 
 
 @Configuration
-class SecurityBeanConfig {
+class OAuth2SecurityBeanConfig {
 
     private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**")
 

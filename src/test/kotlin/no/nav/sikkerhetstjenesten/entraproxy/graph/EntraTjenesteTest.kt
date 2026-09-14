@@ -3,9 +3,14 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CaffeineCacheOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
+import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.caffeine.CaffeineCacheManager
@@ -35,6 +40,9 @@ class EntraTjenesteTest(
         beforeEach {
             server.reset()
         }
+        afterEach {
+            server.verify()
+        }
 
         Given("medlemmer-endepunkt") {
             When("det finnes medlemmer") {
@@ -46,7 +54,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         entra.medlemmer(GROUP_ID) shouldBe setOf(ANSATT)
                     }
-                    server.verify()
                 }
             }
         }
@@ -60,8 +67,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         oid.ansattOid(AnsattId("A123456")) shouldBe OID
                     }
-                    server.verify()
-                    oid.ansattOid(AnsattId("A123456")) shouldBe OID
                 }
             }
         }
@@ -76,7 +81,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         oid.gruppeOid("En gruppe") shouldBe GRUPPE_OID
                     }
-                    server.verify()
                 }
             }
         }
@@ -91,7 +95,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         entra.tema(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(Tema("AAP"))
                     }
-                    server.verify()
                 }
             }
         }
@@ -106,7 +109,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         entra.enheter(AnsattId("A123456"), ANSATT_OID).map { it.enhetnummer.verdi } shouldBe listOf("1234")
                     }
-                    server.verify()
                 }
             }
         }
@@ -121,7 +123,6 @@ class EntraTjenesteTest(
                     repeat(2) {
                         entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE"))
                     }
-                    server.verify()
                 }
             }
         }
@@ -140,21 +141,16 @@ class EntraTjenesteTest(
                         respons?.etternavn shouldBe "Nordmann"
                         respons?.enhet?.enhetnummer?.verdi shouldBe "1234"
                     }
-                    server.verify()
                 }
             }
         }
     }
 
-    @Configuration
-    @EnableCaching
-    class TestConfig {
+    @TestConfiguration
+    class EntraTestConfig : CacheTestConfig(MEDLEMMER,GRAPH,ENTRA_OID)
 
-        @Bean
-        fun cacheManager() = CaffeineCacheManager()
-
-        @Bean
-        fun cacheOperations(cacheManager: CacheManager) = CaffeineCacheOperations(cacheManager)
+    @TestConfiguration
+    class TestBeanConfig {
 
         @Bean
         fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
@@ -175,7 +171,7 @@ class EntraTjenesteTest(
         private val GRUPPE_OID = randomUUID()
         private val ANSATT_OID = randomUUID()
         private val ANSATT = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
-        private val medlemId = randomUUID().toString()
+        private val medlemId = "${randomUUID()}"
         private val gruppeMedlemmerContract = """
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",

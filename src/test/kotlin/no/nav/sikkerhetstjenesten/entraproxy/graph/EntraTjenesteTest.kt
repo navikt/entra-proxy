@@ -1,80 +1,257 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.MvcResult
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
-import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.readValue
-import java.net.URI
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
+import org.springframework.cache.CacheManager
+import org.springframework.cache.annotation.EnableCaching
+import org.springframework.cache.caffeine.CaffeineCacheManager
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod.GET
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.support.RestClientAdapter.create
+import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
+import org.springframework.web.service.invoker.createClient
 import java.util.UUID.randomUUID
 
-private inline fun <reified T> MvcResult.bodyAs(mapper: JsonMapper): T =
-    mapper.readValue(response.contentAsString)
+@RestClientTest
+class EntraTjenesteTest(
+    private val server: MockRestServiceServer,
+    private val entra: EntraTjeneste,
+    private val oid: EntraOidTjeneste) : BehaviorSpec() {
 
-class EntraTjenesteTest : BehaviorSpec({
+    @MockkBean(relaxed = true)
+    private lateinit var norg: NorgTjeneste
 
-    val token: AuthContext = mockk()
-    val entraAdapter: EntraRestClientAdapter = mockk()
-    val oid: EntraOidTjeneste = mockk()
-    val norg: NorgTjeneste = mockk()
-    val cache: ValkeyCacheOperations = mockk(relaxed = true)
-    val entra = EntraTjeneste(entraAdapter, norg, oid, cache)
-    val controller = EntraController(entra, oid)
-    val mockMvc: MockMvc = standaloneSetup(controller).build()
-    val mapper = JsonMapper.builder().findAndAddModules().build()
+    init {
 
-    beforeSpec {
-        every { token.systemAndNs } returns "test:ns"
-        every { token.systemNavn } returns "Test"
-    }
+        beforeEach {
+            server.reset()
+        }
 
-    Given("tema-endepunkt") {
-        When("det finnes medlemmer") {
-            Then("skal responsen inneholde forventet ansatt") {
-                every { oid.gruppeOid(TEMA.gruppeNavn) } returns UUID
-                every { entraAdapter.gruppeMedlemmer("$UUID") } returns setOf(ansatt)
-                mockMvc.perform(get("${API_V1}/tema/${AAP}"))
-                    .andExpect(status().isOk)
-                    .andReturn().bodyAs<Set<Ansatt>>(mapper).single() shouldBe ansatt
+        Given("medlemmer-endepunkt") {
+            When("det finnes medlemmer") {
+                Then("skal responsen inneholde forventede medlemmer, og andre kall skal treffe cachen") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$GROUP_ID/members")
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        entra.medlemmer(GROUP_ID) shouldBe setOf(ANSATT)
+                    }
+                    server.verify()
+                }
+            }
+        }
+
+        Given("users-endepunkt for oppslag av oid") {
+            When("det finnes nøyaktig én bruker for navident") {
+                Then("skal oid returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                    }.andRespond(withSuccess(oidContract, APPLICATION_JSON))
+                    repeat(2) {
+                        oid.ansattOid(AnsattId("A123456")) shouldBe OID
+                    }
+                    server.verify()
+                    oid.ansattOid(AnsattId("A123456")) shouldBe OID
+                }
+            }
+        }
+
+        Given("groups-endepunkt for oppslag av gruppe-oid") {
+            When("det finnes en gruppe med gitt navn") {
+                Then("skal gruppens oid returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups")
+                    }.andRespond(withSuccess(gruppeContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        oid.gruppeOid("En gruppe") shouldBe GRUPPE_OID
+                    }
+                    server.verify()
+                }
+            }
+        }
+
+        Given("memberOf-endepunkt for temaer") {
+            When("ansatt er medlem av en tema-gruppe") {
+                Then("skal temaet returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                    }.andRespond(withSuccess(temaContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        entra.tema(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(Tema("AAP"))
+                    }
+                    server.verify()
+                }
+            }
+        }
+
+        Given("memberOf-endepunkt for enheter") {
+            When("ansatt er medlem av en enhet-gruppe") {
+                Then("skal enhetsnummeret returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                    }.andRespond(withSuccess(enhetContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        entra.enheter(AnsattId("A123456"), ANSATT_OID).map { it.enhetnummer.verdi } shouldBe listOf("1234")
+                    }
+                    server.verify()
+                }
+            }
+        }
+
+        Given("memberOf-endepunkt for grupper") {
+            When("ansatt er medlem av en gruppe") {
+                Then("skal gruppen returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                    }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE"))
+                    }
+                    server.verify()
+                }
+            }
+        }
+
+        Given("users-endepunkt for utvidet ansatt") {
+            When("det finnes en bruker for navident") {
+                Then("skal utvidet ansatt-informasjon returneres") {
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                    }.andRespond(withSuccess(utvidetAnsattContract, APPLICATION_JSON))
+
+                    repeat(2) {
+                        val respons = entra.utvidetAnsatt(AnsattId("A123456"))
+                        respons?.navIdent shouldBe AnsattId("A123456")
+                        respons?.fornavn shouldBe "Kari"
+                        respons?.etternavn shouldBe "Nordmann"
+                        respons?.enhet?.enhetnummer?.verdi shouldBe "1234"
+                    }
+                    server.verify()
+                }
             }
         }
     }
 
-    Given("enhet-endepunkt") {
-        When("adapter feiler første gang og lykkes etter refreshOid") {
-            Then("skal responsen inneholde forventet enhet") {
-                every { oid.ansattOid(ANSATTID) } returns UUID
-                every { entraAdapter.enheterForAnsatt("$UUID") } throws
-                    NotFoundRestException(URI.create(""), "ikke funnet") andThen setOf(ENHET.enhetnummer)
-                every { norg.navnFor(ENHET.enhetnummer) } returns ENHET.navn
-                mockMvc.perform(get("${API_V1}/enhet/ansatt/${ANSATTID.verdi}"))
-                    .andExpect(status().isOk)
-                    .andReturn().bodyAs<Set<Enhet>>(mapper).single() shouldBe ENHET
-                verify(exactly = 2)  { entraAdapter.enheterForAnsatt("$UUID") }
-            }
-        }
+    @Configuration
+    @EnableCaching
+    class TestConfig {
+
+        @Bean
+        fun cacheManager() = CaffeineCacheManager()
+
+        @Bean
+        fun cacheOperations(cacheManager: CacheManager) = CaffeineCacheOperations(cacheManager)
+
+        @Bean
+        fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
+            builderFor(create(builder.baseUrl(baseUrl).build())).build().createClient()
+
+        @Bean
+        fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
+
+        @Bean
+        fun entraTjeneste(client: EntraGraphClient, norg: NorgTjeneste, oid: EntraOidTjeneste, cache: CaffeineCacheOperations) =
+            EntraTjeneste(client, norg, oid, cache)
     }
-}) {
+
     private companion object {
-        private const val AAP = "AAP"
-        private val ANSATTID = AnsattId("A123456")
-        private val UUID = randomUUID()
-        private val TEMA = Tema(AAP)
-        private val ansatt = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
-        private val ENHET = Enhet(Enhetnummer("1234"), "Enhet Navn")
+        private const val baseUrl = "http://localhost"
+        private val GROUP_ID = randomUUID()
+        private val OID = randomUUID()
+        private val GRUPPE_OID = randomUUID()
+        private val ANSATT_OID = randomUUID()
+        private val ANSATT = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
+        private val medlemId = randomUUID().toString()
+        private val gruppeMedlemmerContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
+              "value": [
+                {
+                  "id": "$medlemId",
+                  "displayName": "Ola Nordmann",
+                  "givenName": "Ola",
+                  "surname": "Nordmann",
+                  "onPremisesSamAccountName": "E123456"
+                }
+              ]
+            }
+        """.trimIndent()
+
+        private val oidContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
+              "value": [
+                { "id": "$OID" }
+              ]
+            }
+        """.trimIndent()
+
+        private val gruppeContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#groups",
+              "value": [
+                { "id": "$GRUPPE_OID", "displayName": "En gruppe" }
+              ]
+            }
+        """.trimIndent()
+
+        private val temaContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
+              "value": [
+                { "id": "${randomUUID()}", "displayName": "0000-GA-TEMA_AAP" }
+              ]
+            }
+        """.trimIndent()
+
+        private val enhetContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
+              "value": [
+                { "id": "${randomUUID()}", "displayName": "0000-GA-ENHET_1234" }
+              ]
+            }
+        """.trimIndent()
+
+        private val grupperContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
+              "value": [
+                { "id": "${randomUUID()}", "displayName": "0000-GA-MIN_ROLLE" }
+              ]
+            }
+        """.trimIndent()
+
+        private val utvidetAnsattContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
+              "value": [
+                {
+                  "id": "${randomUUID()}",
+                  "displayName": "Kari Nordmann",
+                  "givenName": "Kari",
+                  "surname": "Nordmann",
+                  "jobTitle": "AAA1234",
+                  "mail": "kari.nordmann@example.com",
+                  "streetAddress": "1234",
+                  "onPremisesSamAccountName": "A123456"
+                }
+              ]
+            }
+        """.trimIndent()
     }
 }

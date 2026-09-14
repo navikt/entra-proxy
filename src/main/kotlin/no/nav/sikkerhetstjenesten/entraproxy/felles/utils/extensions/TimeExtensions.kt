@@ -1,12 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions
 
-import org.slf4j.Logger
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
-import kotlin.time.measureTimedValue
 import kotlin.time.toKotlinDuration
 
 object TimeExtensions {
@@ -34,18 +32,4 @@ object TimeExtensions {
         OSLO
     )
         .format(DateTimeFormatter.ofPattern(fmt))
-
-    inline fun <T> tidOgLog(log: Logger, tekst: String, block: () -> Set<T>): Set<T> {
-        val (result, duration) = timedResult(block)
-        log.info("Hentet ${result.size} $tekst på ${duration.inWholeMilliseconds}ms")
-        return result
-    }
-
-    inline fun <reified T> tidOgLog(log: Logger, block: () -> T?): T? {
-        val (result, duration) = timedResult(block)
-        log.info("Hentet $result på ${duration.inWholeMilliseconds}ms")
-        return result
-    }
-    inline fun <T> timedResult(block: () -> T) =
-        measureTimedValue(block)
 }

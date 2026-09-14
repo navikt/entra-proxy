@@ -14,8 +14,7 @@ class OAuth2LoggingAuthorizationFailureHandler(
 
     override fun onAuthorizationFailure(e: OAuth2AuthorizationException, principal: Authentication, attr: Map<String, Any>) {
         val registrationId = (e as? ClientAuthorizationException)?.clientRegistrationId ?: UTILGJENGELIG
-        val uri = currentUri() ?: UTILGJENGELIG
-        log.info("OAuth2 authorization feilet for id=$registrationId, errorCode=${e.error.errorCode}, uri=$uri",e)
+        log.info("OAuth2 authorization feilet for id=$registrationId, errorCode=${e.error.errorCode}, uri=$currentUri",e)
         delegate.onAuthorizationFailure(e, principal, attr)
     }
 }

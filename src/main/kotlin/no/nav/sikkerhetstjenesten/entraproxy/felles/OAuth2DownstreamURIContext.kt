@@ -1,9 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
-object OAuth2DownstreamURIContext {
-    private val downstreamUri = ThreadLocal<String?>()
+import java.net.URI
 
-    fun currentUri(): String? = downstreamUri.get()
+object OAuth2DownstreamURIContext {
+    private val downstreamUri = ThreadLocal<String>()
+
+    val currentUri get() = URI.create(downstreamUri.get())
 
     fun set(uri: String) {
         downstreamUri.set(uri)

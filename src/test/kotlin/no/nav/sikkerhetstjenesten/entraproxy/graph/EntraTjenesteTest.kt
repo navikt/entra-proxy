@@ -11,11 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MED
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.cache.CacheManager
-import org.springframework.cache.annotation.EnableCaching
-import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.client.MockRestServiceServer
@@ -52,7 +48,7 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.medlemmer(GROUP_ID) shouldBe setOf(ANSATT)
+                        entra.medlemmerIGruppe(GROUP_ID) shouldBe setOf(ANSATT)
                     }
                 }
             }

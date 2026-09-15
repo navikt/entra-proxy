@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.security.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.SecurityTestOAuth2.server
 import org.springframework.test.context.DynamicPropertyRegistry
+import java.lang.Runtime.getRuntime
 import java.util.UUID
 
 object SecurityTestSupport {
@@ -26,18 +27,18 @@ object SecurityTestSupport {
         val server = MockOAuth2Server().also { it.start() }
 
         init {
-            Runtime.getRuntime().addShutdownHook(Thread {
+            getRuntime().addShutdownHook(Thread {
                 server.shutdown()
             })
         }
     }
 
-    fun OBOjwt(aud: String = TEST_AUDIENCE, ansattId: AnsattId = TEST_ANSATT_ID, claims: Map<String,Any> = emptyMap()) = server.issueToken(
+    fun oboJwt(aud: String = TEST_AUDIENCE, ansattId: AnsattId = TEST_ANSATT_ID, claims: Map<String,Any> = emptyMap()) = server.issueToken(
         TEST_ISSUER_ID, TEST_SUBJECT, aud,
         mapOf(NAVIDENT to ansattId.verdi, OID to "${UUID.randomUUID()}") + claims,
     ).serialize()
 
-    fun CCjwt(aud: String = TEST_AUDIENCE, ansattId: AnsattId = TEST_ANSATT_ID, claims: Map<String,Any> = emptyMap()) = server.issueToken(
+    fun ccJwt(aud: String = TEST_AUDIENCE, ansattId: AnsattId = TEST_ANSATT_ID, claims: Map<String,Any> = emptyMap()) = server.issueToken(
         TEST_ISSUER_ID, TEST_SUBJECT, aud,
         mapOf(NAVIDENT to ansattId.verdi, ROLES to listOf(CLIENT_CREDENTIALS)) + claims,
     ).serialize()

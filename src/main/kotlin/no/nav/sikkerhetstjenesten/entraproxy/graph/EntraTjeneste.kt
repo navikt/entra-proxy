@@ -52,7 +52,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
-    fun medlemmer(gruppeId: UUID) =
+    fun medlemmerIGruppe(gruppeId: UUID) =
             gruppeMedlemmer("$gruppeId")
 
 

@@ -3,8 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.CLIENT_CREDENTIALS
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.ROLES
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
@@ -14,10 +12,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.CCjwt
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.OBOjwt
+import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
+import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ANSATT_ID
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_AUDIENCE
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ENHET
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
 import org.springframework.boot.test.context.SpringBootTest
@@ -48,7 +45,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { oidTjeneste.gruppeOid(any()) } returns UUID.randomUUID()
             every { entraTjeneste.enheter(any(), any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any(), any()) } returns sortedSetOf(Tema("AAP"))
-            every { entraTjeneste.medlemmer(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
+            every { entraTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
             every { entraTjeneste.grupperForAnsatt(any(), any()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
@@ -82,7 +79,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har gyldig OBO-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/enhet").header(AUTHORIZATION, OBOjwt()))
+                    mockMvc.perform(get("${API_V1}/enhet").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
                             status().isOk
                         }
@@ -91,7 +88,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har CCF-token") {
                 Then("returnerer 403") {
-                    mockMvc.perform(get("${API_V1}/enhet").header(AUTHORIZATION, CCjwt()))
+                    mockMvc.perform(get("${API_V1}/enhet").header(AUTHORIZATION, ccJwt()))
                         .andExpect {
                             status().isForbidden
                         }
@@ -102,7 +99,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("beskyttet endepunkt ${API_V1}/enhet/ansatt/{navIdent}") {
             When("request har OBO-token") {
                 Then("returnerer 403") {
-                    mockMvc.perform(get("${API_V1}/enhet/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, OBOjwt()))
+                    mockMvc.perform(get("${API_V1}/enhet/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
                             status().isForbidden
                         }
@@ -111,7 +108,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har gyldig CCF-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/enhet/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, CCjwt()))
+                    mockMvc.perform(get("${API_V1}/enhet/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, ccJwt()))
                         .andExpect {
                             status().isOk
                         }
@@ -122,7 +119,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("beskyttet endepunkt ${API_V1}/tema") {
             When("request har gyldig OBO-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/tema").header(AUTHORIZATION, OBOjwt()))
+                    mockMvc.perform(get("${API_V1}/tema").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
                             status().isOk
                         }
@@ -131,7 +128,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har CCF-token") {
                 Then("returnerer 403") {
-                    mockMvc.perform(get("${API_V1}/tema").header(AUTHORIZATION, CCjwt()))
+                    mockMvc.perform(get("${API_V1}/tema").header(AUTHORIZATION, ccJwt()))
                         .andExpect {
                             status().isForbidden
                         }
@@ -142,7 +139,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("beskyttet endepunkt ${API_V1}/tema/ansatt/{navIdent}") {
             When("request har OBO-token") {
                 Then("returnerer 403") {
-                    mockMvc.perform(get("${API_V1}/tema/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, OBOjwt()))
+                    mockMvc.perform(get("${API_V1}/tema/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
                             status().isForbidden
                         }
@@ -151,7 +148,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har gyldig CCF-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/tema/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, CCjwt()))
+                    mockMvc.perform(get("${API_V1}/tema/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, ccJwt()))
                         .andExpect {
                             status().isOk
                         }
@@ -206,7 +203,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("beskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
             When("request har OBO-token") {
                 Then("returnerer 403") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, OBOjwt()))
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
                             status().isForbidden
                         }
@@ -215,7 +212,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
             When("request har gyldig CCF-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, CCjwt()))
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, ccJwt()))
                         .andExpect {
                             status().isOk
                         }

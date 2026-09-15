@@ -13,6 +13,4 @@ import org.springframework.web.service.registry.ImportHttpServices
 class NorgTjeneste(private val client: NorgProxyClient) {
     @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
     fun navnFor(enhetnummer: Enhetnummer) = client.enhetFor(enhetnummer.verdi).navn
-
-
 }

@@ -34,7 +34,9 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.enheter(navIdent, it) } ?: emptySet()
+        oidTjeneste.ansattOid(navIdent)?.let {
+            entraTjeneste.enheter(navIdent, it)
+        } ?: emptySet()
 
     @GetMapping("enhet")
     @OAuth2RequireOBO
@@ -46,7 +48,9 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun temaForAnsatt(@PathVariable navIdent: AnsattId) =
-            oidTjeneste.ansattOid(navIdent)?.let { entraTjeneste.tema(navIdent, it) } ?: emptySet()
+            oidTjeneste.ansattOid(navIdent)?.let {
+                entraTjeneste.tema(navIdent, it)
+            } ?: emptySet()
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")

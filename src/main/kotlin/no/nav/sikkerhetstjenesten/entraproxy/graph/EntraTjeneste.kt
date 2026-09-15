@@ -17,7 +17,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
 
-private const val BRUKER = "onPremisesSamAccountName"
+const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
 private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
 

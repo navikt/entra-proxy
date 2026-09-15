@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
@@ -18,8 +17,9 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import java.util.*
 
+private const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
-private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$NAVIDENT,givenName,surname,mail,streetAddress"
+private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
 
 @RetryingWhenRecoverable
 @Service
@@ -59,7 +59,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
         ansatt  {
-            client.bruker(ANSATTE_FELTER, "$NAVIDENT eq '${ansattId.verdi}'").ansatte.firstOrNull()
+            client.bruker(ANSATTE_FELTER, "$BRUKER eq '${ansattId.verdi}'").ansatte.firstOrNull()
         }
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
@@ -130,5 +130,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     override fun toString() =
         "${javaClass.simpleName} [client=$client, norg=$norg]"
+
 }
 

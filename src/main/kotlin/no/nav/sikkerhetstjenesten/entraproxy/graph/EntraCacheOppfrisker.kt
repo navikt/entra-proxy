@@ -3,8 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkel
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOppfriskerTeller
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.UTVIDET_ANSATT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import org.slf4j.MDC
@@ -12,14 +15,12 @@ import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
-class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val cache: CacheOperations, private val teller: CacheOppfriskerTeller) : AbstractCacheOppfrisker() {
+class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val cache: CacheOperations) : AbstractCacheOppfrisker() {
 
     override val cacheName: String = GRAPH
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) =
-        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDETANSATT || nøkkelElementer.metode ==GRUPPERFORANSATT
-
-
+        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDET_ANSATT || nøkkelElementer.metode == GRUPPER_FOR_ANSATT
     )
             oppfriskMedMetode(nøkkelElementer, nøkkelElementer.metode)
         else
@@ -51,16 +52,9 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         when (metode) {
             TEMA -> entra.tema(ansattId, oid)
             ENHETER -> entra.enheter(ansattId, oid)
-            UTVIDETANSATT -> entra.utvidetAnsatt(ansattId)
-            GRUPPERFORANSATT -> entra.grupperForAnsatt(ansattId, oid)
+            UTVIDET_ANSATT -> entra.utvidetAnsatt(ansattId)
+            GRUPPER_FOR_ANSATT -> entra.grupperForAnsatt(ansattId, oid)
             else -> log.trace("Ukjent metode {} for ansatt {} og oid {}", metode, ansattId.verdi, oid)
         }
-    }
-
-    companion object {
-        private const val TEMA = "tema"
-        private const val ENHETER = "enheter"
-        private const val UTVIDETANSATT = "utvidetAnsatt"
-        private const val GRUPPERFORANSATT = "grupperForAnsatt"
     }
 }

@@ -14,12 +14,20 @@ import java.time.Duration
 class EntraConfig(@Value($$"${spring.http.serviceclient.graph.base-url}") baseUri: URI,
                   @param:Value("\${graph.varighet:3h}") override val varighet : Duration) : CachableRestConfig, RestConfig(baseUri, ENTRA_PING_PATH, GRAPH) {
     override val navn = GRAPH
-    override val caches = setOf(GRUPPER_FOR_ANSATT_GRAPH_CACHE,UTVIDET_ANSATT_GRAPH_CACHE, ENHETER_GRAPH_CACHE,TEMA_GRAPH_CACHE)
+    override val caches = setOf(
+        GRUPPER_FOR_ANSATT_GRAPH_CACHE,
+        UTVIDET_ANSATT_GRAPH_CACHE,
+        ENHETER_GRAPH_CACHE,
+        TEMA_GRAPH_CACHE)
 
     companion object {
-        val GRUPPER_FOR_ANSATT_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,"grupperForAnsatt")
-        val ENHETER_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,"enheter")
-        val TEMA_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,"tema")
-        val UTVIDET_ANSATT_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,"utvidetAnsatt")
+        const val TEMA = "tema"
+        const val ENHETER = "enheter"
+        const val UTVIDET_ANSATT = "utvidetAnsatt"
+        const val GRUPPER_FOR_ANSATT = "grupperForAnsatt"
+        val GRUPPER_FOR_ANSATT_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,GRUPPER_FOR_ANSATT)
+        val ENHETER_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,ENHETER)
+        val TEMA_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,TEMA)
+        val UTVIDET_ANSATT_GRAPH_CACHE = CacheNøkkelConfig(GRAPH,UTVIDET_ANSATT)
     }
 }

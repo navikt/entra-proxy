@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import org.slf4j.LoggerFactory.getLogger
@@ -11,7 +10,6 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
-import java.net.URI
 
 
 @Component
@@ -38,12 +36,8 @@ class EntraOidTjeneste(private val client: EntraGraphClient)  {
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {
     init {
-        body.title = TITLE
+        body.title = "Uventet respons fra Entra"
         body.detail = msg
         body.properties = mapOf("navIdent" to ansattId, "traceId" to Span.current().spanContext.traceId)
-    }
-
-    companion object {
-        const val TITLE = "Uventet respons fra Entra"
     }
 }

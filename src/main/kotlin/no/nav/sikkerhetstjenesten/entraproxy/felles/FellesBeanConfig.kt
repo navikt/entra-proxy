@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import org.apache.hc.core5.util.TimeValue
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
@@ -42,17 +41,15 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
         it.enable(INCLUDE_SOURCE_IN_LOCATION)
     }
-
-
+    
     @Bean
-    fun restClientCustomizer(tokenInterceptor: TokenTypeTellendeRequestInterceptor, logbookInterceptor: /*ObjectProvider<*/LogbookClientHttpRequestInterceptor/*>*/) =
+    fun restClientCustomizer(logbookInterceptor: /*ObjectProvider<*/LogbookClientHttpRequestInterceptor/*>*/) =
         RestClientCustomizer { c ->
             c.requestInterceptors {
                /* logbookInterceptor.ifAvailable {
                     interceptor -> it.add(interceptor)
                 }*/
                 it.addFirst(logbookInterceptor)
-                it.add(tokenInterceptor)
             }
             c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
         }

@@ -3,15 +3,15 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.stereotype.Component
 import org.springframework.web.ErrorResponseException
 
 
-@Component
+@RestRetryingWhenRecoverableService
 class EntraOidTjeneste(private val client: EntraGraphClient)  {
 
     private val log = getLogger(javaClass)

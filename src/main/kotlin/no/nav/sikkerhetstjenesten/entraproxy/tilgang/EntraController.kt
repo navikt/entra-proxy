@@ -57,12 +57,12 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
     fun medlemmerForEnhet(@PathVariable enhetsnummer: Enhetnummer) =
-            medlemmer(enhetsnummer.gruppeNavn)
+        medlemmerIGruppe(enhetsnummer.gruppeNavn)
 
     @GetMapping("tema/{tema}")
     @Operation(summary = "Hent alle medlemmer for et gitt tema")
     fun medlemmerForTema(@PathVariable tema: Tema) =
-            medlemmer(tema.gruppeNavn)
+        medlemmerIGruppe(tema.gruppeNavn)
 
     @GetMapping("ansatt/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
@@ -89,7 +89,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
             entraTjeneste.medlemmerIGruppe( it)
         }
 
-    private fun medlemmer(gruppeNavn: String) =
+    private fun medlemmerIGruppe(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmerIGruppe( it)
         } ?: emptySet()

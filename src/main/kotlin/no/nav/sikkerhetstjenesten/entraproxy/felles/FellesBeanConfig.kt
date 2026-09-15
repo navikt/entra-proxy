@@ -41,7 +41,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
         it.enable(INCLUDE_SOURCE_IN_LOCATION)
     }
-    
+
     @Bean
     fun restClientCustomizer(logbookInterceptor: /*ObjectProvider<*/LogbookClientHttpRequestInterceptor/*>*/) =
         RestClientCustomizer { c ->

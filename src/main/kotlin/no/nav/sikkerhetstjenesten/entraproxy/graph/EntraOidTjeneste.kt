@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
-import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
@@ -28,7 +27,6 @@ class EntraOidTjeneste(private val client: EntraGraphClient)  {
              }
          }
 
-    @WithSpan
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
         client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id

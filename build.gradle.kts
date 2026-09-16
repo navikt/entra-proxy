@@ -55,15 +55,6 @@ springBoot {
     }
 }
 
-val githubUser = providers.gradleProperty("githubUser")
-    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
-    .orElse("x-access-token")
-    .get()
-val githubPassword = providers.gradleProperty("githubPassword")
-    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
-    .orElse("")
-    .get()
-
 repositories {
     mavenCentral()
     mavenLocal()
@@ -74,14 +65,8 @@ repositories {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/navikt/sikkerhetstjenesten-felles")
         credentials {
-            username = githubUser
-            password = githubPassword
-        }
-        if (githubPassword.isBlank()) {
-            logger.lifecycle(
-                "GitHub Packages auth is missing. Set ORG_GRADLE_PROJECT_githubUser/ORG_GRADLE_PROJECT_githubPassword " +
-                    "or GITHUB_ACTOR/GITHUB_TOKEN before running Gradle."
-            )
+            username = "x-access-token"
+            password = providers.environmentVariable("READER_TOKEN").orElse(providers.gradleProperty("gpr.token")).orNull
         }
     }
     maven {

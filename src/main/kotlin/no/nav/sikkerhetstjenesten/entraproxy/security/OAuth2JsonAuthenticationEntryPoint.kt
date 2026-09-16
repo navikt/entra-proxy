@@ -4,7 +4,6 @@ import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.http.ProblemDetail.forStatusAndDetail
@@ -23,15 +22,14 @@ class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : Authe
         with(res) {
             status = UNAUTHORIZED.value()
             contentType = APPLICATION_PROBLEM_JSON_VALUE
-            mapper.writeValue(writer, securityProblemDetail(UNAUTHORIZED,
-                "Bruker er ikke logget inn. Mangler Bearer token i Authorization header."))
+            mapper.writeValue(writer, securityProblemDetail())
         }
     }
 
-    private fun securityProblemDetail(status: HttpStatus, detail: String) =
-        forStatusAndDetail(status, detail).apply {
+    private fun securityProblemDetail() =
+        forStatusAndDetail(UNAUTHORIZED, "Bruker er ikke logget inn. Mangler Bearer token i Authorization header").apply {
             type = create("https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy")
-            title = "${status.value()}"
+            title = "${UNAUTHORIZED.value()}"
             properties = mapOf("traceId" to Span.current().spanContext.traceId)
         }
 

@@ -76,6 +76,7 @@ configurations.configureEach {
 
 dependencies {
     // Kotlin
+    implementation("no.nav.felles:sikkerhetstjenesten-felles:0.0.4")
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
     implementation(libs.jackson.module.kotlin)

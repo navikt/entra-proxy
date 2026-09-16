@@ -55,11 +55,34 @@ springBoot {
     }
 }
 
+val githubUser = providers.gradleProperty("githubUser")
+    .orElse(providers.environmentVariable("GITHUB_ACTOR"))
+    .orElse("x-access-token")
+    .get()
+val githubPassword = providers.gradleProperty("githubPassword")
+    .orElse(providers.environmentVariable("GITHUB_TOKEN"))
+    .orElse("")
+    .get()
+
 repositories {
     mavenCentral()
     mavenLocal()
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
+    }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/navikt/sikkerhetstjenesten-felles")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+        if (githubPassword.isBlank()) {
+            logger.lifecycle(
+                "GitHub Packages auth is missing. Set ORG_GRADLE_PROJECT_githubUser/ORG_GRADLE_PROJECT_githubPassword " +
+                    "or GITHUB_ACTOR/GITHUB_TOKEN before running Gradle."
+            )
+        }
     }
     maven {
         url = uri("https://repo1.maven.org/maven2")
@@ -76,7 +99,7 @@ configurations.configureEach {
 
 dependencies {
     // Kotlin
-    implementation("no.nav.felles:sikkerhetstjenesten-felles:0.0.4")
+    implementation("no.nav.felles:sikkerhetstjenesten-felles:0.0.5")
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
     implementation(libs.jackson.module.kotlin)

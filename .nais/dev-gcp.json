@@ -262,7 +262,7 @@
       "cluster": "dev-gcp"
     },
     {
-      "name": "eien-tilganger-poc",
+      "name": "eien-poc",
       "namespace": "eien",
       "cluster": "dev-gcp"
     }

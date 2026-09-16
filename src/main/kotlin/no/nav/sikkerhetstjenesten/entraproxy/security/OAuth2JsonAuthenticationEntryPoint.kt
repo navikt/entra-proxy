@@ -37,6 +37,6 @@ class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : Authe
 
     companion object {
         private const val MANGLER_BEARER_TOKEN = "Bruker er ikke logget inn. Mangler Bearer token i Authorization header."
-        private val TYPE_URI = URI.create("https://confluence.adeo.no/display/TM/Tilgangsmaskin+API+og+regelsett")
+        private val TYPE_URI = URI.create("https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy")
     }
 }

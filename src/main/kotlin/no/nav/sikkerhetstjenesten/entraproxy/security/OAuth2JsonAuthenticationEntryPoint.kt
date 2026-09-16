@@ -6,14 +6,13 @@ import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.UNAUTHORIZED
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
 import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
-import java.net.URI
+import java.net.URI.create
 
 @Component
 class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : AuthenticationEntryPoint {
@@ -24,19 +23,16 @@ class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : Authe
         with(res) {
             status = UNAUTHORIZED.value()
             contentType = APPLICATION_PROBLEM_JSON_VALUE
-            mapper.writeValue(writer, securityProblemDetail(UNAUTHORIZED, MANGLER_BEARER_TOKEN))
+            mapper.writeValue(writer, securityProblemDetail(UNAUTHORIZED,
+                "Bruker er ikke logget inn. Mangler Bearer token i Authorization header."))
         }
     }
 
     private fun securityProblemDetail(status: HttpStatus, detail: String) =
         forStatusAndDetail(status, detail).apply {
-            type = TYPE_URI
+            type = create("https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy")
             title = "${status.value()}"
             properties = mapOf("traceId" to Span.current().spanContext.traceId)
         }
 
-    companion object {
-        private const val MANGLER_BEARER_TOKEN = "Bruker er ikke logget inn. Mangler Bearer token i Authorization header."
-        private val TYPE_URI = URI.create("https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy")
-    }
 }

@@ -92,6 +92,29 @@ class EntraTjenesteTest(
             }
         }
 
+        Given("medlemmer-endepunkt med et medlem uten onPremisesSamAccountName") {
+            When("gruppen inneholder en nøstet gruppe eller tjenestekonto") {
+                Then("skal medlemmet ignoreres uten at kallet feiler") {
+                    val gruppeId = randomUUID()
+                    val nøstetGruppeId = "${randomUUID()}"
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$medlemId", "displayName": "Ola Nordmann", "givenName": "Ola", "surname": "Nordmann", "onPremisesSamAccountName": "E123456" },
+                            { "id": "$nøstetGruppeId", "displayName": "En nøstet gruppe" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    entra.medlemmerIGruppe(gruppeId) shouldBe setOf(ANSATT)
+                }
+            }
+        }
+
         Given("users-endepunkt for oppslag av oid") {
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {

@@ -103,16 +103,20 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-    private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
-        allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+    private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
-            .mapNotNullTo(sortedSetOf()) {
-                with(it) {
-                    runCatching {
-                        Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
-                    }.getOrNull()
-                }
+        val (medMedlemsnummer, utenMedlemsnummer) = alleMedlemmer.partition { it.onPremisesSamAccountName != null }
+        if (utenMedlemsnummer.isNotEmpty()) {
+            log.info("Ignorerte {} medlem(mer) av gruppe {} uten onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
+                utenMedlemsnummer.size, gruppeOid)
+        }
+        return medMedlemsnummer.mapTo(sortedSetOf()) {
+            with(it) {
+                Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
             }
+        }
+    }
 
     private fun enheter(ansattOid: UUID) =
         buildSet {
@@ -141,14 +145,16 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
 
     private fun ansatt(block: () -> AnsattRespons?) =
-        block()?.let {
-            with(it) {
-                val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
-                UtvidetAnsatt(
-                    AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
-                    TIdent(jobTitle?: TIDENT_DEFAULT),
-                    mail,
-                    Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
+        block()?.let { respons ->
+            respons.onPremisesSamAccountName?.let { navIdent ->
+                with(respons) {
+                    val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
+                    UtvidetAnsatt(
+                        AnsattId(navIdent), displayName, givenName, surname,
+                        TIdent(jobTitle?: TIDENT_DEFAULT),
+                        mail,
+                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
+                }
             }
         }
 

@@ -34,7 +34,7 @@ data class EntraSaksbehandlerRespons(
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattRespons(
         val id: UUID,
-        val onPremisesSamAccountName: String,
+        val onPremisesSamAccountName: String? = null,
         val displayName: String? = UKJENT,
         val givenName: String? = UKJENT,
         val surname: String? = UKJENT,

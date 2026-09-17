@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit.MINUTES
 
 @Component
 @ConditionalOnGCP
-class CachePeriodicJob(private val entra: EntraTjeneste, private val cacheOperations: CacheOperations, @Value("\${groups.disabled}") private val uuid: UUID) {
+class CachePeriodicJob(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) {
 
     private val log = getLogger(javaClass)
 
@@ -21,7 +21,9 @@ class CachePeriodicJob(private val entra: EntraTjeneste, private val cacheOperat
             val medlemmer = entra.medlemmerIGruppe(uuid).mapTo(mutableSetOf()) { it.navIdent.verdi
             }
             log.info("Periodisk cache-jobb OK, {} medlemmer i gruppe {} oppdatert", medlemmer.size, uuid)
-            //cacheOperations.putSet("inaktive",emptySet())
+            val existing = cache.getSet(INAKTIVE)
+            log.info("Periodisk cache-jobb OK, {} medlemmer i eksisterende cache for inaktive", existing.size)
+            cache.replaceSet(INAKTIVE,medlemmer)
         }.onSuccess {
             log.info("Periodisk cache-jobb OK, {} sett oppdatert", it)
         }.onFailure {
@@ -30,6 +32,7 @@ class CachePeriodicJob(private val entra: EntraTjeneste, private val cacheOperat
     }
 
     companion object {
+        private const val INAKTIVE = "inaktive"
         private const val INTERVAL_MINUTES = 1L
     }
 }

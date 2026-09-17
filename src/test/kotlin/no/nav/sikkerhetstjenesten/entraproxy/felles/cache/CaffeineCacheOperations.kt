@@ -9,6 +9,8 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     private val log = getLogger(javaClass)
 
+    override fun getSet(key: String): Set<String> = emptySet()
+
     override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
         val key = caffeineNøkkel(cache, id)
         val springCache = cacheManager.getCache(cache.name) ?: return false

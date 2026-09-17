@@ -8,7 +8,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExten
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.core.Cursor
+import org.springframework.data.redis.core.RedisOperations
 import org.springframework.data.redis.core.ScanOptions
+import org.springframework.data.redis.core.SessionCallback
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
@@ -26,8 +28,7 @@ private val SCRIPT = RedisScript.of(ClassPathResource("scripts/count-all-keys.lu
 @Component
 class ValkeyCacheOperations(
     private val valkey: StringRedisTemplate,
-    vararg cfgs: CachableRestConfig,
-) : CacheOperations {
+    vararg cfgs: CachableRestConfig) : CacheOperations {
 
     private val log = getLogger(javaClass)
     private val defaultTtlForCache = cfgs.flatMap { cfg ->
@@ -46,17 +47,30 @@ class ValkeyCacheOperations(
         }
     }
 
-    override fun putSet(key: String, ansattIds: Set<String>): Long =
-        if (ansattIds.isEmpty()) {
-            0L
-        } else {
-            runCatching {
-                valkey.opsForSet().add(key, *ansattIds.toTypedArray())
-            }
-                .onFailure {
-                    log.info("Cache set feilet for nøkkel {}: {}", key, it.message, it)
-                }.getOrElse { 0L }
-        }
+    override fun replaceSet(key: String, verdier: Set<String>): Long =
+        runCatching {
+            valkey.execute(object : SessionCallback<List<Any>> {
+                override fun <K : Any, V : Any> execute(operations: RedisOperations<K, V>): List<Any> {
+                    @Suppress("UNCHECKED_CAST")
+                    val ops = operations as RedisOperations<String, String>
+                    ops.multi()
+                    ops.delete(key)
+                    if (verdier.isNotEmpty()) {
+                        ops.opsForSet().add(key, *verdier.toTypedArray())
+                    }
+                    return ops.exec()
+                }
+            })?.getOrNull(1) as? Long ?: 0L
+        }.onFailure {
+            log.info("Cache set feilet for nøkkel {}: {}", key, it.message, it)
+        }.getOrElse { 0L }
+
+    override fun getSet(key: String): Set<String> =
+        runCatching {
+            valkey.opsForSet().members(key)
+        }.onFailure {
+            log.info("Cache getSet feilet for nøkkel {}: {}", key, it.message, it)
+        }.getOrNull().orEmpty()
 
     override fun setContains(key: String, ansattId: String): Boolean =
         runCatching {

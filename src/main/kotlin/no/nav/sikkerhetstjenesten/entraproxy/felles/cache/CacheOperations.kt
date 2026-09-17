@@ -4,7 +4,8 @@ import java.time.Duration
 import kotlin.reflect.KClass
 
 interface CacheOperations {
-    fun putSet(key: String, values: Set<String>): Long = 0L
+    fun replaceSet(key: String, values: Set<String>): Long = 0L
+    fun getSet(key: String): Set<String>
     fun setContains(key: String, value: String): Boolean = false
     fun delete(cache: CacheNøkkelConfig, id: String): Boolean
     fun <T : Any> getOne(cache: CacheNøkkelConfig, id: String, clazz: KClass<T>): T?

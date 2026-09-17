@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavidente
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId.Companion.ANSATTID_LENGTH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -106,12 +107,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
-        val (medMedlemsnummer, utenMedlemsnummer) = alleMedlemmer.partition { it.onPremisesSamAccountName != null }
-        if (utenMedlemsnummer.isNotEmpty()) {
-            log.info("Ignorerte {} medlem(mer) av gruppe {} uten onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
-                utenMedlemsnummer.size, gruppeOid)
+        val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
+            it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
         }
-        return medMedlemsnummer.mapTo(sortedSetOf()) {
+        if (ugyldigeMedlemmer.isNotEmpty()) {
+            log.info("Ignorerte {} medlem(mer) av gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
+                ugyldigeMedlemmer.size, gruppeOid)
+        }
+        return gyldigeMedlemmer.mapTo(sortedSetOf()) {
             with(it) {
                 Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
             }

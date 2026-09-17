@@ -22,10 +22,13 @@ class CachePeriodicJob(private val entra: EntraTjeneste, private val cache: Cach
             }
             log.info("Periodisk cache-jobb OK, {} medlemmer i gruppe {} oppdatert", medlemmer.size, uuid)
             val existing = cache.getSet(INAKTIVE)
-            log.info("Periodisk cache-jobb OK, {} medlemmer i eksisterende cache for inaktive", existing.size)
+            val first = existing.first()
+            val contains = cache.setContains(INAKTIVE, first)
+            log.info("Periodisk cache-jobb OK, ${existing.size} medlemmer i eksisterende cache for inaktive, første er $first, contains=$contains")
+
             cache.replaceSet(INAKTIVE,medlemmer)
         }.onSuccess {
-            log.info("Periodisk cache-jobb OK, {} sett oppdatert", it)
+            log.info("Periodisk cache-jobb OK, cache oppdatert")
         }.onFailure {
             log.warn("Periodisk cache-jobb feilet", it)
         }

@@ -125,7 +125,12 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }
 
     private fun <T> allSider(førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Sequence<T> =
-        generateSequence(førsteSide) { next(it)?.let(hentSide) }
+        generateSequence(førsteSide) { side ->
+            next(side)?.let { nesteSideUri ->
+                log.debug("Følger @odata.nextLink {}", nesteSideUri)
+                hentSide(nesteSideUri)
+            }
+        }
 
 
 

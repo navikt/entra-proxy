@@ -106,9 +106,11 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
         allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
-            .mapTo(sortedSetOf()) {
+            .mapNotNullTo(sortedSetOf()) {
                 with(it) {
-                    Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
+                    runCatching {
+                        Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
+                    }.getOrNull()
                 }
             }
 

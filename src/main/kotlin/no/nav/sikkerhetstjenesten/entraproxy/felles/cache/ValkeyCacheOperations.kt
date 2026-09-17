@@ -46,6 +46,27 @@ class ValkeyCacheOperations(
         }
     }
 
+    override fun putSet(key: String, ansattIds: Set<String>): Long =
+        if (ansattIds.isEmpty()) {
+            0L
+        } else {
+            runCatching {
+                valkey.opsForSet().add(key, *ansattIds.toTypedArray())
+            }
+                .onFailure {
+                    log.info("Cache set feilet for nøkkel {}: {}", key, it.message, it)
+                }.getOrElse { 0L }
+        }
+
+    override fun setContains(key: String, ansattId: String): Boolean =
+        runCatching {
+            valkey.opsForSet().isMember(key, ansattId)
+        }.onFailure {
+            log.info("Cache set contains feilet for nøkkel {} og verdi {}: {}", key, ansattId, it.message, it)
+        }.getOrElse {
+            false
+        }
+
     @Observed
     override fun delete(cache: CacheNøkkelConfig, id: String) =
         runCatching { valkey.unlink(cache.tilNøkkel(id)) }

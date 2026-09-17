@@ -36,11 +36,13 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             else throw it
         }
 
-
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            enheter(oid)
+            if (cache.setContains("inaktive",ansattId.verdi)){
+                emptySet()
+            }
+            else enheter(oid)
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 enheter(refreshOid(ansattId))
@@ -70,21 +72,25 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
-            grupperForAnsatt(oid.toString())
+            grupperForAnsatt("$oid")
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                grupperForAnsatt(refreshOid(navIdent).toString())
+                grupperForAnsatt("${refreshOid(navIdent)}")
             }
             else throw it
         }
 
     private fun temaerForAnsatt(ansattOid: String) =
         client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')").value
-            .mapTo(sortedSetOf()) { Tema(it.displayName) }
+            .mapTo(sortedSetOf()) {
+                Tema(it.displayName)
+            }
 
     private fun grupperForAnsatt(ansattOid: String) =
         client.memberOf(ansattOid, MINIMUM_FELTER).value
-            .mapTo(sortedSetOf()) { EntraGruppe(it.displayName) }
+            .mapTo(sortedSetOf()) {
+                EntraGruppe(it.displayName)
+            }
 
     private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
         client.members(gruppeOid, ANSATTE_FELTER).value
@@ -97,7 +103,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun enheter(ansattOid: UUID) =
         buildSet {
             client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')").value
-                .map { Enhetnummer(it.displayName) }
+                .map {
+                    Enhetnummer(it.displayName)
+                }
                 .forEach {
                     add(Enhet(it, norg.navnFor(it)))
                 }
@@ -121,9 +129,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
         return oid.ansattOid(navIdent).also {
-            log.info("Hentet  ny oid $it for $navIdent")
-        }
-            ?: throw NotFoundRestException(currentUri, "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
+            log.info("Hentet ny oid $it for $navIdent")
+        } ?: throw NotFoundRestException(currentUri, "Fant ikke oid for $navIdent i Entra, selv etter cache-opprydding")
     }
 
     override fun toString() =

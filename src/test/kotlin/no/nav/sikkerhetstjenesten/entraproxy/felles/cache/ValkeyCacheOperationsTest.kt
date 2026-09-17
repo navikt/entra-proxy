@@ -239,6 +239,16 @@ class ValkeyCacheOperationsTest(
             }
         }
 
+        Given("cacheSet") {
+            When("ett sett med strenger legges i en Valkey-set") {
+                Then("lagres som medlemmer i den angitte nøkkelen") {
+                    val members = setOf("a", "b", "c")
+                    cache.putSet("cache-set-test", members) shouldBe 3L
+                    valkey.opsForSet().members("cache-set-test") shouldBe members
+                }
+            }
+        }
+
         Given("cache-utløp") {
             ALL_TEST_CACHES.forEach { cacheConfig ->
                 When("TTL løper ut for ${cacheConfig.fullName}") {

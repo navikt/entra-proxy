@@ -22,10 +22,9 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
                 it.navIdent.verdi
             }
             cache.replaceSet(INAKTIVE,medlemmer)
-            log.info("Periodisk cache-jobb OK, ${medlemmer.size} medlemmer i eksisterende cache for inaktive")
-
+            log.info("Periodisk cache-jobb OK, la til ${medlemmer.size} medlemmer i cache for inaktive")
         }.onSuccess {
-            log.info("Periodisk cache-jobb OK, cache oppdatert")
+            log.trace("Periodisk cache-jobb OK, cache oppdatert")
         }.onFailure {
             log.warn("Periodisk cache-jobb feilet", it)
         }

@@ -78,7 +78,7 @@ class ValkeyCacheOperations(
             log.warn("Cache getSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
         }.getOrNull().orEmpty()
 
-    override fun setContains(nøkkel: String, verdi: String) =
+    override fun setInneholder(nøkkel: String, verdi: String) =
         runCatching {
             valkey.opsForSet().isMember(nøkkel, verdi)
         }.onSuccess {

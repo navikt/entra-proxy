@@ -29,7 +29,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (cache.setContains(INAKTIVE,ansattId.verdi)) {
+            if (cache.setInneholder(INAKTIVE,ansattId.verdi)) {
                 emptySet()
             }
             else  {
@@ -45,7 +45,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (cache.setContains(INAKTIVE,ansattId.verdi)) {
+            if (cache.setInneholder(INAKTIVE,ansattId.verdi)) {
                 emptySet()
             }
             else  {

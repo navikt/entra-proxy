@@ -90,21 +90,21 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }
 
     private fun temaerForAnsatt(ansattOid: String) =
-        allSider(client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+        allSider("temaer for $ansattOid", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 Tema(it.displayName)
             }
 
     private fun grupperForAnsatt(ansattOid: String) =
-        allSider(client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
+        allSider("grupper for $ansattOid", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)
             }
 
     private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
-        allSider(client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+        allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 with(it) {
@@ -114,7 +114,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     private fun enheter(ansattOid: UUID) =
         buildSet {
-            allSider(client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
+            allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
                 .flatMap { it.value }
                 .map {
                     Enhetnummer(it.displayName)
@@ -124,13 +124,17 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 }
         }
 
-    private fun <T> allSider(førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Sequence<T> =
-        generateSequence(førsteSide) { side ->
+    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): List<T> {
+        log.info("Henter {}", beskrivelse)
+        val sider = generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
-                log.info("Følger @odata.nextLink {}", nesteSideUri)
+                log.info("Følger @odata.nextLink for {}: {}", beskrivelse, nesteSideUri)
                 hentSide(nesteSideUri)
             }
-        }
+        }.toList()
+        log.info("Hentet {} side(r) for {}", sider.size, beskrivelse)
+        return sider
+    }
 
 
 

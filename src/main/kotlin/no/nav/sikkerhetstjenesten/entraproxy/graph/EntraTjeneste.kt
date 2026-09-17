@@ -15,6 +15,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
+import java.net.URI
 import java.util.*
 
 const val BRUKER = "onPremisesSamAccountName"
@@ -89,19 +90,22 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }
 
     private fun temaerForAnsatt(ansattOid: String) =
-        client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')").value
+        allSider(client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+            .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 Tema(it.displayName)
             }
 
     private fun grupperForAnsatt(ansattOid: String) =
-        client.memberOf(ansattOid, MINIMUM_FELTER).value
+        allSider(client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
+            .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)
             }
 
     private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> =
-        client.members(gruppeOid, ANSATTE_FELTER).value
+        allSider(client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+            .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 with(it) {
                     Ansatt(AnsattId(onPremisesSamAccountName), displayName, givenName, surname)
@@ -110,7 +114,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     private fun enheter(ansattOid: UUID) =
         buildSet {
-            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')").value
+            allSider(client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
+                .flatMap { it.value }
                 .map {
                     Enhetnummer(it.displayName)
                 }
@@ -118,6 +123,10 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                     add(Enhet(it, norg.navnFor(it)))
                 }
         }
+
+    private fun <T> allSider(førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Sequence<T> =
+        generateSequence(førsteSide) { next(it)?.let(hentSide) }
+
 
 
     private fun ansatt(block: () -> AnsattRespons?) =

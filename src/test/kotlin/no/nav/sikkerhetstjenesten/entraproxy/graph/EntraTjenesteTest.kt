@@ -54,6 +54,44 @@ class EntraTjenesteTest(
             }
         }
 
+        Given("medlemmer-endepunkt med paginering") {
+            When("Graph svarer med flere sider via @odata.nextLink") {
+                Then("skal alle sidene hentes og medlemmene fra alle sidene returneres") {
+                    val gruppeId = randomUUID()
+                    val nesteSideUri = "$baseUrl/groups/$gruppeId/members?\$skiptoken=abc"
+                    val medlem2Id = "${randomUUID()}"
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "@odata.nextLink": "$nesteSideUri",
+                          "value": [
+                            { "id": "$medlemId", "displayName": "Ola Nordmann", "givenName": "Ola", "surname": "Nordmann", "onPremisesSamAccountName": "E123456" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString() == nesteSideUri
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$medlem2Id", "displayName": "Kari Nordmann", "givenName": "Kari", "surname": "Nordmann", "onPremisesSamAccountName": "E654321" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    entra.medlemmerIGruppe(gruppeId) shouldBe setOf(
+                        ANSATT,
+                        Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
+                    )
+                }
+            }
+        }
+
         Given("users-endepunkt for oppslag av oid") {
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {

@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavidenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
@@ -28,7 +29,12 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            temaerForAnsatt("$oid")
+            if (cache.setContains(INAKTIVE,ansattId.verdi)) {
+                emptySet()
+            }
+            else  {
+                temaerForAnsatt("$oid")
+            }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 temaerForAnsatt("${refreshOid(ansattId)}")
@@ -39,10 +45,12 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (cache.setContains("inaktive",ansattId.verdi)){
+            if (cache.setContains(INAKTIVE,ansattId.verdi)) {
                 emptySet()
             }
-            else enheter(oid)
+            else  {
+                enheter(oid)
+            }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 enheter(refreshOid(ansattId))

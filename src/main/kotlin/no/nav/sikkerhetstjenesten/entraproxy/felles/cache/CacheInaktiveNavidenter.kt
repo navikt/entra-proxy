@@ -11,22 +11,19 @@ import java.util.concurrent.TimeUnit.MINUTES
 
 @Component
 @ConditionalOnGCP
-class CachePeriodicJob(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) {
+class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) {
 
     private val log = getLogger(javaClass)
 
     @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES)
-    fun kjørPeriodisk() {
+    fun oppdaterCache() {
         runCatching {
-            val medlemmer = entra.medlemmerIGruppe(uuid).mapTo(mutableSetOf()) { it.navIdent.verdi
+            val medlemmer = entra.medlemmerIGruppe(uuid).mapTo(mutableSetOf()) {
+                it.navIdent.verdi
             }
-            log.info("Periodisk cache-jobb OK, {} medlemmer i gruppe {} oppdatert", medlemmer.size, uuid)
-            val existing = cache.getSet(INAKTIVE)
-            val first = existing.first()
-            val contains = cache.setContains(INAKTIVE, first)
-            log.info("Periodisk cache-jobb OK, ${existing.size} medlemmer i eksisterende cache for inaktive, første er $first, contains=$contains")
-
             cache.replaceSet(INAKTIVE,medlemmer)
+            log.info("Periodisk cache-jobb OK, ${medlemmer.size} medlemmer i eksisterende cache for inaktive")
+
         }.onSuccess {
             log.info("Periodisk cache-jobb OK, cache oppdatert")
         }.onFailure {
@@ -35,7 +32,7 @@ class CachePeriodicJob(private val entra: EntraTjeneste, private val cache: Cach
     }
 
     companion object {
-        private const val INAKTIVE = "inaktive"
-        private const val INTERVAL_MINUTES = 1L
+        const val INAKTIVE = "inaktive"
+        private const val INTERVAL_MINUTES = 15L
     }
 }

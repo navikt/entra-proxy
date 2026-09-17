@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
 import java.time.Duration
+import kotlin.collections.emptyList
 import kotlin.collections.getOrNull
 import kotlin.collections.orEmpty
 import kotlin.reflect.KClass
@@ -47,36 +48,43 @@ class ValkeyCacheOperations(
         }
     }
 
-    override fun replaceSet(key: String, verdier: Set<String>): Long =
+    override fun replaceSet(nøkkel: String, verdier: Set<String>) {
         runCatching {
             valkey.execute(object : SessionCallback<List<Any>> {
                 override fun <K : Any, V : Any> execute(operations: RedisOperations<K, V>): List<Any> {
                     @Suppress("UNCHECKED_CAST")
                     val ops = operations as RedisOperations<String, String>
                     ops.multi()
-                    ops.delete(key)
+                    ops.delete(nøkkel)
                     if (verdier.isNotEmpty()) {
-                        ops.opsForSet().add(key, *verdier.toTypedArray())
+                        ops.opsForSet().add(nøkkel, *verdier.toTypedArray())
                     }
                     return ops.exec()
                 }
-            })?.getOrNull(1) as? Long ?: 0L
+            })
+        }.onSuccess {
+            log.trace("Cache set OK for nøkkel {} med {} verdier", nøkkel,verdier.size)
         }.onFailure {
-            log.info("Cache set feilet for nøkkel {}: {}", key, it.message, it)
-        }.getOrElse { 0L }
+            log.info("Cache set feilet for nøkkel {}: {}", nøkkel, it.message, it)
+        }
+    }
 
-    override fun getSet(key: String): Set<String> =
+    override fun getSet(nøkkel: String)  =
         runCatching {
-            valkey.opsForSet().members(key)
+            valkey.opsForSet().members(nøkkel)
+        }.onSuccess {
+            log.trace("Cache getSet OK for nøkkel {}", nøkkel)
         }.onFailure {
-            log.info("Cache getSet feilet for nøkkel {}: {}", key, it.message, it)
+            log.warn("Cache getSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
         }.getOrNull().orEmpty()
 
-    override fun setContains(key: String, ansattId: String): Boolean =
+    override fun setContains(nøkkel: String, verdi: String) =
         runCatching {
-            valkey.opsForSet().isMember(key, ansattId)
+            valkey.opsForSet().isMember(nøkkel, verdi)
+        }.onSuccess {
+            log.trace("Cache setContains OK for nøkkel {} og verdi {}", nøkkel, verdi)
         }.onFailure {
-            log.info("Cache set contains feilet for nøkkel {} og verdi {}: {}", key, ansattId, it.message, it)
+            log.info("Cache set contains feilet for nøkkel {} og verdi {}: {}", nøkkel, verdi, it.message, it)
         }.getOrElse {
             false
         }

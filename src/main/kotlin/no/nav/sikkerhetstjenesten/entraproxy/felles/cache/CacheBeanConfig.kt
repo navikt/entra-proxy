@@ -70,7 +70,7 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
             maxSubscriptionRegistrationWaitingTime = 30_000
 
             setErrorHandler {
-                log.warn("Redis listener feilet, retry om 5s", it)
+                log.warn("Valkey listener feilet, retry om 5s", it)
             }
         }
 

@@ -1,9 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Value
-import tools.jackson.core.Version
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Value.construct
+import tools.jackson.core.Version.unknownVersion
 import tools.jackson.databind.AnnotationIntrospector
 import tools.jackson.databind.cfg.MapperConfig
 import tools.jackson.databind.introspect.Annotated
@@ -18,9 +18,9 @@ class JacksonTypeInfoAddingValkeyModule : SimpleModule() {
         ctx.insertAnnotationIntrospector(object : AnnotationIntrospector() {
             override fun findTypeResolverBuilder(config: MapperConfig<*>, ann: Annotated) =
                 StdTypeResolverBuilder().init(
-                    Value.construct(Id.CLASS, As.PROPERTY, "@class", null, true, true), null)
+                    construct(CLASS, PROPERTY, "@class", null, true, true), null)
 
-            override fun version() = Version.unknownVersion()
+            override fun version() = unknownVersion()
         })
     }
 }

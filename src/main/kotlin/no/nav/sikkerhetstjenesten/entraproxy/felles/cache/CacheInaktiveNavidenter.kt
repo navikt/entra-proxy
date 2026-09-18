@@ -32,7 +32,7 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
                         }
                         sideNummer++
                         cache.addToSet(INAKTIVE, navIdenter).also {
-                            log.info("La til {} inaktive medlemmer i cache for side {}", navIdenter.size, sideNummer)
+                            log.trace("La til {} inaktive medlemmer i cache for side {}", navIdenter.size, sideNummer)
                         }
                     }
                     log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)

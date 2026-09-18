@@ -12,8 +12,8 @@ private const val PONG = "pong"
 @Component
 class CachePingable(
     private val cf: RedisConnectionFactory,
-    @Value("\${spring.data.redis.host:localhost}") host: String,
-    @Value("\${spring.data.redis.port:6379}") port: Int,
+    @Value($$"${spring.data.redis.host:localhost}") host: String,
+    @Value($$"${spring.data.redis.port:6379}") port: Int,
 ) : Pingable {
 
     override val pingEndpoint = URI.create("$host:$port")

@@ -23,7 +23,6 @@ import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
@@ -43,14 +42,8 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 
     @Bean
-    fun restClientCustomizer(logbookInterceptor: /*ObjectProvider<*/LogbookClientHttpRequestInterceptor/*>*/) =
+    fun restClientCustomizer() =
         RestClientCustomizer { c ->
-            c.requestInterceptors {
-               /* logbookInterceptor.ifAvailable {
-                    interceptor -> it.add(interceptor)
-                }*/
-                it.addFirst(logbookInterceptor)
-            }
             c.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
         }
 

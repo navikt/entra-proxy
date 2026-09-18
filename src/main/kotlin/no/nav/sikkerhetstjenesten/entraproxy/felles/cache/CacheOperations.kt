@@ -6,7 +6,7 @@ import kotlin.reflect.KClass
 interface CacheOperations {
     fun replaceSet(nøkkel: String, verdier: Set<String>)
     fun getSet(nøkkel: String): Set<String>
-    fun setInneholder(nøkkel: String, verdi: String): Boolean = false
+    fun inneholder(nøkkel: String, verdi: String): Boolean = false
     fun delete(cache: CacheNøkkelConfig, id: String): Boolean
     fun <T : Any> getOne(cache: CacheNøkkelConfig, id: String, clazz: KClass<T>): T?
     fun putOne(cache: CacheNøkkelConfig, id: String, value: Any, ttl: Duration? = null)

@@ -31,7 +31,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (cache.setInneholder(INAKTIVE,ansattId.verdi)) {
+            if (cache.inneholder(INAKTIVE,ansattId.verdi)) {
                 emptySet()
             }
             else  {
@@ -47,7 +47,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (cache.setInneholder(INAKTIVE,ansattId.verdi)) {
+            if (cache.inneholder(INAKTIVE,ansattId.verdi)) {
                 emptySet()
             }
             else  {
@@ -104,15 +104,15 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
-            log.info("Ignorerte {} medlem(mer) av gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
-                ugyldigeMedlemmer/*.map { it.onPremisesSamAccountName }*/, gruppeOid)
+            log.info("Ignorerte {} medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
+                ugyldigeMedlemmer, oid)
         }
         return gyldigeMedlemmer.mapTo(sortedSetOf()) {
             with(it) {
@@ -167,7 +167,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }
         return oid.ansattOid(navIdent).also {
             log.info("Hentet ny oid $it for $navIdent")
-        } ?: throw NotFoundRestException(currentUri, "Fant ikke oid for $navIdent i Entra, selv etter cache-opprydding")
+        } ?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding")
     }
 
     override fun toString() =

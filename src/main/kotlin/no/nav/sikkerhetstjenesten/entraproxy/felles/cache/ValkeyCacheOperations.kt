@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import io.micrometer.observation.annotation.Observed
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheBeanConfig.Companion.VALKEY_MAPPER
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isLocalOrTest
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isProd
@@ -62,41 +61,35 @@ class ValkeyCacheOperations(
                     return ops.exec()
                 }
             })
-        }.onSuccess {
-            log.trace("Cache set OK for nøkkel {} med {} verdier", nøkkel,verdier.size)
         }.onFailure {
-            log.info("Cache set feilet for nøkkel {}: {}", nøkkel, it.message, it)
+            log.warn("Cache replaceSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
         }
     }
 
     override fun getSet(nøkkel: String)  =
         runCatching {
             valkey.opsForSet().members(nøkkel)
-        }.onSuccess {
-            log.trace("Cache getSet OK for nøkkel {}", nøkkel)
         }.onFailure {
             log.warn("Cache getSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
         }.getOrNull().orEmpty()
 
-    override fun setInneholder(nøkkel: String, verdi: String) =
+    override fun inneholder(nøkkel: String, verdi: String) =
         runCatching {
             valkey.opsForSet().isMember(nøkkel, verdi)
-        }.onSuccess {
-            log.trace("Cache setContains OK for nøkkel {} og verdi {}", nøkkel, verdi)
         }.onFailure {
-            log.info("Cache set contains feilet for nøkkel {} og verdi {}: {}", nøkkel, verdi, it.message, it)
+            log.warn("Cache set inneholder feilet for nøkkel {} og verdi {}: {}", nøkkel, verdi, it.message, it)
         }.getOrElse {
             false
         }
 
-    @Observed
     override fun delete(cache: CacheNøkkelConfig, id: String) =
         runCatching { valkey.unlink(cache.tilNøkkel(id)) }
             .onFailure {
                 log.info("Cache delete feilet for {} nøkkel {}: {}", cache.fullName, id.maskFnr(), it.message, it)
-            }.getOrElse { false }
+            }.getOrElse {
+                false
+            }
 
-    @Observed
     override fun <T : Any> getOne(cache: CacheNøkkelConfig, id: String, clazz: KClass<T>): T? {
         return runCatching {
             valkey.opsForValue().get(cache.tilNøkkel(id))?.let { VALKEY_MAPPER.readValue(it, clazz.java) }
@@ -105,14 +98,13 @@ class ValkeyCacheOperations(
         }.getOrNull()
     }
 
-    @Observed
     override fun putOne(cache: CacheNøkkelConfig, id: String, value: Any, ttl: Duration?) {
         runCatching {
             val key = cache.tilNøkkel(id)
             val json = VALKEY_MAPPER.writeValueAsString(value)
             val ops = valkey.opsForValue()
-            effectiveTtl(cache, ttl)?.let { ttlToUse ->
-                ops.set(key, json, ttlToUse)
+            effectiveTTL(cache, ttl)?.let {
+                    ttlToUse ->  ops.set(key, json, ttlToUse)
             } ?: ops.set(key, json)
         }.onFailure {
             log.info("Cache putOne feilet for {} nøkkel {}: {}", cache.fullName, id, it.message, it)
@@ -120,42 +112,15 @@ class ValkeyCacheOperations(
     }
 
 
-    @Observed
     override fun <T : Any> getMany(cache: CacheNøkkelConfig, ids: Set<String>, clazz: KClass<T>) =  doGetMany(cache, ids.toList(), clazz)
 
 
-    @Observed
     override fun putMany(cache: CacheNøkkelConfig, innslag: Map<String, Any>, ttl: Duration?) {
-        val ttlToUse = effectiveTtl(cache, ttl)
+        val ttlToUse = effectiveTTL(cache, ttl)
         when {
             innslag.isEmpty() -> return
             innslag.size == 1 -> doPutOne(cache, innslag, ttlToUse)
             else -> doPutMany(cache, innslag, ttlToUse?.seconds)
-        }
-    }
-
-    private fun effectiveTtl(cache: CacheNøkkelConfig, ttl: Duration?) =
-        ttl ?: defaultTtlForCache[cache.fullName]
-
-    private fun <T : Any> doGetMany(cache: CacheNøkkelConfig,
-                                    requestedIds: List<String>,
-                                    clazz: KClass<T>): Map<String, T?> {
-        markNow().let { start ->
-            return runCatching {
-                val values = valkey.opsForValue().multiGet(requestedIds.map(cache::tilNøkkel)).orEmpty()
-                requestedIds.mapIndexedNotNull { index, id ->
-                    values.getOrNull(index)?.let { value ->
-                        id to VALKEY_MAPPER.readValue<T>(value, clazz.java)
-                    }
-                }.toMap()
-            }.onSuccess { verdier ->
-                val varighet = start.elapsedNow()
-                log.trace("getMany {} hentet {} av {} nøkler på {}ms",
-                    cache.fullName, verdier.size, requestedIds.size, varighet.inWholeMilliseconds)
-            }.onFailure {
-                log.warn("{} getMany feilet for {} med {} nøkler: {}",
-                    javaClass.simpleName, cache.fullName, requestedIds.size, it.message, it)
-            }.getOrElse { emptyMap() }
         }
     }
 
@@ -166,8 +131,8 @@ class ValkeyCacheOperations(
             (it.keyCommands().scan(scanOptions(cache)) as Cursor<ByteArray>).use { cursor ->
                 val batch = mutableListOf<String>()
                 var deleted = 0L
-                cursor.forEach { keyBytes ->
-                    batch += keyBytes.toString(UTF_8)
+                cursor.forEach {
+                    keyBytes -> batch += keyBytes.toString(UTF_8)
                     if (batch.size == BATCH_SIZE) {
                         deleted += batch.size.toLong()
                         valkey.delete(batch)
@@ -185,12 +150,11 @@ class ValkeyCacheOperations(
         check(!isProd) { "FlushDb er ikke støttet i prod for å unngå utilsiktet sletting av cache-innhold" }
         val before = valkey.execute { it.serverCommands().dbSize() } ?: 0L
         log.info("Tømmer hele Valkey-databasen, størrelse før tømming: {}", before)
-        valkey.execute { it.serverCommands().flushDb() }
+        valkey.execute {
+            it.serverCommands().flushDb()
+        }
         return valkey.execute { it.serverCommands().dbSize() } ?: 0L
     }
-
-    private fun scanOptions(cache: CacheNøkkelConfig) =
-        ScanOptions.scanOptions().match("${cache.tilNøkkel("")}*").count(BATCH_SIZE.toLong()).build()
 
     override fun sizes(vararg caches: CacheNøkkelConfig): Map<String, Long> {
         markNow().let { start ->
@@ -200,10 +164,41 @@ class ValkeyCacheOperations(
             val results = (valkey.execute(SCRIPT, emptyList(), *prefixes.toTypedArray()) as List<Number>)
                 .map(Number::toLong)
             val totalDuration = start.elapsedNow()
-            return caches.zip(results).associate { (cache, count) -> cache.fullName to count }
+            return caches.zip(results).associate {
+                (cache, count) -> cache.fullName to count
+            }
                 .also { log.info("Cache størrelser {} slått opp, tok {}ms", it, totalDuration.inWholeMilliseconds) }
         }
     }
+
+    private fun effectiveTTL(cache: CacheNøkkelConfig, ttl: Duration?) =
+        ttl ?: defaultTtlForCache[cache.fullName]
+
+    private fun <T : Any> doGetMany(cache: CacheNøkkelConfig,
+                                    requestedIds: List<String>,
+                                    clazz: KClass<T>): Map<String, T?> {
+        markNow().let { start ->
+            return runCatching {
+                val values = valkey.opsForValue().multiGet(requestedIds.map(cache::tilNøkkel)).orEmpty()
+                requestedIds.mapIndexedNotNull {
+                    index, id ->
+                    values.getOrNull(index)?.let { value ->
+                        id to VALKEY_MAPPER.readValue<T>(value, clazz.java)
+                    }
+                }.toMap()
+            }.onSuccess {
+                verdier -> val varighet = start.elapsedNow()
+                log.trace("getMany {} hentet {} av {} nøkler på {}ms",
+                    cache.fullName, verdier.size, requestedIds.size, varighet.inWholeMilliseconds)
+            }.onFailure {
+                log.warn("{} getMany feilet for {} med {} nøkler: {}",
+                    javaClass.simpleName, cache.fullName, requestedIds.size, it.message, it)
+            }.getOrElse { emptyMap() }
+        }
+    }
+
+    private fun scanOptions(cache: CacheNøkkelConfig) =
+        ScanOptions.scanOptions().match("${cache.tilNøkkel("")}*").count(BATCH_SIZE.toLong()).build()
 
     private fun doPutOne(cache: CacheNøkkelConfig,
                          innslag: Map<String, Any>,

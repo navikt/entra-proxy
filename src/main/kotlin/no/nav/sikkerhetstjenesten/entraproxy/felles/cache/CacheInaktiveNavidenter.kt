@@ -32,6 +32,6 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
 
     companion object {
         const val INAKTIVE = "inaktive"
-        private const val INTERVAL_MINUTES = 1L
+        private const val INTERVAL_MINUTES = 15L
     }
 }

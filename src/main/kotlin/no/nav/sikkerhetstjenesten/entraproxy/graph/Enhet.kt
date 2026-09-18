@@ -8,15 +8,6 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<En
 
     override fun compareTo(other: Enhet): Int = enhetnummer.compareTo(other.enhetnummer)
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is Enhet) return false
-        return enhetnummer == other.enhetnummer &&
-                navn == other.navn
-    }
-
-    override fun hashCode() = enhetnummer.hashCode()
-
     data class Enhetnummer(private val nummer: String) : Comparable<Enhetnummer> {
 
         @JsonValue

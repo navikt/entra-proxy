@@ -72,6 +72,14 @@ class ValkeyCacheOperations(
         }
     }
 
+    override fun renameSet(fra: String, til: String) {
+        runCatching {
+            valkey.rename(fra, til)
+        }.onFailure {
+            log.warn("Cache renameSet feilet fra {} til {}: {}", fra, til, it.message, it)
+        }
+    }
+
     override fun getSet(nøkkel: String)  =
         runCatching {
             valkey.opsForSet().members(nøkkel)

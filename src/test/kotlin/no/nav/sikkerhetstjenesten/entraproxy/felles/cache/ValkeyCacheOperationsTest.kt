@@ -248,6 +248,22 @@ class ValkeyCacheOperationsTest(
                     valkey.opsForSet().members("cache-set-test") shouldBe members
                 }
             }
+
+            When("et sett byttes inn med renameSet") {
+                Then("erstatter den gamle nøkkelen atomisk, og fjerner den midlertidige nøkkelen") {
+                    val gamleMedlemmer = setOf("gammel-1", "gammel-2")
+                    val nyeMedlemmer = setOf("ny-1", "ny-2", "ny-3")
+                    cache.replaceSet("cache-set-rename-test", gamleMedlemmer)
+                    cache.replaceSet("cache-set-rename-test-staging", nyeMedlemmer)
+
+                    cache.renameSet("cache-set-rename-test-staging", "cache-set-rename-test")
+
+                    assertSoftly {
+                        valkey.opsForSet().members("cache-set-rename-test") shouldBe nyeMedlemmer
+                        valkey.hasKey("cache-set-rename-test-staging") shouldBe false
+                    }
+                }
+            }
         }
 
         Given("cache-utløp") {

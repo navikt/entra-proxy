@@ -104,7 +104,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-    private fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> {
+     fun gruppeMedlemmer(gruppeOid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer for gruppe $gruppeOid", client.members(gruppeOid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
@@ -112,7 +112,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
             log.info("Ignorerte {} medlem(mer) av gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
-                ugyldigeMedlemmer.map { it.onPremisesSamAccountName }, gruppeOid)
+                ugyldigeMedlemmer/*.map { it.onPremisesSamAccountName }*/, gruppeOid)
         }
         return gyldigeMedlemmer.mapTo(sortedSetOf()) {
             with(it) {

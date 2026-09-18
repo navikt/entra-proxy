@@ -18,7 +18,7 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
     @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES)
     fun oppdaterCache() {
         runCatching {
-            val medlemmer = entra.medlemmerIGruppe(uuid).mapTo(mutableSetOf()) {
+            val medlemmer = entra.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) {
                 it.navIdent.verdi
             }
             cache.replaceSet(INAKTIVE,medlemmer)

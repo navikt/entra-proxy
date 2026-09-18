@@ -63,16 +63,16 @@ class CacheBeanConfig(private val cf: RedisConnectionFactory,
             }
 
     @Bean(name = ["redisMessageListenerContainer"])
-    fun redisMessageListenerContainer(cf: RedisConnectionFactory
-    ) = RedisMessageListenerContainer().apply {
-        setConnectionFactory(cf)
-        setRecoveryInterval(5_000) // retry subscription every 5s
-        maxSubscriptionRegistrationWaitingTime = 30_000
+    fun redisMessageListenerContainer(cf: RedisConnectionFactory) =
+        RedisMessageListenerContainer().apply {
+            setConnectionFactory(cf)
+            setRecoveryInterval(5_000) // retry subscription every 5s
+            maxSubscriptionRegistrationWaitingTime = 30_000
 
-        setErrorHandler {
-            log.warn("Redis listener feilet, retry om 5s", it)
+            setErrorHandler {
+                log.warn("Redis listener feilet, retry om 5s", it)
+            }
         }
-    }
 
     companion object {
         val VALKEY_MAPPER = JsonMapper.builder().polymorphicTypeValidator(NavPolymorphicTypeValidator()).apply {

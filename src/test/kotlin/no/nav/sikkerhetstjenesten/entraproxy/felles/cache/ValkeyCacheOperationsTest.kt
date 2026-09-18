@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
 import com.ninjasquad.springmockk.MockkBean
 import com.redis.testcontainers.RedisContainer
 import com.redis.testcontainers.RedisContainer.DEFAULT_IMAGE_NAME
@@ -18,6 +17,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.CacheSizeAware
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
@@ -52,6 +52,7 @@ import java.time.Duration.ofSeconds
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+
 @DataRedisTest
 @ContextConfiguration(classes = [ValkeyCacheTestConfig::class,ValkeyEventListeningCacheOppfrisker::class])
 @EnableAutoConfiguration

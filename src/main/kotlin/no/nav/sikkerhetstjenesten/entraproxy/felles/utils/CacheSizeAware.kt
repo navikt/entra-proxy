@@ -1,9 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
-import  no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CachableRestConfig
 
 
 @Component

@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.stereotype.Component
 import java.net.URI
-import java.util.Collections.*
 
 private const val PONG = "pong"
 

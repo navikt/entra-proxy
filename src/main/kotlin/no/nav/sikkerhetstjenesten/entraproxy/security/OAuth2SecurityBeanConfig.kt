@@ -5,6 +5,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstan
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatusCode
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
@@ -18,6 +19,7 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 
@@ -58,7 +60,7 @@ class OAuth2SecurityBeanConfig {
 
 
     @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor) =
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor, handler: ErrorHandler) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
@@ -69,6 +71,7 @@ class OAuth2SecurityBeanConfig {
                     }
                     it.addLast(logbook)
                 }
+                builder.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
             }
         }
 

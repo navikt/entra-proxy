@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.data.redis.serializer.RedisSerializer
 

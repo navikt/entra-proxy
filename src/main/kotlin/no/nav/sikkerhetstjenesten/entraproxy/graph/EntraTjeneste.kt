@@ -36,11 +36,15 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 emptySet()
             }
             else  {
-                temaerForAnsatt("$oid")
+                temaerForAnsatt("$oid").also {
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId")
+                }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                temaerForAnsatt("${refreshOid(ansattId)}")
+                temaerForAnsatt("${refreshOid(ansattId)}").also {
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid")
+                }
             }
             else throw it
         }
@@ -52,11 +56,15 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 emptySet()
             }
             else  {
-                enheter(oid)
+                enheter(oid).also {
+                    log.info("Hentet ${it.size} enheter for ansatt $ansattId")
+                }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                enheter(refreshOid(ansattId))
+                enheter(refreshOid(ansattId)).also {
+                    log.info("Hentet ${it.size} enheter for ansatt $ansattId etter refresh oid")
+                }
             }
             else throw it
         }
@@ -77,16 +85,22 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     fun utvidetAnsatt(ansattId: TIdent) =
         ansatt  {
             client.bruker(ANSATTE_FELTER, "jobTitle eq '${ansattId.verdi}'").ansatte.firstOrNull()
+        }?.also {
+            log.info("Hentet utvidet ansatt $it for tIdent ${ansattId.verdi}: $it")
         }
 
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
-            grupperForAnsatt("$oid")
+            grupperForAnsatt("$oid").also {
+                log.info("Hentet ${it.size} grupper for ansatt ${navIdent.verdi}")
+            }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                grupperForAnsatt("${refreshOid(navIdent)}")
+                grupperForAnsatt("${refreshOid(navIdent)}").also {
+                    log.info("Hentet ${it.size} grupper for ansatt ${navIdent.verdi} etter refresh oid")
+                }
             }
             else throw it
         }

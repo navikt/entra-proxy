@@ -25,7 +25,9 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
                 cache.replaceSet(INAKTIVE, emptySet())
                 var sideNummer = 0
                 entra.gruppeMedlemmer("$uuid") { side ->
-                    val navIdenter = side.value.mapNotNullTo(mutableSetOf()) { it.onPremisesSamAccountName }
+                    val navIdenter = side.value.mapNotNullTo(mutableSetOf()) {
+                        it.onPremisesSamAccountName
+                    }
                     sideNummer++
                     cache.addToSet(INAKTIVE, navIdenter).also {
                         log.info("La til {} inaktive medlemmer i cache for side {}", navIdenter.size, sideNummer)

@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import java.net.URI
 import java.util.UUID
-import kotlin.system.measureTimeMillis
 
 const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
@@ -158,16 +157,10 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         val sider = generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 sideNummer++
-                log.info("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
-                var nesteSide: T? = null
-                val hentingVarighet = measureTimeMillis {
-                    nesteSide = hentSide(nesteSideUri)
-                }
-                //log.info("Hentet side {} for {} på {}ms", sideNummer, beskrivelse, hentingVarighet)
-                nesteSide
+                log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
+                hentSide(nesteSideUri)
             }
         }.onEach(etterHverSide).toList()
-        //log.info("Hentet totalt {} side(r) for {}", sider.size, beskrivelse)
         return sider
     }
 

@@ -72,13 +72,17 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeId: UUID) =
-            gruppeMedlemmer("$gruppeId")
+            gruppeMedlemmer("$gruppeId").also {
+                log.info("Hentet ${it.size} medlemmer for gruppe $gruppeId")
+            }
 
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
         ansatt  {
             client.bruker(ANSATTE_FELTER, "$BRUKER eq '${ansattId.verdi}'").ansatte.firstOrNull()
+        }?.also {
+            log.info("Hentet ansatt $it for ident ${ansattId.verdi}: $it")
         }
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")

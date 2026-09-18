@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import io.micrometer.core.annotation.Timed
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import org.slf4j.LoggerFactory.getLogger
@@ -15,6 +16,7 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
 
     private val log = getLogger(javaClass)
 
+    @Timed
     @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES)
     fun oppdaterCache() {
         runCatching {
@@ -22,9 +24,7 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
                 it.navIdent.verdi
             }
             cache.replaceSet(INAKTIVE,medlemmer)
-            log.info("Periodisk cache-jobb OK, la til ${medlemmer.size} medlemmer i cache for inaktive")
-        }.onSuccess {
-            log.trace("Periodisk cache-jobb OK, cache oppdatert")
+            log.info("Periodisk cache-jobb OK, la til ${medlemmer.size} inaktive medlemmer i cache")
         }.onFailure {
             log.warn("Periodisk cache-jobb feilet", it)
         }

@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.notifikasjon
 
-import no.nav.boot.conditionals.ConditionalOnNotProd
+import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.NoCoverageAnalysis
 import org.zalando.logbook.Logbook
 import org.zalando.logbook.attributes.AttributeExtractor
@@ -15,7 +15,7 @@ import org.zalando.logbook.Sink
 
 @Configuration
 @NoCoverageAnalysis
-@ConditionalOnNotProd
+@ConditionalOnGCP
 class LogbookBeanConfiguration {
 
     @Bean

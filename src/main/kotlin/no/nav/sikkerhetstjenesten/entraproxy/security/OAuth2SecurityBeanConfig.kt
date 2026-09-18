@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.client.web.client.support.OAuth2RestC
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 
 
 @Configuration
@@ -57,7 +58,7 @@ class OAuth2SecurityBeanConfig {
 
 
     @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager) =
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
@@ -66,6 +67,7 @@ class OAuth2SecurityBeanConfig {
                     if (group.name() == GRAPH) {
                         it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
                     }
+                    it.addLast(logbook)
                 }
             }
         }

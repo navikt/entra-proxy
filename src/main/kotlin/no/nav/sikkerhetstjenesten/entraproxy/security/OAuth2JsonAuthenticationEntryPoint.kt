@@ -11,7 +11,6 @@ import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
-import java.net.URI.create
 
 @Component
 class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : AuthenticationEntryPoint {
@@ -28,7 +27,7 @@ class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : Authe
 
     private fun securityProblemDetail() =
         forStatusAndDetail(UNAUTHORIZED, "Bruker er ikke logget inn. Mangler Bearer token i Authorization header").apply {
-            type = create("https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy")
+            type = TYPE_URI
             title = "${UNAUTHORIZED.value()}"
             properties = mapOf("traceId" to Span.current().spanContext.traceId)
         }

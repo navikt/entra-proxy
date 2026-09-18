@@ -22,6 +22,7 @@ import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
+import java.net.URI
 
 
 @Configuration
@@ -95,6 +96,8 @@ class OAuth2SecurityBeanConfig {
         }
 }
 
+
+val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
 
 const val ROLES = "roles"
 const val CLIENT_CREDENTIALS = "access_as_application"

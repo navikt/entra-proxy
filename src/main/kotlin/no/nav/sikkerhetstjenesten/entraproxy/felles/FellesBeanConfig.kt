@@ -32,8 +32,7 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
-class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor,
-                       private val handler: ErrorHandler) : WebMvcConfigurer {
+class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor, private val handler: ErrorHandler) : WebMvcConfigurer {
 
 
     @Bean
@@ -60,8 +59,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                     cfg.setValidateAfterInactivity(TimeValue.ofSeconds(2))
                 }
         }
-
-
 
     @Bean
     fun sanitizingFunction() = SanitizingFunction { data ->

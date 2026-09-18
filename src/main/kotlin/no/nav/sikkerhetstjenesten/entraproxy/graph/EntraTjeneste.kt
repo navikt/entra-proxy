@@ -57,13 +57,13 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
             else  {
                 enheter(oid).also {
-                    log.info("Hentet ${it.size} enheter for ansatt $ansattId")
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId")
                 }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 enheter(refreshOid(ansattId)).also {
-                    log.info("Hentet ${it.size} enheter for ansatt $ansattId etter refresh oid")
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid")
                 }
             }
             else throw it
@@ -73,7 +73,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeId: UUID) =
             gruppeMedlemmer("$gruppeId").also {
-                log.info("Hentet ${it.size} medlemmer for gruppe $gruppeId")
+                log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeId")
             }
 
 
@@ -98,12 +98,12 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
             grupperForAnsatt("$oid").also {
-                log.info("Hentet ${it.size} grupper for ansatt ${navIdent.verdi}")
+                log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi}")
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 grupperForAnsatt("${refreshOid(navIdent)}").also {
-                    log.info("Hentet ${it.size} grupper for ansatt ${navIdent.verdi} etter refresh oid")
+                    log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid")
                 }
             }
             else throw it

@@ -19,10 +19,11 @@ class EntraOidTjeneste(private val client: EntraGraphClient)  {
     @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
      fun ansattOid(ansattId: AnsattId) =
          with(client.users("id", filter = "$BRUKER eq '${ansattId.verdi}'").oids) {
-             log.info("Fant $size oids ($this) i Entra for ${ansattId.verdi}")
              when (size) {
-                 0 -> throw NotFoundRestException(currentUri, msg = "Fant ingen oid for navident ${ansattId.verdi}, er den fremdeles gyldig?")
-                 1 -> singleOrNull()?.id
+                 0 -> throw NotFoundRestException(currentUri, "Fant ingen oid for  ${ansattId.verdi}, er den fremdeles gyldig?")
+                 1 -> singleOrNull()?.id.also {
+                     log.info("Fant oid $it i Entra for ${ansattId.verdi}")
+                 }
                  else -> throw EntraOidException(ansattId.verdi, "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})")
              }
          }

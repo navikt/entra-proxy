@@ -136,14 +136,16 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T, etterHverSide: (T) -> Unit = {}): List<T> {
         log.info("Henter {}", beskrivelse)
+        var sideNummer = 1
         val sider = generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 log.info("Følger @odata.nextLink for {}: {}", beskrivelse, nesteSideUri)
+                sideNummer++
                 var nesteSide: T? = null
                 val hentingVarighet = measureTimeMillis {
                     nesteSide = hentSide(nesteSideUri)
                 }
-                log.info("Hentet side for {} på {}ms", beskrivelse, hentingVarighet)
+                log.info("Hentet side {} for {} på {}ms", sideNummer, beskrivelse, hentingVarighet)
                 nesteSide
             }
         }.onEach(etterHverSide).toList()

@@ -23,14 +23,9 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
         val varighet = measureTimeMillis {
             runCatching {
                 cache.replaceSet(INAKTIVE, emptySet())
-                var antall = 0
-                var sideNummer = 0
                 entra.gruppeMedlemmer("$uuid") { side ->
                     val navIdenter = side.value.mapNotNullTo(mutableSetOf()) { it.onPremisesSamAccountName }
                     cache.addToSet(INAKTIVE, navIdenter)
-                    antall += navIdenter.size
-                    sideNummer++
-                    log.info("Periodisk oppdaterte cache med side {}", sideNummer)
                 }
                 log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)
             }.onFailure {

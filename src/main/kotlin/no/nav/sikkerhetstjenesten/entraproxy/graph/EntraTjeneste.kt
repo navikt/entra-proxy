@@ -159,11 +159,11 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 val hentingVarighet = measureTimeMillis {
                     nesteSide = hentSide(nesteSideUri)
                 }
-                log.info("Hentet side {} for {} på {}ms", sideNummer, beskrivelse, hentingVarighet)
+                //log.info("Hentet side {} for {} på {}ms", sideNummer, beskrivelse, hentingVarighet)
                 nesteSide
             }
         }.onEach(etterHverSide).toList()
-        log.info("Hentet {} side(r) for {}", sider.size, beskrivelse)
+        //log.info("Hentet totalt {} side(r) for {}", sider.size, beskrivelse)
         return sider
     }
 

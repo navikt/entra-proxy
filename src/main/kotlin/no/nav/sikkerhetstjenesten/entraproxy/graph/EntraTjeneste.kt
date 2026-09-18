@@ -37,7 +37,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
             else  {
                 temaerForAnsatt(ansattId,"$oid").also {
-                    log.info("Hentet ${it.size} tema for ansatt $ansattId")
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId ($oid)")
                 }
             }
         }.getOrElse {
@@ -57,7 +57,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
             else  {
                 enheter(oid).also {
-                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId")
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId ($oid)")
                 }
             }
         }.getOrElse {
@@ -98,7 +98,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
             grupperForAnsatt(navIdent,"$oid").also {
-                log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi}")
+                log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} ($oid)")
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {

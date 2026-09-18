@@ -39,9 +39,9 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
     private fun principal(jwt: Jwt, authorities: Set<GrantedAuthority>) =
         DefaultOAuth2AuthenticatedPrincipal(
             jwt.subject ?: jwt.getClaimAsString(AuthContext.NAVIDENT) ?: "unknown",
-            jwt.claims, authorities).also {
+            jwt.claims, authorities)/*.also {
             log.trace("Principal satt til {} med authorities: {}", it.name, it.authorities)
-        }
+        }*/
 
     private fun authority(jwt: Jwt) =
         when {

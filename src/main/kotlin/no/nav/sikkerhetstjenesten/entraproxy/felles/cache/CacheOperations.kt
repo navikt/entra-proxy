@@ -5,6 +5,7 @@ import kotlin.reflect.KClass
 
 interface CacheOperations {
     fun replaceSet(nøkkel: String, verdier: Set<String>)
+    fun addToSet(nøkkel: String, verdier: Set<String>)
     fun getSet(nøkkel: String): Set<String>
     fun inneholder(nøkkel: String, verdi: String): Boolean = false
     fun delete(cache: CacheNøkkelConfig, id: String): Boolean

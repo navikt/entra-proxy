@@ -22,11 +22,14 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
     fun oppdaterCache() {
         val varighet = measureTimeMillis {
             runCatching {
-                val medlemmer = entra.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) {
-                    it.navIdent.verdi
+                cache.replaceSet(INAKTIVE, emptySet())
+                var antall = 0
+                entra.gruppeMedlemmer("$uuid") { side ->
+                    val navIdenter = side.value.mapNotNullTo(mutableSetOf()) { it.onPremisesSamAccountName }
+                    cache.addToSet(INAKTIVE, navIdenter)
+                    antall += navIdenter.size
                 }
-                cache.replaceSet(INAKTIVE,medlemmer)
-                log.info("Periodisk cache-jobb OK, la til ${medlemmer.size} inaktive medlemmer i cache")
+                log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)
             }.onFailure {
                 log.warn("Periodisk cache-jobb feilet", it)
             }

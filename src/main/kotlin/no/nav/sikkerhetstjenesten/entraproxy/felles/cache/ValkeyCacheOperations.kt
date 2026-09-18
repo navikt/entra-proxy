@@ -66,6 +66,15 @@ class ValkeyCacheOperations(
         }
     }
 
+    override fun addToSet(nøkkel: String, verdier: Set<String>) {
+        if (verdier.isEmpty()) return
+        runCatching {
+            valkey.opsForSet().add(nøkkel, *verdier.toTypedArray())
+        }.onFailure {
+            log.warn("Cache addToSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
+        }
+    }
+
     override fun getSet(nøkkel: String)  =
         runCatching {
             valkey.opsForSet().members(nøkkel)

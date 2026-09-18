@@ -157,8 +157,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         var sideNummer = 1
         val sider = generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
-                log.info("Følger @odata.nextLink for {}: {}", beskrivelse, nesteSideUri)
                 sideNummer++
+                log.info("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
                 var nesteSide: T? = null
                 val hentingVarighet = measureTimeMillis {
                     nesteSide = hentSide(nesteSideUri)

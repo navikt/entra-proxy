@@ -45,7 +45,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { oidTjeneste.gruppeOid(any()) } returns UUID.randomUUID()
             every { entraTjeneste.enheter(any(), any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any(), any()) } returns sortedSetOf(Tema("AAP"))
-            every { entraTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
+            every { entraTjeneste.medlemmerIGruppe(any(), any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
             every { entraTjeneste.grupperForAnsatt(any(), any()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,

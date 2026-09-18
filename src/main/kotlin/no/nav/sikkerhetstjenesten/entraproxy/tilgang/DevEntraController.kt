@@ -51,7 +51,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     @GetMapping("gruppe/medlemmer")
      fun medlemmer(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe( it)
+            entraTjeneste.medlemmerIGruppe( gruppeNavn,it)
         }
 
     @GetMapping("ansatt/{navIdent}")

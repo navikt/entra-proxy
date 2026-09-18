@@ -48,7 +48,7 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.medlemmerIGruppe(GROUP_ID) shouldBe setOf(ANSATT)
+                        entra.medlemmerIGruppe("En gruppe", GROUP_ID) shouldBe setOf(ANSATT)
                     }
                 }
             }
@@ -84,7 +84,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.medlemmerIGruppe(gruppeId) shouldBe setOf(
+                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -110,7 +110,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.medlemmerIGruppe(gruppeId) shouldBe setOf(ANSATT)
+                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
                 }
             }
         }

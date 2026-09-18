@@ -89,13 +89,11 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")
     fun gruppeMedlemmer(gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe( it)
-        }
+        medlemmerIGruppe(gruppeNavn)
 
     private fun medlemmerIGruppe(gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe( it)
+            entraTjeneste.medlemmerIGruppe( gruppeNavn, it)
         } ?: emptySet()
 
     companion object {

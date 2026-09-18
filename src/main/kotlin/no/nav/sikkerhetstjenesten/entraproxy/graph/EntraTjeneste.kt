@@ -36,13 +36,13 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 emptySet()
             }
             else  {
-                temaerForAnsatt("$oid").also {
+                temaerForAnsatt(ansattId,"$oid").also {
                     log.info("Hentet ${it.size} tema for ansatt $ansattId")
                 }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                temaerForAnsatt("${refreshOid(ansattId)}").also {
+                temaerForAnsatt(ansattId,"${refreshOid(ansattId)}").also {
                     log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid")
                 }
             }
@@ -97,27 +97,27 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
-            grupperForAnsatt("$oid").also {
+            grupperForAnsatt(navIdent,"$oid").also {
                 log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi}")
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                grupperForAnsatt("${refreshOid(navIdent)}").also {
+                grupperForAnsatt(navIdent,"${refreshOid(navIdent)}").also {
                     log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid")
                 }
             }
             else throw it
         }
 
-    private fun temaerForAnsatt(ansattOid: String) =
-        allSider("temaer for $ansattOid", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+    private fun temaerForAnsatt(ansattId: AnsattId, ansattOid: String) =
+        allSider("temaer for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 Tema(it.displayName)
             }
 
-    private fun grupperForAnsatt(ansattOid: String) =
-        allSider("grupper for $ansattOid", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
+    private fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)

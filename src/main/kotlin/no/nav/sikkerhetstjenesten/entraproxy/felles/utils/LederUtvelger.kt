@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToFlux
+import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
 import reactor.netty.http.client.PrematureCloseException
 import reactor.util.retry.Retry.backoff
@@ -21,7 +22,8 @@ import kotlin.Long.Companion.MAX_VALUE
 
 @Component
 class LederUtvelger(private val builder: Builder,
-                    @param:Value($$"${elector.sse.url}") private val uri: URI,
+                    @param:Value($$"${elector.get.url}") private val getUri: URI,
+                    @param:Value($$"${elector.sse.url}") private val sseUri: URI,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
@@ -32,11 +34,12 @@ class LederUtvelger(private val builder: Builder,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        log.info("SSE Application ready, connecting to $uri")
+        hentGjeldendeLeder()
+        log.info("SSE Application ready, connecting to $sseUri")
         subscription =
             builder.build()
                 .get()
-                .uri(uri)
+                .uri(sseUri)
                 .retrieve()
                 .bodyToFlux<LederUtvelgerRespons>()
                 .doOnError { log.error("SSE connection feilet for godt: ${it.message}", it) }
@@ -61,6 +64,24 @@ class LederUtvelger(private val builder: Builder,
                     { publisher.publishEvent(LeaderChangedEvent(this, it.name)) },
                     { log.warn("SSE error: ${it.message}", it) }
                 )
+    }
+
+    private fun hentGjeldendeLeder() {
+        runCatching {
+            builder.build()
+                .get()
+                .uri(getUri)
+                .retrieve()
+                .bodyToMono<LederUtvelgerRespons>()
+                .block(ofSeconds(5))
+        }.onSuccess { respons ->
+            respons?.let {
+                log.info("Hentet gjeldende leder {} ved oppstart via {}", it.name, getUri)
+                publisher.publishEvent(LeaderChangedEvent(this, it.name))
+            }
+        }.onFailure {
+            log.warn("Klarte ikke å hente gjeldende leder ved oppstart via {}: {}", getUri, it.message, it)
+        }
     }
 
     @EventListener(ContextClosedEvent::class)

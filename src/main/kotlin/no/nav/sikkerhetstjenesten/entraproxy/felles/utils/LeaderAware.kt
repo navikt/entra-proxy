@@ -15,6 +15,7 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
     @EventListener(LeaderChangedEvent::class)
     open fun onApplicationEvent(event: LeaderChangedEvent) {
         erLeder = event.leder == hostname
+         log.info("Denne instansen er $hostname, lederen er ${event.leder}")
         somLeder("håndtering av lederbytte", {
             log.info("Denne instansen ($hostname) er nå leder")
             doHandleLeaderChange()

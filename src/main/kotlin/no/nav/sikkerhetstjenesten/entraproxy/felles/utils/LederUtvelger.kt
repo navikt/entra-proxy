@@ -101,7 +101,7 @@ class LederUtvelger(private val builder: Builder,
             log.warn("Klarte ikke å hente gjeldende leder via {}: {}", getUri, it.message, it)
         }
     }
-    
+
     @Scheduled(fixedRate = POLL_INTERVAL_SECONDS, timeUnit = SECONDS)
     fun pollGjeldendeLeder() {
         hentGjeldendeLeder()

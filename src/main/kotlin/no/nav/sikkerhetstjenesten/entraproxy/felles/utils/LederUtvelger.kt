@@ -25,18 +25,18 @@ class LederUtvelger(private val client: WebClient,
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
     @EventListener(ApplicationReadyEvent::class)
-    fun onApplicationReady() {
+    fun klar() {
         log.info("Applikasjonen klar, lytter etter SSE-hendelser på  ${config.sse.url}")
-        subscription = subscribeSSE()
+        subscription = abonner()
         hentGjeldendeLeder()
     }
     @EventListener(ContextClosedEvent::class)
-    fun onApplicationShutdown() {
+    fun stopper() {
         log.info("Applikasjonen stopper")
         subscription.dispose()
     }
 
-    private fun subscribeSSE() =
+    private fun abonner() =
         client
             .get()
             .uri(config.sse.url)
@@ -44,7 +44,7 @@ class LederUtvelger(private val client: WebClient,
             .bodyToFlux<LederUtvelgerRespons>()
             .subscribe(
                 {
-                    varsleOmLeder(it.name)
+                    varsleOm(it.name)
                 }, {
                     log.warn("SSE feilet", it)
                 }
@@ -60,14 +60,14 @@ class LederUtvelger(private val client: WebClient,
                 .block(ofSeconds(5))
         }.onSuccess { respons ->
             respons?.let {
-                varsleOmLeder(it.name)
+                varsleOm(it.name)
             }
         }.onFailure {
             log.warn("Klarte ikke å hente gjeldende leder via {}", config.get.url,  it)
         }
     }
 
-    private fun varsleOmLeder(leder: String) {
+    private fun varsleOm(leder: String) {
         val gammelLeder = gjeldendeLeder.getAndSet(leder)
         if (gammelLeder != leder) {
             log.info("Ny leder $leder, gammel var $gammelLeder")

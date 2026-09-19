@@ -30,6 +30,11 @@ class LederUtvelger(private val client: WebClient,
         subscription = subscribeSSE()
         hentGjeldendeLeder()
     }
+    @EventListener(ContextClosedEvent::class)
+    fun onApplicationShutdown() {
+        log.info("Applikasjonen stopper")
+        subscription.dispose()
+    }
 
     private fun subscribeSSE() =
         client
@@ -70,11 +75,7 @@ class LederUtvelger(private val client: WebClient,
         }
     }
 
-    @EventListener(ContextClosedEvent::class)
-    fun onShutdown() {
-        log.info("SSE Application shutting down")
-        subscription.dispose()
-    }
+
 
     private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)

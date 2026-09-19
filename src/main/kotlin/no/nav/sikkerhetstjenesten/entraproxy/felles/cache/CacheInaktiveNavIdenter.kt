@@ -19,7 +19,7 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
     private val log = getLogger(javaClass)
 
     @Timed
-    @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES)
+    @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES, initialDelay = 1)
     fun oppdaterCache() {
         somLeder {
             val varighet = measureTimeMillis {

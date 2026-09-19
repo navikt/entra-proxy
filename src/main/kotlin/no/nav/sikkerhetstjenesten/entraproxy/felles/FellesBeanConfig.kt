@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
+import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
@@ -17,9 +18,12 @@ import org.springframework.core.convert.converter.Converter
 import org.springframework.format.FormatterRegistry
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import reactor.netty.http.client.HttpClient
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
@@ -59,6 +63,17 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     @Bean
     fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: AuthContext) =
         TimedAspect(meterRegistry, Function { pjp -> Tags.of("cluster", token.cluster, "method", pjp.signature.name, "client", token.systemNavn) })
+
+    // Uten den globale spring.http.clients.read-timeout, siden den langvarige SSE-strømmen
+    // legitimt kan være stille i lange perioder mellom lederbytter. Connect-timeout beholdes
+    // for å feile raskt dersom elector-sidecaren er utilgjengelig.
+    @Bean
+    fun electorWebClient(builder: WebClient.Builder): WebClient =
+        builder
+            .clientConnector(ReactorClientHttpConnector(
+                HttpClient.create().option(CONNECT_TIMEOUT_MILLIS, 3000)
+            ))
+            .build()
 
 
     override fun addInterceptors(registry: InterceptorRegistry) {

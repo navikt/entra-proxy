@@ -8,27 +8,22 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClient.Builder
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
 import io.netty.handler.timeout.ReadTimeoutException
-import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.PrematureCloseException
 import reactor.util.retry.Retry.backoff
 import java.net.URI
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
-import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.Long.Companion.MAX_VALUE
 
 @Component
-class LederUtvelger(private val builder: Builder,
+class LederUtvelger(private val client: WebClient,
                     @param:Value($$"${elector.get.url}") private val getUri: URI,
                     @param:Value($$"${elector.sse.url}") private val sseUri: URI,
                     private val publisher: ApplicationEventPublisher) {
@@ -37,25 +32,16 @@ class LederUtvelger(private val builder: Builder,
     private var subscription: Disposable? = null
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
-    // Egen WebClient uten den globale spring.http.clients.read-timeout (5s), som ellers ville
-    // dratt ned den langvarige SSE-strømmen hver gang det går >5s uten et lederbytte-event.
-    private val sseClient = WebClient.builder()
-        .clientConnector(ReactorClientHttpConnector(HttpClient.create()))
-        .build()
-
-    @Volatile
-    private var shuttingDown = false
-
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        log.info("SSE Application ready, connecting to $sseUri")
+        log.info("SSE Application ready,connecting to $sseUri")
         subscribeSSE()
         hentGjeldendeLeder()
     }
 
     private fun subscribeSSE() {
         subscription =
-            sseClient
+            client
                 .get()
                 .uri(sseUri)
                 .retrieve()
@@ -67,10 +53,6 @@ class LederUtvelger(private val builder: Builder,
                     backoff(MAX_VALUE, ofSeconds(1))
                         .maxBackoff(ofSeconds(30))
                         .filter {
-                            if (shuttingDown) {
-                                log.info("SSE shutdown, slutt med retries")
-                                return@filter false
-                            }
                             it is WebClientRequestException ||
                                     it is PrematureCloseException ||
                                     it.cause is PrematureCloseException ||
@@ -98,7 +80,7 @@ class LederUtvelger(private val builder: Builder,
 
     private fun hentGjeldendeLeder() {
         runCatching {
-            builder.build()
+            client
                 .get()
                 .uri(getUri)
                 .retrieve()
@@ -114,24 +96,12 @@ class LederUtvelger(private val builder: Builder,
         }
     }
 
-    /*
-    @Scheduled(fixedRate = POLL_INTERVAL_SECONDS, timeUnit = SECONDS)
-    fun pollGjeldendeLeder() {
-        hentGjeldendeLeder()
-    }
-    */
-
     @EventListener(ContextClosedEvent::class)
     fun onShutdown() {
         log.info("SSE Application shutting down")
-        shuttingDown = true
         subscription?.dispose()
     }
 
     private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)
-
-    companion object {
-        private const val POLL_INTERVAL_SECONDS = 30L
-    }
 }

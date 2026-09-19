@@ -1,104 +1,178 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import io.micrometer.core.annotation.Timed
-import io.opentelemetry.instrumentation.annotations.WithSpan
+import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerCachableRestConfig.Companion.MEDLEMMER
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.tidOgLog
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId.Companion.ANSATTID_LENGTH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.stereotype.Service
-import java.util.*
+import java.net.URI
+import java.util.UUID
 
-@RetryingWhenRecoverable
-@Service
-@Timed(value = GRAPH, histogram = true)
-class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
+const val BRUKER = "onPremisesSamAccountName"
+private const val MINIMUM_FELTER = "id,displayName"
+private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
+
+@RestRetryingWhenRecoverableService
+class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
     private val log = getLogger(javaClass)
 
-    @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
-        tidOgLog(log, "tema for $ansattId") {
-            medNotFoundFallback(oid, {
-                adapter.tema("$it")
-            }) {
-                refreshOid(ansattId)
+        runCatching {
+            if (cache.inneholder(INAKTIVE,ansattId.verdi)) {
+                emptySet()
             }
+            else  {
+                temaerForAnsatt(ansattId,"$oid").also {
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId ($oid)")
+                }
+            }
+        }.getOrElse {
+            if (it is NotFoundRestException)  {
+                temaerForAnsatt(ansattId,"${refreshOid(ansattId)}").also {
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid")
+                }
+            }
+            else throw it
         }
 
-
-    @WithSpan
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
-        tidOgLog(log, "enhet(er) for $ansattId") {
-            medNotFoundFallback(oid, ::enheter) {
-                refreshOid(ansattId)
+        runCatching {
+            if (cache.inneholder(INAKTIVE,ansattId.verdi)) {
+                emptySet()
             }
+            else  {
+                enheter(oid).also {
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId ($oid)")
+                }
+            }
+        }.getOrElse {
+            if (it is NotFoundRestException)  {
+                enheter(refreshOid(ansattId)).also {
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid")
+                }
+            }
+            else throw it
         }
 
 
-    @WithSpan
-    @Cacheable(MEDLEMMER)
-    fun medlemmer(gruppeId: UUID) =
-        tidOgLog(log, "medlem(mer) for gruppe $gruppeId") {
-            adapter.gruppeMedlemmer("$gruppeId")
-        }
+    @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
+    fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
+            gruppeMedlemmer("$gruppeId").also {
+                log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
+            }
 
-    @WithSpan
+
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
         ansatt  {
-            adapter.utvidetAnsatt(ansattId.verdi)
+            client.bruker(ANSATTE_FELTER, "$BRUKER eq '${ansattId.verdi}'").ansatte.firstOrNull()
+        }?.also {
+            log.info("Hentet ansatt $it for ident ${ansattId.verdi}: $it")
         }
 
-    @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
         ansatt  {
-            adapter.utvidetAnsattTident(ansattId.verdi)
+            client.bruker(ANSATTE_FELTER, "jobTitle eq '${ansattId.verdi}'").ansatte.firstOrNull()
+        }?.also {
+            log.info("Hentet utvidet ansatt $it for tIdent ${ansattId.verdi}: $it")
         }
 
 
-    @WithSpan
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
-        tidOgLog(log) {
-            medNotFoundFallback(oid, { adapter.ansatteGrupper(it.toString()) }) { refreshOid(navIdent) }
+        runCatching {
+            grupperForAnsatt(navIdent,"$oid").also {
+                log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} ($oid)")
+            }
+        }.getOrElse {
+            if (it is NotFoundRestException)  {
+                grupperForAnsatt(navIdent,"${refreshOid(navIdent)}").also {
+                    log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid")
+                }
+            }
+            else throw it
         }
 
-    private inline fun <T> medNotFoundFallback(arg: UUID, main: (UUID) -> T, nyOid: (UUID) -> UUID)
-            = runCatching { main(arg) }.getOrElse {
-        if (it is NotFoundRestException) {
-            main(nyOid(arg))
-        } else{
-            throw it
+    private fun temaerForAnsatt(ansattId: AnsattId, ansattOid: String) =
+        allSider("temaer for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+            .flatMap { it.value }
+            .mapTo(sortedSetOf()) {
+                Tema(it.displayName)
+            }
+
+    private fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
+            .flatMap { it.value }
+            .mapTo(sortedSetOf()) {
+                EntraGruppe(it.displayName)
+            }
+
+     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+            .flatMap { it.value }
+        val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
+            it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
+        }
+        if (ugyldigeMedlemmer.isNotEmpty()) {
+            log.info("Ignorerte {} medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
+                ugyldigeMedlemmer, oid)
+        }
+        return gyldigeMedlemmer.mapTo(sortedSetOf()) {
+            with(it) {
+                Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
+            }
         }
     }
 
-    private fun enheter(oid: UUID) =
+    private fun enheter(ansattOid: UUID) =
         buildSet {
-            adapter.enheter("$oid").forEach {
-                add(Enhet(it, norg.navnFor(it)))
-            }
+            allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
+                .flatMap { it.value }
+                .map {
+                    Enhetnummer(it.displayName)
+                }
+                .forEach {
+                    add(Enhet(it, norg.navnFor(it)))
+                }
         }
+
+    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): List<T> {
+        log.info("Henter {}", beskrivelse)
+        var sideNummer = 1
+        val sider = generateSequence(førsteSide) { side ->
+            next(side)?.let { nesteSideUri ->
+                sideNummer++
+                log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
+                hentSide(nesteSideUri)
+            }
+        }.toList()
+        return sider
+    }
+
 
 
     private fun ansatt(block: () -> AnsattRespons?) =
-        tidOgLog(log) {
-            block()?.let {
-                with(it) {
+        block()?.let { respons ->
+            respons.onPremisesSamAccountName?.let { navIdent ->
+                with(respons) {
                     val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
                     UtvidetAnsatt(
-                        AnsattId(onPremisesSamAccountName), displayName, givenName, surname,
+                        AnsattId(navIdent), displayName, givenName, surname,
                         TIdent(jobTitle?: TIDENT_DEFAULT),
                         mail,
                         Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
@@ -111,12 +185,12 @@ class EntraTjeneste(private val adapter: EntraRestClientAdapter, private val nor
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
         return oid.ansattOid(navIdent).also {
-            log.info("Hentet  ny oid $it for $navIdent")
-        }
-            ?: throw NotFoundRestException(adapter.baseURI, "Fant ikke oid for ${navIdent.verdi} i Entra, selv etter cache-opprydding")
+            log.info("Hentet ny oid $it for $navIdent")
+        } ?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding")
     }
 
     override fun toString() =
-        "${javaClass.simpleName} [adapter=$adapter, norg=$norg]"
+        "${javaClass.simpleName} [client=$client, norg=$norg]"
+
 }
 

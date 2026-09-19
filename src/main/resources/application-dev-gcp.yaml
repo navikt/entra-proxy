@@ -20,3 +20,7 @@ management:
 
 oppfolging:
   enabled: true
+
+logbook:
+  filter:
+    enabled: true

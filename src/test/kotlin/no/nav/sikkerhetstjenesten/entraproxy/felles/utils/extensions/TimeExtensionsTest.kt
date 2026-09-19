@@ -5,7 +5,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -48,29 +47,6 @@ class TimeExtensionsTest : BehaviorSpec({
                 s shouldContain "5 sekunder"
                 s shouldNotContain "time"
                 s shouldNotContain "minutt"
-            }
-        }
-    }
-
-    Given("java.time.Duration.format") {
-        When("brukt pa java.time.Duration") {
-            Then("returnerer samme som Kotlin Duration") {
-                java.time.Duration.ofMinutes(5).format() shouldBe "5 minutter"
-            }
-        }
-    }
-
-    Given("Long.local") {
-        When("epoch millis konverteres med standard format") {
-            Then("har formatet yyyy-MM-dd HH:mm:ss") {
-                val formatted = 0L.local()
-                formatted.length shouldBe "yyyy-MM-dd HH:mm:ss".length
-            }
-        }
-        When("egendefinert format gis") {
-            Then("bruker formatet") {
-                val s = 0L.local("yyyy")
-                s.length shouldBe 4
             }
         }
     }

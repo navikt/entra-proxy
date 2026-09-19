@@ -17,3 +17,4 @@ data class CacheConfig(val username: String, val password: String, val host: Str
         const val VALKEY = "valkey"
     }
 }
+

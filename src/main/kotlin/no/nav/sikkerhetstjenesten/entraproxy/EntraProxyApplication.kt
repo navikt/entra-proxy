@@ -1,7 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy
 
-import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
-import no.nav.security.token.support.spring.api.EnableJwtTokenValidation
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.profiler
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -10,15 +8,15 @@ import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.resilience.annotation.EnableResilientMethods
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-@EnableOAuth2Client(cacheEnabled = true)
 @EnableCaching
 @EnableResilientMethods
 @EnableAspectJAutoProxy
 @EnableScheduling
-@EnableJwtTokenValidation(ignore = ["org.springdoc", "org.springframework"])
+@EnableMethodSecurity
 class EntraProxyApplication
 
 fun main(args: Array<String>) {

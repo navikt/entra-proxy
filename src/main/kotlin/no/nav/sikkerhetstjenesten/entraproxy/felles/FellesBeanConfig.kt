@@ -1,46 +1,29 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
-import io.micrometer.core.instrument.Timer
-import org.springdoc.core.customizers.OpenApiCustomizer
-import io.swagger.v3.oas.models.media.Schema
-import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
-import no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AbstractRestConfig
-import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
+import io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.TokenTypeTellendeRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.Token
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import org.aspectj.lang.ProceedingJoinPoint
-import org.aspectj.lang.annotation.Around
-import org.aspectj.lang.annotation.Aspect
-import org.springframework.web.client.support.RestClientAdapter.create
-import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
+import org.apache.hc.core5.util.TimeValue
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
-import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
-import org.springframework.web.client.RestClient.Builder
 import org.springframework.format.FormatterRegistry
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
-import org.springframework.stereotype.Component
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import reactor.netty.http.client.HttpClient
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 import java.util.function.Function
 import kotlin.annotation.AnnotationRetention.BINARY
@@ -55,25 +38,21 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
 
     @Bean
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
-        it.addMixIn(OAuth2AccessTokenResponse::class.java, IgnoreUnknownMixin::class.java)
         it.enable(INCLUDE_SOURCE_IN_LOCATION)
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private interface IgnoreUnknownMixin
-
-
     @Bean
-    fun restClientCustomizer(interceptor: OAuth2ClientRequestInterceptor, tokenInterceptor: TokenTypeTellendeRequestInterceptor) =
-        RestClientCustomizer { c ->
-            c.requestFactory(HttpComponentsClientHttpRequestFactory().apply {
-                setConnectionRequestTimeout(2000)
-                setReadTimeout(2000)
-            })
-            c.requestInterceptors {
-                it.addFirst(interceptor)
-                it.add(tokenInterceptor)
-            }
+    fun httpComponentsBuilderCustomizer():
+            ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder> =
+        ClientHttpRequestFactoryBuilderCustomizer { builder ->
+            builder
+                .withConnectionManagerCustomizer { cm ->
+                    cm.setMaxConnTotal(300)
+                    cm.setMaxConnPerRoute(50)
+                }
+                .withConnectionConfigCustomizer { cfg ->
+                    cfg.setValidateAfterInactivity(TimeValue.ofSeconds(2))
+                }
         }
 
     @Bean
@@ -82,8 +61,19 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 
     @Bean
-    fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: Token) =
+    fun clusterAddingTimedAspect(meterRegistry: MeterRegistry, token: AuthContext) =
         TimedAspect(meterRegistry, Function { pjp -> Tags.of("cluster", token.cluster, "method", pjp.signature.name, "client", token.systemNavn) })
+
+    // Uten den globale spring.http.clients.read-timeout, siden den langvarige SSE-strømmen
+    // legitimt kan være stille i lange perioder mellom lederbytter. Connect-timeout beholdes
+    // for å feile raskt dersom elector-sidecaren er utilgjengelig.
+    @Bean
+    fun electorWebClient(builder: WebClient.Builder): WebClient =
+        builder
+            .clientConnector(ReactorClientHttpConnector(
+                HttpClient.create().option(CONNECT_TIMEOUT_MILLIS, 3000)
+            ))
+            .build()
 
 
     override fun addInterceptors(registry: InterceptorRegistry) {
@@ -93,17 +83,6 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
         configurer.defaultContentType(APPLICATION_JSON)
     }
 
-    @Aspect
-    @Component
-    class TimingAspect(private val meterRegistry: MeterRegistry) {
-
-        @Around("execution(* no.nav.security.token.support.client.spring.oauth2.OAuth2ClientRequestInterceptor.intercept(..))")
-        fun timeMethod(joinPoint: ProceedingJoinPoint) = Timer.builder("mslogin")
-            .description("Timer med histogram for mslogin")
-            .tags("method", joinPoint.signature.name)
-            .publishPercentileHistogram()
-            .register(meterRegistry).recordCallable { joinPoint.proceed() }
-    }
 
     override fun addFormatters(registry: FormatterRegistry) {
         registry.addConverter(StringToEnhetnummerConverter())
@@ -114,54 +93,18 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
+
         private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
-        fun createProxyFactory(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler) = builderFor(create(b.baseUrl(cfg.baseUri)
-            .defaultStatusHandler(HttpStatusCode::isError, errorHandler::handle)
-            .build()))
-            .build()
-
-        inline fun <reified T : Any> createClient(cfg: AbstractRestConfig, b: Builder, errorHandler: ErrorHandler = DefaultRestErrorHandler()) =
-            createProxyFactory(cfg, b, errorHandler).createClient(T::class.java)
 
     }
-    class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
-        override fun convert(source: String): Enhetnummer = Enhetnummer(source)
-    }
-
-    @Bean
-    fun openApiCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
-        val schemas = openApi.components.schemas
-        schemas["Enhetnummer"] = Schema<Enhetnummer>().apply {
-            type = "string"
-            description = "Enhetnummer (4 siffer)"
-            example = Enhetnummer("1234")
-        }
-        schemas["Enhet"] = Schema<Enhet>().apply {
-            type = "object"
-            description = "Enhetnummer (4 siffer) og navn"
-            example = Enhet(Enhetnummer("1234"),"Nav Avdeling Sydpolen")
-        }
-        schemas["Ansatt"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"), "Tore Tang", "Tore", "Tang")
-        }
-        schemas["NavIdent"] = Schema<Ansatt>().apply {
-            type = "string"
-            description = "NavIdent (7 siffer)"
-            example = AnsattId("A123456")
-        }
-        schemas["Tema"] = Schema<Tema>().apply {
-            type = "string"
-            description = "Tema (3 store bokstaver)"
-            example = Tema("AAP")
-        }
+    private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
+        override fun convert(source: String) = Enhetnummer(source)
     }
 }
-
 
 @Retention(BINARY)  // = CLASS in bytecode — enough for JaCoCo
 @Target(FUNCTION, CONSTRUCTOR, CLASS)
 annotation class Generated
 typealias NoCoverageAnalysis = Generated
+
 

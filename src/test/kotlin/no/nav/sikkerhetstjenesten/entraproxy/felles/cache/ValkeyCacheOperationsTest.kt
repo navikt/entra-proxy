@@ -9,6 +9,7 @@ import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -249,18 +250,17 @@ class ValkeyCacheOperationsTest(
                 }
             }
 
-            When("et sett byttes inn med renameSet") {
-                Then("erstatter den gamle nøkkelen atomisk, og fjerner den midlertidige nøkkelen") {
+            When("replaceSet kalles på en nøkkel som allerede har innhold") {
+                Then("erstattes det gamle innholdet atomisk, uten å etterlate midlertidige nøkler") {
                     val gamleMedlemmer = setOf("gammel-1", "gammel-2")
                     val nyeMedlemmer = setOf("ny-1", "ny-2", "ny-3")
-                    cache.replaceSet("cache-set-rename-test", gamleMedlemmer)
-                    cache.replaceSet("cache-set-rename-test-staging", nyeMedlemmer)
+                    cache.replaceSet("cache-set-replace-test", gamleMedlemmer)
 
-                    cache.renameSet("cache-set-rename-test-staging", "cache-set-rename-test")
+                    cache.replaceSet("cache-set-replace-test", nyeMedlemmer)
 
                     assertSoftly {
-                        valkey.opsForSet().members("cache-set-rename-test") shouldBe nyeMedlemmer
-                        valkey.hasKey("cache-set-rename-test-staging") shouldBe false
+                        valkey.opsForSet().members("cache-set-replace-test") shouldBe nyeMedlemmer
+                        valkey.keys("cache-set-replace-test:tmp:*").shouldBeEmpty()
                     }
                 }
             }

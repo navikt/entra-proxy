@@ -48,7 +48,8 @@ class ValkeyCacheOperations(
         val tmp = "$nøkkel:tmp:${UUID.randomUUID()}"
         runCatching {
             valkey.opsForSet().add(tmp, *verdier.toTypedArray())
-            renameSet(tmp, nøkkel)
+            valkey.expire(tmp, Duration.ofMinutes(5)) // selv-opprydding dersom rename eller onFailure-sletting feiler
+            valkey.rename(tmp, nøkkel)
         }.onFailure {
             log.warn("Cache replaceSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
             valkey.delete(tmp)
@@ -60,14 +61,6 @@ class ValkeyCacheOperations(
             valkey.delete(nøkkel)
         }.onFailure {
             log.warn("Cache deleteSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
-        }
-    }
-
-    override fun renameSet(fra: String, til: String) {
-        runCatching {
-            valkey.rename(fra, til)
-        }.onFailure {
-            log.warn("Cache renameSet feilet fra {} til {}: {}", fra, til, it.message, it)
         }
     }
 

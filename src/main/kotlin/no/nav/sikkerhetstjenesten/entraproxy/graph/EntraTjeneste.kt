@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavidenter.Companion.INAKTIVE
+import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService

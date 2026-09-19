@@ -14,7 +14,7 @@ import kotlin.system.measureTimeMillis
 
 @Component
 @ConditionalOnGCP
-class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
+class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
 
     private val log = getLogger(javaClass)
 
@@ -24,13 +24,9 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
         somLeder {
             val varighet = measureTimeMillis {
                 runCatching {
-                    val navIdenter = entra.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) { it.navIdent.verdi }
-                    if (navIdenter.isNotEmpty()) {
-                        cache.replaceSet(STAGING, navIdenter)
-                        cache.renameSet(STAGING, INAKTIVE)
-                    } else {
-                        cache.deleteSet(INAKTIVE)
-                    }
+                    cache.replaceSet(INAKTIVE, entra.gruppeMedlemmer("${uuid}").mapTo(mutableSetOf()) {
+                        it.navIdent.verdi
+                    })
                     log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)
                 }.onFailure {
                     log.warn("Periodisk cache-jobb feilet", it)
@@ -41,7 +37,6 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
     }
     companion object {
         const val INAKTIVE = "inaktive"
-        private const val STAGING = "$INAKTIVE:staging"
         private const val INTERVAL_MINUTES = 15L
     }
 }

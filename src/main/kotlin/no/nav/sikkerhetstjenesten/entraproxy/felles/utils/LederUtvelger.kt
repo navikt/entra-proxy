@@ -26,7 +26,7 @@ class LederUtvelger(private val client: WebClient,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        log.info("SSE Application ready,connecting to ${elector.sse.url}")
+        log.info("Applikasjonen klar, lytter etter SSE-hendelser på  ${elector.sse.url}")
         subscription = subscribeSSE()
         hentGjeldendeLeder()
     }

@@ -41,7 +41,7 @@ class LederUtvelger(private val client: WebClient,
                 {
                     varsleOmLeder(it.name)
                 }, {
-                    log.warn("SSE error: ${it.message}", it)
+                    log.warn("SSE feilet", it)
                 }
             )
 

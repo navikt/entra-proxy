@@ -41,11 +41,17 @@ class LederUtvelger(private val client: WebClient,
                 .uri(elector.sse.url)
                 .retrieve()
                 .bodyToFlux<LederUtvelgerRespons>()
-                .doOnError { log.error("SSE connection feilet for godt: ${it.message}", it) }
-                .doOnSubscribe { log.info("SSE subscribe") }
-                .doOnNext { log.info("SSE next: {} ", it) }
+                .doOnError {
+                    log.error("SSE connection feilet for godt: ${it.message}", it)
+                }
+                .doOnSubscribe {
+                    log.info("SSE subscribe")
+                }
+                .doOnNext {
+                    log.info("SSE next: {} ", it)
+                }
                 .retryWhen(
-                    backoff(MAX_VALUE, ofSeconds(1))
+                    backoff(5, ofSeconds(1))
                         .maxBackoff(ofSeconds(30))
                         .filter {
                             it is WebClientRequestException ||
@@ -54,20 +60,24 @@ class LederUtvelger(private val client: WebClient,
                                     it is ReadTimeoutException ||
                                     it.cause is ReadTimeoutException
                         }
-                        .doBeforeRetry { log.info("SSE retry ${it.failure().message}", it) }
+                        .doBeforeRetry {
+                            log.info("SSE retry ${it.failure().message}", it)
+                        }
                         .doAfterRetry {
                             log.info("SSE connection retry etter ${it.totalRetriesInARow()} forsøk",
                                 it.failure())
                         }
                 )
                 .subscribe(
-                    { varsleOmLeder(it.name) },
-                    { log.warn("SSE error: ${it.message}", it) }
+                    {
+                        varsleOmLeder(it.name)
+                    }, {
+                        log.warn("SSE error: ${it.message}", it)
+                    }
                 )
     }
 
     private fun varsleOmLeder(navn: String) {
-        log.info("Ny leder: {}", navn)
         publisher.publishEvent(LeaderChangedEvent(this, navn))
     }
 

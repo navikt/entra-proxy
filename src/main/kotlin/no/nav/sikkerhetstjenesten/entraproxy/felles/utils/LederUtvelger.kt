@@ -64,8 +64,8 @@ class LederUtvelger(private val client: WebClient,
 
     private fun varsleOmLeder(nyLeder: String) {
         val gammelLeder = gjeldendeLeder.getAndSet(nyLeder)
-        if ( gammelLeder != nyLeder) {
-            log.info("Ny leder: {}, gammel var {}", nyLeder,gammelLeder)
+        if (gammelLeder != nyLeder) {
+            log.info("Ny leder $nyLeder, gammel var $gammelLeder")
             publisher.publishEvent(LeaderChangedEvent(this, nyLeder))
         }
     }

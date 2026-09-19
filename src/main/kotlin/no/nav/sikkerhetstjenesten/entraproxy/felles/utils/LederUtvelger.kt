@@ -22,7 +22,7 @@ import kotlin.Long.Companion.MAX_VALUE
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    private val elector: ElectorProperties,
+                    private val elector: ElectorConfig,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)

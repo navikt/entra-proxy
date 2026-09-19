@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    private val elector: ElectorConfig,
+                    private val config: ElectorConfig,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
@@ -26,7 +26,7 @@ class LederUtvelger(private val client: WebClient,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        log.info("Applikasjonen klar, lytter etter SSE-hendelser på  ${elector.sse.url}")
+        log.info("Applikasjonen klar, lytter etter SSE-hendelser på  ${config.sse.url}")
         subscription = subscribeSSE()
         hentGjeldendeLeder()
     }
@@ -39,7 +39,7 @@ class LederUtvelger(private val client: WebClient,
     private fun subscribeSSE() =
         client
             .get()
-            .uri(elector.sse.url)
+            .uri(config.sse.url)
             .retrieve()
             .bodyToFlux<LederUtvelgerRespons>()
             .subscribe(
@@ -54,7 +54,7 @@ class LederUtvelger(private val client: WebClient,
         runCatching {
             client
                 .get()
-                .uri(elector.get.url)
+                .uri(config.get.url)
                 .retrieve()
                 .bodyToMono<LederUtvelgerRespons>()
                 .block(ofSeconds(5))
@@ -63,7 +63,7 @@ class LederUtvelger(private val client: WebClient,
                 varsleOmLeder(it.name)
             }
         }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder via {}", elector.get.url,  it)
+            log.warn("Klarte ikke å hente gjeldende leder via {}", config.get.url,  it)
         }
     }
 

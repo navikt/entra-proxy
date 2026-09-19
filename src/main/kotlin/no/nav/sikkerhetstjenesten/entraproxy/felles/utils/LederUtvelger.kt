@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
@@ -16,7 +15,6 @@ import reactor.core.Disposable
 import io.netty.handler.timeout.ReadTimeoutException
 import reactor.netty.http.client.PrematureCloseException
 import reactor.util.retry.Retry.backoff
-import java.net.URI
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicReference
@@ -24,8 +22,7 @@ import kotlin.Long.Companion.MAX_VALUE
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    @param:Value($$"${elector.get.url}") private val getUri: URI,
-                    @param:Value($$"${elector.sse.url}") private val sseUri: URI,
+                    private val elector: ElectorProperties,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
@@ -34,7 +31,7 @@ class LederUtvelger(private val client: WebClient,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        log.info("SSE Application ready,connecting to $sseUri")
+        log.info("SSE Application ready,connecting to ${elector.sse.url}")
         subscribeSSE()
         hentGjeldendeLeder()
     }
@@ -43,7 +40,7 @@ class LederUtvelger(private val client: WebClient,
         subscription =
             client
                 .get()
-                .uri(sseUri)
+                .uri(elector.sse.url)
                 .retrieve()
                 .bodyToFlux<LederUtvelgerRespons>()
                 .doOnError { log.error("SSE connection feilet for godt: ${it.message}", it) }
@@ -82,17 +79,17 @@ class LederUtvelger(private val client: WebClient,
         runCatching {
             client
                 .get()
-                .uri(getUri)
+                .uri(elector.get.url)
                 .retrieve()
                 .bodyToMono<LederUtvelgerRespons>()
                 .block(ofSeconds(5))
         }.onSuccess { respons ->
             respons?.let {
-                log.debug("Hentet gjeldende leder {} via {}", it.name, getUri)
+                log.debug("Hentet gjeldende leder {} via {}", it.name, elector.get.url)
                 varsleOmLeder(it.name)
             }
         }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder via {}: {}", getUri, it.message, it)
+            log.warn("Klarte ikke å hente gjeldende leder via {}: {}", elector.get.url, it.message, it)
         }
     }
 

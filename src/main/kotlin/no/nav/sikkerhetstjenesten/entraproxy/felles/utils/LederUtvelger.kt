@@ -9,11 +9,15 @@ import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
+import io.netty.handler.timeout.ReadTimeoutException
+import reactor.netty.http.client.HttpClient
 import reactor.netty.http.client.PrematureCloseException
 import reactor.util.retry.Retry.backoff
 import java.net.URI
@@ -33,6 +37,12 @@ class LederUtvelger(private val builder: Builder,
     private var subscription: Disposable? = null
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
+    // Egen WebClient uten den globale spring.http.clients.read-timeout (5s), som ellers ville
+    // dratt ned den langvarige SSE-strømmen hver gang det går >5s uten et lederbytte-event.
+    private val sseClient = WebClient.builder()
+        .clientConnector(ReactorClientHttpConnector(HttpClient.create()))
+        .build()
+
     @Volatile
     private var shuttingDown = false
 
@@ -45,7 +55,7 @@ class LederUtvelger(private val builder: Builder,
 
     private fun subscribeSSE() {
         subscription =
-            builder.build()
+            sseClient
                 .get()
                 .uri(sseUri)
                 .retrieve()
@@ -63,7 +73,9 @@ class LederUtvelger(private val builder: Builder,
                             }
                             it is WebClientRequestException ||
                                     it is PrematureCloseException ||
-                                    it.cause is PrematureCloseException
+                                    it.cause is PrematureCloseException ||
+                                    it is ReadTimeoutException ||
+                                    it.cause is ReadTimeoutException
                         }
                         .doBeforeRetry { log.info("SSE retry ${it.failure().message}", it) }
                         .doAfterRetry {

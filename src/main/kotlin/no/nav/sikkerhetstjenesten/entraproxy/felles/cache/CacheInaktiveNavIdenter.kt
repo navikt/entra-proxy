@@ -27,12 +27,12 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
                     cache.replaceSet(INAKTIVE, entra.gruppeMedlemmer("${uuid}").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
-                    log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)
+                    log.info("Periodisk cache-jobb OK, la til {} inaktive Nav-identer i cache", cache.getSet(INAKTIVE).size)
                 }.onFailure {
                     log.warn("Periodisk cache-jobb feilet", it)
                 }
             }
-            log.info("Periodisk cache-jobb for inaktive navident tok {}ms", varighet)
+            log.info("Periodisk cache-jobb for inaktive Nav-identer tok {}ms", varighet)
         }
     }
     companion object {

@@ -114,10 +114,12 @@ class LederUtvelger(private val builder: Builder,
         }
     }
 
+    /*
     @Scheduled(fixedRate = POLL_INTERVAL_SECONDS, timeUnit = SECONDS)
     fun pollGjeldendeLeder() {
         hentGjeldendeLeder()
     }
+    */
 
     @EventListener(ContextClosedEvent::class)
     fun onShutdown() {

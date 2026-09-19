@@ -17,7 +17,6 @@ import reactor.netty.http.client.PrematureCloseException
 import reactor.util.retry.Retry.backoff
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.Long.Companion.MAX_VALUE
 
 @Component
@@ -27,7 +26,6 @@ class LederUtvelger(private val client: WebClient,
 
     protected val log = getLogger(javaClass)
     private var subscription: Disposable? = null
-    private val gjeldendeLeder = AtomicReference<String?>(null)
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
@@ -69,10 +67,8 @@ class LederUtvelger(private val client: WebClient,
     }
 
     private fun varsleOmLeder(navn: String) {
-        if (gjeldendeLeder.getAndSet(navn) != navn) {
-            log.info("Ny leder: {}", navn)
-            publisher.publishEvent(LeaderChangedEvent(this, navn))
-        }
+        log.info("Ny leder: {}", navn)
+        publisher.publishEvent(LeaderChangedEvent(this, navn))
     }
 
     private fun hentGjeldendeLeder() {

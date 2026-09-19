@@ -122,8 +122,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-     fun gruppeMedlemmer(oid: String, etterHverSide: (GruppeMedlemmer) -> Unit = {}): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide, etterHverSide)
+     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMap { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
@@ -151,7 +151,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 }
         }
 
-    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T, etterHverSide: (T) -> Unit = {}): List<T> {
+    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): List<T> {
         log.info("Henter {}", beskrivelse)
         var sideNummer = 1
         val sider = generateSequence(førsteSide) { side ->
@@ -160,7 +160,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
-        }.onEach(etterHverSide).toList()
+        }.toList()
         return sider
     }
 

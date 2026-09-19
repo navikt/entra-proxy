@@ -13,9 +13,9 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     override fun replaceSet(key: String, values: Set<String>) {}
 
-    override fun addToSet(key: String, values: Set<String>) {}
-
     override fun renameSet(fra: String, til: String) {}
+
+    override fun deleteSet(nøkkel: String) {}
 
     override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
         val key = caffeineNøkkel(cache, id)

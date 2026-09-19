@@ -264,7 +264,30 @@ class ValkeyCacheOperationsTest(
                     }
                 }
             }
+
+            When("deleteSet kalles på en eksisterende nøkkel") {
+                Then("fjernes nøkkelen helt fra Valkey") {
+                    cache.replaceSet("cache-set-delete-test", setOf("a", "b"))
+                    valkey.hasKey("cache-set-delete-test") shouldBe true
+
+                    cache.deleteSet("cache-set-delete-test")
+
+                    valkey.hasKey("cache-set-delete-test") shouldBe false
+                }
+            }
+
+            When("nøkkelen ikke finnes") {
+                Then("oppfører getSet og inneholder seg som om settet var tomt") {
+                    valkey.hasKey("cache-set-ikke-funnet") shouldBe false
+
+                    assertSoftly {
+                        cache.getSet("cache-set-ikke-funnet") shouldBe emptySet()
+                        cache.inneholder("cache-set-ikke-funnet", "hvilken-som-helst-verdi") shouldBe false
+                    }
+                }
+            }
         }
+
 
         Given("cache-utløp") {
             ALL_TEST_CACHES.forEach { cacheConfig ->

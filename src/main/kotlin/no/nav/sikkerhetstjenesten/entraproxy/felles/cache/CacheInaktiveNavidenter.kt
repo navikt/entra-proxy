@@ -24,27 +24,12 @@ class CacheInaktiveNavidenter(private val entra: EntraTjeneste, private val cach
         somLeder {
             val varighet = measureTimeMillis {
                 runCatching {
-                    // Bygg opp den nye mengden i en midlertidig nøkkel, og bytt den atomisk inn til slutt.
-                    // Slik unngås et vindu der INAKTIVE er tom/ufullstendig mens siden lastes ned.
-                    cache.replaceSet(STAGING, emptySet())
-                    var sideNummer = 0
-                    var totaltAntall = 0
-                    entra.gruppeMedlemmer("$uuid") { side ->
-                        val navIdenter = side.value.mapNotNullTo(mutableSetOf()) {
-                            it.onPremisesSamAccountName
-                        }
-                        sideNummer++
-                        totaltAntall += navIdenter.size
-                        cache.addToSet(STAGING, navIdenter).also {
-                            log.trace("La til {} inaktive medlemmer i staging-cache for side {}", navIdenter.size, sideNummer)
-                        }
-                    }
-                    // Hvis gruppen er tom finnes ikke STAGING-nøkkelen (addToSet er en no-op for tomme mengder),
-                    // så da må INAKTIVE tømmes direkte i stedet for å bytte inn en ikke-eksisterende nøkkel.
-                    if (totaltAntall > 0) {
+                    val navIdenter = entra.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) { it.navIdent.verdi }
+                    if (navIdenter.isNotEmpty()) {
+                        cache.replaceSet(STAGING, navIdenter)
                         cache.renameSet(STAGING, INAKTIVE)
                     } else {
-                        cache.replaceSet(INAKTIVE, emptySet())
+                        cache.deleteSet(INAKTIVE)
                     }
                     log.info("Periodisk cache-jobb OK, la til {} inaktive medlemmer i cache", cache.getSet(INAKTIVE).size)
                 }.onFailure {

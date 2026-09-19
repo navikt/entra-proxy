@@ -45,6 +45,7 @@ class ValkeyCacheOperations(
     }
 
     override fun replaceSet(nøkkel: String, verdier: Set<String>) {
+        if (verdier.isEmpty()) return deleteSet(nøkkel)
         runCatching {
             valkey.execute(object : SessionCallback<List<Any>> {
                 override fun <K : Any, V : Any> execute(operations: RedisOperations<K, V>): List<Any> {
@@ -52,9 +53,7 @@ class ValkeyCacheOperations(
                     val ops = operations as RedisOperations<String, String>
                     ops.multi()
                     ops.delete(nøkkel)
-                    if (verdier.isNotEmpty()) {
-                        ops.opsForSet().add(nøkkel, *verdier.toTypedArray())
-                    }
+                    ops.opsForSet().add(nøkkel, *verdier.toTypedArray())
                     return ops.exec()
                 }
             })
@@ -63,12 +62,11 @@ class ValkeyCacheOperations(
         }
     }
 
-    override fun addToSet(nøkkel: String, verdier: Set<String>) {
-        if (verdier.isEmpty()) return
+    override fun deleteSet(nøkkel: String) {
         runCatching {
-            valkey.opsForSet().add(nøkkel, *verdier.toTypedArray())
+            valkey.delete(nøkkel)
         }.onFailure {
-            log.warn("Cache addToSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
+            log.warn("Cache deleteSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
         }
     }
 

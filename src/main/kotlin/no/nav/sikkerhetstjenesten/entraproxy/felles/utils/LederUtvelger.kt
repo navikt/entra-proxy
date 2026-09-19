@@ -34,8 +34,12 @@ class LederUtvelger(private val builder: Builder,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
-        hentGjeldendeLeder()
         log.info("SSE Application ready, connecting to $sseUri")
+        subscribeSSE()
+        hentGjeldendeLeder()
+    }
+
+    private fun subscribeSSE() {
         subscription =
             builder.build()
                 .get()
@@ -57,8 +61,11 @@ class LederUtvelger(private val builder: Builder,
                                     it is PrematureCloseException ||
                                     it.cause is PrematureCloseException
                         }
-                        .doBeforeRetry { log.info("SSE retry ${it.failure().message}",it) }
-                        .doAfterRetry { log.info("SSE connection retry etter ${it.totalRetriesInARow()} forsøk", it.failure()) }
+                        .doBeforeRetry { log.info("SSE retry ${it.failure().message}", it) }
+                        .doAfterRetry {
+                            log.info("SSE connection retry etter ${it.totalRetriesInARow()} forsøk",
+                                it.failure())
+                        }
                 )
                 .subscribe(
                     { publisher.publishEvent(LeaderChangedEvent(this, it.name)) },

@@ -13,6 +13,7 @@ logstashEncoder = "9.0"
 logbook = "4.1.0"
 springMockk = "5.0.1"
 conditionals = "6.0.7"
+slackApi = "1.49.0"
 coroutines = "1.10.2"
 otel = "2.28.0"
 otelAlpha = "2.30.0-alpha"
@@ -26,6 +27,7 @@ micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-pro
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
 logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
+slack = { module = "com.slack.api:slack-api-client-kotlin-extension", version.ref = "slackApi" }
 springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }

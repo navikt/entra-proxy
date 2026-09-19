@@ -7,13 +7,12 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.DomainExten
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.core.Cursor
-import org.springframework.data.redis.core.RedisOperations
 import org.springframework.data.redis.core.ScanOptions
-import org.springframework.data.redis.core.SessionCallback
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
 import java.time.Duration
+import java.util.UUID
 import kotlin.reflect.KClass
 import kotlin.text.Charsets.UTF_8
 import kotlin.time.TimeSource.Monotonic.markNow
@@ -46,19 +45,13 @@ class ValkeyCacheOperations(
 
     override fun replaceSet(nøkkel: String, verdier: Set<String>) {
         if (verdier.isEmpty()) return deleteSet(nøkkel)
+        val tmp = "$nøkkel:tmp:${UUID.randomUUID()}"
         runCatching {
-            valkey.execute(object : SessionCallback<List<Any>> {
-                override fun <K : Any, V : Any> execute(operations: RedisOperations<K, V>): List<Any> {
-                    @Suppress("UNCHECKED_CAST")
-                    val ops = operations as RedisOperations<String, String>
-                    ops.multi()
-                    ops.delete(nøkkel)
-                    ops.opsForSet().add(nøkkel, *verdier.toTypedArray())
-                    return ops.exec()
-                }
-            })
+            valkey.opsForSet().add(tmp, *verdier.toTypedArray())
+            renameSet(tmp, nøkkel)
         }.onFailure {
             log.warn("Cache replaceSet feilet for nøkkel {}: {}", nøkkel, it.message, it)
+            valkey.delete(tmp)
         }
     }
 

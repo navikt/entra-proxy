@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.reactive.function.client.WebClient.Builder
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToFlux
@@ -18,6 +19,8 @@ import reactor.util.retry.Retry.backoff
 import java.net.URI
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.Long.Companion.MAX_VALUE
 
 @Component
@@ -28,6 +31,7 @@ class LederUtvelger(private val builder: Builder,
 
     protected val log = getLogger(javaClass)
     private var subscription: Disposable? = null
+    private val gjeldendeLeder = AtomicReference<String?>(null)
 
     @Volatile
     private var shuttingDown = false
@@ -68,9 +72,16 @@ class LederUtvelger(private val builder: Builder,
                         }
                 )
                 .subscribe(
-                    { publisher.publishEvent(LeaderChangedEvent(this, it.name)) },
+                    { varsleOmLeder(it.name) },
                     { log.warn("SSE error: ${it.message}", it) }
                 )
+    }
+
+    private fun varsleOmLeder(navn: String) {
+        if (gjeldendeLeder.getAndSet(navn) != navn) {
+            log.info("Ny leder: {}", navn)
+            publisher.publishEvent(LeaderChangedEvent(this, navn))
+        }
     }
 
     private fun hentGjeldendeLeder() {
@@ -83,12 +94,17 @@ class LederUtvelger(private val builder: Builder,
                 .block(ofSeconds(5))
         }.onSuccess { respons ->
             respons?.let {
-                log.info("Hentet gjeldende leder {} ved oppstart via {}", it.name, getUri)
-                publisher.publishEvent(LeaderChangedEvent(this, it.name))
+                log.debug("Hentet gjeldende leder {} via {}", it.name, getUri)
+                varsleOmLeder(it.name)
             }
         }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder ved oppstart via {}: {}", getUri, it.message, it)
+            log.warn("Klarte ikke å hente gjeldende leder via {}: {}", getUri, it.message, it)
         }
+    }
+    
+    @Scheduled(fixedRate = POLL_INTERVAL_SECONDS, timeUnit = SECONDS)
+    fun pollGjeldendeLeder() {
+        hentGjeldendeLeder()
     }
 
     @EventListener(ContextClosedEvent::class)
@@ -100,4 +116,8 @@ class LederUtvelger(private val builder: Builder,
 
     private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)
+
+    companion object {
+        private const val POLL_INTERVAL_SECONDS = 30L
+    }
 }

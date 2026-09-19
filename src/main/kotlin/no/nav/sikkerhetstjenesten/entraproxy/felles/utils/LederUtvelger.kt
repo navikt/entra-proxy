@@ -32,6 +32,7 @@ class LederUtvelger(private val builder: Builder,
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
+        log.info("SSE Application ready, connecting to $uri")
         subscription =
             builder.build()
                 .get()

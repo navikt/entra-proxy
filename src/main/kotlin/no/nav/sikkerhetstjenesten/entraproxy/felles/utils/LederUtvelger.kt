@@ -8,17 +8,12 @@ import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
-import io.netty.handler.timeout.ReadTimeoutException
-import reactor.netty.http.client.PrematureCloseException
-import reactor.util.retry.Retry.backoff
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.Long.Companion.MAX_VALUE
 
 @Component
 class LederUtvelger(private val client: WebClient,
@@ -26,66 +21,29 @@ class LederUtvelger(private val client: WebClient,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
-    private var subscription: Disposable? = null
+    private lateinit var subscription: Disposable
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
     @EventListener(ApplicationReadyEvent::class)
     fun onApplicationReady() {
         log.info("SSE Application ready,connecting to ${elector.sse.url}")
-        subscribeSSE()
+        subscription = subscribeSSE()
         hentGjeldendeLeder()
     }
 
-    private fun subscribeSSE() {
-        subscription =
-            client
-                .get()
-                .uri(elector.sse.url)
-                .retrieve()
-                .bodyToFlux<LederUtvelgerRespons>()
-                .doOnError {
-                    log.error("SSE connection feilet for godt: ${it.message}", it)
+    private fun subscribeSSE() =
+        client
+            .get()
+            .uri(elector.sse.url)
+            .retrieve()
+            .bodyToFlux<LederUtvelgerRespons>()
+            .subscribe(
+                {
+                    varsleOmLeder(it.name)
+                }, {
+                    log.warn("SSE error: ${it.message}", it)
                 }
-                .doOnSubscribe {
-                    log.info("SSE subscribe")
-                }
-                .doOnNext {
-                    log.info("SSE next: {} ", it)
-                }
-                .retryWhen(
-                    backoff(5, ofSeconds(1))
-                        .maxBackoff(ofSeconds(30))
-                        .filter {
-                            it is WebClientRequestException ||
-                                    it is PrematureCloseException ||
-                                    it.cause is PrematureCloseException ||
-                                    it is ReadTimeoutException ||
-                                    it.cause is ReadTimeoutException
-                        }
-                        .doBeforeRetry {
-                            log.info("SSE retry ${it.failure().message}", it)
-                        }
-                        .doAfterRetry {
-                            log.info("SSE connection retry etter ${it.totalRetriesInARow()} forsøk",
-                                it.failure())
-                        }
-                )
-                .subscribe(
-                    {
-                        varsleOmLeder(it.name)
-                    }, {
-                        log.warn("SSE error: ${it.message}", it)
-                    }
-                )
-    }
-
-    private fun varsleOmLeder(ny: String) {
-         val gammel = gjeldendeLeder.getAndSet(ny)
-        if ( gammel != ny) {
-            log.info("Ny leder: {}, gammel var {}", ny,gammel)
-            publisher.publishEvent(LeaderChangedEvent(this, ny))
-        }
-    }
+            )
 
     private fun hentGjeldendeLeder() {
         runCatching {
@@ -97,18 +55,25 @@ class LederUtvelger(private val client: WebClient,
                 .block(ofSeconds(5))
         }.onSuccess { respons ->
             respons?.let {
-                log.debug("Hentet gjeldende leder {} via {}", it.name, elector.get.url)
                 varsleOmLeder(it.name)
             }
         }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder via {}: {}", elector.get.url, it.message, it)
+            log.warn("Klarte ikke å hente gjeldende leder via {}", elector.get.url,  it)
+        }
+    }
+
+    private fun varsleOmLeder(ny: String) {
+        val gammel = gjeldendeLeder.getAndSet(ny)
+        if ( gammel != ny) {
+            log.info("Ny leder: {}, gammel var {}", ny,gammel)
+            publisher.publishEvent(LeaderChangedEvent(this, ny))
         }
     }
 
     @EventListener(ContextClosedEvent::class)
     fun onShutdown() {
         log.info("SSE Application shutting down")
-        subscription?.dispose()
+        subscription.dispose()
     }
 
     private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)

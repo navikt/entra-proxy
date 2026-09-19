@@ -13,7 +13,7 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
     private val log = getLogger(javaClass)
 
     @EventListener(LeaderChangedEvent::class)
-    fun onApplicationEvent(event: LeaderChangedEvent) {
+    open fun onApplicationEvent(event: LeaderChangedEvent) {
         erLeder = event.leder == hostname
         somLeder("håndtering av lederbytte", {
             log.info("Denne instansen ($hostname) er nå leder")

@@ -49,8 +49,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             else throw it
         }
 
-
-
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
@@ -72,13 +70,11 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             else throw it
         }
 
-
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
             gruppeMedlemmer("$gruppeId").also {
                 log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
             }
-
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =

@@ -19,15 +19,10 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
         doHandleLeaderChange(event.leder)
     }
 
-    protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) =
-        somLeder(beskrivelse, block) {}
-
-
-    protected fun <T> somLeder(beskrivelse: String? = null, block: () -> T, default: () -> T): T =
+    protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) {
         if (erLeder) {
             beskrivelse?.let { log.trace(it) }
             block()
-        } else {
-            default()
         }
+    }
 }

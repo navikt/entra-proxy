@@ -137,7 +137,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
-            it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
+            it.onPremisesSamAccountName?.erAnsattId() == true
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
             log.info("Ignorerte {} medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName",

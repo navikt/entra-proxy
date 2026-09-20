@@ -171,7 +171,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
-        }.toSet()
+        }.toSet().also {
+            log.info("Hentet {} side(r) for {}", it.size, beskrivelse)
+        }
     }
 
     private fun CacheOperations.inneholder(ansattId: AnsattId) =

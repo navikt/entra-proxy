@@ -31,7 +31,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId, oid: UUID) =
         runCatching {
-
             if (cache.inneholder(ansattId)) {
                 emptySet()
             }

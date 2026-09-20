@@ -192,9 +192,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         cache.delete(OID_CACHE,navIdent.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }
-        return oid.ansattOid(navIdent).also {
-            log.info("Hentet ny oid $it for $navIdent")
-        } ?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding")
+        return oid.ansattOid(navIdent)?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
     override fun toString() =

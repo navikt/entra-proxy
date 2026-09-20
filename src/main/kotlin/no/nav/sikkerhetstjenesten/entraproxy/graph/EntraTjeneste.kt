@@ -42,8 +42,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                temaerForAnsatt(ansattId,"${refreshOid(ansattId)}").also {
-                    log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid")
+                val nyOid = refreshOid(ansattId)
+                temaerForAnsatt(ansattId,"$nyOid").also {
+                    log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid til $nyOid")
                 }
             }
             else throw it
@@ -64,8 +65,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                enheter(refreshOid(ansattId)).also {
-                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid")
+                val nyOid = refreshOid(ansattId)
+                enheter(nyOid).also {
+                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid til $nyOid")
                 }
             }
             else throw it
@@ -104,8 +106,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                grupperForAnsatt(navIdent,"${refreshOid(navIdent)}").also {
-                    log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid")
+                val nyOid = refreshOid(navIdent)
+                grupperForAnsatt(navIdent,"$nyOid").also {
+                    log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid til $nyOid")
                 }
             }
             else throw it

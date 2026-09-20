@@ -72,7 +72,9 @@ class LederUtvelger(private val client: WebClient,
             }
         }?:error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class LederUtvelgerRespons(val name: String)
+
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)
 }

@@ -140,7 +140,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
-            log.info("Ignorerte {} medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (f.eks. nøstede grupper eller tjenestekontoer)",
+            log.info("Ignorerte {} medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName",
                 ugyldigeMedlemmer, oid)
         }
         return gyldigeMedlemmer.mapTo(sortedSetOf()) {

@@ -67,7 +67,7 @@ class LederUtvelger(private val client: WebClient,
             val gammelLeder = gjeldendeLeder.getAndSet(it)
             if (gammelLeder != it) {
                 log.info("Ny leder $it, gammel var $gammelLeder")
-                publisher.publishEvent(LeaderChangedEvent(this, it))
+                publisher.publishEvent(NyLederHendelse(this, it))
             }
         }?: error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
@@ -75,5 +75,5 @@ class LederUtvelger(private val client: WebClient,
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class LederUtvelgerRespons(val name: String)
 
-    class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)
+    class NyLederHendelse(source: Any, val leder: String) : ApplicationEvent(source)
 }

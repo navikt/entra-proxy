@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LederUtvelger.LeaderChangedEvent
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LederUtvelger.NyLederHendelse
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.event.EventListener
 import java.net.InetAddress.getLocalHost
@@ -12,8 +12,8 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
 
     private val log = getLogger(javaClass)
 
-    @EventListener(LeaderChangedEvent::class)
-    open fun onApplicationEvent(event: LeaderChangedEvent) {
+    @EventListener(NyLederHendelse::class)
+    open fun onApplicationEvent(event: NyLederHendelse) {
         erLeder = event.leder == hostname
          log.info("Denne instansen er $hostname, lederen er ${event.leder}")
         somLeder("håndtering av lederbytte", {

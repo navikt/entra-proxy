@@ -32,7 +32,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     fun tema(ansattId: AnsattId, oid: UUID) =
         runCatching {
 
-            if (ansattId.erInaktivI(cache)) {
+            if (cache.erInaktiv(ansattId)) {
                 emptySet()
             }
             else  {
@@ -55,7 +55,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId, oid: UUID) =
         runCatching {
-            if (ansattId.erInaktivI(cache)) {
+            if (cache.erInaktiv(ansattId)) {
                 emptySet()
             }
             else  {
@@ -186,8 +186,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }
 
-    private fun AnsattId.erInaktivI(cache: CacheOperations)  =
-        cache.inneholder(INAKTIVE, verdi)
+    private fun CacheOperations.erInaktiv(ansattId: AnsattId) =
+        inneholder(INAKTIVE, ansattId.verdi)
 
     private fun refreshOid(navIdent: AnsattId): UUID {
         cache.delete(OID_CACHE,navIdent.verdi).also {

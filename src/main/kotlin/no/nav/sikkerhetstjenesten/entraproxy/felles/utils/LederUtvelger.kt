@@ -11,35 +11,36 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToFlux
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
+import java.net.URI
 import java.time.Duration.ofSeconds
 import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    private val config: ElectorConfig,
+                    private val cfg: ElectorConfig,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
-    private lateinit var subscription: Disposable
+    private lateinit var abonnment: Disposable
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
     @EventListener(ApplicationReadyEvent::class)
     fun klar() {
-        log.info("Applikasjonen klar, lytter etter SSE-hendelser på  ${config.sse.url}")
-        subscription = abonner()
-        hentGjeldendeLeder()
+        log.info("Applikasjonen klar, lytter etter SSE-hendelser på ${cfg.sse.url}")
+        abonnment = abonnerPå(cfg.sse.url)
+        varsleOm(gjeldendeLederFra(cfg.get.url))
     }
     @EventListener(ContextClosedEvent::class)
     fun stopper() {
         log.info("Applikasjonen stopper")
-        subscription.dispose()
+        abonnment.dispose()
     }
 
-    private fun abonner() =
+    private fun abonnerPå(uri: URI) =
         client
             .get()
-            .uri(config.sse.url)
+            .uri(uri)
             .retrieve()
             .bodyToFlux<LederUtvelgerRespons>()
             .subscribe(
@@ -50,32 +51,28 @@ class LederUtvelger(private val client: WebClient,
                 }
             )
 
-    private fun hentGjeldendeLeder() {
+    private fun gjeldendeLederFra(uri: URI) =
         runCatching {
             client
                 .get()
-                .uri(config.get.url)
+                .uri(uri)
                 .retrieve()
                 .bodyToMono<LederUtvelgerRespons>()
                 .block(ofSeconds(5))
-        }.onSuccess { respons ->
-            respons?.let {
-                varsleOm(it.name)
-            }
+                ?.name
         }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder via {}", config.get.url,  it)
-        }
+            log.warn("Klarte ikke å hente gjeldende leder via {}", uri, it)
+        }.getOrThrow()
+
+    private fun varsleOm(leder: String?) {
+        leder?.let {
+            val gammelLeder = gjeldendeLeder.getAndSet(it)
+            if (gammelLeder != it) {
+                log.info("Ny leder $it, gammel var $gammelLeder")
+                publisher.publishEvent(LeaderChangedEvent(this, it))
+            }
+        }?:error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
-
-    private fun varsleOm(leder: String) {
-        val gammelLeder = gjeldendeLeder.getAndSet(leder)
-        if (gammelLeder != leder) {
-            log.info("Ny leder $leder, gammel var $gammelLeder")
-            publisher.publishEvent(LeaderChangedEvent(this, leder))
-        }
-    }
-
-
 
     private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)

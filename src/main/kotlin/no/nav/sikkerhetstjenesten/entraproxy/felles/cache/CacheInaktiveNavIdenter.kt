@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import io.micrometer.core.annotation.Timed
 import no.nav.boot.conditionals.ConditionalOnGCP
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -18,7 +17,6 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
 
     private val log = getLogger(javaClass)
 
-    @Timed
     @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES, initialDelay = 1)
     fun oppdaterCache() =
         somLeder {

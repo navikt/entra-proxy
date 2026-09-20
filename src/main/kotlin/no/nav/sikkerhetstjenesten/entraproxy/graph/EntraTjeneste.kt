@@ -103,7 +103,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }
 
-
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {

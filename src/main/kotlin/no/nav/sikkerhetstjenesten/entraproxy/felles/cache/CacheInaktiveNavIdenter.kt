@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.UUID
 import java.util.concurrent.TimeUnit.MINUTES
-import kotlin.system.measureTimeMillis
+import kotlin.time.measureTimedValue
 
 @Component
 @ConditionalOnGCP
@@ -20,21 +20,27 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
 
     @Timed
     @Scheduled(fixedRate = INTERVAL_MINUTES, timeUnit = MINUTES, initialDelay = 1)
-    fun oppdaterCache() {
+    fun oppdaterCache() =
         somLeder {
-            val varighet = measureTimeMillis {
+            val måling = measureTimedValue {
                 runCatching {
                     cache.replaceSet(INAKTIVE, entra.gruppeMedlemmer("${uuid}").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
-                    log.info("Periodisk cache-jobb OK, la til {} inaktive Nav-identer i cache", cache.getSet(INAKTIVE).size)
-                }.onFailure {
-                    log.warn("Periodisk cache-jobb feilet", it)
+                    cache.getSet(INAKTIVE)
                 }
             }
-            log.info("Periodisk cache-jobb for inaktive Nav-identer tok {}ms", varighet)
+            måling.value.onSuccess {
+                log.info(
+                    "Periodisk cache-jobb OK, la til {} inaktive Nav-identer i cache på {}ms",
+                    it.size,
+                    måling.duration.inWholeMilliseconds
+                )
+            }.onFailure {
+                log.warn("Periodisk cache-jobb feilet", it)
+            }
         }
-    }
+
     companion object {
         const val INAKTIVE = "inaktive"
         private const val INTERVAL_MINUTES = 15L

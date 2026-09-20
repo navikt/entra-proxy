@@ -41,7 +41,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                val nyOid = refreshOid(ansattId)
+                val nyOid = nyOid(ansattId)
                 temaerForAnsatt(ansattId,"$nyOid").also {
                     log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid til $nyOid")
                 }
@@ -64,7 +64,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                val nyOid = refreshOid(ansattId)
+                val nyOid = nyOid(ansattId)
                 enheter(nyOid).also {
                     log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid til $nyOid")
                 }
@@ -105,7 +105,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
-                val nyOid = refreshOid(navIdent)
+                val nyOid = nyOid(navIdent)
                 grupperForAnsatt(navIdent,"$nyOid").also {
                     log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid til $nyOid")
                 }
@@ -188,7 +188,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun CacheOperations.inneholder(ansattId: AnsattId) =
         inneholder(INAKTIVE, ansattId.verdi)
 
-    private fun refreshOid(navIdent: AnsattId): UUID {
+    private fun nyOid(navIdent: AnsattId): UUID {
         cache.delete(OID_CACHE,navIdent.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $navIdent")
         }

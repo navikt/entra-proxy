@@ -14,12 +14,11 @@ import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
 import java.net.URI
 import java.time.Duration.ofSeconds
-import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    private val cfg: ElectorConfig,
+                    private val cfg: UtvelgerConfig,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
@@ -70,7 +69,7 @@ class LederUtvelger(private val client: WebClient,
                 log.info("Ny leder $it, gammel var $gammelLeder")
                 publisher.publishEvent(LeaderChangedEvent(this, it))
             }
-        }?:error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
+        }?: error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

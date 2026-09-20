@@ -174,8 +174,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }.toList()
         return sider
     }
-
-
+    
     private fun CacheOperations.inneholder(ansattId: AnsattId) =
         inneholder(INAKTIVE, ansattId.verdi)
 

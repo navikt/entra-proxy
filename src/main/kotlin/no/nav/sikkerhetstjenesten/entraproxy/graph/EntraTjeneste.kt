@@ -10,7 +10,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
@@ -78,18 +77,30 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
-        ansatt  {
-            client.bruker(ANSATTE_FELTER, "$BRUKER eq '${ansattId.verdi}'").ansatte.firstOrNull()
-        }?.also {
-            log.info("Hentet ansatt $it for ident ${ansattId.verdi}: $it")
-        }
+        utvidetAnsatt("$BRUKER eq '${ansattId.verdi}'",ansattId.verdi)
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
-        ansatt  {
-            client.bruker(ANSATTE_FELTER, "jobTitle eq '${ansattId.verdi}'").ansatte.firstOrNull()
-        }?.also {
-            log.info("Hentet utvidet ansatt $it for tIdent ${ansattId.verdi}: $it")
+        utvidetAnsatt("jobTitle eq '${ansattId.verdi}'",ansattId.verdi)
+
+    private fun utvidetAnsatt(filter: String, verdi: String) =
+        client.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->
+            with(respons) {
+                onPremisesSamAccountName?.let { navIdent ->
+                    val enhetsNummer = Enhetnummer(streetAddress ?: UKJENT_ENHET)
+                    UtvidetAnsatt(
+                        AnsattId(navIdent),
+                        displayName,
+                        givenName,
+                        surname,
+                        TIdent(jobTitle ?: TIDENT_DEFAULT),
+                        mail,
+                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer))
+                    ).also {
+                        log.info("Hentet utvidet ansatt {} for ident {}", it, verdi)
+                    }
+                }
+            }
         }
 
 
@@ -165,21 +176,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return sider
     }
 
-
-
-    private fun ansatt(block: () -> AnsattRespons?) =
-        block()?.let { respons ->
-            respons.onPremisesSamAccountName?.let { navIdent ->
-                with(respons) {
-                    val enhetsNummer = Enhetnummer(streetAddress?: UKJENT_ENHET)
-                    UtvidetAnsatt(
-                        AnsattId(navIdent), displayName, givenName, surname,
-                        TIdent(jobTitle?: TIDENT_DEFAULT),
-                        mail,
-                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer)))
-                }
-            }
-        }
 
     private fun CacheOperations.inneholder(ansattId: AnsattId) =
         inneholder(INAKTIVE, ansattId.verdi)

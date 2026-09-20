@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationEvent
@@ -43,13 +44,11 @@ class LederUtvelger(private val client: WebClient,
             .uri(uri)
             .retrieve()
             .bodyToFlux<LederUtvelgerRespons>()
-            .subscribe(
-                {
+            .subscribe({
                     varsleOm(it.name)
                 }, {
                     log.warn("SSE feilet", it)
-                }
-            )
+                })
 
     private fun gjeldendeLederFra(uri: URI) =
         runCatching {
@@ -73,7 +72,7 @@ class LederUtvelger(private val client: WebClient,
             }
         }?:error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
-
-    private data class LederUtvelgerRespons(val name: String, val last_update: LocalDateTime)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private data class LederUtvelgerRespons(val name: String)
     class LeaderChangedEvent(source: Any, val leder: String) : ApplicationEvent(source)
 }

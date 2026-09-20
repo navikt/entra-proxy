@@ -177,7 +177,11 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     }
 
     private fun CacheOperations.inneholder(ansattId: AnsattId) =
-        inneholder(INAKTIVE, ansattId.verdi)
+        inneholder(INAKTIVE, ansattId.verdi).also {
+            if (it) {
+                log.info("$ansattId er inaktiv")
+            }
+        }
 
     private fun nyOid(navIdent: AnsattId): UUID {
         cache.delete(OID_CACHE,navIdent.verdi).also {

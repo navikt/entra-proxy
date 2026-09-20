@@ -121,21 +121,21 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     private fun temaerForAnsatt(ansattId: AnsattId, ansattOid: String) =
         allSider("temaer for $ansattId ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
-            .flatMap { it.value }
+            .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
                 Tema(it.displayName)
             }
 
     private fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
-            .flatMap { it.value }
+            .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)
             }
 
      fun gruppeMedlemmer(oid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
-            .flatMap { it.value }
+            .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.length == ANSATTID_LENGTH
         }
@@ -153,7 +153,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun enheter(ansattOid: UUID) =
         buildSet {
             allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
-                .flatMap { it.value }
+                .flatMapTo(mutableSetOf()) { it.value }
                 .map {
                     Enhetnummer(it.displayName)
                 }
@@ -162,17 +162,16 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 }
         }
 
-    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): List<T> {
+    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {
         log.info("Henter {}", beskrivelse)
         var sideNummer = 1
-        val sider = generateSequence(førsteSide) { side ->
+        return generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 sideNummer++
                 log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
-        }.toList()
-        return sider
+        }.toSet()
     }
 
     private fun CacheOperations.inneholder(ansattId: AnsattId) =

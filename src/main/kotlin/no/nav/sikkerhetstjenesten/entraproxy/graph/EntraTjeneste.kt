@@ -35,14 +35,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
             else  {
                 temaerForAnsatt(ansattId,"$oid").also {
-                    log.info("Hentet ${it.size} tema for ansatt $ansattId ($oid)")
+                    log.info("Hentet ${it.size} tema for $ansattId ($oid)")
                 }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 val nyOid = nyOid(ansattId)
                 temaerForAnsatt(ansattId,"$nyOid").also {
-                    log.info("Hentet ${it.size} tema for ansatt $ansattId etter refresh oid til $nyOid")
+                    log.info("Hentet ${it.size} tema for $ansattId etter refresh oid til $nyOid")
                 }
             }
             else throw it
@@ -56,14 +56,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
             else  {
                 enheter(oid).also {
-                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId ($oid)")
+                    log.info("Hentet ${it.size} enhet(er) for $ansattId ($oid)")
                 }
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 val nyOid = nyOid(ansattId)
                 enheter(nyOid).also {
-                    log.info("Hentet ${it.size} enhet(er) for ansatt $ansattId etter refresh oid til $nyOid")
+                    log.info("Hentet ${it.size} enhet(er) for $ansattId etter refresh oid til $nyOid")
                 }
             }
             else throw it
@@ -107,20 +107,20 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
         runCatching {
             grupperForAnsatt(navIdent,"$oid").also {
-                log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} ($oid)")
+                log.info("Hentet ${it.size} gruppe(r) for $navIdent ($oid)")
             }
         }.getOrElse {
             if (it is NotFoundRestException)  {
                 val nyOid = nyOid(navIdent)
                 grupperForAnsatt(navIdent,"$nyOid").also {
-                    log.info("Hentet ${it.size} gruppe(r) for ansatt ${navIdent.verdi} etter refresh oid til $nyOid")
+                    log.info("Hentet ${it.size} gruppe(r) for $navIdent etter refresh oid til $nyOid")
                 }
             }
             else throw it
         }
 
     private fun temaerForAnsatt(ansattId: AnsattId, ansattOid: String) =
-        allSider("temaer for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+        allSider("temaer for $ansattId ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
             .flatMap { it.value }
             .mapTo(sortedSetOf()) {
                 Tema(it.displayName)
@@ -174,7 +174,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         }.toList()
         return sider
     }
-    
+
     private fun CacheOperations.inneholder(ansattId: AnsattId) =
         inneholder(INAKTIVE, ansattId.verdi)
 

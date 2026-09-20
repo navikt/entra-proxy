@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.event.EventListener
 import org.springframework.resilience.retry.MethodRetryEvent
 import org.springframework.stereotype.Component
-import kotlin.jvm.javaClass
 
 @Component
 class RetryLogger {

@@ -1,3 +1,4 @@
+
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -60,6 +61,17 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/navikt/sikkerhetstjenesten-felles")
+        credentials {
+            username = "x-access-token"
+            password = providers.environmentVariable("READER_TOKEN").orElse(providers.gradleProperty("gpr.token")).orNull
+        }
+    }
+    maven {
+        url = uri("https://repo1.maven.org/maven2")
+    }
 }
 
 
@@ -74,17 +86,20 @@ dependencies {
     // Kotlin
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
+    implementation(libs.jackson.module.kotlin)
 
     // Observability and logging
     implementation(libs.opentelemetryInstrumentationAnnotations)
     implementation(libs.opentelemetryLogbackMdc)
     implementation(libs.micrometerRegistryPrometheus)
     implementation(libs.logstashLogbackEncoder)
+    implementation(libs.logbook)
 
     // NAV and security
     implementation(libs.bootConditionals)
-    implementation(libs.tokenClientSpring)
-    implementation(libs.tokenValidationSpring)
+    implementation(libs.slack)
+    implementation(libs.springBootStarterOauth2Client)
+    implementation(libs.springBootStarterOauth2ResourceServer)
 
     // HTTP and API documentation
     implementation(libs.httpclient5)
@@ -105,9 +120,16 @@ dependencies {
     // Testing
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
+    testImplementation(libs.caffeine)
     testImplementation(libs.junitJupiter)
+    testImplementation(libs.testcontainersJunitJupiter)
+    testImplementation(libs.testcontainersRedis)
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation(libs.springBootStarterDataRedisTest)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
+    testImplementation("no.nav.security:mock-oauth2-server:6.0.2")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation(kotlin("test"))
 }
 
@@ -127,6 +149,27 @@ tasks.named<BootJar>("bootJar") {
 tasks.named<Test>("test") {
     jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
     useJUnitPlatform()
+    maxParallelForks = 1
+    description = "Runs the full test suite serially, including Redis/Testcontainers tests"
+}
+
+tasks.register<Test>("unitTest") {
+    group = "verification"
+    description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+    useJUnitPlatform()
+    maxParallelForks = 2
+    include("**/*Test.class")
+    exclude("**/felles/cache/**")
+}
+
+tasks.register<Test>("redisTest") {
+    group = "verification"
+    description = "Runs the Redis/Testcontainers cache tests serially"
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+    useJUnitPlatform()
+    maxParallelForks = 1
+    include("**/felles/cache/**")
 }
 
 java {

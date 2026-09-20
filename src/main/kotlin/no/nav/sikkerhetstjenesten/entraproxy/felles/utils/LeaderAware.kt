@@ -1,32 +1,40 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LederUtvelger.LeaderChangedEvent
+import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LederUtvelger.NyLederHendelse
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.event.EventListener
-import java.net.InetAddress
+import java.net.InetAddress.getLocalHost
 
-abstract class LeaderAware {
-    private val hostname = InetAddress.getLocalHost().hostName
-    protected fun doHandleLeaderChange()  = Unit
+abstract class LeaderAware(private var erLeder: Boolean = false) {
+    private val hostname = getLocalHost().hostName
+    protected open fun doHandleLeaderChange(nyLeder: String) = Unit
 
-    private var erLeder: Boolean = false
     private val log = getLogger(javaClass)
 
-    @EventListener(LeaderChangedEvent::class)
-    fun onApplicationEvent(event: LeaderChangedEvent) {
+    @EventListener(NyLederHendelse::class)
+    open fun onApplicationEvent(event: NyLederHendelse) {
         erLeder = event.leder == hostname
+        log.info("Denne instansen er $hostname, lederen er ${event.leder}")
+        doHandleLeaderChange(event.leder)
+    }
+
+    protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) {
         if (erLeder) {
-            log.info("Denne instansen ($hostname) er nå leder")
-            doHandleLeaderChange()
+            beskrivelse?.let { log.trace(it) }
+            block()
         }
     }
 
-    protected fun <T> somLeder(default: T, beskrivelse : String,block: () -> T): T = if (erLeder) {
-       log.trace("Kjører $beskrivelse som leder")
-        block()
-    } else {
-        log.trace("Kjører ikke $beskrivelse som leder, returnerer default")
-        default
-    }
+    protected fun <T> somLeder(
+        beskrivelse: String? = null,
+        block: () -> T,
+        default: () -> T
+    ): T =
+        if (erLeder) {
+            beskrivelse?.let { log.trace(it) }
+            block()
+        } else {
+            default()
+        }
 }

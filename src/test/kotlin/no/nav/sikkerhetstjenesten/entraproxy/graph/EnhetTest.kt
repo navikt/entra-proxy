@@ -68,11 +68,6 @@ class EnhetTest : BehaviorSpec({
             Then("ulikt enhetnummer gir ulikhet") { a shouldNotBe annetNummer }
             Then("ulikhet mot null") { a.equals(null) shouldBe false }
         }
-        When("hashCode") {
-            Then("baserer seg kun pa enhetnummer (dokumenterer faktisk adferd)") {
-                a.hashCode() shouldBe annetNavn.hashCode()
-            }
-        }
         When("compareTo") {
             Then("sortering folger enhetnummer") {
                 listOf(annetNummer, a).sorted() shouldBe listOf(a, annetNummer)

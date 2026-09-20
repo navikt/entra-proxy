@@ -22,3 +22,7 @@ data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
 
     override fun toString() = verdi
 }
+
+fun String.erAnsattId() = runCatching {
+    AnsattId(this)
+}.isSuccess

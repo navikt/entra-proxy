@@ -1,23 +1,40 @@
-no.nav.security.jwt:
-  issuer:
-    azuread:
-      discoveryurl: http://localhost:8080/default/.well-known/openid-configuration
-      accepted_audience: client id
-  client:
-    registration:
-      onbehalfof:
-        token-endpoint-url: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/token
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: https://graph.microsoft.com/.default
-        authentication:
-          client-id:  client id
-          client-jwk: ${azure.app.client.jwk}
-          client-auth-method: private_key_jwt
 spring:
-  cache:
-    type: caffeine
+  security:
+    oauth2:
+      client:
+        registration:
+          graph:
+            provider: azuread
+            client-id: mock-client-id
+            client-secret: mock-client-secret
+            authorization-grant-type: client_credentials
+            scope:
+              - https://graph.microsoft.com/.default
+          norg:
+            provider: azuread
+            client-id: mock-client-id
+            client-secret: mock-client-secret
+            authorization-grant-type: client_credentials
+            scope:
+              - https://graph.microsoft.com/.default
+        provider:
+          azuread:
+            issuer-uri: https://login.microsoftonline.com/mock-tenant/v2.0
 
-microsoft:
-  graph:
-    url: https://graph.microsoft.com/v1.0
-    scope: https://graph.microsoft.com/.default
+azure:
+  app:
+    client:
+      id: mock-client-id
+      secret: mock-client-secret
+      jwk: mock-jwk
+    well:
+      known:
+        url: https://login.microsoftonline.com/mock-tenant/v2.0/.well-known/openid-configuration
+  openid:
+    config:
+      issuer: https://login.microsoftonline.com/mock-tenant/v2.0
+      token:
+        endpoint: https://login.microsoftonline.com/mock-tenant/oauth2/v2.0/token
+
+graph:
+  scope: https://graph.microsoft.com/.default

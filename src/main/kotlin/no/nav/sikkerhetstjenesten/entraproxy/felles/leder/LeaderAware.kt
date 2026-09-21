@@ -10,9 +10,9 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
     private val log = getLogger(javaClass)
 
     @EventListener(LederHendelse::class)
-    open fun onApplicationEvent(event: LederHendelse) {
-        erLeder = event.leder == hostname
-        log.info("Denne instansen er $hostname, lederen er ${event.leder}")
+    open fun onApplicationEvent(hendelse: LederHendelse) {
+        erLeder = hendelse.leder == hostname
+        log.info("Denne instansen er $hostname, lederen er ${hendelse.leder}")
     }
 
     protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) {

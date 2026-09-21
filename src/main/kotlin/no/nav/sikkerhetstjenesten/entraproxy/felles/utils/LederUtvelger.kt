@@ -50,12 +50,12 @@ class LederUtvelger(private val client: WebClient,
 
     private fun varsleOm(leder: String?) {
         leder?.let { ny ->
-            val gammelLeder = gjeldendeLeder.getAndSet(ny)
-            if (gammelLeder != ny) {
-                log.info("Ny leder $ny, gammel var $gammelLeder")
+            val gammel = gjeldendeLeder.getAndSet(ny)
+            if (gammel != ny) {
+                log.info("Ny leder $ny, gammel var $gammel")
                 publisher.publishEvent(NyLederHendelse(this, ny ))
             }
-        }?: error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
+        }?: error("Kunne ikke hente gjeldende leder fra ${cfg.get.url}")
     }
 
     @EventListener(ApplicationReadyEvent::class)

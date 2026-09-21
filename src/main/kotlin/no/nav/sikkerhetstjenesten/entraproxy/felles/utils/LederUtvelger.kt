@@ -19,7 +19,7 @@ class LederUtvelger(private val client: WebClient,
                     private val cfg: LederConfig,
                     private val publisher: ApplicationEventPublisher) {
 
-    protected val log = getLogger(javaClass)
+    private val log = getLogger(javaClass)
     private lateinit var abonnent: Disposable
     private val gjeldendeLeder = AtomicReference<String?>(null)
 

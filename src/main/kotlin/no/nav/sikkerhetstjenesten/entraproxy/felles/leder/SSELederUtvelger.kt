@@ -6,9 +6,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.Disposable
 import java.net.URI
 
-/**
- * Abonnerer på en Server-Sent Events (SSE)-strøm og kjører den gitte blokken for hver hendelse som mottas.
- */
 @Component
 class SSELederUtvelger(private val client: WebClient) {
 

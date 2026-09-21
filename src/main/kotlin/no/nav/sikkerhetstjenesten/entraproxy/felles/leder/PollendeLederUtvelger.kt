@@ -6,9 +6,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import java.net.URI
 import java.time.Duration
 
-/**
- * Gjør et synkront REST-oppslag mot [uri] og blokkerer på svaret i inntil [timeout].
- */
 @Component
 class PollendeLederUtvelger(private val client: WebClient) {
 

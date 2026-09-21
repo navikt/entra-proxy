@@ -30,12 +30,12 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
             }
             måling.value.onSuccess {
                 log.info(
-                    "Periodisk cache-jobb OK, la til {} inaktive Nav-identer i cache på {}ms",
+                    "Periodisk cache-oppdatering OK, la til {} inaktive Nav-identer i cache på {}ms",
                     it.size,
                     måling.duration.inWholeMilliseconds
                 )
             }.onFailure {
-                log.warn("Periodisk cache-jobb feilet", it)
+                log.warn("Periodisk cache-oppdatering feilet", it)
             }
         }
 

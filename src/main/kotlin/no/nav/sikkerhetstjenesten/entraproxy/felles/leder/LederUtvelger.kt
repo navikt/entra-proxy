@@ -24,7 +24,7 @@ class LederUtvelger(private val cfg: LederConfig,
     private fun subscribe(uri: URI) =
         sseUtvelger.subscribe<LederUtvelgerRespons>(uri) { varsleOm(it.name) }
 
-    private fun hent(uri: URI) =
+    private fun poll(uri: URI) =
         pollendeUtvelger.poll<LederUtvelgerRespons>(uri, ofSeconds(5))?.name
 
     private fun varsleOm(leder: String?) {
@@ -40,7 +40,7 @@ class LederUtvelger(private val cfg: LederConfig,
     fun klar() {
         log.info("Applikasjonen klar, lytter etter SSE-hendelser på ${cfg.sse.url}")
         abonnent = subscribe(cfg.sse.url)
-        varsleOm(hent(cfg.get.url))
+        varsleOm(poll(cfg.get.url))
     }
     @EventListener(ContextClosedEvent::class)
     fun stopper() {

@@ -6,44 +6,26 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToFlux
-import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.Disposable
 import java.net.URI
 import java.time.Duration.ofSeconds
 import java.util.concurrent.atomic.AtomicReference
 
 @Component
-class LederUtvelger(private val client: WebClient,
-                    private val cfg: LederConfig,
-                    private val publisher: ApplicationEventPublisher) {
+class LederUtvelger(private val cfg: LederConfig,
+                    private val publisher: ApplicationEventPublisher,
+                    private val sseUtvelger: SSEUtvelger,
+                    private val restUtvelger: RestUtvelger) {
 
     private val log = getLogger(javaClass)
     private lateinit var abonnent: Disposable
     private val gjeldendeLeder = AtomicReference<String?>(null)
 
-    private fun request(uri: URI) =
-        client
-            .get()
-            .uri(uri)
-            .retrieve()
+    private fun subscribe(uri: URI) =
+        sseUtvelger.subscribe<LederUtvelgerRespons>(uri) { varsleOm(it.name) }
 
-    private fun abonnerPå(uri: URI) =
-        request(uri)
-            .bodyToFlux<LederUtvelgerRespons>()
-            .map(LederUtvelgerRespons::name)
-            .subscribe(::varsleOm) { log.warn("SSE feilet", it) }
-
-    private fun gjeldendeLederFra(uri: URI) =
-        runCatching {
-            request(uri)
-                .bodyToMono<LederUtvelgerRespons>()
-                .block(ofSeconds(5))
-                ?.name
-        }.onFailure {
-            log.warn("Klarte ikke å hente gjeldende leder via {}", uri, it)
-        }.getOrThrow()
+    private fun hent(uri: URI) =
+        restUtvelger.hent<LederUtvelgerRespons>(uri, ofSeconds(5))?.name
 
     private fun varsleOm(leder: String?) {
         val ny = leder ?: error("Kunne ikke hente gjeldende leder fra ${cfg.get.url}")
@@ -57,8 +39,8 @@ class LederUtvelger(private val client: WebClient,
     @EventListener(ApplicationReadyEvent::class)
     fun klar() {
         log.info("Applikasjonen klar, lytter etter SSE-hendelser på ${cfg.sse.url}")
-        abonnent = abonnerPå(cfg.sse.url)
-        varsleOm(gjeldendeLederFra(cfg.get.url))
+        abonnent = subscribe(cfg.sse.url)
+        varsleOm(hent(cfg.get.url))
     }
     @EventListener(ContextClosedEvent::class)
     fun stopper() {

@@ -1,9 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.ContextClosedEvent
 import org.springframework.context.event.EventListener
@@ -18,24 +16,12 @@ import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class LederUtvelger(private val client: WebClient,
-                    private val cfg: UtvelgerConfig,
+                    private val cfg: LederConfig,
                     private val publisher: ApplicationEventPublisher) {
 
     protected val log = getLogger(javaClass)
-    private lateinit var abonnment: Disposable
+    private lateinit var abonnent: Disposable
     private val gjeldendeLeder = AtomicReference<String?>(null)
-
-    @EventListener(ApplicationReadyEvent::class)
-    fun klar() {
-        log.info("Applikasjonen klar, lytter etter SSE-hendelser på ${cfg.sse.url}")
-        abonnment = abonnerPå(cfg.sse.url)
-        varsleOm(gjeldendeLederFra(cfg.get.url))
-    }
-    @EventListener(ContextClosedEvent::class)
-    fun stopper() {
-        log.info("Applikasjonen stopper")
-        abonnment.dispose()
-    }
 
     private fun abonnerPå(uri: URI) =
         client
@@ -72,8 +58,16 @@ class LederUtvelger(private val client: WebClient,
         }?: error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }
 
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private data class LederUtvelgerRespons(val name: String)
+    @EventListener(ApplicationReadyEvent::class)
+    fun klar() {
+        log.info("Applikasjonen klar, lytter etter SSE-hendelser på ${cfg.sse.url}")
+        abonnent = abonnerPå(cfg.sse.url)
+        varsleOm(gjeldendeLederFra(cfg.get.url))
+    }
+    @EventListener(ContextClosedEvent::class)
+    fun stopper() {
+        log.info("Applikasjonen stopper")
+        abonnent.dispose()
+    }
 
-    class NyLederHendelse(source: Any, val leder: String) : ApplicationEvent(source)
 }

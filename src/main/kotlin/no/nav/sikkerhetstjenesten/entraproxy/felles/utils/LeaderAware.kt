@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LederUtvelger.NyLederHendelse
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.context.event.EventListener
 import java.net.InetAddress.getLocalHost

@@ -22,6 +22,6 @@ class PollendeLederUtvelger(private val client: WebClient, @Value($$"${elector.g
                 .bodyToMono<LederUtvelgerRespons>()
                 .block(timeout)
         }.onFailure {
-            log.warn("Klarte ikke å hente fra {}", uri, it)
+            log.warn("Klarte ikke å hente leder fra {}", uri, it)
         }.getOrThrow()
 }

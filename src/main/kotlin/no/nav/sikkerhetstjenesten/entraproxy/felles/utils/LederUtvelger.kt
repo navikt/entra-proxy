@@ -29,11 +29,8 @@ class LederUtvelger(private val client: WebClient,
             .uri(uri)
             .retrieve()
             .bodyToFlux<LederUtvelgerRespons>()
-            .subscribe({
-                    varsleOm(it.name)
-                }, {
-                    log.warn("SSE feilet", it)
-                })
+            .map(LederUtvelgerRespons::name)
+            .subscribe(::varsleOm) { log.warn("SSE feilet", it) }
 
     private fun gjeldendeLederFra(uri: URI) =
         runCatching {

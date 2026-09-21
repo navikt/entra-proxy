@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.leder
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
-import java.time.Duration.ofSeconds
 
 @Component
 class LederUtvelger(private val sseUtvelger: SSELederUtvelger,
@@ -14,6 +13,6 @@ class LederUtvelger(private val sseUtvelger: SSELederUtvelger,
     @EventListener(ApplicationReadyEvent::class)
     fun klar() {
         sseUtvelger.subscribe { varsler.varsle(it.name) }
-        varsler.varsle(pollendeUtvelger.poll(ofSeconds(5))?.name)
+        varsler.varsle(pollendeUtvelger.poll()?.name)
     }
 }

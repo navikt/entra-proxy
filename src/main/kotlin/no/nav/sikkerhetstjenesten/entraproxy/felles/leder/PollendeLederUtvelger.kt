@@ -13,7 +13,7 @@ class PollendeLederUtvelger(private val client: WebClient, @Value($$"${elector.g
 
     private val log = getLogger(javaClass)
 
-    fun poll(timeout: Duration) =
+    fun poll(timeout: Duration = Duration.ofSeconds(5)) =
         runCatching {
             client
                 .get()

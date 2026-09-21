@@ -11,7 +11,7 @@ import reactor.core.Disposable
 import java.net.URI
 
 @Component
-class SSELederUtvelger(private val client: WebClient, @Value("\${elector.sse.url}") private val uri: URI) {
+class SSELederUtvelger(private val client: WebClient, @Value($$"${elector.sse.url}") private val uri: URI) {
 
     private val log = getLogger(javaClass)
     private lateinit var abonnent: Disposable

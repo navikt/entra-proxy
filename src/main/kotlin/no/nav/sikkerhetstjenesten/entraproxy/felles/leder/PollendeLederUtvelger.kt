@@ -1,28 +1,27 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.leder
 
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import java.net.URI
 import java.time.Duration
 
 @Component
-class PollendeLederUtvelger(private val client: WebClient) {
+class PollendeLederUtvelger(private val client: WebClient, @Value($$"${elector.get.url}") private val uri: URI) {
 
     private val log = getLogger(javaClass)
 
-    fun <T : Any> poll(uri: URI, type: Class<T>, timeout: Duration): T? =
+    fun poll(timeout: Duration) =
         runCatching {
             client
                 .get()
                 .uri(uri)
                 .retrieve()
-                .bodyToMono(type)
+                .bodyToMono<LederUtvelgerRespons>()
                 .block(timeout)
         }.onFailure {
             log.warn("Klarte ikke å hente fra {}", uri, it)
         }.getOrThrow()
 }
-
-inline fun <reified T : Any> PollendeLederUtvelger.poll(uri: URI, timeout: Duration): T? =
-    poll(uri, T::class.java, timeout)

@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
+package no.nav.sikkerhetstjenesten.entraproxy.felles.leder
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.net.URI

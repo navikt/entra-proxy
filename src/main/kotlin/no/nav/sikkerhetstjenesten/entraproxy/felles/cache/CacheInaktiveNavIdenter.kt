@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import no.nav.boot.conditionals.ConditionalOnGCP
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
+import no.nav.sikkerhetstjenesten.entraproxy.felles.leder.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value

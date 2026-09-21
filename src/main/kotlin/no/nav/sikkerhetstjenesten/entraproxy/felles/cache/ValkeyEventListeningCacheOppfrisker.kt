@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.LeaderAware
+import no.nav.sikkerhetstjenesten.entraproxy.felles.leder.LeaderAware
 import org.springframework.data.redis.annotation.RedisListener
 import org.springframework.stereotype.Component
 

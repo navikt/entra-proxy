@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
+package no.nav.sikkerhetstjenesten.entraproxy.felles.leder
 
 
 import org.slf4j.LoggerFactory.getLogger
@@ -7,15 +7,12 @@ import java.net.InetAddress.getLocalHost
 
 abstract class LeaderAware(private var erLeder: Boolean = false) {
     private val hostname = getLocalHost().hostName
-    protected open fun doHandleLeaderChange(nyLeder: String) = Unit
-
     private val log = getLogger(javaClass)
 
-    @EventListener(NyLederHendelse::class)
-    open fun onApplicationEvent(event: NyLederHendelse) {
+    @EventListener(LederHendelse::class)
+    open fun onApplicationEvent(event: LederHendelse) {
         erLeder = event.leder == hostname
         log.info("Denne instansen er $hostname, lederen er ${event.leder}")
-        doHandleLeaderChange(event.leder)
     }
 
     protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) {
@@ -24,16 +21,4 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
             block()
         }
     }
-
-    protected fun <T> somLeder(
-        beskrivelse: String? = null,
-        block: () -> T,
-        default: () -> T
-    ): T =
-        if (erLeder) {
-            beskrivelse?.let { log.trace(it) }
-            block()
-        } else {
-            default()
-        }
 }

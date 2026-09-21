@@ -4,8 +4,7 @@ import java.time.Duration
 import kotlin.reflect.KClass
 
 interface CacheOperations {
-    fun replaceSet(nøkkel: String, verdier: Set<String>)
-    fun deleteSet(nøkkel: String)
+    fun putSet(nøkkel: String, verdier: Set<String>)
     fun getSet(nøkkel: String): Set<String>
     fun inneholder(nøkkel: String, verdi: String): Boolean = false
     fun delete(cache: CacheNøkkelConfig, id: String): Boolean
@@ -14,8 +13,6 @@ interface CacheOperations {
     fun <T : Any> getMany(cache: CacheNøkkelConfig, ids: Set<String>, clazz: KClass<T>): Map<String, T?>
     fun putMany(cache: CacheNøkkelConfig, innslag: Map<String, Any>, ttl: Duration? = null)
     fun clear(cache: CacheNøkkelConfig): Long
-    fun clear(caches: Set<CacheNøkkelConfig>) = caches.sumOf { clear(it) }
-    fun clearAll(): Long
     fun size(cache: CacheNøkkelConfig): Long =
         sizes(cache).values.single()
 

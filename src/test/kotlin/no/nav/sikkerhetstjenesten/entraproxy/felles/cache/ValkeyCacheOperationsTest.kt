@@ -245,7 +245,7 @@ class ValkeyCacheOperationsTest(
             When("ett sett med strenger legges i en Valkey-set") {
                 Then("lagres som medlemmer i den angitte nøkkelen") {
                     val members = setOf("a", "b", "c")
-                    cache.replaceSet("cache-set-test", members)
+                    cache.putSet("cache-set-test", members)
                     valkey.opsForSet().members("cache-set-test") shouldBe members
                 }
             }
@@ -254,9 +254,9 @@ class ValkeyCacheOperationsTest(
                 Then("erstattes det gamle innholdet atomisk, uten å etterlate midlertidige nøkler") {
                     val gamleMedlemmer = setOf("gammel-1", "gammel-2")
                     val nyeMedlemmer = setOf("ny-1", "ny-2", "ny-3")
-                    cache.replaceSet("cache-set-replace-test", gamleMedlemmer)
+                    cache.putSet("cache-set-replace-test", gamleMedlemmer)
 
-                    cache.replaceSet("cache-set-replace-test", nyeMedlemmer)
+                    cache.putSet("cache-set-replace-test", nyeMedlemmer)
 
                     assertSoftly {
                         valkey.opsForSet().members("cache-set-replace-test") shouldBe nyeMedlemmer
@@ -265,12 +265,12 @@ class ValkeyCacheOperationsTest(
                 }
             }
 
-            When("deleteSet kalles på en eksisterende nøkkel") {
+            When("replaceSet kalles med et tomt sett på en eksisterende nøkkel") {
                 Then("fjernes nøkkelen helt fra Valkey") {
-                    cache.replaceSet("cache-set-delete-test", setOf("a", "b"))
+                    cache.putSet("cache-set-delete-test", setOf("a", "b"))
                     valkey.hasKey("cache-set-delete-test") shouldBe true
 
-                    cache.deleteSet("cache-set-delete-test")
+                    cache.putSet("cache-set-delete-test", emptySet())
 
                     valkey.hasKey("cache-set-delete-test") shouldBe false
                 }

@@ -43,7 +43,7 @@ class ValkeyCacheOperations(
         }
     }
 
-    override fun replaceSet(nøkkel: String, verdier: Set<String>) {
+    override fun putSet(nøkkel: String, verdier: Set<String>) {
         if (verdier.isEmpty()) return deleteSet(nøkkel)
         val tmp = "$nøkkel:tmp:${UUID.randomUUID()}"
         runCatching {
@@ -56,7 +56,7 @@ class ValkeyCacheOperations(
         }
     }
 
-    override fun deleteSet(nøkkel: String) {
+    private fun deleteSet(nøkkel: String) {
         runCatching {
             valkey.delete(nøkkel)
         }.onFailure {
@@ -142,16 +142,6 @@ class ValkeyCacheOperations(
                 deleted
             }
         }
-    }
-
-    override fun clearAll(): Long {
-        check(!isProd) { "FlushDb er ikke støttet i prod for å unngå utilsiktet sletting av cache-innhold" }
-        val before = valkey.execute { it.serverCommands().dbSize() } ?: 0L
-        log.info("Tømmer hele Valkey-databasen, størrelse før tømming: {}", before)
-        valkey.execute {
-            it.serverCommands().flushDb()
-        }
-        return valkey.execute { it.serverCommands().dbSize() } ?: 0L
     }
 
     override fun sizes(vararg caches: CacheNøkkelConfig): Map<String, Long> {

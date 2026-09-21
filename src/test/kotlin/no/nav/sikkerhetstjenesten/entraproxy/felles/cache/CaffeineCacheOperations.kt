@@ -11,9 +11,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     override fun getSet(key: String): Set<String> = emptySet()
 
-    override fun replaceSet(key: String, values: Set<String>) {}
-
-    override fun deleteSet(nøkkel: String) {}
+    override fun putSet(key: String, values: Set<String>) {}
 
     override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
         val key = caffeineNøkkel(cache, id)
@@ -67,17 +65,6 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
             deleted.forEach { springCache.evict(it) }
             deleted.size.toLong()
         }
-    }
-
-    override fun clearAll(): Long {
-        val deleted = cacheManager.cacheNames.sumOf { cacheName ->
-            val springCache = cacheManager.getCache(cacheName) ?: return@sumOf 0L
-            val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
-            val count = nativeCache.estimatedSize()
-            springCache.clear()
-            count
-        }
-        return deleted
     }
 
     override fun sizes(vararg caches: CacheNøkkelConfig): Map<String, Long> =

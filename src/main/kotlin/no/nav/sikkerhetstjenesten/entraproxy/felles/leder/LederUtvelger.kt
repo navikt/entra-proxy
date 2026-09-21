@@ -13,7 +13,7 @@ class LederUtvelger(private val sseUtvelger: SSELederUtvelger,
 
     @EventListener(ApplicationReadyEvent::class)
     fun klar() {
-        sseUtvelger.subscribe { varsler.varsle(it.navn) }
-        varsler.varsle(pollendeUtvelger.poll(ofSeconds(5))?.navn)
+        sseUtvelger.subscribe { varsler.varsle(it.name) }
+        varsler.varsle(pollendeUtvelger.poll(ofSeconds(5))?.name)
     }
 }

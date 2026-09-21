@@ -11,7 +11,7 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
     @EventListener(LederHendelse::class)
     open fun onApplicationEvent(hendelse: LederHendelse) {
         erLeder = hendelse.leder == HOSTNAME
-        log.info("Denne instansen er $HOSTNAME, lederen er ${hendelse.leder}")
+        log.trace("Denne instansen er $HOSTNAME, lederen er ${hendelse.leder}")
     }
 
     protected fun somLeder(beskrivelse: String? = null, block: () -> Unit) {

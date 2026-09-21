@@ -49,11 +49,11 @@ class LederUtvelger(private val client: WebClient,
         }.getOrThrow()
 
     private fun varsleOm(leder: String?) {
-        leder?.let {
-            val gammelLeder = gjeldendeLeder.getAndSet(it)
-            if (gammelLeder != it) {
-                log.info("Ny leder $it, gammel var $gammelLeder")
-                publisher.publishEvent(NyLederHendelse(this, it))
+        leder?.let { ny ->
+            val gammelLeder = gjeldendeLeder.getAndSet(ny)
+            if (gammelLeder != ny) {
+                log.info("Ny leder $ny, gammel var $gammelLeder")
+                publisher.publishEvent(NyLederHendelse(this, ny ))
             }
         }?: error("Fikk ikke hentet gjeldende leder fra ${cfg.get.url}")
     }

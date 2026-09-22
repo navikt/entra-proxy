@@ -14,15 +14,11 @@ abstract class LeaderAware(private var erLeder: Boolean = false) {
         log.trace("Denne instansen er $HOSTNAME, lederen er ${hendelse.leder}")
     }
 
-    protected fun <T> somLeder(beskrivelse: String? = null, block: () -> T): T? {
+    protected fun <T> somLeder(beskrivelse: String? = null, block: () -> T): T? =
         if (erLeder) {
-            beskrivelse?.let {
-                log.trace(it)
-            }
-            return block()
-        }
-        return null
-    }
+            beskrivelse?.let(log::trace)
+            block()
+        } else null
     companion object {
         private val HOSTNAME = getLocalHost().hostName
     }

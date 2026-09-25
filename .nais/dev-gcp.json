@@ -265,7 +265,7 @@
       "cluster": "dev-gcp"
     },
     {
-      "name": "eien-poc",
+      "name": "eien-backend",
       "namespace": "eien",
       "cluster": "dev-gcp"
     }

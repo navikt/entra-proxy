@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.notifikasjon.LogbookBeanConfiguration
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvWebMvcConfig
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2JsonAccessDeniedHandler
@@ -19,5 +20,6 @@ import org.springframework.context.annotation.Import
     OAuth2JsonAuthenticationEntryPoint::class,
     OAuth2SecurityBeanConfig::class,
     LogbookBeanConfiguration::class,
-    DefaultRestErrorHandler::class)
+    DefaultRestErrorHandler::class,
+    CsvWebMvcConfig::class)
 class SecurityTestApplication

@@ -246,10 +246,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(content().contentType("text/csv;charset=UTF-8"))
                         .andExpect(
-                            content().string(
-                                "navIdent\r\n" +
-                                    "${TEST_ANSATT_ID.verdi}\r\n",
-                            ),
+                            content().string("${TEST_ANSATT_ID.verdi}\r\n"),
                         )
                 }
             }

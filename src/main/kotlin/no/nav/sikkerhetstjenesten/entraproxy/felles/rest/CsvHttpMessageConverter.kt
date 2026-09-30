@@ -39,8 +39,6 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
         @Suppress("UNCHECKED_CAST")
         val rader = value as? Collection<AnsattBasis> ?: emptyList()
         OutputStreamWriter(outputMessage.body, UTF_8).use { writer ->
-            writer.write(HEADER)
-            writer.write(NEWLINE)
             rader.forEach { ansatt ->
                 writer.write(ansatt.tilCsvRad())
                 writer.write(NEWLINE)
@@ -70,7 +68,6 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
     companion object {
         private const val SEPARATOR = ","
         private const val NEWLINE = "\r\n"
-        private const val HEADER = "navIdent"
 
         /** Brukes i `@GetMapping(produces = [...])` slik at CSV vises som et valgbart format i Swagger. */
         const val TEXT_CSV_VALUE = "text/csv;charset=UTF-8"

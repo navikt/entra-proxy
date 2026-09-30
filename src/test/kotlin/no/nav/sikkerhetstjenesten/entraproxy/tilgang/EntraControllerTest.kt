@@ -20,11 +20,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -231,6 +233,24 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect {
                             status().isOk
                         }
+                }
+            }
+
+            When("request ber om text/csv") {
+                Then("returnerer 200 med csv-innhold") {
+                    mockMvc.perform(
+                        get("${API_V1}/gruppe/medlemmer")
+                            .param("gruppeNavn", "test-gruppe")
+                            .header(HttpHeaders.ACCEPT, "text/csv"),
+                    )
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                        .andExpect(
+                            content().string(
+                                "navIdent,visningNavn,fornavn,etternavn\r\n" +
+                                    "${TEST_ANSATT_ID.verdi},Test Ansatt,Test,Ansatt\r\n",
+                            ),
+                        )
                 }
             }
         }

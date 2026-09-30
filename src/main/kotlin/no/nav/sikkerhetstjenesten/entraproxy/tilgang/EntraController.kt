@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.OID
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvHttpMessageConverter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -16,6 +17,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireOBO
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -86,7 +88,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
             entraTjeneste.grupperForAnsatt(navIdent, it)
         }
 
-    @GetMapping("gruppe/medlemmer")
+    @GetMapping("gruppe/medlemmer", produces = [APPLICATION_JSON_VALUE, CsvHttpMessageConverter.TEXT_CSV_VALUE])
     @Operation(summary = "Hent ansatte i en gitt gruppe")
     fun gruppeMedlemmer(gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)

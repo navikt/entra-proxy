@@ -72,5 +72,8 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
         private const val SEPARATOR = ","
         private const val NEWLINE = "\r\n"
         private const val HEADER = "navIdent,visningNavn,fornavn,etternavn"
+
+        /** Brukes i `@GetMapping(produces = [...])` slik at CSV vises som et valgbart format i Swagger. */
+        const val TEXT_CSV_VALUE = "text/csv;charset=UTF-8"
     }
 }

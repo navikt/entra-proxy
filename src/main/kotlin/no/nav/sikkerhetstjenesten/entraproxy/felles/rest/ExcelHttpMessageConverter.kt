@@ -46,9 +46,6 @@ class ExcelHttpMessageConverter :
             rader.forEachIndexed { radIndeks, ansatt ->
                 ark.createRow(radIndeks + 1).apply {
                     createCell(0).setCellValue(ansatt.navIdent.verdi)
-                    createCell(1).setCellValue(ansatt.visningNavn)
-                    createCell(2).setCellValue(ansatt.fornavn)
-                    createCell(3).setCellValue(ansatt.etternavn)
                 }
             }
             workbook.write(outputMessage.body)
@@ -66,7 +63,7 @@ class ExcelHttpMessageConverter :
     }
 
     companion object {
-        private val KOLONNER = listOf("navIdent", "visningNavn", "fornavn", "etternavn")
+        private val KOLONNER = listOf("navIdent")
 
         /** Brukes i `@GetMapping(produces = [...])` slik at Excel vises som et valgbart format i Swagger. */
         const val EXCEL_VALUE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

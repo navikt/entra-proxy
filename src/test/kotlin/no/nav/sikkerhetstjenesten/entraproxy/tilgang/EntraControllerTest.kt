@@ -251,8 +251,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().contentType("text/csv;charset=UTF-8"))
                         .andExpect(
                             content().string(
-                                "navIdent,visningNavn,fornavn,etternavn\r\n" +
-                                    "${TEST_ANSATT_ID.verdi},Test Ansatt,Test,Ansatt\r\n",
+                                "navIdent\r\n" +
+                                    "${TEST_ANSATT_ID.verdi}\r\n",
                             ),
                         )
                 }
@@ -272,10 +272,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                     val ark = XSSFWorkbook(ByteArrayInputStream(result.response.contentAsByteArray)).use {
                         it.getSheetAt(0)
                     }
-                    ark.getRow(0).map { it.stringCellValue } shouldBe
-                        listOf("navIdent", "visningNavn", "fornavn", "etternavn")
-                    ark.getRow(1).map { it.stringCellValue } shouldBe
-                        listOf(TEST_ANSATT_ID.verdi, "Test Ansatt", "Test", "Ansatt")
+                    ark.getRow(0).map { it.stringCellValue } shouldBe listOf("navIdent")
+                    ark.getRow(1).map { it.stringCellValue } shouldBe listOf(TEST_ANSATT_ID.verdi)
                 }
             }
         }

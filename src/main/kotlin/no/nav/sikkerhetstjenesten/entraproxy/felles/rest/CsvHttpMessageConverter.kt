@@ -58,8 +58,7 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
         return elementType.takeIf { AnsattBasis::class.java.isAssignableFrom(it) }
     }
 
-    private fun AnsattBasis.tilCsvRad() =
-        listOf(navIdent.verdi, visningNavn, fornavn, etternavn).joinToString(SEPARATOR) { it.csvEscaped() }
+    private fun AnsattBasis.tilCsvRad() = navIdent.verdi.csvEscaped()
 
     private fun String?.csvEscaped(): String {
         val verdi = this ?: ""
@@ -71,7 +70,7 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
     companion object {
         private const val SEPARATOR = ","
         private const val NEWLINE = "\r\n"
-        private const val HEADER = "navIdent,visningNavn,fornavn,etternavn"
+        private const val HEADER = "navIdent"
 
         /** Brukes i `@GetMapping(produces = [...])` slik at CSV vises som et valgbart format i Swagger. */
         const val TEXT_CSV_VALUE = "text/csv;charset=UTF-8"

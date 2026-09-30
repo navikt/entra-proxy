@@ -11,19 +11,12 @@ import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 import java.nio.charset.StandardCharsets.UTF_8
 
-/**
- * Skriver ut samlinger av [AnsattBasis] (Ansatt, UtvidetAnsatt, ...) som CSV når klienten ber om
- * `Accept: text/csv`. JSON forblir default for alle andre klienter.
- */
 class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaType("text", "csv", UTF_8)) {
 
     override fun canRead(clazz: Class<*>, mediaType: MediaType?) = false
 
     override fun canWrite(clazz: Class<*>, mediaType: MediaType?) = false
 
-    // Default-implementasjonen i HttpMessageConverter.getSupportedMediaTypes(Class) filtrerer på
-    // canRead/canWrite(Class, MediaType) (begge false her siden vi bare skriver ut basert på generisk
-    // elementtype). Uten denne overstyringen ville aldri text/csv blitt foreslått som produserbar type.
     override fun getSupportedMediaTypes(clazz: Class<*>) = supportedMediaTypes
 
     override fun canWrite(type: Type?, clazz: Class<*>, mediaType: MediaType?) =
@@ -34,15 +27,12 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
 
     override fun read(type: Type, contextClass: Class<*>?, inputMessage: HttpInputMessage): Nothing =
         throw HttpMessageNotReadableException("CSV-lesing er ikke støttet", inputMessage)
-
+    
     override fun writeInternal(value: Any, type: Type?, outputMessage: HttpOutputMessage) {
         @Suppress("UNCHECKED_CAST")
         val rader = value as? Collection<AnsattBasis> ?: emptyList()
         OutputStreamWriter(outputMessage.body, UTF_8).use { writer ->
-            rader.forEach { ansatt ->
-                writer.write(ansatt.tilCsvRad())
-                writer.write(NEWLINE)
-            }
+            rader.forEach { writer.write(it.navIdent.verdi + NEWLINE) }
         }
     }
 
@@ -56,17 +46,7 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
         return elementType.takeIf { AnsattBasis::class.java.isAssignableFrom(it) }
     }
 
-    private fun AnsattBasis.tilCsvRad() = navIdent.verdi.csvEscaped()
-
-    private fun String?.csvEscaped(): String {
-        val verdi = this ?: ""
-        return if (verdi.any { it == SEPARATOR[0] || it == '"' || it == '\n' || it == '\r' })
-            "\"" + verdi.replace("\"", "\"\"") + "\""
-        else verdi
-    }
-
     companion object {
-        private const val SEPARATOR = ","
         private const val NEWLINE = "\r\n"
 
         /** Brukes i `@GetMapping(produces = [...])` slik at CSV vises som et valgbart format i Swagger. */

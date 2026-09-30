@@ -2,7 +2,9 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.shouldBe
 import io.mockk.every
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ExcelHttpMessageConverter
 import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
@@ -18,6 +20,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_EN
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
@@ -28,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.io.ByteArrayInputStream
 import java.util.UUID
 
 @SpringBootTest(classes = [SecurityTestApplication::class])
@@ -251,6 +255,27 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                                     "${TEST_ANSATT_ID.verdi},Test Ansatt,Test,Ansatt\r\n",
                             ),
                         )
+                }
+            }
+
+            When("request ber om excel") {
+                Then("returnerer 200 med excel-innhold") {
+                    val result = mockMvc.perform(
+                        get("${API_V1}/gruppe/medlemmer")
+                            .param("gruppeNavn", "test-gruppe")
+                            .header(HttpHeaders.ACCEPT, ExcelHttpMessageConverter.EXCEL_VALUE),
+                    )
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(ExcelHttpMessageConverter.EXCEL_VALUE))
+                        .andReturn()
+
+                    val ark = XSSFWorkbook(ByteArrayInputStream(result.response.contentAsByteArray)).use {
+                        it.getSheetAt(0)
+                    }
+                    ark.getRow(0).map { it.stringCellValue } shouldBe
+                        listOf("navIdent", "visningNavn", "fornavn", "etternavn")
+                    ark.getRow(1).map { it.stringCellValue } shouldBe
+                        listOf(TEST_ANSATT_ID.verdi, "Test Ansatt", "Test", "Ansatt")
                 }
             }
         }

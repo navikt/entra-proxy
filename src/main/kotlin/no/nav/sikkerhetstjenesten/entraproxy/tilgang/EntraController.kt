@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvHttpMessageConverter
+import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ExcelHttpMessageConverter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -88,7 +89,10 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
             entraTjeneste.grupperForAnsatt(navIdent, it)
         }
 
-    @GetMapping("gruppe/medlemmer", produces = [APPLICATION_JSON_VALUE, CsvHttpMessageConverter.TEXT_CSV_VALUE])
+    @GetMapping(
+        "gruppe/medlemmer",
+        produces = [APPLICATION_JSON_VALUE, CsvHttpMessageConverter.TEXT_CSV_VALUE, ExcelHttpMessageConverter.EXCEL_VALUE],
+    )
     @Operation(summary = "Hent ansatte i en gitt gruppe")
     fun gruppeMedlemmer(gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)

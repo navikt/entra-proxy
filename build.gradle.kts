@@ -105,6 +105,9 @@ dependencies {
     implementation(libs.httpclient5)
     implementation(libs.springdocOpenapiStarterWebmvcUi)
 
+    // Excel-eksport
+    implementation("org.apache.poi:poi-ooxml:5.5.1")
+
     // Spring Boot starters
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterCache)

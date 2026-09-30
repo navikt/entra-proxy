@@ -6,10 +6,6 @@ import org.springframework.http.converter.HttpMessageConverters
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-/**
- * Registrerer [CsvHttpMessageConverter] slik at klienter kan be om `Accept: text/csv` (eller `?format=csv`)
- * på endepunkter som returnerer samlinger av [no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattBasis].
- */
 @Configuration
 class CsvWebMvcConfig : WebMvcConfigurer {
 

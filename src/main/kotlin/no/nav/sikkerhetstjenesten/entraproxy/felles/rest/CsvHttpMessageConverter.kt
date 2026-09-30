@@ -27,17 +27,21 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
 
     override fun read(type: Type, contextClass: Class<*>?, inputMessage: HttpInputMessage): Nothing =
         throw HttpMessageNotReadableException("CSV-lesing er ikke støttet", inputMessage)
-    
+
     override fun writeInternal(value: Any, type: Type?, outputMessage: HttpOutputMessage) {
         @Suppress("UNCHECKED_CAST")
         val rader = value as? Collection<AnsattBasis> ?: emptyList()
-        OutputStreamWriter(outputMessage.body, UTF_8).use { writer ->
-            rader.forEach { writer.write(it.navIdent.verdi + NEWLINE) }
+        OutputStreamWriter(outputMessage.body, UTF_8).use {
+            writer -> rader.forEach {
+                writer.write(it.navIdent.verdi + NEWLINE)
+            }
         }
     }
 
     private fun supportsMediaType(mediaType: MediaType?) =
-        mediaType == null || supportedMediaTypes.any { it.isCompatibleWith(mediaType) }
+        mediaType == null || supportedMediaTypes.any {
+            it.isCompatibleWith(mediaType)
+        }
 
     private fun Type?.ansattBasisElementTypeOrNull(): Type? {
         val parameterized = this as? ParameterizedType ?: return null
@@ -48,8 +52,6 @@ class CsvHttpMessageConverter : AbstractGenericHttpMessageConverter<Any>(MediaTy
 
     companion object {
         private const val NEWLINE = "\r\n"
-
-        /** Brukes i `@GetMapping(produces = [...])` slik at CSV vises som et valgbart format i Swagger. */
         const val TEXT_CSV_VALUE = "text/csv;charset=UTF-8"
     }
 }

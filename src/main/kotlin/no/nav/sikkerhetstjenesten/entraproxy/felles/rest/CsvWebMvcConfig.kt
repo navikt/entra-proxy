@@ -15,14 +15,9 @@ class CsvWebMvcConfig : WebMvcConfigurer {
 
     override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
         configurer.mediaType("csv", MediaType("text", "csv"))
-        configurer.mediaType(
-            "xlsx",
-            MediaType.parseMediaType(ExcelHttpMessageConverter.EXCEL_VALUE),
-        )
     }
 
     override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
         builder.addCustomConverter(CsvHttpMessageConverter())
-        builder.addCustomConverter(ExcelHttpMessageConverter())
     }
 }

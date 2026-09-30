@@ -1,6 +1,7 @@
 {
   "ingresses": [
-    "https://entraproxy.intern.nav.no"
+    "https://entraproxy.intern.nav.no",
+    "https://entraproxy.ansatt.nav.no"
   ],
   "groups" : {
     "disabled": "23429545-36e9-446e-8927-211e2929b6a4"

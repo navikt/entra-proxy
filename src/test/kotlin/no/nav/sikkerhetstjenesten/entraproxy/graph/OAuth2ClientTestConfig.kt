@@ -32,7 +32,7 @@ class OAuth2ClientTestConfig {
         customizers: ObjectProvider<RestClientCustomizer>, env: Environment) =
         RestClientHttpServiceGroupConfigurer { groups ->
             groups.forEachClient { group, builder ->
-                env.getRequiredProperty("${SERVICE_CLIENT_PREFIX}.${group.name()}.base-url").let(builder::baseUrl)
+                env.getRequiredProperty("$SERVICE_CLIENT_PREFIX.${group.name()}.base-url").let(builder::baseUrl)
                 customizers.forEach { it.customize(builder) }
             }
         }

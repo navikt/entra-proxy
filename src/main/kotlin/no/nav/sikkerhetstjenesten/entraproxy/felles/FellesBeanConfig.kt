@@ -81,10 +81,5 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 }
 
-@Retention(BINARY)  // = CLASS in bytecode — enough for JaCoCo
-@Target(FUNCTION, CONSTRUCTOR, CLASS)
-annotation class Generated
-typealias NoCoverageAnalysis = Generated
-
 
 

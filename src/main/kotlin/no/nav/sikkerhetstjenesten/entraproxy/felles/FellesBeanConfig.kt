@@ -5,6 +5,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tags
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor
+import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.apache.hc.core5.util.TimeValue
 import org.springframework.boot.actuate.endpoint.SanitizingFunction
@@ -29,8 +30,12 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
-class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandlerInterceptor) : WebMvcConfigurer {
+class FellesBeanConfig(private val ctx: AuthContext,
+                         private val meterRegistry: MeterRegistry,) : WebMvcConfigurer {
 
+
+    @Bean
+    fun handler() = DefaultRestErrorHandler()
 
     @Bean
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {
@@ -57,7 +62,7 @@ class FellesBeanConfig(private val ansattIdAddingInterceptor: ConsumerAwareHandl
     }
 
     override fun addInterceptors(registry: InterceptorRegistry) {
-        registry.addInterceptor(ansattIdAddingInterceptor)
+        registry.addInterceptor(ConsumerAwareHandlerInterceptor(ctx, meterRegistry))
     }
     override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
         configurer.defaultContentType(APPLICATION_JSON)

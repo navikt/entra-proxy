@@ -5,11 +5,11 @@ import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.NAIS_CLU
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.security.CLIENT_CREDENTIALS
-import no.nav.sikkerhetstjenesten.entraproxy.security.ROLES
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.SecurityTestOAuth2.server
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.ROLES
 import org.springframework.test.context.DynamicPropertyRegistry
 import java.lang.Runtime.getRuntime
 import java.util.UUID

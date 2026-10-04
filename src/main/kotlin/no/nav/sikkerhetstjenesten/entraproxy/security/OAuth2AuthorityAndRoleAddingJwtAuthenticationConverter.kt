@@ -1,7 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.ROLES
 import no.nav.sikkerhetstjenesten.felles.security.GRANTED_CCF_AUTHORITY
 import no.nav.sikkerhetstjenesten.felles.security.GRANTED_OBO_AUTHORITY
 import org.springframework.core.convert.converter.Converter

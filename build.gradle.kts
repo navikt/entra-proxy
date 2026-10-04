@@ -79,7 +79,7 @@ configurations.configureEach {
     resolutionStrategy {
         failOnNonReproducibleResolution()
     }
-    exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+    exclude("org.springframework.boot", "spring-boot-starter-tomcat")
 }
 
 dependencies {

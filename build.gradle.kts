@@ -84,7 +84,7 @@ configurations.configureEach {
 
 dependencies {
     // Kotlin
-    implementation("no.nav.felles:sikkerhetstjenesten-lib:0.0.44")
+    implementation(libs.sikkerhetstjenestenLib)
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)

@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatusCode
@@ -61,16 +62,18 @@ class OAuth2SecurityBeanConfig {
 
 
     @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor, handler: ErrorHandler) =
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager,  logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
+                    logbookInterceptor.ifAvailable {
+                        interceptor -> it.add(interceptor)
+                    }
                     it.addFirst(DownstreamUriCapturingInterceptor())
                     if (group.name() == GRAPH) {
                         it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
                     }
-                    it.addLast(logbook)
                 }
                 builder.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
             }

@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.sikkerhetstjenesten.felles.domain.DomainExtensions.requireDigits
+import no.nav.sikkerhetstjenesten.felles.utils.extensions.DomainExtensions.requireDigits
 
 data class TIdent (@JsonValue val verdi: String)  {
     init {

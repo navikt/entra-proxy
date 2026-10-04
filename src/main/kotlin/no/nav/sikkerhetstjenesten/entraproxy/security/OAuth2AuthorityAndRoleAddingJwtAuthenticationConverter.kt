@@ -1,9 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.GRANTED_CCF_AUTHORITY
-import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.GRANTED_OBO_AUTHORITY
-import org.slf4j.LoggerFactory.getLogger
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.felles.security.GRANTED_CCF_AUTHORITY
+import no.nav.sikkerhetstjenesten.felles.security.GRANTED_OBO_AUTHORITY
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.core.GrantedAuthority
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component
 @Component
 class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, AbstractAuthenticationToken> {
 
-    private val log = getLogger(javaClass)
 
     private val delegate = JwtAuthenticationConverter()
         .andThen {
@@ -38,7 +37,7 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
 
     private fun principal(jwt: Jwt, authorities: Set<GrantedAuthority>) =
         DefaultOAuth2AuthenticatedPrincipal(
-            jwt.subject ?: jwt.getClaimAsString(AuthContext.NAVIDENT) ?: "unknown",
+            jwt.subject ?: jwt.getClaimAsString(NAVIDENT) ?: "unknown",
             jwt.claims, authorities)
 
     private fun authority(jwt: Jwt) =

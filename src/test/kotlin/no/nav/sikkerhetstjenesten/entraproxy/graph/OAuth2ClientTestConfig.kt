@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.DefaultRestErrorHandler
+import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.restclient.RestClientCustomizer
 import org.springframework.boot.test.context.TestConfiguration

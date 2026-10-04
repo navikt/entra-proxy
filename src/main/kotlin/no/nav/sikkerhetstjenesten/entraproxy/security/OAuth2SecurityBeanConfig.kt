@@ -1,9 +1,12 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamUriCapturingInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV
+import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
+import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatusCode
@@ -52,14 +55,6 @@ class OAuth2SecurityBeanConfig {
             .stateless()
             .build()
 
-    private fun HttpSecurity.stateless() =
-        requestCache { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(STATELESS) }
-            .csrf { it.disable() }
-            .formLogin { it.disable() }
-            .httpBasic { it.disable() }
-            .logout { it.disable() }
-
 
     @Bean
     fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor, handler: ErrorHandler) =
@@ -67,7 +62,7 @@ class OAuth2SecurityBeanConfig {
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
-                    it.addFirst(OAuth2DownstreamUriCapturingInterceptor())
+                    it.addFirst(DownstreamUriCapturingInterceptor())
                     if (group.name() == GRAPH) {
                         it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
                     }
@@ -103,7 +98,5 @@ val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem
 const val ROLES = "roles"
 const val CLIENT_CREDENTIALS = "access_as_application"
 private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
-
-
 
 

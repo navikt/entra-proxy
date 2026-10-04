@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.security
 import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ProblemDetail.forStatusAndDetail
@@ -13,10 +12,8 @@ import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
 
 @Component
-class OAuth2JsonAccessDeniedHandler(private val mapper: JsonMapper, private val authContext: AuthContext) :
+class OAuth2JsonAccessDeniedHandler(private val mapper: JsonMapper) :
     AccessDeniedHandler {
-
-
 
     fun securityProblemDetail(status: HttpStatus, detail: String) =
         forStatusAndDetail(status, detail).apply {

@@ -29,8 +29,7 @@ import java.util.UUID
 @RequestMapping(API_V1)
 class EntraController(private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
-    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter CC-flow")
-    @OAuth2RequireCCF
+    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.enheter(navIdent, it)

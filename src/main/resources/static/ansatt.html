@@ -71,6 +71,21 @@
     const resultat = document.getElementById('ansatt-resultat');
     const felter = document.getElementById('ansatt-felter');
 
+    async function hentResponse(url, beskrivelse) {
+        const response = await fetch(url, {
+            headers: {'Accept': 'application/json'}
+        });
+        if (!response.ok) {
+            let melding = `Kunne ikke hente ${beskrivelse} (HTTP ${response.status}).`;
+            if (response.headers.get('content-type')?.includes('json')) {
+                const problem = await response.json();
+                melding = problem.detail ?? melding;
+            }
+            throw new Error(melding);
+        }
+        return response;
+    }
+
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const ansattid = input.value.trim().toUpperCase();
@@ -81,17 +96,7 @@
         status.textContent = 'Henter ansatt...';
 
         try {
-            const response = await fetch(`/api/v1/ansatt/${encodeURIComponent(ansattid)}`, {
-                headers: {'Accept': 'application/json'}
-            });
-            if (!response.ok) {
-                let melding = `Kunne ikke hente ansatt (HTTP ${response.status}).`;
-                if (response.headers.get('content-type')?.includes('json')) {
-                    const problem = await response.json();
-                    melding = problem.detail ?? melding;
-                }
-                throw new Error(melding);
-            }
+            const response = await hentResponse(`/api/v1/ansatt/${encodeURIComponent(ansattid)}`, 'ansatt');
             if (response.status === 204) {
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
@@ -101,6 +106,8 @@
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
             }
+            const enheterResponse = await hentResponse(`/api/v1/enhet/ansatt/${encodeURIComponent(ansattid)}`, 'enheter');
+            const enheter = await enheterResponse.json();
             const verdier = [
                 ['Nav-ident', ansatt.navIdent],
                 ['Navn', ansatt.visningNavn],
@@ -109,7 +116,10 @@
                 ['T-ident', ansatt.tIdent],
                 ['E-post', ansatt.epost],
                 ['Enhetsnummer', ansatt.enhet?.enhetnummer],
-                ['Enhetsnavn', ansatt.enhet?.navn]
+                ['Enhetsnavn', ansatt.enhet?.navn],
+                ['Tilgjengelige enheter', enheter.length
+                    ? enheter.map(enhet => `${enhet.enhetnummer} - ${enhet.navn}`).join(', ')
+                    : 'Ingen tilgjengelige enheter']
             ];
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');

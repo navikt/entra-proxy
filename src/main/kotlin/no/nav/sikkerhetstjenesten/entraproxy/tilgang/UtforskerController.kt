@@ -12,17 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
 @RequestMapping("$API_V1/utforsker")
-class UtforskerController(
-    private val entraTjeneste: EntraTjeneste,
-    private val oidTjeneste: EntraOidTjeneste
-) {
-
-    @ResponseBody
-    @GetMapping("gruppe/medlemmer", produces = [APPLICATION_JSON_VALUE])
-    fun medlemmer(@RequestParam gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe(gruppeNavn, it)
-        } ?: emptySet()
+class UtforskerController {
 
     @GetMapping("medlemmer")
     fun visMedlemmer() = "redirect:/medlemmer.html"

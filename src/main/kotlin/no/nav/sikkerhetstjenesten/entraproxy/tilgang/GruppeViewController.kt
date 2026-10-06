@@ -10,5 +10,5 @@ import org.springframework.web.bind.annotation.RequestMapping
 class GruppeViewController {
 
     @GetMapping("vis")
-    fun visMedlemmer() = "gruppe/medlemmer"
+    fun visMedlemmer() = "redirect:/gruppe/medlemmer.html"
 }

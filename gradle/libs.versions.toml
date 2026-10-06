@@ -44,7 +44,6 @@ springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boo
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
 springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
-springBootStarterMustache = { module = "org.springframework.boot:spring-boot-starter-mustache" }
 springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
 springBootStarterWebclient = { module = "org.springframework.boot:spring-boot-starter-webclient" }
 springBootStarterWebflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }

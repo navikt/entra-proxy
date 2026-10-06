@@ -315,7 +315,7 @@
             status.textContent = 'Henter medlemmer...';
 
             try {
-                const response = await fetch(`medlemmer?${new URLSearchParams({gruppeNavn})}`, {
+                const response = await fetch(`/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`, {
                     headers: {'Accept': 'application/json'}
                 });
                 if (!response.ok) {

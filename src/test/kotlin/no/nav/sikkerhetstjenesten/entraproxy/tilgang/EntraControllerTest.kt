@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import java.util.UUID
 
 @SpringBootTest(classes = [SecurityTestApplication::class])
@@ -229,19 +229,28 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        /*Given("gruppesiden ${API_V1}/gruppe/vis") {
+        Given("gruppesiden ${API_V1}/gruppe/vis") {
             When("request mangler bearer-token") {
-                Then("viser skjema og medlemsliste") {
+                Then("videresender til den statiske siden") {
                     mockMvc.perform(get("${API_V1}/gruppe/vis"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentTypeCompatibleWith("text/html"))
-                        .andExpect(view().name("gruppe/medlemmer"))
-                        .andExpect(content().string(containsString("id=\"gruppeNavn\"")))
-                        .andExpect(content().string(containsString("Vis medlemmer")))
-                        .andExpect(content().string(containsString("id=\"medlemmer\"")))
+                        .andExpect(status().isFound())
+                        .andExpect(redirectedUrl("/gruppe/medlemmer.html"))
                 }
             }
-        }*/
+        }
+
+        Given("den statiske gruppesiden") {
+            When("request mangler bearer-token") {
+                Then("viser skjema og bruker API-adressen for medlemsoppslag") {
+                    mockMvc.perform(get("/gruppe/medlemmer.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/html"))
+                        .andExpect(content().string(containsString("id=\"gruppeNavn\"")))
+                        .andExpect(content().string(containsString("Hent medlemmer")))
+                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                }
+            }
+        }
 
         Given("endepunkt ${API_V1}/gruppe/medlemmer") {
             When("request har gruppeNavn") {

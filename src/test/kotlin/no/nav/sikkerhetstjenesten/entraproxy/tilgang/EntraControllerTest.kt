@@ -76,6 +76,18 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             )
         }
 
+        Given("den statiske utforskersiden") {
+            When("request mangler bearer-token") {
+                Then("viser linker til ansatt og gruppemedlemmer") {
+                    mockMvc.perform(get("/utforsker.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/html"))
+                        .andExpect(content().string(containsString("href=\"/ansatt.html\"")))
+                        .andExpect(content().string(containsString("href=\"/medlemmer.html\"")))
+                }
+            }
+        }
+
         Given("beskyttet endepunkt ${API_V1}/enhet") {
             When("request mangler bearer-token") {
                 Then("returnerer 401") {

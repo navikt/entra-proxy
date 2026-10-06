@@ -165,6 +165,36 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("medlemsoppslag i utforskeren") {
+            When("request mangler bearer-token") {
+                Then("returnerer medlemmer som JSON") {
+                    mockMvc.perform(get("$API_V1/utforsker/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
+                }
+                Then("den statiske siden bruker gruppe-endepunktet") {
+                    mockMvc.perform(get("/medlemmer.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                }
+                Then("gruppe-endepunktet returnerer medlemmer uten token") {
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
+                }
+            }
+            When("gruppen ikke finnes") {
+                Then("returnerer en tom liste") {
+                    every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
+                    mockMvc.perform(get("$API_V1/utforsker/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().json("[]"))
+                }
+            }
+        }
+
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
                 Then("returnerer 200") {

@@ -61,6 +61,7 @@ class OAuth2SecurityBeanConfig {
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers( *UNPROTECTED_ENDPOINTS).permitAll()
             requests.requestMatchers(GET, "/ansatt.html", "$API_V1/ansatt/{navIdent}").permitAll()
+            requests.requestMatchers(GET, "$API_V1/gruppe/medlemmer").permitAll()
             requests.anyRequest().authenticated()
         }
             .exceptionHandling {

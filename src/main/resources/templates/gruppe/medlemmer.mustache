@@ -40,8 +40,9 @@
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
         .medlemmer {
-            max-height: 24rem;
-            overflow: auto;
+            max-height: min(24rem, 50vh);
+            overflow-x: auto;
+            overflow-y: scroll;
             scrollbar-gutter: stable;
         }
         li { margin-bottom: 0.5rem; overflow-wrap: anywhere; }

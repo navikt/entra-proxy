@@ -41,7 +41,7 @@ import java.net.URI
 @Configuration
 class OAuth2SecurityBeanConfig {
 
-    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**","$API_V1/gruppe/**", "/medlemmer.html")
+    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**","$API_V1/utforsker/**", "/medlemmer.html", "/ansatt.html")
 
 
     @Bean

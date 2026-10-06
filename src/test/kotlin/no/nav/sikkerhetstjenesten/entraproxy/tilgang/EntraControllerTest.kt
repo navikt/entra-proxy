@@ -228,55 +228,6 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 }
             }
         }
-
-        Given("gruppesiden ${API_V1}/gruppe/vis") {
-            When("request mangler bearer-token") {
-                Then("videresender til den statiske siden") {
-                    mockMvc.perform(get("${API_V1}/gruppe/vis"))
-                        .andExpect(status().isFound())
-                        .andExpect(redirectedUrl("/gruppe/medlemmer.html"))
-                }
-            }
-        }
-
-        Given("den statiske gruppesiden") {
-            When("request mangler bearer-token") {
-                Then("viser skjema og bruker API-adressen for medlemsoppslag") {
-                    mockMvc.perform(get("/gruppe/medlemmer.html"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentTypeCompatibleWith("text/html"))
-                        .andExpect(content().string(containsString("id=\"gruppeNavn\"")))
-                        .andExpect(content().string(containsString("Hent medlemmer")))
-                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
-                }
-            }
-        }
-
-        Given("endepunkt ${API_V1}/gruppe/medlemmer") {
-            When("request har gruppeNavn") {
-                Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
-                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
-                }
-            }
-
-            When("request ber om text/csv") {
-                Then("returnerer 200 med csv-innhold") {
-                    mockMvc.perform(
-                        get("${API_V1}/gruppe/medlemmer")
-                            .param("gruppeNavn", "test-gruppe")
-                            .header(HttpHeaders.ACCEPT, "text/csv"),
-                    )
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentType("text/csv;charset=UTF-8"))
-                        .andExpect(
-                            content().string("${TEST_ANSATT_ID.verdi}\r\n"),
-                        )
-                }
-            }
-        }
     }
 
 

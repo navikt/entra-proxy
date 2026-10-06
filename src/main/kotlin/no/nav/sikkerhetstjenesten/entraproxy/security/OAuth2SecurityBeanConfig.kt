@@ -17,6 +17,7 @@ import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatusCode
+import org.springframework.http.HttpMethod.GET
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
@@ -40,7 +41,7 @@ import java.net.URI
 @Configuration
 class OAuth2SecurityBeanConfig {
 
-    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**","$API_V1/gruppe/**", "/gruppe/medlemmer.html")
+    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**","$API_V1/gruppe/**", "/medlemmer.html")
 
 
     @Bean
@@ -59,6 +60,7 @@ class OAuth2SecurityBeanConfig {
                             entryPoint: AuthenticationEntryPoint) =
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers( *UNPROTECTED_ENDPOINTS).permitAll()
+            requests.requestMatchers(GET, "/ansatt.html", "$API_V1/ansatt/{navIdent}").permitAll()
             requests.anyRequest().authenticated()
         }
             .exceptionHandling {

@@ -216,7 +216,7 @@
             rad.append(navIdentCelle, navnCelle);
             for (const medlemmer of andreGrupper) {
                 const celle = document.createElement('td');
-                celle.textContent = medlemmer.has(medlem.navIdent) ? '+' : '';
+                celle.textContent = medlemmer.has(medlem.navIdent) ? '✓' : '';
                 rad.appendChild(celle);
             }
             sammenligningTabellRader.appendChild(rad);

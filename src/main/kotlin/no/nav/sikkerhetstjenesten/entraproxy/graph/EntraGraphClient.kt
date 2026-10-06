@@ -42,7 +42,7 @@ interface EntraGraphClient {
         @RequestParam($$"$count") count: String = "true"
     ): GruppeMedlemmer
 
-    @HttpExchange(method = "GET", url = $$"/groups/{gruppeId}/members/$count", headers = ["ConsistencyLevel=eventual"])
+    @GetExchange( $$"/groups/{gruppeId}/members/$count")
     fun antallMedlemmer(@PathVariable gruppeId: String): String
 
     @GetExchange

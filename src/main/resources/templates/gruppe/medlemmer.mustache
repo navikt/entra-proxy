@@ -70,12 +70,53 @@
     <ul class="aksel-body-short medlemmer" id="medlemmer" aria-label="Gruppemedlemmer" tabindex="0"></ul>
     </section>
     </div>
+    <section id="felles-resultat" aria-labelledby="felles-overskrift" hidden>
+        <h2 class="aksel-heading aksel-heading--medium" id="felles-overskrift">Medlemmer i alle gruppene</h2>
+        <p class="aksel-body-short status" id="felles-status" role="status" aria-live="polite"></p>
+        <ul class="aksel-body-short medlemmer" id="felles-medlemmer" aria-label="Medlemmer i alle gruppene" tabindex="0"></ul>
+    </section>
 </main>
 <script>
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
+    const fellesResultat = document.getElementById('felles-resultat');
+    const fellesStatus = document.getElementById('felles-status');
+    const fellesListe = document.getElementById('felles-medlemmer');
     let antallSok = 1;
+
+    function visMedlemmer(liste, navIdenter) {
+        liste.replaceChildren();
+        for (const navIdent of navIdenter) {
+            const item = document.createElement('li');
+            item.textContent = navIdent;
+            liste.appendChild(item);
+        }
+    }
+
+    function oppdaterFellesMedlemmer() {
+        const paneler = [...sok.querySelectorAll('.sok-panel')];
+        fellesResultat.hidden = paneler.length < 2;
+        fellesListe.replaceChildren();
+        if (fellesResultat.hidden) {
+            return;
+        }
+        if (paneler.some(panel => panel.dataset.populert !== 'true')) {
+            fellesStatus.textContent = 'Fullf\u00f8r et s\u00f8k i alle feltene for \u00e5 vise felles medlemmer.';
+            return;
+        }
+
+        const medlemssett = paneler.map(panel =>
+            new Set([...panel.querySelector('.medlemmer').children].map(item => item.textContent))
+        );
+        const fellesMedlemmer = [...medlemssett[0]].filter(navIdent =>
+            medlemssett.every(medlemmer => medlemmer.has(navIdent))
+        );
+        visMedlemmer(fellesListe, fellesMedlemmer);
+        fellesStatus.textContent = fellesMedlemmer.length
+            ? `${fellesMedlemmer.length} medlemmer finnes i alle gruppene.`
+            : 'Ingen medlemmer finnes i alle gruppene.';
+    }
 
     function klargjorSok(panel) {
         const form = panel.querySelector('form');
@@ -94,13 +135,16 @@
             nyttPanel.querySelector('label').htmlFor = nyttPanel.querySelector('input').id;
             panel.after(nyttPanel);
             klargjorSok(nyttPanel);
+            oppdaterFellesMedlemmer();
             nyttPanel.querySelector('input').focus();
         });
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const gruppeNavn = input.value.trim();
+            panel.dataset.populert = 'false';
             liste.replaceChildren();
+            oppdaterFellesMedlemmer();
             status.classList.remove('error');
 
             if (!gruppeNavn) {
@@ -126,11 +170,8 @@
                 }
 
                 const medlemmer = await response.json();
-                for (const medlem of medlemmer) {
-                    const item = document.createElement('li');
-                    item.textContent = medlem.navIdent;
-                    liste.appendChild(item);
-                }
+                visMedlemmer(liste, medlemmer.map(medlem => medlem.navIdent));
+                panel.dataset.populert = 'true';
                 status.textContent = medlemmer.length
                     ? `${medlemmer.length} medlemmer funnet.`
                     : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
@@ -139,6 +180,7 @@
                 status.classList.add('error');
             } finally {
                 button.disabled = false;
+                oppdaterFellesMedlemmer();
             }
         });
     }

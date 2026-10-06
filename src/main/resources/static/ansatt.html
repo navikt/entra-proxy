@@ -108,6 +108,8 @@
             }
             const enheterResponse = await hentResponse(`/api/v1/enhet/ansatt/${encodeURIComponent(ansattid)}`, 'enheter');
             const enheter = await enheterResponse.json();
+            const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
+            const grupper = await grupperResponse.json();
             const verdier = [
                 ['Nav-ident', ansatt.navIdent],
                 ['Navn', ansatt.visningNavn],
@@ -131,6 +133,24 @@
                 rad.append(feltCelle, verdiCelle);
                 felter.appendChild(rad);
             }
+            const gruppeRad = document.createElement('tr');
+            const gruppeFelt = document.createElement('th');
+            gruppeFelt.scope = 'row';
+            gruppeFelt.textContent = 'Gruppemedlemskap';
+            const gruppeVerdi = document.createElement('td');
+            if (grupper.length) {
+                const liste = document.createElement('ul');
+                for (const gruppe of grupper) {
+                    const element = document.createElement('li');
+                    element.textContent = gruppe.rolle;
+                    liste.appendChild(element);
+                }
+                gruppeVerdi.appendChild(liste);
+            } else {
+                gruppeVerdi.textContent = 'Ingen gruppemedlemskap';
+            }
+            gruppeRad.append(gruppeFelt, gruppeVerdi);
+            felter.appendChild(gruppeRad);
             resultat.hidden = false;
             status.textContent = 'Ansatt hentet.';
         } catch (error) {

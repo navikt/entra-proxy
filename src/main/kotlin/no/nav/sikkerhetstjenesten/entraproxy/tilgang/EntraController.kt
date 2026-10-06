@@ -76,12 +76,11 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
         entraTjeneste.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
-    @OAuth2RequireCCF
-    @Operation(summary = "Hent informasjon om ansatts tilganger, krever CCFlow")
+    @Operation(summary = "Hent informasjon om ansatts tilganger")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
             entraTjeneste.grupperForAnsatt(navIdent, it)
-        }
+        } ?: emptySet()
 
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")

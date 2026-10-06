@@ -251,12 +251,25 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("beskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
+        Given("ubeskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
+            When("request mangler bearer-token") {
+                Then("returnerer gruppemedlemskap") {
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
+                }
+                Then("ansattsiden henter og viser gruppemedlemskap") {
+                    mockMvc.perform(get("/ansatt.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
+                        .andExpect(content().string(containsString("Gruppemedlemskap")))
+                }
+            }
             When("request har OBO-token") {
-                Then("returnerer 403") {
+                Then("returnerer 200") {
                     mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
-                            status().isForbidden
+                            status().isOk
                         }
                 }
             }

@@ -82,7 +82,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(
+                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -108,7 +108,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
+                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
                 }
             }
         }

@@ -140,6 +140,7 @@
         </div>
     </section>
 </main>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
@@ -157,22 +158,16 @@
     eksporterDetaljvisning.addEventListener('click', () => {
         const rader = [
             [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
-                celle.querySelector('.sorter-knapp')?.textContent ?? celle.textContent
+                celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
             ),
             ...[...sammenligningTabellRader.rows].map(rad =>
                 [...rad.cells].map(celle => celle.textContent.trim())
             )
         ];
-        const csv = rader
-            .map(rad => rad.map(verdi => `"${verdi.replaceAll('"', '""')}"`).join(';'))
-            .join('\r\n');
-        const fil = new Blob(['\uFEFF', csv], {type: 'text/csv;charset=utf-8'});
-        const url = URL.createObjectURL(fil);
-        const lenke = document.createElement('a');
-        lenke.href = url;
-        lenke.download = 'gruppesammenligning.csv';
-        lenke.click();
-        URL.revokeObjectURL(url);
+        const regneark = XLSX.utils.aoa_to_sheet(rader);
+        const arbeidsbok = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(arbeidsbok, regneark, 'Detaljvisning');
+        XLSX.writeFile(arbeidsbok, 'gruppesammenligning.xlsx');
     });
 
     function oppdaterFellesMedlemmer() {

@@ -69,7 +69,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
    // @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
-            gruppeMedlemmer("$gruppeId").also {
+            gruppeMedlemmer("$gruppeId", gruppeNavn).also {
                 log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
             }
 
@@ -131,8 +131,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true

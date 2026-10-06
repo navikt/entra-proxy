@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Medlemmer i Entra-gruppe</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #f3f3f4;
+            color: #1f1f1f;
+            font-family: Arial, sans-serif;
+        }
+        main {
+            max-width: 40rem;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border: 1px solid #d1d6db;
+            border-radius: 8px;
+        }
+        #vis-medlemmer {
+            margin-top: 1rem;
+            width: 100%;
+        }
+        #status { min-height: 1.5rem; margin-top: 1rem; }
+        #status.error { color: #a40000; }
+        li { margin-bottom: 0.5rem; overflow-wrap: anywhere; }
+    </style>
+</head>
+<body>
+<main>
+    <h1 class="aksel-heading aksel-heading--large">Medlemmer i Entra-gruppe</h1>
+    <form id="gruppe-form">
+        <div class="aksel-form-field" style="margin-top: 1rem;">
+            <label class="aksel-label" for="gruppeNavn">Gruppenavn</label>
+            <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Skriv inn gruppenavn">
+        </div>
+        <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Vis medlemmer</button>
+    </form>
+    <p class="aksel-body-short" id="status" role="status" aria-live="polite"></p>
+    <ul class="aksel-body-short" id="medlemmer" aria-label="Gruppemedlemmer"></ul>
+</main>
+<script>
+    const form = document.getElementById('gruppe-form');
+    const button = document.getElementById('vis-medlemmer');
+    const status = document.getElementById('status');
+    const liste = document.getElementById('medlemmer');
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const gruppeNavn = document.getElementById('gruppeNavn').value.trim();
+        liste.replaceChildren();
+        status.classList.remove('error');
+
+        if (!gruppeNavn) {
+            status.textContent = 'Skriv inn et gruppenavn.';
+            status.classList.add('error');
+            return;
+        }
+
+        button.disabled = true;
+        status.textContent = 'Henter medlemmer...';
+
+        try {
+            const response = await fetch(`medlemmer?${new URLSearchParams({gruppeNavn})}`, {
+                headers: {'Accept': 'application/json'}
+            });
+            if (!response.ok) {
+                let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
+                if (response.headers.get('content-type')?.includes('json')) {
+                    const problem = await response.json();
+                    melding = problem.detail ?? melding;
+                }
+                throw new Error(melding);
+            }
+
+            const medlemmer = await response.json();
+            for (const medlem of medlemmer) {
+                const item = document.createElement('li');
+                item.textContent = medlem.visningNavn
+                    ? `${medlem.visningNavn} (${medlem.navIdent})`
+                    : medlem.navIdent;
+                liste.appendChild(item);
+            }
+            status.textContent = medlemmer.length
+                ? `${medlemmer.length} medlemmer funnet.`
+                : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
+        } catch (error) {
+            status.textContent = `Henting feilet: ${error.message}`;
+            status.classList.add('error');
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

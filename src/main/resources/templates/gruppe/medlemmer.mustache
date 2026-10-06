@@ -58,6 +58,7 @@
         }
         .oppsummering {
             width: 100%;
+            background: #f3f3f4;
             border-collapse: collapse;
             text-align: left;
         }
@@ -67,8 +68,13 @@
             border-bottom: 1px solid #d1d6db;
         }
         .sammenligning-tabell {
-            margin-top: 2rem;
+            background: #f3f3f4;
             overflow-x: auto;
+        }
+        #sammenligning-detaljer {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #d1d6db;
         }
         .sammenligning-tabell table {
             width: 100%;
@@ -105,7 +111,7 @@
             <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Skriv inn gruppenavn">
         </div>
         <div class="sok-knapper">
-            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Vis medlemmer</button>
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
             <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Ny sammenligningsgruppe</button>
         </div>
     </form>

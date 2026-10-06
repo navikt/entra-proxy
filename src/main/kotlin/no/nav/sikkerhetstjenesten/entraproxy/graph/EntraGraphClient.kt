@@ -37,7 +37,7 @@ interface EntraGraphClient {
     fun members(
         @PathVariable gruppeId: String,
         @RequestParam($$"$select") select: String,
-        @RequestParam($$"$top") top: Int = 250,
+        @RequestParam($$"$top") top: Int = 1000,
         @RequestParam($$"$count") count: String = "true"
     ): GruppeMedlemmer
 

@@ -28,6 +28,9 @@
             margin-top: 1rem;
         }
         .sok-knapp { margin-top: 1rem; }
+        .medlemskap-resultat {
+            grid-column: 1 / -1;
+        }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
         table {
@@ -61,6 +64,22 @@
                 <tbody id="ansatt-felter"></tbody>
             </table>
         </section>
+        <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
+            <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelige enheter</h2>
+            <p id="enheter-status"></p>
+            <table>
+                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th></tr></thead>
+                <tbody id="enheter-rader"></tbody>
+            </table>
+        </section>
+        <section class="medlemskap-resultat" id="grupper-resultat" aria-labelledby="grupper-overskrift" hidden>
+            <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
+            <p id="grupper-status"></p>
+            <table>
+                <thead><tr><th scope="col">Gruppenavn</th></tr></thead>
+                <tbody id="grupper-rader"></tbody>
+            </table>
+        </section>
     </div>
 </main>
 <script>
@@ -70,6 +89,12 @@
     const status = document.getElementById('status');
     const resultat = document.getElementById('ansatt-resultat');
     const felter = document.getElementById('ansatt-felter');
+    const enheterResultat = document.getElementById('enheter-resultat');
+    const grupperResultat = document.getElementById('grupper-resultat');
+    const enheterRader = document.getElementById('enheter-rader');
+    const grupperRader = document.getElementById('grupper-rader');
+    const enheterStatus = document.getElementById('enheter-status');
+    const grupperStatus = document.getElementById('grupper-status');
 
     async function hentResponse(url, beskrivelse) {
         const response = await fetch(url, {
@@ -90,7 +115,11 @@
         event.preventDefault();
         const ansattid = input.value.trim().toUpperCase();
         resultat.hidden = true;
+        enheterResultat.hidden = true;
+        grupperResultat.hidden = true;
         felter.replaceChildren();
+        enheterRader.replaceChildren();
+        grupperRader.replaceChildren();
         status.classList.remove('error');
         knapp.disabled = true;
         status.textContent = 'Henter ansatt...';
@@ -118,10 +147,7 @@
                 ['T-ident', ansatt.tIdent],
                 ['E-post', ansatt.epost],
                 ['Enhetsnummer', ansatt.enhet?.enhetnummer],
-                ['Enhetsnavn', ansatt.enhet?.navn],
-                ['Tilgjengelige enheter', enheter.length
-                    ? enheter.map(enhet => `${enhet.enhetnummer} - ${enhet.navn}`).join(', ')
-                    : 'Ingen tilgjengelige enheter']
+                ['Enhetsnavn', ansatt.enhet?.navn]
             ];
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');
@@ -133,25 +159,27 @@
                 rad.append(feltCelle, verdiCelle);
                 felter.appendChild(rad);
             }
-            const gruppeRad = document.createElement('tr');
-            const gruppeFelt = document.createElement('th');
-            gruppeFelt.scope = 'row';
-            gruppeFelt.textContent = 'Gruppemedlemskap';
-            const gruppeVerdi = document.createElement('td');
-            if (grupper.length) {
-                const liste = document.createElement('ul');
-                for (const gruppe of grupper) {
-                    const element = document.createElement('li');
-                    element.textContent = gruppe.rolle;
-                    liste.appendChild(element);
-                }
-                gruppeVerdi.appendChild(liste);
-            } else {
-                gruppeVerdi.textContent = 'Ingen gruppemedlemskap';
+            for (const enhet of enheter) {
+                const rad = document.createElement('tr');
+                const nummerCelle = document.createElement('td');
+                nummerCelle.textContent = enhet.enhetnummer;
+                const navnCelle = document.createElement('td');
+                navnCelle.textContent = enhet.navn;
+                rad.append(nummerCelle, navnCelle);
+                enheterRader.appendChild(rad);
             }
-            gruppeRad.append(gruppeFelt, gruppeVerdi);
-            felter.appendChild(gruppeRad);
+            for (const gruppe of grupper) {
+                const rad = document.createElement('tr');
+                const celle = document.createElement('td');
+                celle.textContent = gruppe.rolle;
+                rad.appendChild(celle);
+                grupperRader.appendChild(rad);
+            }
+            enheterStatus.textContent = enheter.length ? `${enheter.length} enheter` : 'Ingen tilgjengelige enheter';
+            grupperStatus.textContent = grupper.length ? `${grupper.length} grupper` : 'Ingen gruppemedlemskap';
             resultat.hidden = false;
+            enheterResultat.hidden = false;
+            grupperResultat.hidden = false;
             status.textContent = 'Ansatt hentet.';
         } catch (error) {
             status.textContent = `Henting feilet: ${error.message}`;

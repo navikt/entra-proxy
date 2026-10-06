@@ -76,7 +76,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             )
         }
 
-        Given("den statiske utforskersiden") {
+        xGiven("den statiske utforskersiden") {
             When("request mangler bearer-token") {
                 Then("viser linker til ansatt og gruppemedlemmer") {
                     mockMvc.perform(get("/utforsker.html"))

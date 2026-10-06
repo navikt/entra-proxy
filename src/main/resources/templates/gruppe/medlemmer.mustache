@@ -73,6 +73,16 @@
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
         }
+        .sorter-knapp {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: inherit;
+            font: inherit;
+            font-weight: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
         .oppsummering td:last-child,
         .oppsummering th:last-child {
             text-align: right;
@@ -183,15 +193,15 @@
         const tabellOverskrift = document.createElement('tr');
         const navIdentOverskrift = document.createElement('th');
         navIdentOverskrift.scope = 'col';
-        navIdentOverskrift.textContent = 'Nav-ident';
+        leggTilSorterbarOverskrift(navIdentOverskrift, 'Nav-ident', 0);
         const navnOverskrift = document.createElement('th');
         navnOverskrift.scope = 'col';
-        navnOverskrift.textContent = 'Navn';
+        leggTilSorterbarOverskrift(navnOverskrift, 'Navn', 1);
         tabellOverskrift.append(navIdentOverskrift, navnOverskrift);
-        for (const panel of paneler.slice(1)) {
+        for (const [indeks, panel] of paneler.slice(1).entries()) {
             const gruppeOverskrift = document.createElement('th');
             gruppeOverskrift.scope = 'col';
-            gruppeOverskrift.textContent = panel.dataset.gruppeNavn;
+            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 2);
             tabellOverskrift.appendChild(gruppeOverskrift);
         }
         sammenligningTabellOverskrift.appendChild(tabellOverskrift);
@@ -211,6 +221,32 @@
             }
             sammenligningTabellRader.appendChild(rad);
         }
+    }
+
+    function leggTilSorterbarOverskrift(celle, tekst, kolonneIndeks) {
+        const knapp = document.createElement('button');
+        knapp.className = 'sorter-knapp';
+        knapp.type = 'button';
+        knapp.textContent = tekst;
+        knapp.addEventListener('click', () => {
+            const retning = knapp.dataset.sortering === 'ascending' ? 'descending' : 'ascending';
+            const andreKnapper = sammenligningTabellOverskrift.querySelectorAll('.sorter-knapp');
+            for (const annenKnapp of andreKnapper) {
+                annenKnapp.dataset.sortering = '';
+                annenKnapp.closest('th').removeAttribute('aria-sort');
+            }
+            knapp.dataset.sortering = retning;
+            celle.setAttribute('aria-sort', retning);
+            const rader = [...sammenligningTabellRader.rows];
+            rader.sort((radA, radB) => {
+                const verdiA = radA.cells[kolonneIndeks].textContent.trim();
+                const verdiB = radB.cells[kolonneIndeks].textContent.trim();
+                const sammenligning = verdiA.localeCompare(verdiB, undefined, {numeric: true, sensitivity: 'base'});
+                return retning === 'ascending' ? sammenligning : -sammenligning;
+            });
+            sammenligningTabellRader.append(...rader);
+        });
+        celle.appendChild(knapp);
     }
 
     function klargjorSok(panel) {

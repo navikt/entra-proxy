@@ -48,6 +48,20 @@
             overflow-y: scroll;
             scrollbar-gutter: stable;
         }
+        .oppsummering {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .oppsummering th,
+        .oppsummering td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #d1d6db;
+        }
+        .oppsummering td:last-child,
+        .oppsummering th:last-child {
+            text-align: right;
+        }
         li { margin-bottom: 0.5rem; overflow-wrap: anywhere; }
     </style>
 </head>
@@ -73,7 +87,12 @@
     <section id="felles-resultat" aria-labelledby="felles-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium" id="felles-overskrift">Oppsummering av gruppemedlemskap</h2>
         <p class="aksel-body-short status" id="felles-status" role="status" aria-live="polite"></p>
-        <ul class="aksel-body-short" id="felles-medlemmer" aria-label="Oppsummering av gruppemedlemskap"></ul>
+        <table class="oppsummering">
+            <thead>
+            <tr><th scope="col">Grupper</th><th scope="col">Antall medlemmer</th></tr>
+            </thead>
+            <tbody id="felles-medlemmer"></tbody>
+        </table>
     </section>
 </main>
 <script>
@@ -115,17 +134,24 @@
             andreGrupper.every(medlemmer => !medlemmer.has(navIdent))
         );
         const oppsummeringer = [
-            `Kun i ${paneler[0].dataset.gruppeNavn}: ${kunForsteGruppe.length}`,
+            {grupper: `Kun i ${paneler[0].dataset.gruppeNavn}`, antall: kunForsteGruppe.length},
             ...andreGrupper.map((medlemmer, indeks) => {
                 const fellesAntall = [...forsteGruppe].filter(navIdent => medlemmer.has(navIdent)).length;
-                return `I ${paneler[0].dataset.gruppeNavn} og ${paneler[indeks + 1].dataset.gruppeNavn}: ${fellesAntall}`;
+                return {
+                    grupper: `I ${paneler[0].dataset.gruppeNavn} og ${paneler[indeks + 1].dataset.gruppeNavn}`,
+                    antall: fellesAntall
+                };
             })
         ];
         fellesListe.replaceChildren();
         for (const oppsummering of oppsummeringer) {
-            const item = document.createElement('li');
-            item.textContent = oppsummering;
-            fellesListe.appendChild(item);
+            const rad = document.createElement('tr');
+            const gruppeCelle = document.createElement('td');
+            const antallCelle = document.createElement('td');
+            gruppeCelle.textContent = oppsummering.grupper;
+            antallCelle.textContent = oppsummering.antall;
+            rad.append(gruppeCelle, antallCelle);
+            fellesListe.appendChild(rad);
         }
         fellesStatus.textContent = 'Antall medlemmer basert på gruppene over.';
     }

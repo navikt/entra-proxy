@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvWebMvcConfig
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2JsonAuthenticationEntryPoint
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig
@@ -17,6 +16,5 @@ import org.springframework.context.annotation.Import
     OAuth2JsonAuthenticationEntryPoint::class,
     OAuth2SecurityBeanConfig::class,
     NotificationAutoConfiguration::class,
-    DefaultRestErrorHandler::class,
-    CsvWebMvcConfig::class)
+    DefaultRestErrorHandler::class)
 class SecurityTestApplication

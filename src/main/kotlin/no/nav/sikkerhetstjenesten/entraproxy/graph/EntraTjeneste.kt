@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
@@ -67,7 +68,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             else throw it
         }
 
-   // @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
+    @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
             gruppeMedlemmer("$gruppeId", gruppeNavn).also {
                 log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")

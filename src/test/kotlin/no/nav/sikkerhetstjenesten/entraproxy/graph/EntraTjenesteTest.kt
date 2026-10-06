@@ -40,7 +40,7 @@ class EntraTjenesteTest(
             server.verify()
         }
 
-        xGiven("medlemmer-endepunkt") {
+        Given("medlemmer-endepunkt") {
             When("det finnes medlemmer") {
                 Then("skal responsen inneholde forventede medlemmer") {
                     server.expect { request ->

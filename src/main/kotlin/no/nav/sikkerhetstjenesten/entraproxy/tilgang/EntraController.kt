@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvHttpMessageConverter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -14,7 +13,6 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -86,7 +84,7 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
             entraTjeneste.grupperForAnsatt(navIdent, it)
         }
 
-    @GetMapping("gruppe/medlemmer", produces = [APPLICATION_JSON_VALUE, CsvHttpMessageConverter.TEXT_CSV_VALUE])
+    @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe")
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)

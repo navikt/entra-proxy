@@ -83,7 +83,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(content().contentTypeCompatibleWith("text/html"))
                         .andExpect(content().string(containsString("href=\"/ansatt.html\"")))
-                        .andExpect(content().string(containsString("href=\"/medlemmer.html\"")))
+                        .andExpect(content().string(containsString("href=\"/grupper.html\"")))
                 }
             }
         }
@@ -186,7 +186,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden bruker gruppe-endepunktet") {
-                    mockMvc.perform(get("/medlemmer.html"))
+                    mockMvc.perform(get("/grupper.html"))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                 }

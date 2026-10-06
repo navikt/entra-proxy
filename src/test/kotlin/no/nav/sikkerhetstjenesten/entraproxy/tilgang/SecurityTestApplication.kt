@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Import
 @SpringBootApplication
 @Import(
     EntraController::class,
-    UtforskerController::class,
     OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter::class,
     OAuth2JsonAuthenticationEntryPoint::class,
     OAuth2SecurityBeanConfig::class,

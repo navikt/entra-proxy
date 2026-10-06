@@ -105,26 +105,12 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("ubeskyttet endepunkt ${API_V1}/enhet/ansatt/{navIdent}") {
-            When("request mangler bearer-token") {
-                Then("returnerer tilgjengelige enheter") {
-                    mockMvc.perform(get("${API_V1}/enhet/ansatt/$TEST_ANSATT_ID"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$[0].enhetnummer").value(TEST_ENHET.enhetnummer.verdi))
-                        .andExpect(jsonPath("$[0].navn").value(TEST_ENHET.navn))
-                }
-                Then("ansattsiden henter enheter og viser en egen rad") {
-                    mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/enhet/ansatt/")))
-                        .andExpect(content().string(containsString("Tilgjengelige enheter")))
-                }
-            }
+        Given("beskyttet endepunkt ${API_V1}/enhet/ansatt/{navIdent}") {
             When("request har OBO-token") {
-                Then("returnerer 200") {
+                Then("returnerer 403") {
                     mockMvc.perform(get("${API_V1}/enhet/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
-                            status().isOk
+                            status().isForbidden
                         }
                 }
             }
@@ -182,7 +168,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("medlemsoppslag i utforskeren") {
             When("request mangler bearer-token") {
                 Then("returnerer medlemmer som JSON") {
-                    mockMvc.perform(get("$API_V1/utforsker/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
@@ -202,7 +188,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("gruppen ikke finnes") {
                 Then("returnerer en tom liste") {
                     every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
-                    mockMvc.perform(get("$API_V1/utforsker/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe"))
                         .andExpect(status().isOk())
                         .andExpect(content().json("[]"))
                 }

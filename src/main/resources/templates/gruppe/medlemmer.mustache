@@ -22,13 +22,15 @@
             border-radius: 8px;
         }
         #sok {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
             gap: 2rem;
-            overflow-x: auto;
             padding-bottom: 1rem;
         }
+        .sok-panel:first-child {
+            grid-column: 1 / -1;
+        }
         .sok-panel {
-            flex: 0 0 28rem;
             min-width: 0;
         }
         .sok-knapper {

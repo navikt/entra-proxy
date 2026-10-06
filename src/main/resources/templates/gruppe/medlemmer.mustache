@@ -113,9 +113,10 @@
             medlemssett.every(medlemmer => medlemmer.has(navIdent))
         );
         visMedlemmer(fellesListe, fellesMedlemmer);
+        const gruppenavn = paneler.map(panel => panel.dataset.gruppeNavn).join(', ');
         fellesStatus.textContent = fellesMedlemmer.length
-            ? `${fellesMedlemmer.length} medlemmer finnes i alle gruppene.`
-            : 'Ingen medlemmer finnes i alle gruppene.';
+            ? `${fellesMedlemmer.length} felles medlemmer i gruppene: ${gruppenavn}.`
+            : `Ingen felles medlemmer i gruppene: ${gruppenavn}.`;
     }
 
     function klargjorSok(panel) {
@@ -171,6 +172,7 @@
 
                 const medlemmer = await response.json();
                 visMedlemmer(liste, medlemmer.map(medlem => medlem.navIdent));
+                panel.dataset.gruppeNavn = gruppeNavn;
                 panel.dataset.populert = 'true';
                 status.textContent = medlemmer.length
                     ? `${medlemmer.length} medlemmer funnet.`

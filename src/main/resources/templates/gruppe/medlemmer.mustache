@@ -14,20 +14,32 @@
             font-family: Arial, sans-serif;
         }
         main {
-            max-width: 40rem;
+            max-width: 90rem;
             margin: 2rem auto;
             padding: 2rem;
             background: #fff;
             border: 1px solid #d1d6db;
             border-radius: 8px;
         }
-        #vis-medlemmer {
-            margin-top: 1rem;
-            width: 100%;
+        #sok {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
         }
-        #status { min-height: 1.5rem; margin-top: 1rem; }
-        #status.error { color: #a40000; }
-        #medlemmer {
+        .sok-panel {
+            flex: 0 0 28rem;
+            min-width: 0;
+        }
+        .sok-knapper {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .nytt-sok { margin-left: auto; }
+        .status { min-height: 1.5rem; margin-top: 1rem; }
+        .status.error { color: #a40000; }
+        .medlemmer {
             max-height: 24rem;
             overflow: auto;
             scrollbar-gutter: stable;
@@ -38,66 +50,96 @@
 <body>
 <main>
     <h1 class="aksel-heading aksel-heading--large">Medlemmer i Entra-gruppe</h1>
+    <div id="sok">
+    <section class="sok-panel" aria-label="Gruppesøk 1">
     <form id="gruppe-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="gruppeNavn">Gruppenavn</label>
             <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Skriv inn gruppenavn">
         </div>
-        <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Vis medlemmer</button>
+        <div class="sok-knapper">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Vis medlemmer</button>
+            <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Nytt s&#248;k</button>
+        </div>
     </form>
-    <p class="aksel-body-short" id="status" role="status" aria-live="polite"></p>
-    <ul class="aksel-body-short" id="medlemmer" aria-label="Gruppemedlemmer" tabindex="0"></ul>
+    <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
+    <ul class="aksel-body-short medlemmer" id="medlemmer" aria-label="Gruppemedlemmer" tabindex="0"></ul>
+    </section>
+    </div>
 </main>
 <script>
-    const form = document.getElementById('gruppe-form');
-    const button = document.getElementById('vis-medlemmer');
-    const status = document.getElementById('status');
-    const liste = document.getElementById('medlemmer');
+    const sok = document.getElementById('sok');
+    const forstePanel = sok.querySelector('.sok-panel');
+    const panelMal = forstePanel.cloneNode(true);
+    let antallSok = 1;
 
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const gruppeNavn = document.getElementById('gruppeNavn').value.trim();
-        liste.replaceChildren();
-        status.classList.remove('error');
+    function klargjorSok(panel) {
+        const form = panel.querySelector('form');
+        const input = panel.querySelector('input');
+        const button = panel.querySelector('button[type="submit"]');
+        const status = panel.querySelector('.status');
+        const liste = panel.querySelector('.medlemmer');
 
-        if (!gruppeNavn) {
-            status.textContent = 'Skriv inn et gruppenavn.';
-            status.classList.add('error');
-            return;
-        }
+        panel.querySelector('.nytt-sok').addEventListener('click', () => {
+            const nyttPanel = panelMal.cloneNode(true);
+            antallSok += 1;
+            nyttPanel.setAttribute('aria-label', `Gruppes\u00f8k ${antallSok}`);
+            for (const element of nyttPanel.querySelectorAll('[id]')) {
+                element.id = `${element.id}-${antallSok}`;
+            }
+            nyttPanel.querySelector('label').htmlFor = nyttPanel.querySelector('input').id;
+            panel.after(nyttPanel);
+            klargjorSok(nyttPanel);
+            nyttPanel.querySelector('input').focus();
+        });
 
-        button.disabled = true;
-        status.textContent = 'Henter medlemmer...';
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const gruppeNavn = input.value.trim();
+            liste.replaceChildren();
+            status.classList.remove('error');
 
-        try {
-            const response = await fetch(`medlemmer?${new URLSearchParams({gruppeNavn})}`, {
-                headers: {'Accept': 'application/json'}
-            });
-            if (!response.ok) {
-                let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
-                if (response.headers.get('content-type')?.includes('json')) {
-                    const problem = await response.json();
-                    melding = problem.detail ?? melding;
+            if (!gruppeNavn) {
+                status.textContent = 'Skriv inn et gruppenavn.';
+                status.classList.add('error');
+                return;
+            }
+
+            button.disabled = true;
+            status.textContent = 'Henter medlemmer...';
+
+            try {
+                const response = await fetch(`medlemmer?${new URLSearchParams({gruppeNavn})}`, {
+                    headers: {'Accept': 'application/json'}
+                });
+                if (!response.ok) {
+                    let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
+                    if (response.headers.get('content-type')?.includes('json')) {
+                        const problem = await response.json();
+                        melding = problem.detail ?? melding;
+                    }
+                    throw new Error(melding);
                 }
-                throw new Error(melding);
-            }
 
-            const medlemmer = await response.json();
-            for (const medlem of medlemmer) {
-                const item = document.createElement('li');
-                item.textContent = medlem.navIdent;
-                liste.appendChild(item);
+                const medlemmer = await response.json();
+                for (const medlem of medlemmer) {
+                    const item = document.createElement('li');
+                    item.textContent = medlem.navIdent;
+                    liste.appendChild(item);
+                }
+                status.textContent = medlemmer.length
+                    ? `${medlemmer.length} medlemmer funnet.`
+                    : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
+            } catch (error) {
+                status.textContent = `Henting feilet: ${error.message}`;
+                status.classList.add('error');
+            } finally {
+                button.disabled = false;
             }
-            status.textContent = medlemmer.length
-                ? `${medlemmer.length} medlemmer funnet.`
-                : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
-        } catch (error) {
-            status.textContent = `Henting feilet: ${error.message}`;
-            status.classList.add('error');
-        } finally {
-            button.disabled = false;
-        }
-    });
+        });
+    }
+
+    klargjorSok(forstePanel);
 </script>
 </body>
 </html>

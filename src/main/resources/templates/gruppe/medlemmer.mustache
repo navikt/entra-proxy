@@ -131,6 +131,7 @@
     </section>
     <section id="sammenligning-detaljer" aria-labelledby="sammenligning-detaljer-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium" id="sammenligning-detaljer-overskrift">Detaljvisning</h2>
+        <button class="aksel-button" data-variant="secondary" data-color="brand-blue" id="eksporter-detaljvisning" type="button">Eksporter til Excel</button>
         <div class="sammenligning-tabell">
             <table aria-label="Medlemskap i sammenligningsgrupper">
                 <thead id="sammenligning-tabell-overskrift"></thead>
@@ -149,8 +150,30 @@
     const fellesListe = document.getElementById('felles-medlemmer');
     const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
     const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
+    const eksporterDetaljvisning = document.getElementById('eksporter-detaljvisning');
     const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
+
+    eksporterDetaljvisning.addEventListener('click', () => {
+        const rader = [
+            [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
+                celle.querySelector('.sorter-knapp')?.textContent ?? celle.textContent
+            ),
+            ...[...sammenligningTabellRader.rows].map(rad =>
+                [...rad.cells].map(celle => celle.textContent.trim())
+            )
+        ];
+        const csv = rader
+            .map(rad => rad.map(verdi => `"${verdi.replaceAll('"', '""')}"`).join(';'))
+            .join('\r\n');
+        const fil = new Blob(['\uFEFF', csv], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(fil);
+        const lenke = document.createElement('a');
+        lenke.href = url;
+        lenke.download = 'gruppesammenligning.csv';
+        lenke.click();
+        URL.revokeObjectURL(url);
+    });
 
     function oppdaterFellesMedlemmer() {
         const allePaneler = [...sok.querySelectorAll('.sok-panel')];

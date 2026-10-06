@@ -44,6 +44,18 @@
             border-bottom: 1px solid #d1d6db;
             overflow-wrap: anywhere;
         }
+        .sorter-knapp {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+        }
+        .sorter-knapp::after { content: " \2195"; }
+        th[aria-sort="ascending"] .sorter-knapp::after { content: " \2191"; }
+        th[aria-sort="descending"] .sorter-knapp::after { content: " \2193"; }
     </style>
 </head>
 <body>
@@ -76,7 +88,10 @@
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
             <table>
-                <thead><tr><th scope="col">Gruppenavn</th><th scope="col">Antall medlemmer</th></tr></thead>
+                <thead><tr>
+                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="0">Gruppenavn</button></th>
+                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="1">Antall medlemmer</button></th>
+                </tr></thead>
                 <tbody id="grupper-rader"></tbody>
             </table>
         </section>
@@ -95,6 +110,27 @@
     const grupperRader = document.getElementById('grupper-rader');
     const enheterStatus = document.getElementById('enheter-status');
     const grupperStatus = document.getElementById('grupper-status');
+    const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
+
+    for (const sorterKnapp of sorterKnapper) {
+        sorterKnapp.addEventListener('click', () => {
+            const overskrift = sorterKnapp.closest('th');
+            const retning = overskrift.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+            for (const knapp of sorterKnapper) {
+                knapp.closest('th').removeAttribute('aria-sort');
+            }
+            overskrift.setAttribute('aria-sort', retning);
+            const kolonne = Number(sorterKnapp.dataset.kolonne);
+            const rader = [...grupperRader.rows];
+            rader.sort((radA, radB) => {
+                const verdiA = radA.cells[kolonne].textContent.trim();
+                const verdiB = radB.cells[kolonne].textContent.trim();
+                const sammenligning = verdiA.localeCompare(verdiB, 'nb', {numeric: true, sensitivity: 'base'});
+                return retning === 'ascending' ? sammenligning : -sammenligning;
+            });
+            grupperRader.replaceChildren(...rader);
+        });
+    }
 
     async function hentResponse(url, beskrivelse) {
         const response = await fetch(url, {
@@ -120,6 +156,9 @@
         felter.replaceChildren();
         enheterRader.replaceChildren();
         grupperRader.replaceChildren();
+        for (const sorterKnapp of sorterKnapper) {
+            sorterKnapp.closest('th').removeAttribute('aria-sort');
+        }
         status.classList.remove('error');
         knapp.disabled = true;
         status.textContent = 'Henter ansatt...';

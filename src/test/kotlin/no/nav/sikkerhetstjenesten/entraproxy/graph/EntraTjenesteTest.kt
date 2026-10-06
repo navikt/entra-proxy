@@ -47,7 +47,7 @@ class EntraTjenesteTest(
                 Then("brukes count-endepunktet") {
                     server.expect { request ->
                         request.method shouldBe GET
-                        request.uri.toString() shouldBe "$baseUrl/groups/$GROUP_ID/members/\$count"
+                        request.uri.toString() shouldBe $$"$$baseUrl/groups/$$GROUP_ID/members/$count"
                     }.andRespond(withSuccess("1535", TEXT_PLAIN))
 
                     client.antallMedlemmer("$GROUP_ID") shouldBe "1535"

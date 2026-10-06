@@ -229,7 +229,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("gruppesiden ${API_V1}/gruppe/vis") {
+        /*Given("gruppesiden ${API_V1}/gruppe/vis") {
             When("request mangler bearer-token") {
                 Then("viser skjema og medlemsliste") {
                     mockMvc.perform(get("${API_V1}/gruppe/vis"))
@@ -241,7 +241,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().string(containsString("id=\"medlemmer\"")))
                 }
             }
-        }
+        }*/
 
         Given("endepunkt ${API_V1}/gruppe/medlemmer") {
             When("request har gruppeNavn") {

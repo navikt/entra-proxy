@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
@@ -25,6 +26,7 @@ import java.util.UUID.randomUUID
 @RestClientTest
 class EntraTjenesteTest(
     private val server: MockRestServiceServer,
+    private val client: EntraGraphClient,
     private val entra: EntraTjeneste,
     private val oid: EntraOidTjeneste) : BehaviorSpec() {
 
@@ -38,6 +40,20 @@ class EntraTjenesteTest(
         }
         afterEach {
             server.verify()
+        }
+
+        Given("antall medlemmer fra Graph") {
+            When("Graph returnerer antallet som ren tekst") {
+                Then("brukes count-endepunktet med eventual consistency") {
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.toString() shouldBe "$baseUrl/groups/$GROUP_ID/members/\$count"
+                        request.headers.getFirst("ConsistencyLevel") shouldBe "eventual"
+                    }.andRespond(withSuccess("1535", TEXT_PLAIN))
+
+                    client.antallMedlemmer("$GROUP_ID") shouldBe "1535"
+                }
+            }
         }
 
         Given("medlemmer-endepunkt") {

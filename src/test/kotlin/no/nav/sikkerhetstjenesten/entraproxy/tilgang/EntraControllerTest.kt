@@ -207,6 +207,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("antall medlemmer i gruppe") {
+            When("request mangler bearer-token") {
+                Then("returnerer antall som tekst") {
+                    every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
+                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string("1535"))
+                }
+            }
+        }
+
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
                 Then("returnerer medlemmer uten bearer-token") {
@@ -214,10 +225,10 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                 }
-                Then("ansattsiden henter gruppemedlemmer og viser antallskolonnen") {
+                Then("ansattsiden henter medlemsantall og viser antallskolonnen") {
                     mockMvc.perform(get("/ansatt.html"))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                        .andExpect(content().string(containsString("/api/v1/gruppe/antall?")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
                 }
             }

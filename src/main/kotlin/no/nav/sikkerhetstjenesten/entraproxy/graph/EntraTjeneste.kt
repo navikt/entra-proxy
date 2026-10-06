@@ -192,4 +192,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     override fun toString() =
         "${javaClass.simpleName} [client=$client, norg=$norg]"
 
+    fun antallMedlemmerIGruppe(it: UUID) =
+        client.antallMedlemmer("$it")
+
 }

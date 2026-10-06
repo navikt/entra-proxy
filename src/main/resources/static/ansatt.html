@@ -141,12 +141,12 @@
             const grupper = await grupperResponse.json();
             const antallMedlemmer = new Map();
             for (const gruppe of grupper) {
-                const medlemmerResponse = await hentResponse(
-                    `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: gruppe.rolle})}`,
-                    `medlemmer i gruppe ${gruppe.rolle}`
+                const antallResponse = await hentResponse(
+                    `/api/v1/gruppe/antall?${new URLSearchParams({gruppeNavn: gruppe.rolle})}`,
+                    `antall medlemmer i gruppe ${gruppe.rolle}`
                 );
-                const medlemmer = await medlemmerResponse.json();
-                antallMedlemmer.set(gruppe.rolle, medlemmer.length);
+                const antall = await antallResponse.text();
+                antallMedlemmer.set(gruppe.rolle, antall);
             }
             const verdier = [
                 ['Nav-ident', ansatt.navIdent],

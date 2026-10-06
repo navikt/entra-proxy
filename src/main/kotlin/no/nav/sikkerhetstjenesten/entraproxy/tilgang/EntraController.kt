@@ -92,6 +92,13 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
             entraTjeneste.medlemmerIGruppe( gruppeNavn, it)
         } ?: emptySet()
 
+    @GetMapping("gruppe/antall")
+    @Operation(summary = "Hent antall medlemmer i en gitt gruppe")
+    fun antallMedlemmerIGruppe(@RequestParam gruppeNavn: String) =
+        oidTjeneste.gruppeOid(gruppeNavn)?.let {
+            entraTjeneste.antallMedlemmerIGruppe(it)
+        } ?: "0"
+
     companion object {
         const val API_V1 = "/api/v1"
     }

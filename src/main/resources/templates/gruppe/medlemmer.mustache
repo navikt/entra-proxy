@@ -27,6 +27,11 @@
         }
         #status { min-height: 1.5rem; margin-top: 1rem; }
         #status.error { color: #a40000; }
+        #medlemmer {
+            max-height: 24rem;
+            overflow: auto;
+            scrollbar-gutter: stable;
+        }
         li { margin-bottom: 0.5rem; overflow-wrap: anywhere; }
     </style>
 </head>
@@ -41,7 +46,7 @@
         <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Vis medlemmer</button>
     </form>
     <p class="aksel-body-short" id="status" role="status" aria-live="polite"></p>
-    <ul class="aksel-body-short" id="medlemmer" aria-label="Gruppemedlemmer"></ul>
+    <ul class="aksel-body-short" id="medlemmer" aria-label="Gruppemedlemmer" tabindex="0"></ul>
 </main>
 <script>
     const form = document.getElementById('gruppe-form');
@@ -80,9 +85,7 @@
             const medlemmer = await response.json();
             for (const medlem of medlemmer) {
                 const item = document.createElement('li');
-                item.textContent = medlem.visningNavn
-                    ? `${medlem.visningNavn} (${medlem.navIdent})`
-                    : medlem.navIdent;
+                item.textContent = medlem.navIdent;
                 liste.appendChild(item);
             }
             status.textContent = medlemmer.length

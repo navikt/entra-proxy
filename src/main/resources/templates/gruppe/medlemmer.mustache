@@ -64,6 +64,7 @@
             border-bottom: 1px solid #d1d6db;
         }
         .sammenligning-tabell {
+            margin-top: 2rem;
             overflow-x: auto;
         }
         .sammenligning-tabell table {
@@ -113,6 +114,9 @@
             </thead>
             <tbody id="felles-medlemmer"></tbody>
         </table>
+    </section>
+    <section id="sammenligning-detaljer" aria-labelledby="sammenligning-detaljer-overskrift" hidden>
+        <h2 class="aksel-heading aksel-heading--medium" id="sammenligning-detaljer-overskrift">Detaljvisning</h2>
         <div class="sammenligning-tabell">
             <table aria-label="Medlemskap i sammenligningsgrupper">
                 <thead id="sammenligning-tabell-overskrift"></thead>
@@ -126,6 +130,7 @@
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
     const fellesResultat = document.getElementById('felles-resultat');
+    const sammenligningDetaljer = document.getElementById('sammenligning-detaljer');
     const fellesStatus = document.getElementById('felles-status');
     const fellesListe = document.getElementById('felles-medlemmer');
     const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
@@ -144,7 +149,9 @@
     function oppdaterFellesMedlemmer() {
         const paneler = [...sok.querySelectorAll('.sok-panel')];
         const fullforteSok = paneler.filter(panel => panel.dataset.populert === 'true').length;
-        fellesResultat.hidden = fullforteSok < 2 || fullforteSok !== paneler.length;
+        const visResultat = fullforteSok >= 2 && fullforteSok === paneler.length;
+        fellesResultat.hidden = !visResultat;
+        sammenligningDetaljer.hidden = !visResultat;
         fellesListe.replaceChildren();
         sammenligningTabellOverskrift.replaceChildren();
         sammenligningTabellRader.replaceChildren();

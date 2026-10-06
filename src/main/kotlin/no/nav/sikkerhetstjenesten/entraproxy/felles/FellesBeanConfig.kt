@@ -1,14 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
-import io.micrometer.core.aop.TimedAspect
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Tags
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.apache.hc.core5.util.TimeValue
-import org.springframework.boot.actuate.endpoint.SanitizingFunction
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
@@ -22,11 +19,6 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
-import java.util.function.Function
-import kotlin.annotation.AnnotationRetention.BINARY
-import kotlin.annotation.AnnotationTarget.CLASS
-import kotlin.annotation.AnnotationTarget.CONSTRUCTOR
-import kotlin.annotation.AnnotationTarget.FUNCTION
 
 
 @Configuration
@@ -56,10 +48,6 @@ class FellesBeanConfig(private val ctx: AuthContext,
                 }
         }
 
-    @Bean
-    fun sanitizingFunction() = SanitizingFunction { data ->
-        if (SENSITIVE_KEYS.any { data.key.contains(it, ignoreCase = true) }) data.withValue("******") else data
-    }
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(ConsumerAwareHandlerInterceptor(ctx, meterRegistry))
@@ -77,8 +65,6 @@ class FellesBeanConfig(private val ctx: AuthContext,
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
-
-        private val SENSITIVE_KEYS = setOf("password", "secret", "token", "key","credentials", "jwk","private_key")
 
     }
     private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {

@@ -47,7 +47,7 @@ class OAuth2SecurityBeanConfig {
     fun authContext() = AuthContext()
 
     @Bean
-    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, @Qualifier("authContext") ctx: AuthContext): AccessDeniedHandler =
+    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
         object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
             override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
         }

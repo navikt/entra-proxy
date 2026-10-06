@@ -71,9 +71,9 @@
     </section>
     </div>
     <section id="felles-resultat" aria-labelledby="felles-overskrift" hidden>
-        <h2 class="aksel-heading aksel-heading--medium" id="felles-overskrift">Medlemmer i alle gruppene</h2>
+        <h2 class="aksel-heading aksel-heading--medium" id="felles-overskrift">Oppsummering av gruppemedlemskap</h2>
         <p class="aksel-body-short status" id="felles-status" role="status" aria-live="polite"></p>
-        <ul class="aksel-body-short medlemmer" id="felles-medlemmer" aria-label="Medlemmer i alle gruppene" tabindex="0"></ul>
+        <ul class="aksel-body-short" id="felles-medlemmer" aria-label="Oppsummering av gruppemedlemskap"></ul>
     </section>
 </main>
 <script>
@@ -109,14 +109,25 @@
         const medlemssett = paneler.map(panel =>
             new Set([...panel.querySelector('.medlemmer').children].map(item => item.textContent))
         );
-        const fellesMedlemmer = [...medlemssett[0]].filter(navIdent =>
-            medlemssett.every(medlemmer => medlemmer.has(navIdent))
+        const forsteGruppe = medlemssett[0];
+        const andreGrupper = medlemssett.slice(1);
+        const kunForsteGruppe = [...forsteGruppe].filter(navIdent =>
+            andreGrupper.every(medlemmer => !medlemmer.has(navIdent))
         );
-        visMedlemmer(fellesListe, fellesMedlemmer);
-        const gruppenavn = paneler.map(panel => panel.dataset.gruppeNavn).join(', ');
-        fellesStatus.textContent = fellesMedlemmer.length
-            ? `${fellesMedlemmer.length} felles medlemmer i gruppene: ${gruppenavn}.`
-            : `Ingen felles medlemmer i gruppene: ${gruppenavn}.`;
+        const oppsummeringer = [
+            `Kun i ${paneler[0].dataset.gruppeNavn}: ${kunForsteGruppe.length}`,
+            ...andreGrupper.map((medlemmer, indeks) => {
+                const fellesAntall = [...forsteGruppe].filter(navIdent => medlemmer.has(navIdent)).length;
+                return `I ${paneler[0].dataset.gruppeNavn} og ${paneler[indeks + 1].dataset.gruppeNavn}: ${fellesAntall}`;
+            })
+        ];
+        fellesListe.replaceChildren();
+        for (const oppsummering of oppsummeringer) {
+            const item = document.createElement('li');
+            item.textContent = oppsummering;
+            fellesListe.appendChild(item);
+        }
+        fellesStatus.textContent = 'Antall medlemmer basert på gruppene over.';
     }
 
     function klargjorSok(panel) {

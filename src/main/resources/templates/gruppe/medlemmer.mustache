@@ -44,18 +44,6 @@
         .nytt-sok { margin-left: auto; }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
-        .medlemmer-tabell {
-            background: #f3f3f4;
-            max-height: min(24rem, 50vh);
-            overflow-x: auto;
-            overflow-y: scroll;
-            scrollbar-gutter: stable;
-        }
-        .medlemmer-tabell table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
         .oppsummering {
             width: 100%;
             background: #f3f3f4;
@@ -74,7 +62,6 @@
         #sammenligning-detaljer {
             margin-top: 3rem;
             padding-top: 1.5rem;
-            border-top: 2px solid #d1d6db;
         }
         .sammenligning-tabell table {
             width: 100%;
@@ -85,12 +72,6 @@
         .sammenligning-tabell td {
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
-        }
-        .medlemmer-tabell th,
-        .medlemmer-tabell td {
-            padding: 0.5rem;
-            border-bottom: 1px solid #d1d6db;
-            text-align: left;
         }
         .oppsummering td:last-child,
         .oppsummering th:last-child {
@@ -116,12 +97,6 @@
         </div>
     </form>
     <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
-    <div class="medlemmer-tabell">
-        <table aria-label="Gruppemedlemmer">
-            <thead><tr><th scope="col">Nav-ident</th></tr></thead>
-            <tbody class="medlemmer" id="medlemmer"></tbody>
-        </table>
-    </div>
     </section>
     <h2 class="aksel-heading aksel-heading--medium" id="sammenligningsoverskrift" hidden>Sammenligningsgrupper</h2>
     </div>
@@ -155,20 +130,8 @@
     const fellesListe = document.getElementById('felles-medlemmer');
     const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
     const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
+    const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
-
-    function visMedlemmer(liste, medlemmer) {
-        liste.replaceChildren();
-        for (const medlem of medlemmer) {
-            const rad = document.createElement('tr');
-            rad.dataset.navIdent = medlem.navIdent;
-            rad.dataset.visningNavn = medlem.visningNavn ?? '';
-            const navIdentCelle = document.createElement('td');
-            navIdentCelle.textContent = medlem.navIdent;
-            rad.appendChild(navIdentCelle);
-            liste.appendChild(rad);
-        }
-    }
 
     function oppdaterFellesMedlemmer() {
         const paneler = [...sok.querySelectorAll('.sok-panel')];
@@ -183,9 +146,8 @@
             return;
         }
 
-        const medlemssett = paneler.map(panel =>
-            new Set([...panel.querySelector('.medlemmer').children].map(rad => rad.dataset.navIdent))
-        );
+        const panelMedlemmer = paneler.map(panel => gruppemedlemmer.get(panel));
+        const medlemssett = panelMedlemmer.map(medlemmer => new Set(medlemmer.map(medlem => medlem.navIdent)));
         const forsteGruppe = medlemssett[0];
         const andreGrupper = medlemssett.slice(1);
         const kunForsteGruppe = [...forsteGruppe].filter(navIdent =>
@@ -229,17 +191,17 @@
         }
         sammenligningTabellOverskrift.appendChild(tabellOverskrift);
 
-        for (const medlemRad of paneler[0].querySelector('.medlemmer').children) {
+        for (const medlem of panelMedlemmer[0]) {
             const rad = document.createElement('tr');
             const navIdentCelle = document.createElement('th');
             navIdentCelle.scope = 'row';
-            navIdentCelle.textContent = medlemRad.dataset.navIdent;
+            navIdentCelle.textContent = medlem.navIdent;
             const navnCelle = document.createElement('td');
-            navnCelle.textContent = medlemRad.dataset.visningNavn;
+            navnCelle.textContent = medlem.visningNavn ?? '';
             rad.append(navIdentCelle, navnCelle);
             for (const medlemmer of andreGrupper) {
                 const celle = document.createElement('td');
-                celle.textContent = medlemmer.has(medlemRad.dataset.navIdent) ? '+' : '';
+                celle.textContent = medlemmer.has(medlem.navIdent) ? '+' : '';
                 rad.appendChild(celle);
             }
             sammenligningTabellRader.appendChild(rad);
@@ -251,8 +213,6 @@
         const input = panel.querySelector('input');
         const button = panel.querySelector('button[type="submit"]');
         const status = panel.querySelector('.status');
-        const liste = panel.querySelector('.medlemmer');
-
         panel.querySelector('.nytt-sok').addEventListener('click', () => {
             const nyttPanel = panelMal.cloneNode(true);
             nyttPanel.querySelector('h2')?.remove();
@@ -273,7 +233,7 @@
             event.preventDefault();
             const gruppeNavn = input.value.trim();
             panel.dataset.populert = 'false';
-            liste.replaceChildren();
+            gruppemedlemmer.delete(panel);
             oppdaterFellesMedlemmer();
             status.classList.remove('error');
 
@@ -300,7 +260,7 @@
                 }
 
                 const medlemmer = await response.json();
-                visMedlemmer(liste, medlemmer);
+                gruppemedlemmer.set(panel, medlemmer);
                 panel.dataset.gruppeNavn = gruppeNavn;
                 panel.dataset.populert = 'true';
                 status.textContent = medlemmer.length

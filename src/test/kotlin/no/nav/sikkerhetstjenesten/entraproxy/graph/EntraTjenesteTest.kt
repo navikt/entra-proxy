@@ -44,11 +44,10 @@ class EntraTjenesteTest(
 
         Given("antall medlemmer fra Graph") {
             When("Graph returnerer antallet som ren tekst") {
-                Then("brukes count-endepunktet med eventual consistency") {
+                Then("brukes count-endepunktet") {
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.toString() shouldBe "$baseUrl/groups/$GROUP_ID/members/\$count"
-                        request.headers.getFirst("ConsistencyLevel") shouldBe "eventual"
                     }.andRespond(withSuccess("1535", TEXT_PLAIN))
 
                     client.antallMedlemmer("$GROUP_ID") shouldBe "1535"

@@ -23,7 +23,7 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
         somLeder {
             val måling = measureTimedValue {
                 runCatching {
-                    cache.putSet(INAKTIVE, entra.gruppeMedlemmer("$uuid", "Alle Disablede Brukere").mapTo(mutableSetOf()) {
+                    cache.putSet(INAKTIVE, entra.gruppeMedlemmer("$uuid", "Alle brukere i  permisjon").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
                     cache.getSet(INAKTIVE)

@@ -134,9 +134,13 @@
     let antallSok = 1;
 
     function oppdaterFellesMedlemmer() {
-        const paneler = [...sok.querySelectorAll('.sok-panel')];
-        const fullforteSok = paneler.filter(panel => panel.dataset.populert === 'true').length;
-        const visResultat = fullforteSok >= 2 && fullforteSok === paneler.length;
+        const allePaneler = [...sok.querySelectorAll('.sok-panel')];
+        const alleSokFullfort = allePaneler.every(panel => panel.dataset.populert === 'true');
+        const forsteMedlemmer = gruppemedlemmer.get(allePaneler[0]) ?? [];
+        const sammenligningsPaneler = allePaneler.slice(1).filter(panel =>
+            (gruppemedlemmer.get(panel)?.length ?? 0) > 0
+        );
+        const visResultat = alleSokFullfort && forsteMedlemmer.length > 0 && sammenligningsPaneler.length > 0;
         fellesResultat.hidden = !visResultat;
         sammenligningDetaljer.hidden = !visResultat;
         fellesListe.replaceChildren();
@@ -146,7 +150,8 @@
             return;
         }
 
-        const panelMedlemmer = paneler.map(panel => gruppemedlemmer.get(panel));
+        const paneler = [allePaneler[0], ...sammenligningsPaneler];
+        const panelMedlemmer = [forsteMedlemmer, ...sammenligningsPaneler.map(panel => gruppemedlemmer.get(panel))];
         const medlemssett = panelMedlemmer.map(medlemmer => new Set(medlemmer.map(medlem => medlem.navIdent)));
         const forsteGruppe = medlemssett[0];
         const andreGrupper = medlemssett.slice(1);

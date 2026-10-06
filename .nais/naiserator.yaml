@@ -76,4 +76,3 @@ spec:
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE
       value: {{nais.cluster.cache}}
-

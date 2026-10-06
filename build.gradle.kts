@@ -112,6 +112,7 @@ dependencies {
     implementation(libs.springBootStarterCache)
     implementation(libs.springBootStarterDataRedis)
     implementation(libs.springBootStarterJetty)
+    implementation(libs.springBootStarterMustache)
     implementation(libs.springBootStarterRestclient)
     implementation(libs.springBootStarterValidation)
     implementation(libs.springBootStarterWeb)

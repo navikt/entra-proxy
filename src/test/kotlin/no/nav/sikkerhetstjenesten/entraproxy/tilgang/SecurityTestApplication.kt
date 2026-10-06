@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import
 @SpringBootApplication
 @Import(
     EntraController::class,
+    GruppeViewController::class,
     OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter::class,
     OAuth2JsonAuthenticationEntryPoint::class,
     OAuth2SecurityBeanConfig::class,

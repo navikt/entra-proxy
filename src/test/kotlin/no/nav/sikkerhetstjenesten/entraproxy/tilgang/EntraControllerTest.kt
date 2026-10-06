@@ -18,6 +18,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_EN
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
+import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders
@@ -27,7 +28,9 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.view
 import java.util.UUID
 
 @SpringBootTest(classes = [SecurityTestApplication::class])
@@ -226,13 +229,27 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("gruppesiden ${API_V1}/gruppe/vis") {
+            When("request mangler bearer-token") {
+                Then("viser skjema og medlemsliste") {
+                    mockMvc.perform(get("${API_V1}/gruppe/vis"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/html"))
+                        .andExpect(view().name("gruppe/medlemmer"))
+                        .andExpect(content().string(containsString("id=\"gruppeNavn\"")))
+                        .andExpect(content().string(containsString("Vis medlemmer")))
+                        .andExpect(content().string(containsString("id=\"medlemmer\"")))
+                }
+            }
+        }
+
         Given("endepunkt ${API_V1}/gruppe/medlemmer") {
             When("request har gruppeNavn") {
                 Then("returnerer 200") {
                     mockMvc.perform(get("${API_V1}/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
-                        .andExpect {
-                            status().isOk
-                        }
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
             }
 
@@ -262,4 +279,3 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
     }
 }
-

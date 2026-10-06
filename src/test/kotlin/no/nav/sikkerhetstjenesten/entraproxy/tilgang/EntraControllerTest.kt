@@ -209,11 +209,16 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
-                Then("returnerer 200") {
+                Then("returnerer medlemmer uten bearer-token") {
                     mockMvc.perform(get("${API_V1}/enhet/${TEST_ENHET.enhetnummer.verdi}"))
-                        .andExpect {
-                            status().isOk
-                        }
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                }
+                Then("ansattsiden henter gruppemedlemmer og viser antallskolonnen") {
+                    mockMvc.perform(get("/ansatt.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                        .andExpect(content().string(containsString("Antall medlemmer")))
                 }
             }
         }

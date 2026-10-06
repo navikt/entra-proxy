@@ -76,7 +76,7 @@
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
             <table>
-                <thead><tr><th scope="col">Gruppenavn</th></tr></thead>
+                <thead><tr><th scope="col">Gruppenavn</th><th scope="col">Antall medlemmer</th></tr></thead>
                 <tbody id="grupper-rader"></tbody>
             </table>
         </section>
@@ -139,6 +139,15 @@
             const enheter = await enheterResponse.json();
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
+            const antallMedlemmer = new Map();
+            for (const gruppe of grupper) {
+                const medlemmerResponse = await hentResponse(
+                    `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: gruppe.rolle})}`,
+                    `medlemmer i gruppe ${gruppe.rolle}`
+                );
+                const medlemmer = await medlemmerResponse.json();
+                antallMedlemmer.set(gruppe.rolle, medlemmer.length);
+            }
             const verdier = [
                 ['Nav-ident', ansatt.navIdent],
                 ['Navn', ansatt.visningNavn],
@@ -172,7 +181,9 @@
                 const rad = document.createElement('tr');
                 const celle = document.createElement('td');
                 celle.textContent = gruppe.rolle;
-                rad.appendChild(celle);
+                const antallCelle = document.createElement('td');
+                antallCelle.textContent = antallMedlemmer.get(gruppe.rolle) ?? '';
+                rad.append(celle, antallCelle);
                 grupperRader.appendChild(rad);
             }
             enheterStatus.textContent = enheter.length ? `${enheter.length} enheter` : 'Ingen tilgjengelige enheter';

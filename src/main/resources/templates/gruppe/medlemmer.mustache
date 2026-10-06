@@ -63,6 +63,19 @@
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
         }
+        .sammenligning-tabell {
+            overflow-x: auto;
+        }
+        .sammenligning-tabell table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .sammenligning-tabell th,
+        .sammenligning-tabell td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #d1d6db;
+        }
         .oppsummering td:last-child,
         .oppsummering th:last-child {
             text-align: right;
@@ -100,6 +113,12 @@
             </thead>
             <tbody id="felles-medlemmer"></tbody>
         </table>
+        <div class="sammenligning-tabell">
+            <table aria-label="Medlemskap i sammenligningsgrupper">
+                <thead id="sammenligning-tabell-overskrift"></thead>
+                <tbody id="sammenligning-tabell-rader"></tbody>
+            </table>
+        </div>
     </section>
 </main>
 <script>
@@ -109,6 +128,8 @@
     const fellesResultat = document.getElementById('felles-resultat');
     const fellesStatus = document.getElementById('felles-status');
     const fellesListe = document.getElementById('felles-medlemmer');
+    const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
+    const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
     let antallSok = 1;
 
     function visMedlemmer(liste, navIdenter) {
@@ -125,6 +146,8 @@
         const fullforteSok = paneler.filter(panel => panel.dataset.populert === 'true').length;
         fellesResultat.hidden = fullforteSok < 2 || fullforteSok !== paneler.length;
         fellesListe.replaceChildren();
+        sammenligningTabellOverskrift.replaceChildren();
+        sammenligningTabellRader.replaceChildren();
         if (fellesResultat.hidden) {
             return;
         }
@@ -158,6 +181,33 @@
             fellesListe.appendChild(rad);
         }
         fellesStatus.textContent = 'Antall medlemmer basert på gruppene over.';
+
+        const tabellOverskrift = document.createElement('tr');
+        const navIdentOverskrift = document.createElement('th');
+        navIdentOverskrift.scope = 'col';
+        navIdentOverskrift.textContent = 'Nav-ident';
+        tabellOverskrift.appendChild(navIdentOverskrift);
+        for (const panel of paneler.slice(1)) {
+            const gruppeOverskrift = document.createElement('th');
+            gruppeOverskrift.scope = 'col';
+            gruppeOverskrift.textContent = panel.dataset.gruppeNavn;
+            tabellOverskrift.appendChild(gruppeOverskrift);
+        }
+        sammenligningTabellOverskrift.appendChild(tabellOverskrift);
+
+        for (const navIdent of forsteGruppe) {
+            const rad = document.createElement('tr');
+            const navIdentCelle = document.createElement('th');
+            navIdentCelle.scope = 'row';
+            navIdentCelle.textContent = navIdent;
+            rad.appendChild(navIdentCelle);
+            for (const medlemmer of andreGrupper) {
+                const celle = document.createElement('td');
+                celle.textContent = medlemmer.has(navIdent) ? '+' : '';
+                rad.appendChild(celle);
+            }
+            sammenligningTabellRader.appendChild(rad);
+        }
     }
 
     function klargjorSok(panel) {

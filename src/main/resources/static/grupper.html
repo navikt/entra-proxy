@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
     <style>
         * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
         body {
             margin: 0;
             background: #f3f3f4;
@@ -316,6 +317,16 @@
 
             if (!gruppeNavn) {
                 status.textContent = 'Skriv inn et gruppenavn.';
+                status.classList.add('error');
+                return;
+            }
+
+            const alleredeValgt = [...sok.querySelectorAll('.sok-panel')]
+                .some(annetPanel => annetPanel !== panel
+                    && annetPanel.dataset.gruppeNavn
+                    && annetPanel.dataset.gruppeNavn.toLowerCase() === gruppeNavn.toLowerCase());
+            if (alleredeValgt) {
+                status.textContent = `Gruppen "${gruppeNavn}" er allerede valgt i et annet s\u00f8k.`;
                 status.classList.add('error');
                 return;
             }

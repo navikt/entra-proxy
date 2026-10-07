@@ -174,13 +174,13 @@
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
             }
-            const enheterResponse = await hentResponse(`/api/v1/enhet/ansatt/${encodeURIComponent(ansattid)}`, 'enheter');
-            const enheter = await enheterResponse.json();
             const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-enheter');
             const nomEnheter = await nomResponse.json();
-            const nomIdForEnhetsnummer = new Map(
-                nomEnheter.map(tilknytning => [tilknytning.orgEnhet.tilgangsenhetId, tilknytning.orgEnhet.id])
-            );
+            const enheter = nomEnheter.map(tilknytning => ({
+                enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
+                navn: tilknytning.orgEnhet.navn,
+                nomId: tilknytning.orgEnhet.id
+            }));
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
             const antallMedlemmer = new Map();
@@ -219,7 +219,7 @@
                 const navnCelle = document.createElement('td');
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');
-                nomIdCelle.textContent = nomIdForEnhetsnummer.get(enhet.enhetnummer) ?? '';
+                nomIdCelle.textContent = enhet.nomId ?? '';
                 rad.append(nummerCelle, navnCelle, nomIdCelle);
                 enheterRader.appendChild(rad);
             }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLConfig.NOMGRAPH) client: GraphQlClient) : AbstractSyncGraphQLClientAdapter(cfg, client) {
 
-    fun orgTilknytninger(ansattId: String) = query<Any>(TILKNYTNINGER_QUERY, ident(ansattId))
+    fun orgTilknytninger(ansattId: String) = query<NomRespons>(TILKNYTNINGER_QUERY, ident(ansattId))
 
     companion object {
         private const val IDENT = "navident"

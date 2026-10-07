@@ -4,7 +4,7 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.NAIS_CLUSTER_NAME
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.SecurityTestOAuth2.server
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT

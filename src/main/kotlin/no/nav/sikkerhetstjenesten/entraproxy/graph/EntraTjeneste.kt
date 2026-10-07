@@ -1,9 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER

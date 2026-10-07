@@ -4,8 +4,8 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
 class EnhetTest : BehaviorSpec({
 

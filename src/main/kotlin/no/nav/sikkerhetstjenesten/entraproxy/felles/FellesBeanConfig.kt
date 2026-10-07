@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles
 
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext

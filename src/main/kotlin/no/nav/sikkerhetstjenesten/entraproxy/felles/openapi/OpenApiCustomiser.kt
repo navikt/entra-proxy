@@ -5,7 +5,7 @@ import io.swagger.v3.oas.models.media.Schema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.stereotype.Component

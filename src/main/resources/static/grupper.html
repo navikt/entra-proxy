@@ -112,6 +112,7 @@
         <div class="sok-knapper">
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
             <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Ny sammenligningsgruppe</button>
+            <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
         </div>
     </form>
     <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
@@ -289,11 +290,20 @@
                 element.id = `${element.id}-${antallSok}`;
             }
             nyttPanel.querySelector('label').htmlFor = nyttPanel.querySelector('input').id;
+            nyttPanel.querySelector('.fjern-gruppe').hidden = false;
             sok.append(nyttPanel);
             sok.querySelector('#sammenligningsoverskrift').hidden = false;
             klargjorSok(nyttPanel);
             oppdaterFellesMedlemmer();
             nyttPanel.querySelector('input').focus();
+        });
+
+        panel.querySelector('.fjern-gruppe').addEventListener('click', () => {
+            panel.remove();
+            gruppemedlemmer.delete(panel);
+            const gjenstaendePaneler = [...sok.querySelectorAll('.sok-panel')];
+            sok.querySelector('#sammenligningsoverskrift').hidden = gjenstaendePaneler.length <= 1;
+            oppdaterFellesMedlemmer();
         });
 
         form.addEventListener('submit', async (event) => {

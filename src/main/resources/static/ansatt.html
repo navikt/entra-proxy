@@ -233,8 +233,8 @@
                 rad.append(celle, antallCelle);
                 grupperRader.appendChild(rad);
             }
-            enheterStatus.textContent = enheter.length ? `${enheter.length} enheter` : 'Ingen tilgjengelige enheter';
-            grupperStatus.textContent = grupper.length ? `${grupper.length} grupper` : 'Ingen gruppemedlemskap';
+            enheterStatus.textContent = enheter.length ? `${enheter.length} ${enheter.length === 1 ? 'enhet' : 'enheter'}` : 'Ingen tilgjengelige enheter';
+            grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
             resultat.hidden = false;
             enheterResultat.hidden = false;
             grupperResultat.hidden = false;

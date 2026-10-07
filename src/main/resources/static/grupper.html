@@ -331,7 +331,7 @@
                 panel.dataset.gruppeNavn = gruppeNavn;
                 panel.dataset.populert = 'true';
                 status.textContent = medlemmer.length
-                    ? `${medlemmer.length} medlemmer`
+                    ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`
                     : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
             } catch (error) {
                 status.textContent = `Henting feilet: ${error.message}`;

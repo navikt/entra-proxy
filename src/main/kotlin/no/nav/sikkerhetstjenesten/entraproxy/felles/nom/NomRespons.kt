@@ -7,7 +7,7 @@ data class NomRespons(val navident: AnsattId, val orgTilknytninger: Set<OrgTilkn
 
     data class OrgTilknytning(val orgEnhet: OrgEnhet)  {
         data class OrgEnhet(
-            val id: String,
+            val id: NomIdent,
             val navn: String,
             val tilgangsenhetId: Enhetnummer,
         )

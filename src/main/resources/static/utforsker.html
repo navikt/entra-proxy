@@ -33,9 +33,20 @@
 <main>
     <h1 class="aksel-heading aksel-heading--large">Utforsker</h1>
     <nav aria-label="Utforskersider">
-        <a class="aksel-link" href="/ansatt.html">Ansatt</a>
-        <a class="aksel-link" href="/grupper.html">Grupper</a>>
+        <a class="aksel-link" id="ansatt-lenke" href="/ansatt.html">Ansatt</a>
+        <a class="aksel-link" href="/grupper.html">Grupper</a>
     </nav>
 </main>
+<script>
+    // ansatt.html er kun tilgjengelig i milj\u00f8er som ikke er prod. Skjul lenken
+    // der siden faktisk ikke finnes, slik at vi unng\u00e5r en d\u00f8d lenke i prod.
+    fetch('/ansatt.html', {method: 'HEAD'})
+        .then(response => {
+            if (!response.ok) {
+                document.getElementById('ansatt-lenke').remove();
+            }
+        })
+        .catch(() => document.getElementById('ansatt-lenke').remove());
+</script>
 </body>
 </html>

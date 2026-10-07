@@ -256,11 +256,16 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                 }
-                Then("ansattsiden henter medlemsantall og viser antallskolonnen") {
+                Then("ansatt.html er ikke tilgjengelig i prod") {
                     mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/antall?")))
-                        .andExpect(content().string(containsString("Antall medlemmer")))
+                        .andExpect(status().isNotFound())
+                }
+                Then("klassepath-stien til ansatt.html er heller ikke en gyldig URL i prod") {
+                    // /dev-static/ er ikke en av Spring Boots standard static-lokasjoner, s\u00e5 stien
+                    // finnes ikke som rute i det hele tatt \u2013 den blir aldri servert (200), uansett
+                    // om kallet er autentisert eller ikke.
+                    mockMvc.perform(get("/dev-static/ansatt.html").header(AUTHORIZATION, oboJwt()))
+                        .andExpect(status().is4xxClientError())
                 }
             }
         }
@@ -305,11 +310,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
-                Then("ansattsiden henter og viser gruppemedlemskap") {
+                Then("ansatt.html er ikke tilgjengelig i prod") {
                     mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
-                        .andExpect(content().string(containsString("Gruppemedlemskap")))
+                        .andExpect(status().isNotFound())
                 }
             }
             When("request har OBO-token") {

@@ -79,7 +79,6 @@
         </section>
         <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelig enheter (Nom)</h2>
-            <p id="enheter-status"></p>
             <table>
                 <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
                 <tbody id="enheter-rader"></tbody>
@@ -109,7 +108,6 @@
     const grupperResultat = document.getElementById('grupper-resultat');
     const enheterRader = document.getElementById('enheter-rader');
     const grupperRader = document.getElementById('grupper-rader');
-    const enheterStatus = document.getElementById('enheter-status');
     const grupperStatus = document.getElementById('grupper-status');
     const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
 
@@ -228,7 +226,6 @@
                 rad.append(celle, antallCelle);
                 grupperRader.appendChild(rad);
             }
-            enheterStatus.textContent = enheter.length ? `${enheter.length} ${enheter.length === 1 ? 'enhet' : 'enheter'}` : 'Ingen tilgjengelige enheter';
             grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
             resultat.hidden = false;
             enheterResultat.hidden = false;

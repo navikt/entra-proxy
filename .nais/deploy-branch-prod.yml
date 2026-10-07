@@ -1,0 +1,54 @@
+name: Build and deploy branch to prod
+on:
+  workflow_dispatch:
+
+# Én manuell prod-deploy om gangen per ref — kanseller pågående når ny kjøring startes.
+concurrency:
+  group: deploy-prod-${{ github.ref }}
+  cancel-in-progress: true
+
+# Deny-by-default på workflow-nivå; jobs åpner kun det de trenger.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    permissions:
+      pages: write     # actions/deploy-pages
+      checks: write    # publisere test-resultater til Checks API
+      contents: read   # checkout kode
+      id-token: write  # nais/docker-build-push + nais/attest-sign (OIDC mot GAR + Sigstore)
+    uses: $/.github/workflows/build.yml
+    secrets:
+      READER_TOKEN: ${{ secrets.READER_TOKEN }}
+    with:
+      publish-pages: false
+      cache-read-only: false
+      environment: github-pages
+
+  deploy:
+    permissions:
+      contents: read
+      id-token: write  # nais/deploy/actions/deploy (OIDC mot Nais)
+    strategy:
+      matrix:
+        cluster: [ prod-gcp ]
+    name: Deploy til ${{matrix.cluster}}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      ${{matrix.cluster}}:sikkerhetstjenesten
+    env:
+      PRINT_PAYLOAD: true
+      TIMEOUT: 30m
+      RESOURCE: .nais/naiserator.yaml
+      CLUSTER: ${{matrix.cluster}}
+      VARS: .nais/${{matrix.cluster}}.json
+      IMAGE: ${{needs.build.outputs.image}}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: nais/deploy/actions/deploy@7ad7c2b833e1db74a80954e3ee6bb6ac060a8ae7 # v2

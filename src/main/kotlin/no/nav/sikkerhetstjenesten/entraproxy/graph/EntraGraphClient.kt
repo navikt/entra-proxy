@@ -64,6 +64,6 @@ interface EntraGraphClient {
     companion object {
         const val ENTRA_PING_PATH = "/organization"
         const val GRAPH = "graph"
-        private const val TOP = 500
+        private const val TOP = 999
     }
 }

@@ -18,7 +18,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
-import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_GRAPH_CACHE

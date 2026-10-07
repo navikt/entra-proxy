@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 
 import com.fasterxml.jackson.annotation.JsonValue
-import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
 data class NomOrgTilknytning(val orgEnhet: NomEnhet)  {
     data class NomEnhet(val id: NomIdent, val navn: String, val tilgangsenhetId: Enhetnummer) {

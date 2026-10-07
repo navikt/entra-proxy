@@ -24,7 +24,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("/nom/{ansattId}")
     fun orgTilknytninger(@PathVariable ansattId: AnsattId) =
-        nom.orgTilknytninger(ansattId)
+        nom.ansattData(ansattId)
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =

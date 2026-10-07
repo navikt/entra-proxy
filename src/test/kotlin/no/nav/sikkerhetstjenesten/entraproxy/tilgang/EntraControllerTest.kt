@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLRespons
 import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomOrgTilknytning
 import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
@@ -23,7 +24,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProp
 import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import java.util.UUID
 
 @SpringBootTest(classes = [SecurityTestApplication::class])
@@ -225,19 +224,25 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
         Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
             When("request mangler bearer-token") {
-                Then("returnerer org-tilknytninger fra NOM") {
-                    every { nomTjeneste.orgTilknytninger(TEST_ANSATT_ID) } returns setOf(
-                        NomOrgTilknytning(
-                            NomOrgTilknytning.NomEnhet(
-                                NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
-                                "Testenhet",
-                                TEST_ENHET.enhetnummer
+                Then("returnerer ansattdata og org-tilknytninger fra NOM") {
+                    every { nomTjeneste.ansattData(TEST_ANSATT_ID) } returns NomGraphQLRespons(
+                        navident = TEST_ANSATT_ID,
+                        visningsnavn = "Test Ansatt",
+                        orgTilknytninger = setOf(
+                            NomOrgTilknytning(
+                                NomOrgTilknytning.NomEnhet(
+                                    NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                    "Testenhet",
+                                    TEST_ENHET.enhetnummer
+                                )
                             )
                         )
                     )
                     mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}"))
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$[0].orgEnhet.navn").value("Testenhet"))
+                        .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
+                        .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
                 }
             }
         }

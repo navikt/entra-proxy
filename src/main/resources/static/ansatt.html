@@ -70,14 +70,15 @@
             <button class="aksel-button sok-knapp" data-variant="primary" data-color="brand-blue" id="sok-ansatt" type="submit">S&#248;k</button>
             <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
         </form>
-        <section id="ansatt-resultat" aria-label="Ansattinformasjon" hidden>
+        <section id="ansatt-resultat" aria-labelledby="ansatt-overskrift" hidden>
+            <h2 class="aksel-heading aksel-heading--medium" id="ansatt-overskrift">Personinformasjon (Nom)</h2>
             <table>
                 <thead><tr><th scope="col">Felt</th><th scope="col">Verdi</th></tr></thead>
                 <tbody id="ansatt-felter"></tbody>
             </table>
         </section>
         <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
-            <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelige enheter</h2>
+            <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelig enheter (Nom)</h2>
             <p id="enheter-status"></p>
             <table>
                 <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
@@ -174,9 +175,9 @@
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
             }
-            const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-enheter');
-            const nomEnheter = await nomResponse.json();
-            const enheter = nomEnheter.map(tilknytning => ({
+            const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-data');
+            const nomData = await nomResponse.json();
+            const enheter = nomData.orgTilknytninger.map(tilknytning => ({
                 enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
                 navn: tilknytning.orgEnhet.navn,
                 nomId: tilknytning.orgEnhet.id
@@ -193,7 +194,7 @@
                 antallMedlemmer.set(gruppe.rolle, antall);
             }
             const verdier = [
-                ['Nav-ident', ansatt.navIdent],
+                ['Nav-ident', `${nomData.visningsnavn} (${nomData.navident})`],
                 ['Navn', ansatt.visningNavn],
                 ['Fornavn', ansatt.fornavn],
                 ['Etternavn', ansatt.etternavn],

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 class NomTjeneste(private val graph: NomSyncGraphQLClientAdapter) {
 
 
-    fun orgTilknytninger(ansattId: AnsattId) =
-        graph.orgTilknytninger(ansattId.verdi).orgTilknytninger
+    fun ansattData(ansattId: AnsattId) =
+        graph.orgTilknytninger(ansattId.verdi)
 
 }

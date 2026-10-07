@@ -103,7 +103,7 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @GetMapping("nom/enhet/{navIdent}")
     @Operation(summary = "Hent org-tilknytninger for ansatt fra NOM")
     fun orgTilknytningerForAnsatt(@PathVariable navIdent: AnsattId) =
-        nom.orgTilknytninger(navIdent)
+        nom.ansattData(navIdent)
 
     companion object {
         const val API_V1 = "/api/v1"

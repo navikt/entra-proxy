@@ -11,6 +11,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomOrgTilknytning
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ANSATT_ID
@@ -46,6 +48,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
     @MockkBean
     private lateinit var norgTjeneste: NorgTjeneste
+
+    @MockkBean
+    private lateinit var nomTjeneste: NomTjeneste
 
     init {
 
@@ -214,6 +219,25 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                     mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe"))
                         .andExpect(status().isOk())
                         .andExpect(content().string("1535"))
+                }
+            }
+        }
+
+        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
+            When("request mangler bearer-token") {
+                Then("returnerer org-tilknytninger fra NOM") {
+                    every { nomTjeneste.orgTilknytninger(TEST_ANSATT_ID) } returns setOf(
+                        NomOrgTilknytning(
+                            NomOrgTilknytning.NomEnhet(
+                                NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                "Testenhet",
+                                TEST_ENHET.enhetnummer
+                            )
+                        )
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].orgEnhet.navn").value("Testenhet"))
                 }
             }
         }

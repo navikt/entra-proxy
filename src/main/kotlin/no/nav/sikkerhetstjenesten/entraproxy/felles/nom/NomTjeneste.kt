@@ -8,6 +8,6 @@ class NomTjeneste(private val graph: NomSyncGraphQLClientAdapter) {
 
 
     fun orgTilknytninger(ansattId: AnsattId) =
-        graph.orgTilknytninger(ansattId.verdi)
+        graph.orgTilknytninger(ansattId.verdi).orgTilknytninger
 
 }

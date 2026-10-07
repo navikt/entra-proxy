@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.felles.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
@@ -27,33 +28,33 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EntraController(private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste) {
+class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.enheter(navIdent, it)
+        oid.ansattOid(navIdent)?.let {
+            entra.enheter(navIdent, it)
         } ?: emptySet()
 
     @GetMapping("enhet")
     @OAuth2RequireOBO
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
     fun enheterForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entraTjeneste.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId),principal.requiredAttribute(OID,UUID::fromString))
+            entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId),principal.requiredAttribute(OID,UUID::fromString))
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun temaForAnsatt(@PathVariable navIdent: AnsattId) =
-            oidTjeneste.ansattOid(navIdent)?.let {
-                entraTjeneste.tema(navIdent, it)
+            oid.ansattOid(navIdent)?.let {
+                entra.tema(navIdent, it)
             } ?: emptySet()
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
     @OAuth2RequireOBO
     fun temaForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entraTjeneste.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId), principal.requiredAttribute(OID,UUID::fromString))
+            entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId), principal.requiredAttribute(OID,UUID::fromString))
 
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer for en gitt enhet")
@@ -68,18 +69,18 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
     @GetMapping("ansatt/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
     fun utvidetAnsattForNavIdent(@PathVariable navIdent: AnsattId) =
-        entraTjeneste.utvidetAnsatt(navIdent)
+        entra.utvidetAnsatt(navIdent)
 
     @GetMapping("ansatt/tident/{tIdent}")
     @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234)")
     fun utvidetAnsattForTIdent(@PathVariable tIdent: TIdent) =
-        entraTjeneste.utvidetAnsatt(tIdent)
+        entra.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatts tilganger")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.grupperForAnsatt(navIdent, it)
+        oid.ansattOid(navIdent)?.let {
+            entra.grupperForAnsatt(navIdent, it)
         } ?: emptySet()
 
     @GetMapping("gruppe/medlemmer")
@@ -88,16 +89,21 @@ class EntraController(private val entraTjeneste: EntraTjeneste, private val oidT
         medlemmerIGruppe(gruppeNavn)
 
     private fun medlemmerIGruppe(gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe( gruppeNavn, it)
+        oid.gruppeOid(gruppeNavn)?.let {
+            entra.medlemmerIGruppe( gruppeNavn, it)
         } ?: emptySet()
 
     @GetMapping("gruppe/antall")
     @Operation(summary = "Hent antall medlemmer i en gitt gruppe")
     fun antallMedlemmerIGruppe(@RequestParam gruppeNavn: String) =
-        oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.antallMedlemmerIGruppe(it)
+        oid.gruppeOid(gruppeNavn)?.let {
+            entra.antallMedlemmerIGruppe(it)
         } ?: "0"
+
+    @GetMapping("nom/enhet/{navIdent}")
+    @Operation(summary = "Hent org-tilknytninger for ansatt fra NOM")
+    fun orgTilknytningerForAnsatt(@PathVariable navIdent: AnsattId) =
+        nom.orgTilknytninger(navIdent)
 
     companion object {
         const val API_V1 = "/api/v1"

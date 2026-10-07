@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
@@ -19,7 +20,11 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
 @Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
-class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste) {
+class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste, private val nom: NomTjeneste) {
+
+    @GetMapping("/nom/{ansattId}")
+    fun orgTilknytninger(@PathVariable ansattId: AnsattId) =
+        nom.orgTilknytninger(ansattId)
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =

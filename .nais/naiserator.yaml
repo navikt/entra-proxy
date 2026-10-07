@@ -72,7 +72,7 @@ spec:
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
-    - name: NOM_GRAPH
+    - name: NOMGRAPH
       value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE
       value: {{nais.cluster.type}}

@@ -228,6 +228,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                     every { nomTjeneste.ansattData(TEST_ANSATT_ID) } returns NomGraphQLRespons(
                         navident = TEST_ANSATT_ID,
                         visningsnavn = "Test Ansatt",
+                        gjeldendeSektor = "STAT",
                         orgTilknytninger = setOf(
                             NomOrgTilknytning(
                                 NomOrgTilknytning.NomEnhet(
@@ -242,6 +243,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
+                        .andExpect(jsonPath("$.gjeldendeSektor").value("STAT"))
                         .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
                 }
             }

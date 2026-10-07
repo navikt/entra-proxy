@@ -132,7 +132,7 @@
     </section>
     <section id="sammenligning-detaljer" aria-labelledby="sammenligning-detaljer-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium" id="sammenligning-detaljer-overskrift">Detaljvisning</h2>
-        <button class="aksel-button" data-variant="secondary" data-color="brand-blue" id="eksporter-detaljvisning" type="button">Eksporter til Excel</button>
+        <button class="aksel-button" data-variant="secondary" data-color="brand-blue" id="eksporter-detaljvisning" type="button">Eksporter til CSV</button>
         <div class="sammenligning-tabell">
             <table aria-label="Medlemskap i sammenligningsgrupper">
                 <thead id="sammenligning-tabell-overskrift"></thead>
@@ -141,7 +141,6 @@
         </div>
     </section>
 </main>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script>
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
@@ -165,10 +164,18 @@
                 [...rad.cells].map(celle => celle.textContent.trim())
             )
         ];
-        const regneark = XLSX.utils.aoa_to_sheet(rader);
-        const arbeidsbok = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(arbeidsbok, regneark, 'Detaljvisning');
-        XLSX.writeFile(arbeidsbok, 'gruppesammenligning.xlsx');
+        const csv = rader.map(rad =>
+            rad.map(verdi => `"${verdi.replace(/"/g, '""')}"`).join(',')
+        ).join('\r\n');
+        const blob = new Blob(['\uFEFF', csv], {type: 'text/csv;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const lenke = document.createElement('a');
+        lenke.href = url;
+        lenke.download = 'gruppesammenligning.csv';
+        document.body.appendChild(lenke);
+        lenke.click();
+        lenke.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 0);
     });
 
     function oppdaterFellesMedlemmer() {

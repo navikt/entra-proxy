@@ -1,0 +1,12 @@
+query orgtilknytninger($navident: String!) {
+    ressurs(where: {navident: $navident}) {
+        navident
+        orgTilknytninger (utvalg: AKTIVE) {
+            orgEnhet {
+                id
+                navn
+                tilgangsenhetId
+            }
+        }
+    }
+}

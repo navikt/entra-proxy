@@ -72,6 +72,8 @@ spec:
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
+    - name: NOM_GRAPH
+      value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE

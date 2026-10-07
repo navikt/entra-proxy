@@ -194,14 +194,8 @@
                 antallMedlemmer.set(gruppe.rolle, antall);
             }
             const verdier = [
-                ['Nav-ident', `${nomData.visningsnavn} (${nomData.navident})`],
-                ['Navn', ansatt.visningNavn],
-                ['Fornavn', ansatt.fornavn],
-                ['Etternavn', ansatt.etternavn],
-                ['T-ident', ansatt.tIdent],
-                ['E-post', ansatt.epost],
-                ['Enhetsnummer', ansatt.enhet?.enhetnummer],
-                ['Enhetsnavn', ansatt.enhet?.navn]
+                ['Nav-ident', nomData.navident],
+                ['Navn', nomData.visningsnavn]
             ];
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');

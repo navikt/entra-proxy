@@ -80,7 +80,7 @@
             <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelige enheter</h2>
             <p id="enheter-status"></p>
             <table>
-                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th></tr></thead>
+                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
                 <tbody id="enheter-rader"></tbody>
             </table>
         </section>
@@ -176,6 +176,11 @@
             }
             const enheterResponse = await hentResponse(`/api/v1/enhet/ansatt/${encodeURIComponent(ansattid)}`, 'enheter');
             const enheter = await enheterResponse.json();
+            const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-enheter');
+            const nomEnheter = await nomResponse.json();
+            const nomIdForEnhetsnummer = new Map(
+                nomEnheter.map(tilknytning => [tilknytning.orgEnhet.tilgangsenhetId, tilknytning.orgEnhet.id])
+            );
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
             const antallMedlemmer = new Map();
@@ -213,7 +218,9 @@
                 nummerCelle.textContent = enhet.enhetnummer;
                 const navnCelle = document.createElement('td');
                 navnCelle.textContent = enhet.navn;
-                rad.append(nummerCelle, navnCelle);
+                const nomIdCelle = document.createElement('td');
+                nomIdCelle.textContent = nomIdForEnhetsnummer.get(enhet.enhetnummer) ?? '';
+                rad.append(nummerCelle, navnCelle, nomIdCelle);
                 enheterRader.appendChild(rad);
             }
             for (const gruppe of grupper) {

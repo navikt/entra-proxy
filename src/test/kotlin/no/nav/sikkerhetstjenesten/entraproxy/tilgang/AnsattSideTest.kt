@@ -15,6 +15,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.head
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -50,6 +51,10 @@ class AnsattSideTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().string(containsString("Antall medlemmer")))
                         .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
                         .andExpect(content().string(containsString("Gruppemedlemskap")))
+                }
+                Then("HEAD-kall mot ansatt.html svarer ok") {
+                    mockMvc.perform(head("/ansatt.html"))
+                        .andExpect(status().isOk())
                 }
             }
         }

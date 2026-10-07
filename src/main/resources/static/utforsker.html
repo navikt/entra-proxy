@@ -38,15 +38,19 @@
     </nav>
 </main>
 <script>
-    // ansatt.html er kun tilgjengelig i milj\u00f8er som ikke er prod. Skjul lenken
-    // der siden faktisk ikke finnes, slik at vi unng\u00e5r en d\u00f8d lenke i prod.
-    fetch('/ansatt.html', {method: 'HEAD'})
+    // ansatt.html er kun tilgjengelig i milj\u00f8er som ikke er prod (f.eks. ikke i prod-gcp).
+    // Vi skjuler lenken der siden bekreftet ikke finnes (HTTP 404), men "feiler \u00e5pent"
+    // (behold lenken) ved usikre feil som nettverksfeil eller blokkerte foresp\u00f8rsler,
+    // slik at vi ikke risikerer \u00e5 skjule en fungerende lenke ved f.eks. proxy-/CSP-kvirker.
+    fetch('/ansatt.html', {method: 'GET', cache: 'no-store'})
         .then(response => {
-            if (!response.ok) {
+            if (response.status === 404) {
                 document.getElementById('ansatt-lenke').remove();
             }
         })
-        .catch(() => document.getElementById('ansatt-lenke').remove());
+        .catch(() => {
+            // Usikker feil (nettverk, CSP, proxy o.l.) \u2013 behold lenken synlig.
+        });
 </script>
 </body>
 </html>

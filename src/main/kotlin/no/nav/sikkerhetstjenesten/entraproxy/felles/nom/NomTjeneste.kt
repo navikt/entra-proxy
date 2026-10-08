@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service
 class NomTjeneste(private val graph: NomSyncGraphQLClientAdapter) {
 
 
-    fun ansattData(ansattId: AnsattId) =
-        graph.orgTilknytninger(ansattId.verdi)
+    fun orgData(ident: AnsattId) =
+        graph.orgData(ident.verdi)
+
+    fun orgDataBulk(identer: Set<AnsattId>) =
+        graph.orgDataBulk(identer.map { it.verdi })
 
 }

@@ -6,3 +6,4 @@ data class NomGraphQLRespons(val navident: AnsattId, val visningsnavn: String, v
 
 }
 
+data class NomBulkGraphQLRespons(val ressurs: NomGraphQLRespons)

@@ -225,7 +225,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
             When("request mangler bearer-token") {
                 Then("returnerer ansattdata og org-tilknytninger fra NOM") {
-                    every { nomTjeneste.ansattData(TEST_ANSATT_ID) } returns NomGraphQLRespons(
+                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomGraphQLRespons(
                         navident = TEST_ANSATT_ID,
                         visningsnavn = "Test Ansatt",
                         gjeldendeSektor = "STAT",

@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV
@@ -13,6 +14,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -23,8 +26,12 @@ import org.springframework.web.bind.annotation.RestController
 class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste, private val nom: NomTjeneste) {
 
     @GetMapping("/nom/{ansattId}")
-    fun orgTilknytninger(@PathVariable ansattId: AnsattId) =
-        nom.ansattData(ansattId)
+    fun orgData(@PathVariable ansattId: AnsattId) =
+        nom.orgData(ansattId)
+
+    @PostMapping("/nom/bulk")
+    fun orgDataBulk(@RequestBody identer: Set<AnsattId>) =
+        nom.orgDataBulk(identer)
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =

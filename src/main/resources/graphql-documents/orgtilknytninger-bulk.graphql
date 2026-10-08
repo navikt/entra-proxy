@@ -1,0 +1,16 @@
+query bulkorgtilknytninger($navidenter: [String]) {
+    ressurser(where: {navidenter: $navidenter}) {
+        ressurs {
+            navident
+            visningsnavn
+            gjeldendeSektor
+            orgTilknytninger (utvalg: AKTIVE) {
+                orgEnhet {
+                    id
+                    navn
+                    tilgangsenhetId
+                }
+            }
+        }
+    }
+}

@@ -173,12 +173,12 @@
                 ...[...sammenligningTabellRader.rows].map(rad =>
                     [...rad.cells].map((celle, kolonneIndeks) => {
                         const verdi = celle.textContent.trim();
-                        return kolonneIndeks >= 2 && verdi === '✓' ? '+' : verdi;
+                        return kolonneIndeks >= 2 ? String(verdi === '✓') : verdi;
                     })
                 )
             ];
             const csv = rader.map(rad =>
-                rad.map(verdi => `"${verdi.replace(/"/g, '""')}"`).join(',')
+                rad.map(verdi => /[",\r\n]/.test(verdi) ? `"${verdi.replace(/"/g, '""')}"` : verdi).join(',')
             ).join('\r\n');
             await navigator.clipboard.writeText(csv);
             kopierStatus.textContent = 'Tabellen er kopiert som CSV til utklippstavlen.';

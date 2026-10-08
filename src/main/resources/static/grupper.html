@@ -177,11 +177,9 @@
                     })
                 )
             ];
-            const csv = rader.map(rad =>
-                rad.map(verdi => /[",\r\n]/.test(verdi) ? `"${verdi.replace(/"/g, '""')}"` : verdi).join(',')
-            ).join('\r\n');
-            await navigator.clipboard.writeText(csv);
-            kopierStatus.textContent = 'Tabellen er kopiert som CSV til utklippstavlen.';
+            const tsv = rader.map(rad => rad.join('\t')).join('\r\n');
+            await navigator.clipboard.writeText(tsv);
+            kopierStatus.textContent = 'Tabellen er kopiert til utklippstavlen.';
         } catch (error) {
             kopierStatus.textContent = `Kopiering feilet: ${error.message}`;
             kopierStatus.classList.add('error');

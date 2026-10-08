@@ -18,6 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -104,6 +106,11 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @Operation(summary = "Hent org-tilknytninger for ansatt fra NOM")
     fun orgTilknytningerForAnsatt(@PathVariable navIdent: AnsattId) =
         nom.orgData(navIdent)
+
+    @PostMapping("nom/enheter")
+    @Operation(summary = "Hent org-tilknytninger for ansatte fra NOM")
+    fun orgTilknytningerForAnsattBulk(@RequestBody identer: Set<AnsattId>) =
+        nom.orgDataBulk(identer)
 
     companion object {
         const val API_V1 = "/api/v1"

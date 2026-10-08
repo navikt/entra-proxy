@@ -8,6 +8,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import org.springframework.graphql.client.GraphQlClient
+import org.springframework.graphql.client.toEntityList
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     Given("bulk queries") {
@@ -23,21 +24,21 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         When("the response contains resources") {
             val first = NomGraphQLRespons(AnsattId("A123456"), "First", "NAV")
             val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "NAV")
-            every { retrieve.toEntityList(NomBulkGraphQLRespons::class.java) } returns
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
-                adapter.orgDataBulk("A123456", "B123456") shouldBe listOf(first, second)
+                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe listOf(first, second)
                 verify { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) }
                 verify { request.retrieveSync("ressurser") }
             }
         }
 
         When("the response contains an empty resource list") {
-            every { retrieve.toEntityList(NomBulkGraphQLRespons::class.java) } returns emptyList()
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk("A123456", "B123456") shouldBe emptyList()
+                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe emptyList()
             }
         }
 
@@ -47,7 +48,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.orgDataBulk("A123456", "B123456")
+                    adapter.orgDataBulk(listOf("A123456", "B123456"))
                 } shouldBe failure
             }
         }

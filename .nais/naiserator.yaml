@@ -56,6 +56,21 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+    sidecar:
+      enabled: true
+      autoLogin: true
+      # Stiene nettleserverktøyene bruker. Speiler app-lagets permitAll-flate
+      # (UNPROTECTED_ENDPOINTS) slik at Wonderwall ikke auto-login-redirecter dem
+      # (og svarer 401 på fetch/XHR). Alt annet krever fortsatt innlogging.
+      autoLoginIgnorePaths:
+        - /utforsker.html
+        - /grupper.html
+        - /ansatt.html
+        - /favicon.ico
+        - /swagger-ui/**
+        - /v3/api-docs/**
+        - /api/v1/nom/**
+        - /api/v1/gruppe/**
   accessPolicy:
     outbound:
       rules:

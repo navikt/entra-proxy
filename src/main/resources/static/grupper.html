@@ -132,7 +132,8 @@
     </section>
     <section id="sammenligning-detaljer" aria-labelledby="sammenligning-detaljer-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium" id="sammenligning-detaljer-overskrift">Detaljvisning</h2>
-        <button class="aksel-button" data-variant="secondary" data-color="brand-blue" id="eksporter-detaljvisning" type="button">Eksporter til CSV</button>
+        <button class="aksel-button" data-variant="secondary" data-color="brand-blue" id="kopier-detaljvisning" type="button">Kopier som CSV</button>
+        <p class="aksel-body-short status" id="kopier-status" role="status" aria-live="polite"></p>
         <div class="sammenligning-tabell">
             <table aria-label="Medlemskap i sammenligningsgrupper">
                 <thead id="sammenligning-tabell-overskrift"></thead>
@@ -151,31 +152,39 @@
     const fellesListe = document.getElementById('felles-medlemmer');
     const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
     const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
-    const eksporterDetaljvisning = document.getElementById('eksporter-detaljvisning');
+    const kopierDetaljvisning = document.getElementById('kopier-detaljvisning');
+    const kopierStatus = document.getElementById('kopier-status');
     const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
 
-    eksporterDetaljvisning.addEventListener('click', () => {
-        const rader = [
-            [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
-                celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
-            ),
-            ...[...sammenligningTabellRader.rows].map(rad =>
-                [...rad.cells].map(celle => celle.textContent.trim())
-            )
-        ];
-        const csv = rader.map(rad =>
-            rad.map(verdi => `"${verdi.replace(/"/g, '""')}"`).join(',')
-        ).join('\r\n');
-        const blob = new Blob(['\uFEFF', csv], {type: 'text/csv;charset=utf-8'});
-        const url = URL.createObjectURL(blob);
-        const lenke = document.createElement('a');
-        lenke.href = url;
-        lenke.download = 'gruppesammenligning.csv';
-        document.body.appendChild(lenke);
-        lenke.click();
-        lenke.remove();
-        setTimeout(() => URL.revokeObjectURL(url), 0);
+    kopierDetaljvisning.addEventListener('click', async () => {
+        kopierDetaljvisning.disabled = true;
+        kopierStatus.classList.remove('error');
+        kopierStatus.textContent = 'Kopierer...';
+
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error('Utklippstavlen er ikke tilgjengelig. Bruk HTTPS og en nettleser som st\u00f8tter kopiering.');
+            }
+            const rader = [
+                [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
+                    celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
+                ),
+                ...[...sammenligningTabellRader.rows].map(rad =>
+                    [...rad.cells].map(celle => celle.textContent.trim())
+                )
+            ];
+            const csv = rader.map(rad =>
+                rad.map(verdi => `"${verdi.replace(/"/g, '""')}"`).join(',')
+            ).join('\r\n');
+            await navigator.clipboard.writeText(csv);
+            kopierStatus.textContent = 'Tabellen er kopiert som CSV til utklippstavlen.';
+        } catch (error) {
+            kopierStatus.textContent = `Kopiering feilet: ${error.message}`;
+            kopierStatus.classList.add('error');
+        } finally {
+            kopierDetaljvisning.disabled = false;
+        }
     });
 
     function oppdaterFellesMedlemmer() {
@@ -191,6 +200,8 @@
         fellesListe.replaceChildren();
         sammenligningTabellOverskrift.replaceChildren();
         sammenligningTabellRader.replaceChildren();
+        kopierStatus.textContent = '';
+        kopierStatus.classList.remove('error');
         if (fellesResultat.hidden) {
             return;
         }

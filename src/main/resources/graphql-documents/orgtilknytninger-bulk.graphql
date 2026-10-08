@@ -1,4 +1,4 @@
-query bulkorgtilknytninger($navidenter: [String]) {
+query bulkorgtilknytninger($navidenter: [String!]) {
     ressurser(where: {navidenter: $navidenter}) {
         ressurs {
             navident

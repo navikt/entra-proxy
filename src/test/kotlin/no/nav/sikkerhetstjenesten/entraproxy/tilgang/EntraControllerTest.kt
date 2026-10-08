@@ -28,7 +28,9 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -245,6 +247,37 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
                         .andExpect(jsonPath("$.gjeldendeSektor").value("STAT"))
                         .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
+                }
+            }
+        }
+
+        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/bulk") {
+            When("request mangler bearer-token") {
+                Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
+                    every { nomTjeneste.orgDataBulk(any()) } returns listOf(
+                        NomGraphQLRespons(
+                            navident = TEST_ANSATT_ID,
+                            visningsnavn = "Test Ansatt",
+                            gjeldendeSektor = "STAT",
+                            orgTilknytninger = setOf(
+                                NomOrgTilknytning(
+                                    NomOrgTilknytning.NomEnhet(
+                                        NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                        "Testenhet",
+                                        TEST_ENHET.enhetnummer
+                                    )
+                                )
+                            )
+                        )
+                    )
+                    mockMvc.perform(
+                        post("${API_V1}/nom/enhet/bulk")
+                            .contentType(APPLICATION_JSON)
+                            .content("[\"${TEST_ANSATT_ID.verdi}\"]")
+                    )
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
                 }
             }
         }

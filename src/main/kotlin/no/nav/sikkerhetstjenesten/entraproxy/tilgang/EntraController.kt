@@ -107,9 +107,9 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     fun orgTilknytningerForAnsatt(@PathVariable navIdent: AnsattId) =
         nom.orgData(navIdent)
 
-    @PostMapping("nom/enheter")
+    @PostMapping("nom/enhet/bulk")
     @Operation(summary = "Hent org-tilknytninger for ansatte fra NOM")
-    fun orgTilknytningerForAnsattBulk(@RequestBody identer: Set<AnsattId>) =
+    fun orgTilknytningerForAnsatteBulk(@RequestBody identer: Set<AnsattId>) =
         nom.orgDataBulk(identer)
 
     companion object {

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import java.net.URI
 import java.util.UUID
-import java.util.stream.Collectors
+import java.util.stream.Collectors.toSet
 
 const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
@@ -156,10 +156,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             .mapTo(mutableSetOf()) {
                 Enhetnummer(it.displayName)
             }
-            // Parallelliserer NORG-oppslagene siden de er uavhengige nettverkskall (men cachet per enhetnummer)
             .parallelStream()
             .map { Enhet(it, norg.navnFor(it)) }
-            .collect(Collectors.toSet())
+            .collect(toSet())
 
     private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {
         log.info("Henter {}", beskrivelse)

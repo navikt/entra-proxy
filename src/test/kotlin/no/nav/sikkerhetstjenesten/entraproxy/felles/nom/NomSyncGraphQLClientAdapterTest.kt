@@ -39,7 +39,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
-                adapter.nomAnsatte(identer) shouldBe setOf(
+                adapter.ansatte(identer) shouldBe setOf(
                     NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger),
                     NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
                 )
@@ -52,7 +52,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty list is returned") {
-                adapter.nomAnsatte(identer) shouldBe emptySet()
+                adapter.ansatte(identer) shouldBe emptySet()
             }
         }
 
@@ -62,7 +62,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.nomAnsatte(identer) shouldBe setOf(
+                adapter.ansatte(identer) shouldBe setOf(
                     NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
                 )
             }
@@ -73,7 +73,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
             Then("an empty list is returned") {
-                adapter.nomAnsatte(identer) shouldBe emptySet()
+                adapter.ansatte(identer) shouldBe emptySet()
             }
         }
 
@@ -83,7 +83,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.nomAnsatte(identer)
+                    adapter.ansatte(identer)
                 } shouldBe failure
             }
         }

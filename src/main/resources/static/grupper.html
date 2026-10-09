@@ -177,9 +177,9 @@
                     })
                 )
             ];
-            const tabulator = '\t';
-            const tsv = rader.map(rad => rad.join(tabulator)).join('\r\n');
-            await navigator.clipboard.writeText(tsv);
+            const kolonneskille = ';';
+            const tekst = rader.map(rad => rad.join(kolonneskille)).join('\r\n');
+            await navigator.clipboard.writeText(tekst);
             kopierStatus.textContent = 'Tabellen er kopiert til utklippstavlen.';
         } catch (error) {
             kopierStatus.textContent = `Kopiering feilet: ${error.message}`;

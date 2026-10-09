@@ -71,7 +71,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
@@ -90,7 +90,7 @@ jobs:
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@423a915c9b72edf2ba848b88171ccb0489e2a40a # v0
+        uses: nais/docker-build-push@bfe52e3ad6d0e96fd1056a03acb7b619aaffb39d # v0
         with:
           team: sikkerhetstjenesten
           tag: ${{ env.TAG }}

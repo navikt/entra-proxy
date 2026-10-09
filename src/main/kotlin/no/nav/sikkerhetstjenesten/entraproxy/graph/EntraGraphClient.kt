@@ -18,8 +18,8 @@ interface EntraGraphClient {
     ): AnsattOids
 
     @GetExchange("/groups")
-    fun groups(
-        @RequestParam($$"$select") select: String,
+        fun groups(
+            @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
         @RequestParam($$"$count") count: String = "true"
     ): Grupper
@@ -29,7 +29,7 @@ interface EntraGraphClient {
         @PathVariable ansattId: String,
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter", required = false) filter: String? = null,
-        @RequestParam($$"$top") top: Int = 250,
+        @RequestParam($$"$top") top: Int = TOP,
         @RequestParam($$"$count") count: String = "true"
     ): Tilganger
 
@@ -37,9 +37,12 @@ interface EntraGraphClient {
     fun members(
         @PathVariable gruppeId: String,
         @RequestParam($$"$select") select: String,
-        @RequestParam($$"$top") top: Int = 250,
+        @RequestParam($$"$top") top: Int = TOP,
         @RequestParam($$"$count") count: String = "true"
     ): GruppeMedlemmer
+
+    @GetExchange( $$"/groups/{gruppeId}/members/$count")
+    fun antallMedlemmer(@PathVariable gruppeId: String): String
 
     @GetExchange
     fun tilgangerSide(uri: URI): Tilganger
@@ -60,5 +63,6 @@ interface EntraGraphClient {
     companion object {
         const val ENTRA_PING_PATH = "/organization"
         const val GRAPH = "graph"
+        private const val TOP = 999
     }
 }

@@ -79,11 +79,13 @@ configurations.configureEach {
     resolutionStrategy {
         failOnNonReproducibleResolution()
     }
-    exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+    exclude("org.springframework.boot", "spring-boot-starter-tomcat")
 }
 
 dependencies {
     // Kotlin
+    implementation(libs.sikkerhetstjenestenLib)
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
     implementation(libs.jackson.module.kotlin)
@@ -109,6 +111,7 @@ dependencies {
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterCache)
     implementation(libs.springBootStarterDataRedis)
+    implementation(libs.springBootStarterGraphql)
     implementation(libs.springBootStarterJetty)
     implementation(libs.springBootStarterRestclient)
     implementation(libs.springBootStarterValidation)

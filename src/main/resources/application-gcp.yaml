@@ -83,6 +83,13 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - "api://${nais.cluster.type}-gcp.org.norg2/.default"
+          nomgraph:
+            provider: azuread
+            client-id: ${azure.app.client.id}
+            client-secret: ${azure.app.client.secret}
+            authorization-grant-type: client_credentials
+            scope:
+              - "api://${nais.cluster.type}-gcp.nom.nom-api/.default"
 
         provider:
           azuread:

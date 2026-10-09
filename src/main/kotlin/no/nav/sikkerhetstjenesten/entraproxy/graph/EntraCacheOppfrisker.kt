@@ -1,15 +1,15 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.AbstractCacheOppfrisker
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheNøkkel
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.UTVIDET_ANSATT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import java.util.UUID
@@ -19,12 +19,13 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
 
     override val cacheName: String = GRAPH
 
-    override fun doOppfrisk(nøkkelElementer: CacheNøkkel) =
-        if (nøkkelElementer.metode == TEMA || nøkkelElementer.metode == ENHETER ||nøkkelElementer.metode == UTVIDET_ANSATT || nøkkelElementer.metode == GRUPPER_FOR_ANSATT
-    )
-            oppfriskMedMetode(nøkkelElementer, nøkkelElementer.metode)
-        else
-            log.warn("Ukjent nøkkel $nøkkelElementer")
+    override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
+        val metode = nøkkelElementer.metode
+        when (metode) {
+            TEMA, ENHETER, UTVIDET_ANSATT, GRUPPER_FOR_ANSATT -> oppfriskMedMetode(nøkkelElementer, metode)
+            else -> log.warn("Ukjent nøkkel $nøkkelElementer")
+        }
+    }
 
 
     private fun oppfriskMedMetode(elementer: CacheNøkkel, metode: String) {

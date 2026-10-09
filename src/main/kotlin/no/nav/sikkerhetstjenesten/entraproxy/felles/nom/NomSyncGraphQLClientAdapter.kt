@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.graphql.client.GraphQlClient
-import org.springframework.graphql.client.toEntity
 import org.springframework.graphql.client.toEntityList
 import org.springframework.stereotype.Component
 
@@ -12,11 +11,12 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
 
     fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
 
-    fun orgDataBulk(identer: List<String>) = //: List<NomGraphQLRespons> =
+    fun orgDataBulk(identer: List<String>): List<NomGraphQLRespons> =
         client.documentName(BULK_TILKNYTNINGER_QUERY.first)
             .variables(identer(identer))
             .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
-            .toEntity<NomBulkGraphQLResponser>()?.ressurser
+            .toEntityList<NomBulkGraphQLRespons>()
+            .map { it.ressurs }
 
     companion object {
         private const val IDENT = "navident"

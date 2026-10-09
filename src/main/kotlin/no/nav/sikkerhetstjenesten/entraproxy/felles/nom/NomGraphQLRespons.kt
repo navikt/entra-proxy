@@ -3,6 +3,5 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 
 data class NomGraphQLRespons(val navident: AnsattId, val visningsnavn: String, val gjeldendeSektor: String,val orgTilknytninger: Set<NomOrgTilknytning> = emptySet())
-data class NomBulkGraphQLResponser(val ressurser: List<NomGraphQLRespons>)
-
+data class NomBulkGraphQLRespons(val ressurs: NomGraphQLRespons)
 

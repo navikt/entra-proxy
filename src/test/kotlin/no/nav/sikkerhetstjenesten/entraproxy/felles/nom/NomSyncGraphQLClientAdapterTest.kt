@@ -41,6 +41,25 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
+        When("the response contains a missing resource") {
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
+
+            Then("available resources are returned") {
+                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe listOf(first)
+            }
+        }
+
+        When("all resources are missing") {
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
+
+            Then("an empty list is returned") {
+                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe emptyList()
+            }
+        }
+
         When("the query fails") {
             val failure = IllegalStateException("GraphQL query failed")
             every { request.retrieveSync("ressurser") } throws failure

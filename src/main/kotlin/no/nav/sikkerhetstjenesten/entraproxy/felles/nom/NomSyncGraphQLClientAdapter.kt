@@ -11,12 +11,18 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
 
     fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
 
-    fun orgDataBulk(identer: List<String>): List<NomGraphQLRespons> =
-        client.documentName(BULK_TILKNYTNINGER_QUERY.first)
+    fun orgDataBulk(identer: List<String>): List<NomGraphQLRespons> {
+        val respons = client.documentName(BULK_TILKNYTNINGER_QUERY.first)
             .variables(identer(identer))
             .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
             .toEntityList<NomBulkGraphQLRespons>()
-            .map { it.ressurs }
+        val ressurser = respons.mapNotNull { it.ressurs }
+        val antallManglende = respons.size - ressurser.size
+        if (antallManglende > 0) {
+            log.warn("NOM bulk-oppslag returnerte {} elementer uten ressurs av {} elementer", antallManglende, respons.size)
+        }
+        return ressurser
+    }
 
     companion object {
         private const val IDENT = "navident"

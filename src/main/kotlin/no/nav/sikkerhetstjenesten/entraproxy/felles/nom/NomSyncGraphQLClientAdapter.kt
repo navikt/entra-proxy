@@ -24,18 +24,19 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
             .mapNotNull { it.ressurs }
             .toSet()
 
-    companion object {
+    private companion object {
         private const val IDENT = "navident"
         private const val IDENTER = "navidenter"
         private const val TILGANGSENHET = "tilgangsenhetId"
+        private val TILKNYTNINGER_QUERY = "orgtilknytninger" to "ressurs"
+        private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"
+        private val TILGANGSENHET_ANSATTE_QUERY = "ansatte-for-tilgangsenhet" to "ressurser"
 
         private fun ident(navident: String) = mapOf(IDENT to navident)
         private fun identer(navidenter: Set<String>) = mapOf(IDENTER to navidenter)
         private fun tilgangsenhet(tilgangsenhetId: String) = mapOf(TILGANGSENHET to tilgangsenhetId)
 
-        private val TILKNYTNINGER_QUERY = "orgtilknytninger" to "ressurs"
-        private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"
-        private val TILGANGSENHET_ANSATTE_QUERY = "ansatte-for-tilgangsenhet" to "ressurser"
+
 
     }
 }

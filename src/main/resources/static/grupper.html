@@ -173,6 +173,11 @@
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
     panelMal.querySelector('.nom-form').remove();
+    panelMal.querySelector('form .sok-knapper').insertBefore(
+        panelMal.querySelector('.nytt-sok'),
+        panelMal.querySelector('.fjern-gruppe')
+    );
+    panelMal.querySelector('.sammenligningsknapp').remove();
     const fellesResultat = document.getElementById('felles-resultat');
     const sammenligningDetaljer = document.getElementById('sammenligning-detaljer');
     const fellesStatus = document.getElementById('felles-status');

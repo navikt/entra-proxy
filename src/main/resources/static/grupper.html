@@ -245,15 +245,19 @@
         const navnOverskrift = document.createElement('th');
         navnOverskrift.scope = 'col';
         leggTilSorterbarOverskrift(navnOverskrift, 'Navn', 1);
-        tabellOverskrift.append(navIdentOverskrift, navnOverskrift);
+        const tilgangsenhetOverskrift = document.createElement('th');
+        tilgangsenhetOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(tilgangsenhetOverskrift, 'Nom tilgangsenhet', 2);
+        tabellOverskrift.append(navIdentOverskrift, navnOverskrift, tilgangsenhetOverskrift);
         for (const [indeks, panel] of paneler.slice(1).entries()) {
             const gruppeOverskrift = document.createElement('th');
             gruppeOverskrift.scope = 'col';
-            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 2);
+            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 3);
             tabellOverskrift.appendChild(gruppeOverskrift);
         }
         sammenligningTabellOverskrift.appendChild(tabellOverskrift);
 
+        const tilgangsenhetCeller = new Map();
         for (const medlem of panelMedlemmer[0]) {
             const rad = document.createElement('tr');
             const navIdentCelle = document.createElement('th');
@@ -261,13 +265,55 @@
             navIdentCelle.textContent = medlem.navIdent;
             const navnCelle = document.createElement('td');
             navnCelle.textContent = medlem.visningNavn ?? '';
-            rad.append(navIdentCelle, navnCelle);
+            const tilgangsenhetCelle = document.createElement('td');
+            tilgangsenhetCeller.set(medlem.navIdent, tilgangsenhetCelle);
+            rad.append(navIdentCelle, navnCelle, tilgangsenhetCelle);
             for (const medlemmer of andreGrupper) {
                 const celle = document.createElement('td');
                 celle.textContent = medlemmer.has(medlem.navIdent) ? '✓' : '';
                 rad.appendChild(celle);
             }
             sammenligningTabellRader.appendChild(rad);
+        }
+        hentNomTilgangsenheter(tilgangsenhetCeller);
+    }
+
+    async function hentNomTilgangsenheter(celler) {
+        if (celler.size === 0) {
+            return;
+        }
+        for (const celle of celler.values()) {
+            celle.textContent = 'Henter...';
+        }
+        try {
+            const response = await fetch('/api/v1/nom/enhet/bulk', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                body: JSON.stringify([...celler.keys()])
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const ressurser = await response.json();
+            if (!Array.isArray(ressurser)) {
+                throw new Error('Uventet respons fra NOM: forventet en liste med ansatte.');
+            }
+            const tilgangsenheterPerNavIdent = new Map(ressurser.map(ressurs => {
+                if (typeof ressurs?.navident !== 'string' || !Array.isArray(ressurs.orgTilknytninger)) {
+                    throw new Error('Uventet respons fra NOM: mangler navident eller orgTilknytninger.');
+                }
+                const tilgangsenheter = ressurs.orgTilknytninger.map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId);
+                return [ressurs.navident, [...new Set(tilgangsenheter)].join(', ')];
+            }));
+            for (const [navIdent, celle] of celler) {
+                celle.textContent = tilgangsenheterPerNavIdent.get(navIdent) ?? '';
+            }
+        } catch (error) {
+            for (const celle of celler.values()) {
+                celle.textContent = 'Oppslag feilet';
+                celle.title = error.message;
+                celle.classList.add('error');
+            }
         }
     }
 

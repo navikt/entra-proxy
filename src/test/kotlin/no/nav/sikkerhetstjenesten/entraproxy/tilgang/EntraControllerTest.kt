@@ -280,6 +280,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
+                        .andExpect(jsonPath("$[0].orgTilknytninger[0].orgEnhet.tilgangsenhetId").value(TEST_ENHET.enhetnummer.verdi))
                 }
             }
         }

@@ -4,6 +4,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLConfig.Compani
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.Builder
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 
 @Configuration
 @NoCoverageAnalysis
@@ -21,9 +23,14 @@ class NomBeanConfig {
 
     @Bean
     @Qualifier(NOMGRAPH)
-    fun nomGraphRestClient(builder: Builder, mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
+    fun nomGraphRestClient(builder: Builder,
+                           logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
+                           mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder
             .requestInterceptors {
+                logbookInterceptor.ifAvailable {
+                        interceptor -> it.add(interceptor)
+                }
                 it.add(DownstreamUriCapturingInterceptor())
                 it.add(OAuth2ClientHttpRequestInterceptor(mgr).apply {
                     setClientRegistrationIdResolver { NOMGRAPH }

@@ -47,6 +47,9 @@
             gap: 0.75rem;
             margin-top: 1rem;
         }
+        .sammenligningsknapp {
+            justify-content: center;
+        }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
         .oppsummering {
@@ -118,9 +121,9 @@
         </div>
         <div class="sok-knapper">
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
-            <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Ny sammenligningsgruppe</button>
             <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
         </div>
+        <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </form>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
@@ -130,9 +133,12 @@
         <div class="sok-knapper">
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
         </div>
+        <p class="aksel-body-short status" id="nom-status" role="status" aria-live="polite"></p>
     </form>
     </div>
-    <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
+    <div class="sok-knapper sammenligningsknapp">
+        <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Ny sammenligningsgruppe</button>
+    </div>
     </section>
     <h2 class="aksel-heading aksel-heading--medium" id="sammenligningsoverskrift" hidden>Sammenligningsgrupper</h2>
     </div>
@@ -361,7 +367,6 @@
     }
 
     function klargjorSok(panel) {
-        const status = panel.querySelector('.status');
         let sisteSok = 0;
         panel.querySelector('.nytt-sok').addEventListener('click', () => {
             const nyttPanel = panelMal.cloneNode(true);
@@ -391,6 +396,7 @@
         for (const form of panel.querySelectorAll('form')) {
             const input = form.querySelector('input');
             const button = form.querySelector('button[type="submit"]');
+            const status = form.querySelector('.status');
             const erNomSok = form.classList.contains('nom-form');
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -403,7 +409,10 @@
                 panel.dataset.populert = 'false';
                 gruppemedlemmer.delete(panel);
                 oppdaterFellesMedlemmer();
-                status.classList.remove('error');
+                for (const sokStatus of panel.querySelectorAll('.status')) {
+                    sokStatus.textContent = '';
+                    sokStatus.classList.remove('error');
+                }
 
                 if (erNomSok ? !/^[0-9]{4}$/.test(verdi) : !verdi) {
                     status.textContent = erNomSok ? 'Skriv inn en tilgangsenhetId med 4 siffer.' : 'Skriv inn et gruppenavn.';

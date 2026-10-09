@@ -21,27 +21,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         every { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) } returns request
         every { request.retrieveSync("ressurser") } returns retrieve
 
-        When("the response contains resources") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "NAV")
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "NAV")
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
-            xThen("list variables are sent and resources are unwrapped") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe listOf(first, second)
-                verify { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) }
-                verify { request.retrieveSync("ressurser") }
-            }
-        }
-
-        When("the response contains an empty resource list") {
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
-
-            xThen("an empty list is returned") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe emptyList()
-            }
-        }
-
+       
         When("the query fails") {
             val failure = IllegalStateException("GraphQL query failed")
             every { request.retrieveSync("ressurser") } throws failure

@@ -29,6 +29,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -90,6 +91,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             Then("krever autentisering for et ukjent API-endepunkt") {
                 mockMvc.perform(get("$API_V1/does-not-exist"))
                     .andExpect(status().isUnauthorized())
+            }
+            Then("viser en vennlig feilside i nettleseren") {
+                mockMvc.perform(get("/grupper1.html").accept(TEXT_HTML))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
+                    .andExpect(content().string(containsString("Siden finnes ikke")))
+                    .andExpect(content().string(containsString("href=\"/utforsker.html\"")))
+            }
+            Then("beholder standard feilbehandling for en JSON-klient") {
+                mockMvc.perform(get("/grupper1.html").accept(APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
             }
         }
 

@@ -131,7 +131,7 @@
     </form>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
-            <label class="aksel-label" for="tilgangsenhetId">NOM tilgangsenhet</label>
+            <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet</label>
             <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" required placeholder="4 siffer">
         </div>
         <div class="sok-knapper">
@@ -328,11 +328,11 @@
             }
             const ressurser = await response.json();
             if (!Array.isArray(ressurser)) {
-                throw new Error('Uventet respons fra NOM: forventet en liste med ansatte.');
+                throw new Error('Uventet respons fra Nom: forventet en liste med ansatte.');
             }
             const tilgangsenheterPerNavIdent = new Map(ressurser.map(ressurs => {
                 if (typeof ressurs?.navident !== 'string' || !Array.isArray(ressurs.orgTilknytninger)) {
-                    throw new Error('Uventet respons fra NOM: mangler navident eller orgTilknytninger.');
+                    throw new Error('Uventet respons fra Nom: mangler navident eller orgTilknytninger.');
                 }
                 const tilgangsenheter = ressurs.orgTilknytninger.map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId);
                 return [ressurs.navident, [...new Set(tilgangsenheter)].join(', ')];
@@ -414,7 +414,7 @@
                 }
                 const verdi = input.value.trim();
                 const sokId = ++sisteSok;
-                const gruppeNavn = erNomSok ? `NOM tilgangsenhet ${verdi}` : verdi;
+                const gruppeNavn = erNomSok ? `Nom tilgangsenhet ${verdi}` : verdi;
                 panel.dataset.populert = 'false';
                 gruppemedlemmer.delete(panel);
                 oppdaterFellesMedlemmer();

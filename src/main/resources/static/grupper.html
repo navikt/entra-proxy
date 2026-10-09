@@ -141,7 +141,7 @@
     </form>
     </div>
     <div class="sok-knapper sammenligningsknapp">
-        <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button">Ny sammenligningsgruppe</button>
+        <button class="aksel-button nytt-sok" data-variant="secondary" data-color="brand-blue" type="button" disabled>Ny sammenligningsgruppe</button>
     </div>
     </section>
     <h2 class="aksel-heading aksel-heading--medium" id="sammenligningsoverskrift" hidden>Sammenligningsgrupper</h2>
@@ -223,6 +223,10 @@
 
     function oppdaterFellesMedlemmer() {
         const allePaneler = [...sok.querySelectorAll('.sok-panel')];
+        const hovedsokFullfort = forstePanel.dataset.populert === 'true';
+        for (const panel of allePaneler) {
+            panel.querySelector('.nytt-sok').disabled = !hovedsokFullfort;
+        }
         const alleSokFullfort = allePaneler.every(panel => panel.dataset.populert === 'true');
         const forsteMedlemmer = gruppemedlemmer.get(allePaneler[0]) ?? [];
         const sammenligningsPaneler = allePaneler.slice(1).filter(panel =>

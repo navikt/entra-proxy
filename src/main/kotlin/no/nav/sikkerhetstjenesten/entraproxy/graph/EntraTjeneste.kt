@@ -97,7 +97,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                         mail,
                         Enhet(enhetsNummer, norg.navnFor(enhetsNummer))
                     ).also {
-                        log.info("Hentet utvidet ansatt {} for ident {}", it, verdi)
+                        log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
                     }
                 }
             }

@@ -256,7 +256,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/bulk") {
             When("request mangler bearer-token") {
                 Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
-                    every { nomTjeneste.orgDataBulk(any()) } returns listOf(
+                    every { nomTjeneste.orgDataBulk(any()) } returns setOf(
                         NomGraphQLRespons(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",

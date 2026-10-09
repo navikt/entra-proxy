@@ -18,7 +18,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
 
         every { client.documentName("orgtilknytninger-bulk") } returns request
-        every { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) } returns request
+        every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
         every { request.retrieveSync("ressurser") } returns retrieve
         When("the response contains resources") {
             val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
@@ -27,17 +27,17 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe listOf(first, second)
-                verify { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) }
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe setOf(first, second)
+                verify { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) }
                 verify { request.retrieveSync("ressurser") }
             }
         }
 
         When("the response contains an empty resource list") {
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptyList()
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptySet()
             }
         }
 
@@ -47,7 +47,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe listOf(first)
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe setOf(first)
             }
         }
 
@@ -56,7 +56,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptyList()
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptySet()
             }
         }
 

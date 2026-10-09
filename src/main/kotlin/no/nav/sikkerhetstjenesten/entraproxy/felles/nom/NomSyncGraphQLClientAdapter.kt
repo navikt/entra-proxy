@@ -11,11 +11,11 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
 
     fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
 
-    fun orgDataBulk(identer: Set<String>): List<NomGraphQLRespons> {
+    fun orgDataBulk(identer: Set<String>): Set<NomGraphQLRespons> {
         return client.documentName(BULK_TILKNYTNINGER_QUERY.first)
             .variables(identer(identer))
             .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
-            .toEntityList<NomBulkGraphQLRespons>().mapNotNull { it.ressurs }
+            .toEntityList<NomBulkGraphQLRespons>().mapNotNull { it.ressurs }.toSet()
     }
 
     companion object {

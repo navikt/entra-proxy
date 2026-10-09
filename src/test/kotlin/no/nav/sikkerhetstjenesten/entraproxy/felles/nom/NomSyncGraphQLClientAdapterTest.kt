@@ -27,7 +27,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe listOf(first, second)
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe listOf(first, second)
                 verify { request.variables(mapOf("navidenter" to listOf("A123456", "B123456"))) }
                 verify { request.retrieveSync("ressurser") }
             }
@@ -37,7 +37,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe emptyList()
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptyList()
             }
         }
 
@@ -47,7 +47,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe listOf(first)
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe listOf(first)
             }
         }
 
@@ -56,7 +56,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(listOf("A123456", "B123456")) shouldBe emptyList()
+                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptyList()
             }
         }
 
@@ -66,7 +66,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.orgDataBulk(listOf("A123456", "B123456"))
+                    adapter.orgDataBulk(setOf("A123456", "B123456"))
                 } shouldBe failure
             }
         }

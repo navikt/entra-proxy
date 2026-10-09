@@ -46,6 +46,10 @@
             filter: grayscale(1);
             opacity: 0.65;
         }
+        html.soker,
+        html.soker * {
+            cursor: wait !important;
+        }
         .sok-knapper {
             display: flex;
             gap: 0.75rem;
@@ -188,6 +192,12 @@
     const kopierStatus = document.getElementById('kopier-status');
     const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
+    let aktiveOppslag = 0;
+
+    function oppdaterSokemarkering(endring) {
+        aktiveOppslag += endring;
+        document.documentElement.classList.toggle('soker', aktiveOppslag > 0);
+    }
 
     kopierDetaljvisning.addEventListener('click', async () => {
         kopierDetaljvisning.disabled = true;
@@ -321,6 +331,7 @@
         for (const celle of celler.values()) {
             celle.textContent = 'Henter...';
         }
+        oppdaterSokemarkering(1);
         try {
             const response = await fetch('/api/v1/nom/enhet/bulk', {
                 method: 'POST',
@@ -350,6 +361,8 @@
                 celle.title = error.message;
                 celle.classList.add('error');
             }
+        } finally {
+            oppdaterSokemarkering(-1);
         }
     }
 
@@ -448,6 +461,7 @@
                 }
                 button.disabled = true;
                 status.textContent = 'Henter medlemmer...';
+                oppdaterSokemarkering(1);
 
                 try {
                     const url = erNomSok
@@ -503,6 +517,7 @@
                     if (sokId === sisteSok) {
                         oppdaterFellesMedlemmer();
                     }
+                    oppdaterSokemarkering(-1);
                 }
             });
         }

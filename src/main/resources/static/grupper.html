@@ -42,6 +42,10 @@
             grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
             gap: 2rem;
         }
+        .inaktivt-sok {
+            filter: grayscale(1);
+            opacity: 0.65;
+        }
         .sok-knapper {
             display: flex;
             gap: 0.75rem;
@@ -430,6 +434,9 @@
                     return;
                 }
 
+                for (const sokForm of panel.querySelectorAll('form')) {
+                    sokForm.classList.toggle('inaktivt-sok', sokForm !== form);
+                }
                 button.disabled = true;
                 status.textContent = 'Henter medlemmer...';
 

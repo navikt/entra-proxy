@@ -462,13 +462,20 @@
                     if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
                         throw new Error('Uventet respons: mangler nav-ident eller navn.');
                     }
+                    const enhetsnavn = erNomSok
+                        ? resultat.flatMap(ressurs => ressurs.orgTilknytninger ?? [])
+                            .find(tilknytning => tilknytning.orgEnhet?.tilgangsenhetId === verdi
+                                && typeof tilknytning.orgEnhet.navn === 'string'
+                                && tilknytning.orgEnhet.navn.trim())?.orgEnhet.navn
+                        : undefined;
+                    const resultatnavn = erNomSok ? enhetsnavn ?? `tilgangsenhet ${verdi}` : gruppeNavn;
                     gruppemedlemmer.set(panel, medlemmer);
                     panel.dataset.gruppeNavn = gruppeNavn;
                     panel.dataset.populert = 'true';
                     status.textContent = medlemmer.length
-                        ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`
+                        ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'} i ${resultatnavn}`
                         : erNomSok
-                            ? 'Ingen medlemmer funnet for tilgangsenheten.'
+                            ? `Ingen medlemmer funnet i ${resultatnavn}.`
                             : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
                 } catch (error) {
                     if (sokId === sisteSok) {

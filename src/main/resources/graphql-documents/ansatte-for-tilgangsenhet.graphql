@@ -4,6 +4,13 @@ query ansatteForTilgangsenhet($tilgangsenhetId: String!){
             navident
             visningsnavn
             gjeldendeSektor
+            orgTilknytninger (utvalg: AKTIVE) {
+                orgEnhet {
+                    id
+                    navn
+                    tilgangsenhetId
+                }
+            }
         }
     }
 }

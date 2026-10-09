@@ -12,7 +12,7 @@ class NomTjeneste(private val nom: NomPort) {
         nom.ansatt(ident)
 
     fun orgDataBulk(identer: Set<AnsattId>): Set<NomAnsatt> =
-        nom.nomAnsatte(identer)
+        nom.ansatte(identer)
 
     fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
         nom.ansatteForTilgangsenhet(tilgangsenhetId)

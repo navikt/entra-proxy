@@ -3,6 +3,7 @@ query ansatteForTilgangsenhet($tilgangsenhetId: String!){
         ressurs {
             navident
             visningsnavn
+            gjeldendeSektor
         }
     }
 }

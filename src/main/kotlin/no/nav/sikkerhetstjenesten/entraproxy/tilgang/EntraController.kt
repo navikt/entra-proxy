@@ -1,12 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType.HTTP
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import io.swagger.v3.oas.annotations.security.SecurityScheme
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.NAVIDENT
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.CsvHttpMessageConverter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
@@ -14,9 +9,11 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireCCF
-import no.nav.sikkerhetstjenesten.entraproxy.security.Authorities.OAuth2RequireOBO
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal

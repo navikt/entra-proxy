@@ -1,8 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
 import no.nav.boot.conditionals.ConditionalOnGCP
-import no.nav.sikkerhetstjenesten.entraproxy.felles.leder.LeaderAware
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.leder.LeaderAware
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -22,7 +23,7 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
         somLeder {
             val måling = measureTimedValue {
                 runCatching {
-                    cache.putSet(INAKTIVE, entra.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) {
+                    cache.putSet(INAKTIVE, entra.gruppeMedlemmer("$uuid", "Alle brukere i  permisjon").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
                     cache.getSet(INAKTIVE)

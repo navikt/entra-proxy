@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.profiler
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterUtils.Companion.profiler
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 

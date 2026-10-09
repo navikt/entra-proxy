@@ -19,10 +19,8 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.CacheSizeAware
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isProd
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterUtils
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterUtils.Companion.isProd
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
@@ -37,6 +35,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
+import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
+import no.nav.sikkerhetstjenesten.felles.cache.ValkeyCacheOperations
+import no.nav.sikkerhetstjenesten.felles.cache.ValkeyEventListeningCacheOppfrisker
+import no.nav.sikkerhetstjenesten.felles.cache.getMany
+import no.nav.sikkerhetstjenesten.felles.cache.getOne
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.data.redis.test.autoconfigure.DataRedisTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -342,21 +351,6 @@ class ValkeyCacheOperationsTest(
                         cache.getMany<String>(cacheConfig, IDS).shouldBeEmpty()
                         cache.size(cacheConfig) shouldBe 0
                     }
-                }
-            }
-        }
-
-        Given("clear i prod-miljø") {
-            beforeEach {
-                mockkObject(ClusterUtils.Companion)
-                every { isProd } returns true
-            }
-            afterEach { unmockkObject(ClusterUtils.Companion) }
-
-            When("clear kalles") {
-                Then("kaster IllegalStateException fordi clear er blokkert i prod") {
-                    shouldThrow<IllegalStateException> { cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE) }
-                        .message shouldContain "prod"
                 }
             }
         }

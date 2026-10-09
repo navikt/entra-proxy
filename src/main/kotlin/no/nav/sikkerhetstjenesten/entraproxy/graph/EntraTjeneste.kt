@@ -1,18 +1,16 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
+import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId.Companion.ANSATTID_LENGTH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
+import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import java.net.URI
@@ -71,7 +69,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
-            gruppeMedlemmer("$gruppeId").also {
+            gruppeMedlemmer("$gruppeId", gruppeNavn).also {
                 log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
             }
 
@@ -133,8 +131,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true

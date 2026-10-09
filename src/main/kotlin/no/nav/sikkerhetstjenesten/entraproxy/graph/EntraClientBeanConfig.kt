@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.PingableHealthIndicator
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.service.registry.ImportHttpServices

@@ -15,7 +15,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
         client.documentName(BULK_TILKNYTNINGER_QUERY.first)
             .variables(identer(identer))
             .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
-            .toEntityList<Any>()
+            .toEntityList<NomGraphQLRespons>()
          //   .map { it.ressurs }
 
     companion object {

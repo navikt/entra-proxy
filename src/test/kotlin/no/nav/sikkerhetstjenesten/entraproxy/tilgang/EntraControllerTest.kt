@@ -105,6 +105,21 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("NOM-stier uten eksplisitt offentlig tilgang") {
+            Then("krever autentisering for andre GET-stier") {
+                mockMvc.perform(get("$API_V1/nom/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("krever autentisering for andre POST-stier") {
+                mockMvc.perform(post("$API_V1/nom/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("krever autentisering for POST mot et offentlig GET-endepunkt") {
+                mockMvc.perform(post("$API_V1/nom/enhet/$TEST_ANSATT_ID"))
+                    .andExpect(status().isUnauthorized())
+            }
+        }
+
         xGiven("den statiske utforskersiden") {
             When("request mangler bearer-token") {
                 Then("viser linker til ansatt og gruppemedlemmer") {

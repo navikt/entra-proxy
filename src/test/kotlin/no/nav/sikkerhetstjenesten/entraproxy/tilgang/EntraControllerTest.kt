@@ -197,6 +197,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
                         .andExpect(content().string(containsString("/api/v1/nom/enhet/bulk")))
+                        .andExpect(content().string(containsString("/api/v1/nom/ansatte/")))
+                        .andExpect(content().string(containsString("name=\"tilgangsenhetId\"")))
+                        .andExpect(content().string(containsString("pattern=\"[0-9]{4}\"")))
                 }
                 Then("gruppe-endepunktet returnerer medlemmer uten token") {
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))

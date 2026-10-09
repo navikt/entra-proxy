@@ -37,6 +37,11 @@
         .sok-panel {
             min-width: 0;
         }
+        .hovedsok {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+            gap: 2rem;
+        }
         .sok-knapper {
             display: flex;
             gap: 0.75rem;
@@ -105,6 +110,7 @@
     <div id="sok">
     <section class="sok-panel" aria-label="Gruppesøk 1">
     <h2 class="aksel-heading aksel-heading--medium">Gruppe som skal utforskes</h2>
+    <div class="hovedsok">
     <form id="gruppe-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="gruppeNavn">Gruppenavn</label>
@@ -116,6 +122,16 @@
             <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
         </div>
     </form>
+    <form id="nom-form" class="nom-form">
+        <div class="aksel-form-field" style="margin-top: 1rem;">
+            <label class="aksel-label" for="tilgangsenhetId">NOM tilgangsenhet</label>
+            <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" required placeholder="4 siffer">
+        </div>
+        <div class="sok-knapper">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
+        </div>
+    </form>
+    </div>
     <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </section>
     <h2 class="aksel-heading aksel-heading--medium" id="sammenligningsoverskrift" hidden>Sammenligningsgrupper</h2>
@@ -146,6 +162,7 @@
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
+    panelMal.querySelector('.nom-form').remove();
     const fellesResultat = document.getElementById('felles-resultat');
     const sammenligningDetaljer = document.getElementById('sammenligning-detaljer');
     const fellesStatus = document.getElementById('felles-status');
@@ -344,10 +361,8 @@
     }
 
     function klargjorSok(panel) {
-        const form = panel.querySelector('form');
-        const input = panel.querySelector('input');
-        const button = panel.querySelector('button[type="submit"]');
         const status = panel.querySelector('.status');
+        let sisteSok = 0;
         panel.querySelector('.nytt-sok').addEventListener('click', () => {
             const nyttPanel = panelMal.cloneNode(true);
             nyttPanel.querySelector('h2')?.remove();
@@ -373,61 +388,92 @@
             oppdaterFellesMedlemmer();
         });
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const gruppeNavn = input.value.trim();
-            panel.dataset.populert = 'false';
-            gruppemedlemmer.delete(panel);
-            oppdaterFellesMedlemmer();
-            status.classList.remove('error');
+        for (const form of panel.querySelectorAll('form')) {
+            const input = form.querySelector('input');
+            const button = form.querySelector('button[type="submit"]');
+            const erNomSok = form.classList.contains('nom-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (button.disabled) {
+                    return;
+                }
+                const verdi = input.value.trim();
+                const sokId = ++sisteSok;
+                const gruppeNavn = erNomSok ? `NOM tilgangsenhet ${verdi}` : verdi;
+                panel.dataset.populert = 'false';
+                gruppemedlemmer.delete(panel);
+                oppdaterFellesMedlemmer();
+                status.classList.remove('error');
 
-            if (!gruppeNavn) {
-                status.textContent = 'Skriv inn et gruppenavn.';
-                status.classList.add('error');
-                return;
-            }
-
-            const alleredeValgt = [...sok.querySelectorAll('.sok-panel')]
-                .some(annetPanel => annetPanel !== panel
-                    && annetPanel.dataset.gruppeNavn
-                    && annetPanel.dataset.gruppeNavn.toLowerCase() === gruppeNavn.toLowerCase());
-            if (alleredeValgt) {
-                status.textContent = `Gruppen "${gruppeNavn}" er allerede valgt i et annet s\u00f8k.`;
-                status.classList.add('error');
-                return;
-            }
-
-            button.disabled = true;
-            status.textContent = 'Henter medlemmer...';
-
-            try {
-                const response = await fetch(`/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`, {
-                    headers: {'Accept': 'application/json'}
-                });
-                if (!response.ok) {
-                    let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
-                    if (response.headers.get('content-type')?.includes('json')) {
-                        const problem = await response.json();
-                        melding = problem.detail ?? melding;
-                    }
-                    throw new Error(melding);
+                if (erNomSok ? !/^[0-9]{4}$/.test(verdi) : !verdi) {
+                    status.textContent = erNomSok ? 'Skriv inn en tilgangsenhetId med 4 siffer.' : 'Skriv inn et gruppenavn.';
+                    status.classList.add('error');
+                    return;
                 }
 
-                const medlemmer = await response.json();
-                gruppemedlemmer.set(panel, medlemmer);
-                panel.dataset.gruppeNavn = gruppeNavn;
-                panel.dataset.populert = 'true';
-                status.textContent = medlemmer.length
-                    ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`
-                    : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
-            } catch (error) {
-                status.textContent = `Henting feilet: ${error.message}`;
-                status.classList.add('error');
-            } finally {
-                button.disabled = false;
-                oppdaterFellesMedlemmer();
-            }
-        });
+                const alleredeValgt = [...sok.querySelectorAll('.sok-panel')]
+                    .some(annetPanel => annetPanel !== panel
+                        && annetPanel.dataset.gruppeNavn
+                        && annetPanel.dataset.gruppeNavn.toLowerCase() === gruppeNavn.toLowerCase());
+                if (alleredeValgt) {
+                    status.textContent = `Gruppen "${gruppeNavn}" er allerede valgt i et annet s\u00f8k.`;
+                    status.classList.add('error');
+                    return;
+                }
+
+                button.disabled = true;
+                status.textContent = 'Henter medlemmer...';
+
+                try {
+                    const url = erNomSok
+                        ? `/api/v1/nom/ansatte/${verdi}`
+                        : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`;
+                    const response = await fetch(url, {
+                        headers: {'Accept': 'application/json'}
+                    });
+                    if (!response.ok) {
+                        let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
+                        if (response.headers.get('content-type')?.includes('json')) {
+                            const problem = await response.json();
+                            melding = problem.detail ?? melding;
+                        }
+                        throw new Error(melding);
+                    }
+
+                    const resultat = await response.json();
+                    if (sokId !== sisteSok) {
+                        return;
+                    }
+                    if (!Array.isArray(resultat)) {
+                        throw new Error('Uventet respons: forventet en liste med medlemmer.');
+                    }
+                    const medlemmer = erNomSok
+                        ? resultat.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
+                        : resultat;
+                    if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
+                        throw new Error('Uventet respons: mangler nav-ident eller navn.');
+                    }
+                    gruppemedlemmer.set(panel, medlemmer);
+                    panel.dataset.gruppeNavn = gruppeNavn;
+                    panel.dataset.populert = 'true';
+                    status.textContent = medlemmer.length
+                        ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`
+                        : erNomSok
+                            ? 'Ingen medlemmer funnet for tilgangsenheten.'
+                            : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
+                } catch (error) {
+                    if (sokId === sisteSok) {
+                        status.textContent = `Henting feilet: ${error.message}`;
+                        status.classList.add('error');
+                    }
+                } finally {
+                    button.disabled = false;
+                    if (sokId === sisteSok) {
+                        oppdaterFellesMedlemmer();
+                    }
+                }
+            });
+        }
     }
 
     klargjorSok(forstePanel);

@@ -1,5 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.graphql.client.GraphQlClient
@@ -7,22 +9,26 @@ import org.springframework.graphql.client.toEntityList
 import org.springframework.stereotype.Component
 
 @Component
-class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLConfig.NOMGRAPH) client: GraphQlClient) : AbstractSyncGraphQLClientAdapter(cfg, client) {
+class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLConfig.NOMGRAPH) client: GraphQlClient) : AbstractSyncGraphQLClientAdapter(cfg, client), NomPort {
 
-    fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
+    override fun ansatt(ident: AnsattId): NomAnsatt =
+        queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt()
 
-    fun orgDataBulk(identer: Set<String>) = hentRessurser(BULK_TILKNYTNINGER_QUERY, identer(identer))
+    override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt> =
+        hentRessurser(BULK_TILKNYTNINGER_QUERY, identer(identer.map { it.verdi }.toSet()))
 
-    fun ansatteForTilgangsenhet(tilgangsenhetId: String) =
-        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(tilgangsenhetId))
+    override fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
+        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(tilgangsenhetId.verdi))
 
-    private fun hentRessurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomGraphQLRespons> =
+    private fun hentRessurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
         client.documentName(query.first)
             .variables(variabler)
             .retrieveSync(query.second)
             .toEntityList<NomBulkGraphQLRespons>()
-            .mapNotNull { it.ressurs }
+            .mapNotNull { it.ressurs?.toAnsatt() }
             .toSet()
+
+    private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
 
     private companion object {
         private const val IDENT = "navident"

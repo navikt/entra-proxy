@@ -11,7 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLRespons
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomOrgTilknytning
 import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
@@ -232,7 +232,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
             When("request mangler bearer-token") {
                 Then("returnerer ansattdata og org-tilknytninger fra NOM") {
-                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomGraphQLRespons(
+                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomAnsatt(
                         navident = TEST_ANSATT_ID,
                         visningsnavn = "Test Ansatt",
                         gjeldendeSektor = "STAT",
@@ -260,7 +260,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request mangler bearer-token") {
                 Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
                     every { nomTjeneste.orgDataBulk(any()) } returns setOf(
-                        NomGraphQLRespons(
+                        NomAnsatt(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",
                             gjeldendeSektor = "STAT",
@@ -292,7 +292,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request mangler bearer-token") {
                 Then("returnerer ansatte fra NOM") {
                     every { nomTjeneste.ansatteForTilgangsenhet(TEST_ENHET.enhetnummer) } returns setOf(
-                        NomGraphQLRespons(
+                        NomAnsatt(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",
                             gjeldendeSektor = "STAT"

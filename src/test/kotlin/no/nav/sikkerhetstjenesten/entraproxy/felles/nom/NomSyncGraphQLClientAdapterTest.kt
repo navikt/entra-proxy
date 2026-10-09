@@ -7,10 +7,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.toEntityList
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
+    val identer = setOf(AnsattId("A123456"), AnsattId("B123456"))
+    val tilgangsenhetId = Enhetnummer("0315")
     Given("bulk queries") {
         val client = mockk<GraphQlClient>()
         val request = mockk<GraphQlClient.RequestSpec>()
@@ -21,13 +24,25 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
         every { request.retrieveSync("ressurser") } returns retrieve
         When("the response contains resources") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            val tilknytninger = setOf(
+                NomOrgTilknytning(
+                    NomOrgTilknytning.NomEnhet(
+                        NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                        "Testenhet",
+                        tilgangsenhetId
+                    )
+                )
+            )
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
             val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe setOf(first, second)
+                adapter.nomAnsatte(identer) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                )
                 verify { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) }
                 verify { request.retrieveSync("ressurser") }
             }
@@ -37,7 +52,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptySet()
+                adapter.nomAnsatte(identer) shouldBe emptySet()
             }
         }
 
@@ -47,7 +62,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe setOf(first)
+                adapter.nomAnsatte(identer) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                )
             }
         }
 
@@ -56,7 +73,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
             Then("an empty list is returned") {
-                adapter.orgDataBulk(setOf("A123456", "B123456")) shouldBe emptySet()
+                adapter.nomAnsatte(identer) shouldBe emptySet()
             }
         }
 
@@ -66,7 +83,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.orgDataBulk(setOf("A123456", "B123456"))
+                    adapter.nomAnsatte(identer)
                 } shouldBe failure
             }
         }
@@ -89,7 +106,10 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("the tilgangsenhetId variable is sent and all employees are returned") {
-                adapter.ansatteForTilgangsenhet("0315") shouldBe setOf(first, second)
+                adapter.ansatteForTilgangsenhet(tilgangsenhetId) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                )
                 verify { request.variables(mapOf("tilgangsenhetId" to "0315")) }
                 verify { request.retrieveSync("ressurser") }
             }
@@ -99,7 +119,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty set is returned") {
-                adapter.ansatteForTilgangsenhet("0315") shouldBe emptySet()
+                adapter.ansatteForTilgangsenhet(tilgangsenhetId) shouldBe emptySet()
             }
         }
 
@@ -109,7 +129,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.ansatteForTilgangsenhet("0315") shouldBe setOf(first)
+                adapter.ansatteForTilgangsenhet(tilgangsenhetId) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                )
             }
         }
 
@@ -119,7 +141,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.ansatteForTilgangsenhet("0315")
+                    adapter.ansatteForTilgangsenhet(tilgangsenhetId)
                 } shouldBe failure
             }
         }

@@ -5,16 +5,16 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import org.springframework.stereotype.Service
 
 @Service
-class NomTjeneste(private val graph: NomSyncGraphQLClientAdapter) {
+class NomTjeneste(private val nom: NomPort) {
 
 
-    fun orgData(ident: AnsattId) =
-        graph.orgData(ident.verdi)
+    fun orgData(ident: AnsattId): NomAnsatt =
+        nom.ansatt(ident)
 
-    fun orgDataBulk(identer: Set<AnsattId>) =
-        graph.orgDataBulk(identer.map { it.verdi }.toSet())
+    fun orgDataBulk(identer: Set<AnsattId>): Set<NomAnsatt> =
+        nom.nomAnsatte(identer)
 
-    fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer) =
-        graph.ansatteForTilgangsenhet(tilgangsenhetId.verdi)
+    fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
+        nom.ansatteForTilgangsenhet(tilgangsenhetId)
 
 }

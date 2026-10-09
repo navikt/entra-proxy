@@ -11,7 +11,6 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
-import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -43,13 +42,6 @@ class OAuth2SecurityBeanConfig {
 
     private val UNPROTECTED_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
         arrayOf(
-            it.matcher("/$DEV/**"),
-            it.matcher("/swagger-ui/**"),
-            it.matcher("/v3/api-docs/**"),
-            it.matcher("/monitoring/**"),
-            it.matcher("/grupper.html"),
-            it.matcher("/ansatt.html"),
-            it.matcher("/utforsker.html"),
             it.matcher(GET, "$API_V1/ansatt/{navIdent}"),
             it.matcher(GET, "$API_V1/ansatt/tilganger/{navIdent}"),
             it.matcher(GET, "$API_V1/enhet/{enhetsnummer}"),
@@ -59,7 +51,6 @@ class OAuth2SecurityBeanConfig {
             it.matcher(POST, "$API_V1/nom/**"),
         )
     }
-
 
     @Bean
     fun authContext() = AuthContext()
@@ -77,7 +68,8 @@ class OAuth2SecurityBeanConfig {
                             entryPoint: AuthenticationEntryPoint) =
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers(*UNPROTECTED_ENDPOINTS).permitAll()
-            requests.anyRequest().authenticated()
+            requests.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("$API_V1/**")).authenticated()
+            requests.anyRequest().permitAll()
         }
             .exceptionHandling {
                 it.accessDeniedHandler(deniedHandler)

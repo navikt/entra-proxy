@@ -82,6 +82,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             )
         }
 
+        Given("en side som ikke finnes") {
+            Then("returnerer 404 uten å kreve autentisering") {
+                mockMvc.perform(get("/does-not-exist"))
+                    .andExpect(status().isNotFound())
+            }
+            Then("krever autentisering for et ukjent API-endepunkt") {
+                mockMvc.perform(get("$API_V1/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+        }
+
         xGiven("den statiske utforskersiden") {
             When("request mangler bearer-token") {
                 Then("viser linker til ansatt og gruppemedlemmer") {

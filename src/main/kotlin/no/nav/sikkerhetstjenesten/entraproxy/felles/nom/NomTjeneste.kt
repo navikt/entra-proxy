@@ -11,6 +11,6 @@ class NomTjeneste(private val graph: NomSyncGraphQLClientAdapter) {
         graph.orgData(ident.verdi)
 
     fun orgDataBulk(identer: Set<AnsattId>) =
-        graph.orgDataBulk(identer.map { it.verdi })
+        graph.orgDataBulk(identer.map { it.verdi }.toSet())
 
 }

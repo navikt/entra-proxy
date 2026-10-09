@@ -11,17 +11,11 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
 
     fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
 
-    fun orgDataBulk(identer: List<String>): List<NomGraphQLRespons> {
-        val respons = client.documentName(BULK_TILKNYTNINGER_QUERY.first)
+    fun orgDataBulk(identer: Set<String>): List<NomGraphQLRespons> {
+        return client.documentName(BULK_TILKNYTNINGER_QUERY.first)
             .variables(identer(identer))
             .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
-            .toEntityList<NomBulkGraphQLRespons>()
-        val ressurser = respons.mapNotNull { it.ressurs }
-        val antallManglende = respons.size - ressurser.size
-        if (antallManglende > 0) {
-            log.warn("NOM bulk-oppslag returnerte {} elementer uten ressurs av {} elementer", antallManglende, respons.size)
-        }
-        return ressurser
+            .toEntityList<NomBulkGraphQLRespons>().mapNotNull { it.ressurs }
     }
 
     companion object {
@@ -29,7 +23,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
         private const val IDENTER = "navidenter"
 
         private fun ident(navident: String) = mapOf(IDENT to navident)
-        private fun identer(navidenter: List<String>) = mapOf(IDENTER to navidenter)
+        private fun identer(navidenter: Set<String>) = mapOf(IDENTER to navidenter)
 
         private val TILKNYTNINGER_QUERY = "orgtilknytninger" to "ressurs"
         private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"

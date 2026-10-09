@@ -285,6 +285,24 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("ubeskyttet endepunkt ${API_V1}/nom/ansatte/{tilgangsenhetId}") {
+            When("request mangler bearer-token") {
+                Then("returnerer ansatte fra NOM") {
+                    every { nomTjeneste.ansatteForTilgangsenhet(TEST_ENHET.enhetnummer) } returns setOf(
+                        NomGraphQLRespons(
+                            navident = TEST_ANSATT_ID,
+                            visningsnavn = "Test Ansatt",
+                            gjeldendeSektor = "STAT"
+                        )
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
+                }
+            }
+        }
+
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
                 Then("returnerer medlemmer uten bearer-token") {

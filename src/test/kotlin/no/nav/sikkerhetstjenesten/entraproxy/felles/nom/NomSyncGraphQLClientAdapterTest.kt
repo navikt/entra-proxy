@@ -71,4 +71,57 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
     }
+
+    Given("ansatte for tilgangsenhet") {
+        val client = mockk<GraphQlClient>()
+        val request = mockk<GraphQlClient.RequestSpec>()
+        val retrieve = mockk<GraphQlClient.RetrieveSyncSpec>()
+        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
+
+        every { client.documentName("ansatte-for-tilgangsenhet") } returns request
+        every { request.variables(mapOf("tilgangsenhetId" to "0315")) } returns request
+        every { request.retrieveSync("ressurser") } returns retrieve
+
+        When("the tilgangsenhet has resources") {
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
+
+            Then("the tilgangsenhetId variable is sent and all employees are returned") {
+                adapter.ansatteForTilgangsenhet("0315") shouldBe setOf(first, second)
+                verify { request.variables(mapOf("tilgangsenhetId" to "0315")) }
+                verify { request.retrieveSync("ressurser") }
+            }
+        }
+
+        When("the tilgangsenhet has no resources") {
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
+
+            Then("an empty set is returned") {
+                adapter.ansatteForTilgangsenhet("0315") shouldBe emptySet()
+            }
+        }
+
+        When("a resource is missing") {
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
+
+            Then("available resources are returned") {
+                adapter.ansatteForTilgangsenhet("0315") shouldBe setOf(first)
+            }
+        }
+
+        When("the query fails") {
+            val failure = IllegalStateException("GraphQL query failed")
+            every { request.retrieveSync("ressurser") } throws failure
+
+            Then("the failure is propagated") {
+                shouldThrow<IllegalStateException> {
+                    adapter.ansatteForTilgangsenhet("0315")
+                } shouldBe failure
+            }
+        }
+    }
 })

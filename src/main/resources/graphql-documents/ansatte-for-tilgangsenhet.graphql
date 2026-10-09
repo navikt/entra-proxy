@@ -1,0 +1,8 @@
+query ansatteForTilgangsenhet($tilgangsenhetId: String!){
+    ressurser(filter: {tilgangsenhetId: $tilgangsenhetId, periodiskUtvalg: AKTIVE} ) {
+        ressurs {
+            navident
+            visningsnavn
+        }
+    }
+}

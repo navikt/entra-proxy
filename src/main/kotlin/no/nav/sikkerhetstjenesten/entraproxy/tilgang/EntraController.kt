@@ -112,6 +112,11 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     fun orgTilknytningerForAnsatteBulk(@RequestBody identer: Set<AnsattId>) =
         nom.orgDataBulk(identer)
 
+    @GetMapping("nom/ansatte/{tilgangsenhetId}")
+    @Operation(summary = "Hent ansatte i en tilgangsenhet fra NOM")
+    fun ansatteForTilgangsenhet(@PathVariable tilgangsenhetId: Enhetnummer) =
+        nom.ansatteForTilgangsenhet(tilgangsenhetId)
+
     companion object {
         const val API_V1 = "/api/v1"
     }

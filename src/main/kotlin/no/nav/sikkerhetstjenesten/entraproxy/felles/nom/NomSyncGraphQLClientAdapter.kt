@@ -11,22 +11,31 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
 
     fun orgData(ident: String) = queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident))
 
-    fun orgDataBulk(identer: Set<String>): Set<NomGraphQLRespons> {
-        return client.documentName(BULK_TILKNYTNINGER_QUERY.first)
-            .variables(identer(identer))
-            .retrieveSync(BULK_TILKNYTNINGER_QUERY.second)
-            .toEntityList<NomBulkGraphQLRespons>().mapNotNull { it.ressurs }.toSet()
-    }
+    fun orgDataBulk(identer: Set<String>) = hentRessurser(BULK_TILKNYTNINGER_QUERY, identer(identer))
+
+    fun ansatteForTilgangsenhet(tilgangsenhetId: String) =
+        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(tilgangsenhetId))
+
+    private fun hentRessurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomGraphQLRespons> =
+        client.documentName(query.first)
+            .variables(variabler)
+            .retrieveSync(query.second)
+            .toEntityList<NomBulkGraphQLRespons>()
+            .mapNotNull { it.ressurs }
+            .toSet()
 
     companion object {
         private const val IDENT = "navident"
         private const val IDENTER = "navidenter"
+        private const val TILGANGSENHET = "tilgangsenhetId"
 
         private fun ident(navident: String) = mapOf(IDENT to navident)
         private fun identer(navidenter: Set<String>) = mapOf(IDENTER to navidenter)
+        private fun tilgangsenhet(tilgangsenhetId: String) = mapOf(TILGANGSENHET to tilgangsenhetId)
 
         private val TILKNYTNINGER_QUERY = "orgtilknytninger" to "ressurs"
         private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"
+        private val TILGANGSENHET_ANSATTE_QUERY = "ansatte-for-tilgangsenhet" to "ressurser"
 
     }
 }

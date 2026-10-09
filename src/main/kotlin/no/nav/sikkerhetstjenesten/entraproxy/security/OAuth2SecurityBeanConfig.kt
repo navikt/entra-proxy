@@ -44,7 +44,7 @@ class OAuth2SecurityBeanConfig {
         arrayOf(
             it.matcher(GET, "$API_V1/ansatt/{navIdent}"),
             it.matcher(GET, "$API_V1/ansatt/tilganger/{navIdent}"),
-            it.matcher(GET, "$API_V1/enhet/{enhetsnummer}"),
+          //  it.matcher(GET, "$API_V1/enhet/{enhetsnummer}"),
             it.matcher(GET, "$API_V1/gruppe/medlemmer"),
             it.matcher(GET, "$API_V1/gruppe/antall"),
             it.matcher(GET, "$API_V1/nom/**"),

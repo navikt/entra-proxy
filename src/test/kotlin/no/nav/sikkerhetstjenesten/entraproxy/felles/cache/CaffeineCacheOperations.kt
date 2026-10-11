@@ -1,5 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
 
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.CacheManager
 import java.time.Duration
@@ -82,4 +84,3 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
             cache.fullName to count
         }
 }
-

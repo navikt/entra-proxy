@@ -18,9 +18,11 @@ coroutines = "1.10.2"
 otel = "2.28.0"
 otelAlpha = "2.30.0-alpha"
 testcontainers = "1.21.3"
+sikkerhetstjenestenLib = "0.0.56"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+sikkerhetstjenestenLib = { module = "no.nav.felles:sikkerhetstjenesten-lib", version.ref = "sikkerhetstjenestenLib" }
 opentelemetryInstrumentationAnnotations = { module = "io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations" }
 opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0", version.ref = "otelAlpha" }
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
@@ -38,6 +40,7 @@ springBootStarterActuator = { module = "org.springframework.boot:spring-boot-sta
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }

@@ -1,11 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.NotFoundRestException
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RestRetryingWhenRecoverableService
-import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId.Companion.ANSATTID_LENGTH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -13,10 +8,15 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
+import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
+import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import java.net.URI
 import java.util.UUID
+import java.util.stream.Collectors.toSet
 
 const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
@@ -71,7 +71,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
-            gruppeMedlemmer("$gruppeId").also {
+            gruppeMedlemmer("$gruppeId", gruppeNavn).also {
                 log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
             }
 
@@ -97,7 +97,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                         mail,
                         Enhet(enhetsNummer, norg.navnFor(enhetsNummer))
                     ).also {
-                        log.info("Hentet utvidet ansatt {} for ident {}", it, verdi)
+                        log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
                     }
                 }
             }
@@ -133,8 +133,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 EntraGruppe(it.displayName)
             }
 
-     fun gruppeMedlemmer(oid: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true
@@ -151,16 +151,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     }
 
     private fun enheter(ansattOid: UUID) =
-        buildSet {
-            allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
-                .flatMapTo(mutableSetOf()) { it.value }
-                .map {
-                    Enhetnummer(it.displayName)
-                }
-                .forEach {
-                    add(Enhet(it, norg.navnFor(it)))
-                }
-        }
+        allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
+            .flatMapTo(mutableSetOf()) { it.value }
+            .mapTo(mutableSetOf()) {
+                Enhetnummer(it.displayName)
+            }
+            .parallelStream()
+            .map { Enhet(it, norg.navnFor(it)) }
+            .collect(toSet())
 
     private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {
         log.info("Henter {}", beskrivelse)
@@ -192,5 +190,8 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     override fun toString() =
         "${javaClass.simpleName} [client=$client, norg=$norg]"
+
+    fun antallMedlemmerIGruppe(it: UUID) =
+        client.antallMedlemmer("$it")
 
 }

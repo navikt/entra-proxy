@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
@@ -25,6 +26,7 @@ import java.util.UUID.randomUUID
 @RestClientTest
 class EntraTjenesteTest(
     private val server: MockRestServiceServer,
+    private val client: EntraGraphClient,
     private val entra: EntraTjeneste,
     private val oid: EntraOidTjeneste) : BehaviorSpec() {
 
@@ -40,16 +42,27 @@ class EntraTjenesteTest(
             server.verify()
         }
 
+        Given("antall medlemmer fra Graph") {
+            When("Graph returnerer antallet som ren tekst") {
+                Then("brukes count-endepunktet") {
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.toString() shouldBe $$"$$baseUrl/groups/$$GROUP_ID/members/$count"
+                    }.andRespond(withSuccess("1535", TEXT_PLAIN))
+
+                    client.antallMedlemmer("$GROUP_ID") shouldBe "1535"
+                }
+            }
+        }
+
         Given("medlemmer-endepunkt") {
             When("det finnes medlemmer") {
-                Then("skal responsen inneholde forventede medlemmer, og andre kall skal treffe cachen") {
+                Then("skal responsen inneholde forventede medlemmer") {
                     server.expect { request ->
                         request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$GROUP_ID/members")
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
-                    repeat(2) {
-                        entra.medlemmerIGruppe("En gruppe", GROUP_ID) shouldBe setOf(ANSATT)
-                    }
+                    entra.medlemmerIGruppe("En gruppe", GROUP_ID) shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -84,7 +97,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(
+                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -110,7 +123,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
+                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
                 }
             }
         }

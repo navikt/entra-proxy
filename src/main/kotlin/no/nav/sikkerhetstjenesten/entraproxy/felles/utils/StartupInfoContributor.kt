@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.local
+import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
+import no.nav.sikkerhetstjenesten.felles.utils.extensions.TimeExtensions.local
 import org.springframework.boot.actuate.info.Info.Builder
 import org.springframework.boot.actuate.info.InfoContributor
 import org.springframework.context.ConfigurableApplicationContext

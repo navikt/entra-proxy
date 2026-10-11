@@ -4,7 +4,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions.TimeExtensions.format
+import no.nav.sikkerhetstjenesten.felles.utils.extensions.TimeExtensions.format
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes

@@ -7,25 +7,18 @@ import com.redis.testcontainers.RedisContainer.DEFAULT_IMAGE_NAME
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.AuthContext
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.CacheSizeAware
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterUtils.Companion.isProd
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_GRAPH_CACHE
@@ -37,6 +30,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
+import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
+import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
+import no.nav.sikkerhetstjenesten.felles.cache.ValkeyCacheOperations
+import no.nav.sikkerhetstjenesten.felles.cache.ValkeyEventListeningCacheOppfrisker
+import no.nav.sikkerhetstjenesten.felles.cache.getMany
+import no.nav.sikkerhetstjenesten.felles.cache.getOne
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.data.redis.test.autoconfigure.DataRedisTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -346,21 +350,6 @@ class ValkeyCacheOperationsTest(
             }
         }
 
-        Given("clear i prod-miljø") {
-            beforeEach {
-                mockkObject(ClusterUtils.Companion)
-                every { isProd } returns true
-            }
-            afterEach { unmockkObject(ClusterUtils.Companion) }
-
-            When("clear kalles") {
-                Then("kaster IllegalStateException fordi clear er blokkert i prod") {
-                    shouldThrow<IllegalStateException> { cache.clear(GRUPPER_FOR_ANSATT_GRAPH_CACHE) }
-                        .message shouldContain "prod"
-                }
-            }
-        }
-
         Given("graceful degradation ved Redis-feil") {
             When("getOne kalles mot utilgjengelig Redis") {
                 Then("returnerer null i stedet for å kaste exception") {
@@ -538,8 +527,8 @@ class ValkeyCacheOperationsTest(
         private val G2 = EntraGruppe("Gruppe 2")
         private val T1 = Tema("ABC")
         private val T2 = Tema("DEF")
-        private val E1 = Enhet(Enhet.Enhetnummer("1234"), "Enhet 1")
-        private val E2 = Enhet(Enhet.Enhetnummer("5678"), "Enhet 2")
+        private val E1 = Enhet(Enhetnummer("1234"), "Enhet 1")
+        private val E2 = Enhet(Enhetnummer("5678"), "Enhet 2")
         private val U1 = UtvidetAnsatt(A1, "Visning 1", "Fornavn 1", "Etternavn 1", TIdent("ABC1234"), "e1@test", E1)
         private val U2 = UtvidetAnsatt(A2, "Visning 2", "Fornavn 2", "Etternavn 2", TIdent("DEF5678"), "e2@test", E2)
         private val M1 = Ansatt(A1, "Visning 1", "Fornavn 1", "Etternavn 1")

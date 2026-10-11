@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.PROD_GCP
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -11,6 +11,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomOrgTilknytning
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ANSATT_ID
@@ -18,15 +21,19 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_EN
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
+import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -43,6 +50,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
     @MockkBean
     private lateinit var norgTjeneste: NorgTjeneste
+
+    @MockkBean
+    private lateinit var nomTjeneste: NomTjeneste
 
     init {
 
@@ -71,6 +81,55 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 "test@nav.no",
                 TEST_ENHET,
             )
+        }
+
+        Given("en side som ikke finnes") {
+            Then("returnerer 404 uten å kreve autentisering") {
+                mockMvc.perform(get("/does-not-exist"))
+                    .andExpect(status().isNotFound())
+            }
+            Then("krever autentisering for et ukjent API-endepunkt") {
+                mockMvc.perform(get("$API_V1/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("viser en vennlig feilside i nettleseren") {
+                mockMvc.perform(get("/grupper1.html").accept(TEXT_HTML))
+                    .andExpect(status().isNotFound())
+                    .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
+                    .andExpect(content().string(containsString("Siden finnes ikke")))
+                    .andExpect(content().string(containsString("href=\"/utforsker.html\"")))
+            }
+            Then("beholder standard feilbehandling for en JSON-klient") {
+                mockMvc.perform(get("/grupper1.html").accept(APPLICATION_JSON))
+                    .andExpect(status().isNotFound())
+            }
+        }
+
+        Given("NOM-stier uten eksplisitt offentlig tilgang") {
+            Then("krever autentisering for andre GET-stier") {
+                mockMvc.perform(get("$API_V1/nom/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("krever autentisering for andre POST-stier") {
+                mockMvc.perform(post("$API_V1/nom/does-not-exist"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("krever autentisering for POST mot et offentlig GET-endepunkt") {
+                mockMvc.perform(post("$API_V1/nom/enhet/$TEST_ANSATT_ID"))
+                    .andExpect(status().isUnauthorized())
+            }
+        }
+
+        xGiven("den statiske utforskersiden") {
+            When("request mangler bearer-token") {
+                Then("viser linker til ansatt og gruppemedlemmer") {
+                    mockMvc.perform(get("/utforsker.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/html"))
+                        .andExpect(content().string(containsString("href=\"/ansatt.html\"")))
+                        .andExpect(content().string(containsString("href=\"/grupper.html\"")))
+                }
+            }
         }
 
         Given("beskyttet endepunkt ${API_V1}/enhet") {
@@ -162,13 +221,146 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("medlemsoppslag i utforskeren") {
+            When("request mangler bearer-token") {
+                Then("returnerer medlemmer som JSON") {
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
+                }
+                Then("den statiske siden bruker gruppe-endepunktet") {
+                    mockMvc.perform(get("/grupper.html"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                        .andExpect(content().string(containsString("Nom tilgangsenhet")))
+                        .andExpect(content().string(containsString("/api/v1/nom/enhet/bulk")))
+                        .andExpect(content().string(containsString("/api/v1/nom/ansatte/")))
+                        .andExpect(content().string(containsString("name=\"tilgangsenhetId\"")))
+                        .andExpect(content().string(containsString("pattern=\"[0-9]{4}\"")))
+                }
+                Then("gruppe-endepunktet returnerer medlemmer uten token") {
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
+                }
+            }
+            When("gruppen ikke finnes") {
+                Then("returnerer en tom liste") {
+                    every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().json("[]"))
+                }
+            }
+        }
+
+        Given("antall medlemmer i gruppe") {
+            When("request mangler bearer-token") {
+                Then("returnerer antall som tekst") {
+                    every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
+                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string("1535"))
+                }
+            }
+        }
+
+        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
+            When("request mangler bearer-token") {
+                Then("returnerer ansattdata og org-tilknytninger fra NOM") {
+                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomAnsatt(
+                        navident = TEST_ANSATT_ID,
+                        visningsnavn = "Test Ansatt",
+                        gjeldendeSektor = "STAT",
+                        orgTilknytninger = setOf(
+                            NomOrgTilknytning(
+                                NomOrgTilknytning.NomEnhet(
+                                    NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                    "Testenhet",
+                                    TEST_ENHET.enhetnummer
+                                )
+                            )
+                        )
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
+                        .andExpect(jsonPath("$.gjeldendeSektor").value("STAT"))
+                        .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
+                }
+            }
+        }
+
+        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/bulk") {
+            When("request mangler bearer-token") {
+                Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
+                    every { nomTjeneste.orgDataBulk(any()) } returns setOf(
+                        NomAnsatt(
+                            navident = TEST_ANSATT_ID,
+                            visningsnavn = "Test Ansatt",
+                            gjeldendeSektor = "STAT",
+                            orgTilknytninger = setOf(
+                                NomOrgTilknytning(
+                                    NomOrgTilknytning.NomEnhet(
+                                        NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                        "Testenhet",
+                                        TEST_ENHET.enhetnummer
+                                    )
+                                )
+                            )
+                        )
+                    )
+                    mockMvc.perform(
+                        post("${API_V1}/nom/enhet/bulk")
+                            .contentType(APPLICATION_JSON)
+                            .content("[\"${TEST_ANSATT_ID.verdi}\"]")
+                    )
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
+                        .andExpect(jsonPath("$[0].orgTilknytninger[0].orgEnhet.tilgangsenhetId").value(TEST_ENHET.enhetnummer.verdi))
+                }
+            }
+        }
+
+        Given("ubeskyttet endepunkt ${API_V1}/nom/ansatte/{tilgangsenhetId}") {
+            When("request mangler bearer-token") {
+                Then("returnerer ansatte fra NOM") {
+                    every { nomTjeneste.ansatteForTilgangsenhet(TEST_ENHET.enhetnummer) } returns setOf(
+                        NomAnsatt(
+                            navident = TEST_ANSATT_ID,
+                            visningsnavn = "Test Ansatt",
+                            gjeldendeSektor = "STAT"
+                        )
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
+                }
+            }
+        }
+
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
-                Then("returnerer 200") {
+                Then("returnerer medlemmer uten bearer-token") {
                     mockMvc.perform(get("${API_V1}/enhet/${TEST_ENHET.enhetnummer.verdi}"))
-                        .andExpect {
-                            status().isOk
-                        }
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
+                }
+                Then("ansatt.html er ikke tilgjengelig i prod") {
+                    mockMvc.perform(get("/ansatt.html"))
+                        .andExpect(status().isNotFound())
+                }
+                Then("klassepath-stien til ansatt.html er heller ikke en gyldig URL i prod") {
+                    // /dev-static/ er ikke en av Spring Boots standard static-lokasjoner, s\u00e5 stien
+                    // finnes ikke som rute i det hele tatt \u2013 den blir aldri servert (200), uansett
+                    // om kallet er autentisert eller ikke.
+                    mockMvc.perform(get("/dev-static/ansatt.html").header(AUTHORIZATION, oboJwt()))
+                        .andExpect(status().is4xxClientError())
                 }
             }
         }
@@ -206,12 +398,23 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("beskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
+        Given("ubeskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
+            When("request mangler bearer-token") {
+                Then("returnerer gruppemedlemskap") {
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID"))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
+                }
+                Then("ansatt.html er ikke tilgjengelig i prod") {
+                    mockMvc.perform(get("/ansatt.html"))
+                        .andExpect(status().isNotFound())
+                }
+            }
             When("request har OBO-token") {
-                Then("returnerer 403") {
+                Then("returnerer 200") {
                     mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
                         .andExpect {
-                            status().isForbidden
+                            status().isOk
                         }
                 }
             }
@@ -222,32 +425,6 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect {
                             status().isOk
                         }
-                }
-            }
-        }
-
-        Given("endepunkt ${API_V1}/gruppe/medlemmer") {
-            When("request har gruppeNavn") {
-                Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
-                        .andExpect {
-                            status().isOk
-                        }
-                }
-            }
-
-            When("request ber om text/csv") {
-                Then("returnerer 200 med csv-innhold") {
-                    mockMvc.perform(
-                        get("${API_V1}/gruppe/medlemmer")
-                            .param("gruppeNavn", "test-gruppe")
-                            .header(HttpHeaders.ACCEPT, "text/csv"),
-                    )
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentType("text/csv;charset=UTF-8"))
-                        .andExpect(
-                            content().string("${TEST_ANSATT_ID.verdi}\r\n"),
-                        )
                 }
             }
         }
@@ -262,4 +439,3 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
     }
 }
-

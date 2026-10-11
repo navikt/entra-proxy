@@ -4,6 +4,8 @@
     "https://entraproxy.ansatt.dev.nav.no"
   ],
 
+  "nomgraph": "nom-api.nom",
+
   "groups" : {
           "disabled": "0cccfd66-b82d-4ccb-934d-340a07ca784b"
   },

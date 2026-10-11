@@ -1,12 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
-import io.opentelemetry.api.trace.Span
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import no.nav.sikkerhetstjenesten.felles.security.securityProblemDetail
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON_VALUE
-import org.springframework.http.ProblemDetail.forStatusAndDetail
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.stereotype.Component
@@ -21,15 +20,7 @@ class OAuth2JsonAuthenticationEntryPoint(private val mapper: JsonMapper) : Authe
         with(res) {
             status = UNAUTHORIZED.value()
             contentType = APPLICATION_PROBLEM_JSON_VALUE
-            mapper.writeValue(writer, securityProblemDetail())
+            mapper.writeValue(writer, securityProblemDetail(UNAUTHORIZED, "Bruker er ikke logget inn. Mangler Bearer token i Authorization header", TYPE_URI))
         }
     }
-
-    private fun securityProblemDetail() =
-        forStatusAndDetail(UNAUTHORIZED, "Bruker er ikke logget inn. Mangler Bearer token i Authorization header").apply {
-            type = TYPE_URI
-            title = "${UNAUTHORIZED.value()}"
-            properties = mapOf("traceId" to Span.current().spanContext.traceId)
-        }
-
 }

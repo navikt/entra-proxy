@@ -1,14 +1,23 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
+
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.OAuth2DownstreamUriCapturingInterceptor
-import no.nav.sikkerhetstjenesten.entraproxy.felles.utils.cluster.ClusterConstants.DEV
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
+import no.nav.sikkerhetstjenesten.felles.security.AbstractOAuth2JsonAccessDeniedHandler
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
+import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
+import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatusCode
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.http.SessionCreationPolicy.STATELESS
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
 import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler
@@ -20,16 +29,37 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
+import tools.jackson.databind.json.JsonMapper
 import java.net.URI
 
 
 @Configuration
 class OAuth2SecurityBeanConfig {
 
-    private val UNPROTECTED_ENDPOINTS = arrayOf("/$DEV/**", "/swagger-ui/**", "/v3/api-docs/**", "/monitoring/**","$API_V1/gruppe/**")
+    private val UNPROTECTED_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
+        arrayOf(
+            it.matcher(GET, "$API_V1/ansatt/{navIdent}"),
+            it.matcher(GET, "$API_V1/ansatt/tilganger/{navIdent}"),
+            it.matcher(GET, "$API_V1/gruppe/medlemmer"),
+            it.matcher(GET, "$API_V1/gruppe/antall"),
+            it.matcher(GET, "$API_V1/nom/enhet/{navIdent}"),
+            it.matcher(GET, "$API_V1/nom/ansatte/{tilgangsenhetId}"),
+            it.matcher(POST, "$API_V1/nom/enhet/bulk"),
+        )
+    }
+
+    @Bean
+    fun authContext() = AuthContext()
+
+    @Bean
+    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
+        object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
+            override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
+        }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity,
@@ -37,8 +67,9 @@ class OAuth2SecurityBeanConfig {
                             deniedHandler: AccessDeniedHandler,
                             entryPoint: AuthenticationEntryPoint) =
         http.authorizeHttpRequests { requests ->
-            requests.requestMatchers( *UNPROTECTED_ENDPOINTS).permitAll()
-            requests.anyRequest().authenticated()
+            requests.requestMatchers(*UNPROTECTED_ENDPOINTS).permitAll()
+            requests.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("$API_V1/**")).authenticated()
+            requests.anyRequest().permitAll()
         }
             .exceptionHandling {
                 it.accessDeniedHandler(deniedHandler)
@@ -52,26 +83,20 @@ class OAuth2SecurityBeanConfig {
             .stateless()
             .build()
 
-    private fun HttpSecurity.stateless() =
-        requestCache { it.disable() }
-            .sessionManagement { it.sessionCreationPolicy(STATELESS) }
-            .csrf { it.disable() }
-            .formLogin { it.disable() }
-            .httpBasic { it.disable() }
-            .logout { it.disable() }
-
 
     @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: LogbookClientHttpRequestInterceptor, handler: ErrorHandler) =
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager,  logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
-                    it.addFirst(OAuth2DownstreamUriCapturingInterceptor())
+                    logbookInterceptor.ifAvailable {
+                        interceptor -> it.add(interceptor)
+                    }
+                    it.addFirst(DownstreamUriCapturingInterceptor())
                     if (group.name() == GRAPH) {
                         it.add(headerAddingRequestInterceptor(HEADER_CONSISTENCY_LEVEL))
                     }
-                    it.addLast(logbook)
                 }
                 builder.defaultStatusHandler(HttpStatusCode::isError, handler::handle)
             }
@@ -100,10 +125,4 @@ class OAuth2SecurityBeanConfig {
 
 val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
 
-const val ROLES = "roles"
-const val CLIENT_CREDENTIALS = "access_as_application"
 private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
-
-
-
-

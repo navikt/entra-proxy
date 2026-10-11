@@ -63,6 +63,8 @@ spec:
         namespace: nais-system
       - application: norg2
         namespace: org
+      - application: nom-api
+        namespace: nom
     inbound:
       rules:
         {{#each inbound as |app|}}
@@ -75,8 +77,9 @@ spec:
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
+    - name: NOMGRAPH
+      value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE
       value: {{nais.cluster.cache}}
-

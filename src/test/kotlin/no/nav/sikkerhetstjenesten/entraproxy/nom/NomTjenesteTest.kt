@@ -74,7 +74,7 @@ class NomTjenesteTest : BehaviorSpec({
                 tjeneste.ansatteForNomIdent(NomIdent("xy123z")) shouldBe emptySet()
             }
         }
-       
+
          */
 
         When("serializing the employee for the existing pages") {

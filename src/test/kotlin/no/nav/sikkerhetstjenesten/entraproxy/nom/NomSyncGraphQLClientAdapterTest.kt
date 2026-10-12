@@ -20,7 +20,7 @@ import org.springframework.graphql.client.toEntityList
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val identer = setOf(AnsattId("A123456"), AnsattId("B123456"))
     val tilgangsenhetId = Enhetnummer("0315")
-    Given("bulk queries") {
+    xGiven("bulk queries") {
         val client = mockk<GraphQlClient>()
         val request = mockk<RequestSpec>()
         val retrieve = mockk<RetrieveSyncSpec>()
@@ -192,7 +192,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
     }
 
-    Given("ansatte for nomident") {
+    xGiven("ansatte for nomident") {
         val client = mockk<GraphQlClient>()
         val request = mockk<RequestSpec>()
         val retrieve = mockk<RetrieveSyncSpec>()

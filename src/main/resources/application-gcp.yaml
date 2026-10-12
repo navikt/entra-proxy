@@ -113,6 +113,9 @@ graph:
 norg:
   varighet: 3h
 
+nom:
+  varighet: 3h
+
 medlemmer:
     varighet: 3h
 

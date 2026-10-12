@@ -16,12 +16,12 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt()
 
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt> =
-        hentRessurser(BULK_TILKNYTNINGER_QUERY, identer(identer.map { it.verdi }.toSet()))
+        ressurser(BULK_TILKNYTNINGER_QUERY, identer(identer.map { it.verdi }.toSet()))
 
     override fun ansatteForTilgangsenhet(enhet: Enhetnummer): Set<NomAnsatt> =
-        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
+        ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
 
-    private fun hentRessurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
+    private fun ressurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
         client.documentName(query.first)
             .variables(variabler)
             .retrieveSync(query.second)

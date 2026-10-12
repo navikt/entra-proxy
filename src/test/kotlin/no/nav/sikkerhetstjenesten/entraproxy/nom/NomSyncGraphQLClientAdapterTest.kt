@@ -151,7 +151,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("the tilgangsenhetId variable is sent and all employees are returned") {
-                adapter.ansatteForEenhet(tilgangsenhetId) shouldBe setOf(
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
                     NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor),
                     NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
                 )
@@ -164,7 +164,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
             Then("an empty set is returned") {
-                adapter.ansatteForEenhet(tilgangsenhetId) shouldBe emptySet()
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe emptySet()
             }
         }
 
@@ -174,7 +174,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
-                adapter.ansatteForEenhet(tilgangsenhetId) shouldBe setOf(
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
                     NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
                 )
             }
@@ -186,7 +186,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.ansatteForEenhet(tilgangsenhetId)
+                    adapter.ansatteForEnhet(tilgangsenhetId)
                 } shouldBe failure
             }
         }

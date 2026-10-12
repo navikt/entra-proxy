@@ -53,12 +53,12 @@ class NomTjenesteCacheTest(
             }
 
             When("the same tilgangsenhet is looked up twice") {
-                every { nom.ansatteForEenhet(enhet) } returns setOf(ansatt)
+                every { nom.ansatteForEnhet(enhet) } returns setOf(ansatt)
 
                 Then("the port is queried only once") {
                     tjeneste.ansatteForTilgangsenhet(enhet) shouldBe setOf(ansatt)
                     tjeneste.ansatteForTilgangsenhet(enhet) shouldBe setOf(ansatt)
-                    verify(exactly = 1) { nom.ansatteForEenhet(enhet) }
+                    verify(exactly = 1) { nom.ansatteForEnhet(enhet) }
                 }
             }
 

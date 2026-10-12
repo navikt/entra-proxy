@@ -46,7 +46,7 @@ class NomTjenesteTest : BehaviorSpec({
         }
 
         When("looking up employees for an access unit") {
-            every { nom.ansatteForEenhet(enhetsnummer) } returns setOf(ansatt)
+            every { nom.ansatteForEnhet(enhetsnummer) } returns setOf(ansatt)
 
             Then("the service returns the employee data") {
                 tjeneste.ansatteForTilgangsenhet(enhetsnummer) shouldBe setOf(ansatt)
@@ -55,7 +55,7 @@ class NomTjenesteTest : BehaviorSpec({
 
         When("the result is empty") {
             every { nom.ansatte(emptySet()) } returns emptySet()
-            every { nom.ansatteForEenhet(Enhetnummer("1234")) } returns emptySet()
+            every { nom.ansatteForEnhet(Enhetnummer("1234")) } returns emptySet()
 
             Then("the service preserves empty results") {
                 tjeneste.orgDataBulk(emptySet()) shouldBe emptySet()

@@ -24,7 +24,6 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
             log.trace("Hentet alle ${identer.size} ansatte fra CACHE")
             return fraCache.values.toSet()
         }
-        // Hent de som ikke finnes i cache fra NOM
         val mangler = identer.filterNot { it.verdi in fraCache }
         log.trace("Henter ${mangler.size} ansatt(e) som ikke finnes i CACHE fra NOM")
         val fraNom = ressurser(BULK_TILKNYTNINGER_QUERY, identer(mangler.map { it.verdi }.toSet()))
@@ -32,12 +31,12 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         return fraCache.values.toSet() + fraNom
     }
 
-    override fun ansatteForEenhet(enhet: Enhetnummer): Set<NomAnsatt> {
+    override fun ansatteForEnhet(enhet: Enhetnummer): Set<NomAnsatt> {
         return ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
 
     }
 
-    private fun ressurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
+    private fun ressurser(query: Pair<String, String>, variabler: Map<String, Any>)  =
         client.documentName(query.first)
             .variables(variabler)
             .retrieveSync(query.second)
@@ -46,7 +45,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
             .toSet()
 
     private fun fraCache(identer: Set<AnsattId>) =
-        cache.getMany<NomAnsatt>(NOM_CACHE, identer.map { it.verdi }.toSet())
+        cache.getMany<NomAnsatt>(NOM_CACHE, buildSet { identer.forEach { add(it.verdi) } })
             .filterValues { it != null }
             .mapValues { it.value!! }.also {
                 log.trace("Hentet ${it.size} ansatte(er) av ${identer.size} mulige fra CACHE")

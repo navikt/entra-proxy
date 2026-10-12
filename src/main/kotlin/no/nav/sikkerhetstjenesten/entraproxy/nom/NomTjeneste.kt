@@ -16,8 +16,8 @@ class NomTjeneste(private val nom: NomPort) {
     fun orgDataBulk(identer: Set<AnsattId>): Set<NomAnsatt> =
         nom.ansatte(identer)
 
-    @Cacheable(cacheNames = [NOMGRAPH], key = "#tilgangsenhetId.verdi")
-    fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
-        nom.ansatteForEenhet(tilgangsenhetId)
+    @Cacheable(cacheNames = [NOMGRAPH], key = "#enhet.verdi")
+    fun ansatteForTilgangsenhet(enhet: Enhetnummer): Set<NomAnsatt> =
+        nom.ansatteForEnhet(enhet)
 
 }

@@ -8,8 +8,10 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOM_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.GraphQlClient.RequestSpec
 import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
@@ -22,11 +24,49 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         val client = mockk<GraphQlClient>()
         val request = mockk<RequestSpec>()
         val retrieve = mockk<RetrieveSyncSpec>()
-        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
+        val cache = mockk<CacheOperations>(relaxed = true)
+        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
 
         every { client.documentName("orgtilknytninger-bulk") } returns request
         every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
         every { request.retrieveSync("ressurser") } returns retrieve
+        When("all idents are found in cache") {
+            val cachedA = NomAnsatt(AnsattId("A123456"), "Cached A", "STAT")
+            val cachedB = NomAnsatt(AnsattId("B123456"), "Cached B", "STAT")
+            val strengClient = mockk<GraphQlClient>()
+            val cacheMedAlle = mockk<CacheOperations>(relaxed = true)
+            val adapterMedAlle = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), strengClient, cacheMedAlle)
+            every { cacheMedAlle.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
+                mapOf("A123456" to cachedA, "B123456" to cachedB)
+
+            Then("all employees are returned from cache without querying NOM") {
+                adapterMedAlle.ansatte(identer) shouldBe setOf(cachedA, cachedB)
+            }
+        }
+
+        When("only some idents are found in cache") {
+            val cachedA = NomAnsatt(AnsattId("A123456"), "Cached A", "STAT")
+            val lokalClient = mockk<GraphQlClient>()
+            val lokalRequest = mockk<RequestSpec>()
+            val lokalRetrieve = mockk<RetrieveSyncSpec>()
+            val cacheMedTreff = mockk<CacheOperations>(relaxed = true)
+            val adapterMedTreff = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), lokalClient, cacheMedTreff)
+            every { cacheMedTreff.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
+                mapOf("A123456" to cachedA)
+            every { lokalClient.documentName("orgtilknytninger-bulk") } returns lokalRequest
+            every { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) } returns lokalRequest
+            every { lokalRequest.retrieveSync("ressurser") } returns lokalRetrieve
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
+            every { lokalRetrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
+
+            Then("only the missing idents are fetched from NOM and merged with the cache hits") {
+                val forventetB = NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                adapterMedTreff.ansatte(identer) shouldBe setOf(cachedA, forventetB)
+                verify { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) }
+                verify { cacheMedTreff.putMany(NOM_CACHE, mapOf("B123456" to forventetB)) }
+            }
+        }
+
         When("the response contains resources") {
             val tilknytninger = setOf(
                 NomOrgTilknytning(
@@ -97,7 +137,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         val client = mockk<GraphQlClient>()
         val request = mockk<RequestSpec>()
         val retrieve = mockk<RetrieveSyncSpec>()
-        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
+        val cache = mockk<CacheOperations>(relaxed = true)
+        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
 
         every { client.documentName("ansatte-for-tilgangsenhet") } returns request
         every { request.variables(mapOf("tilgangsenhetId" to "0315")) } returns request

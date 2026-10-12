@@ -14,10 +14,11 @@ class NomGraphQLConfig(@Value($$"${nomgraph}") nomHost: String,
     CachableRestConfig, RestConfig(URI.create("http://$nomHost$DEFAULT_GRAPHQL_PATH"), "", NOMGRAPH) {
 
     override val navn = name
-    override val caches = setOf(CacheNøkkelConfig(NOMGRAPH))
+    override val caches = setOf(NOM_CACHE)
 
     companion object {
         const val NOMGRAPH = "nomgraph"
+        val NOM_CACHE = CacheNøkkelConfig(NOMGRAPH)
         private const val DEFAULT_GRAPHQL_PATH = "/graphql"
     }
 }

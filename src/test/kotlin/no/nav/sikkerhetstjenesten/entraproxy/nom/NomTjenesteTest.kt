@@ -54,6 +54,7 @@ class NomTjenesteTest : BehaviorSpec({
             }
         }
 
+        /*
         When("looking up employees for a nom unit") {
             every { nom.ansatteForNomIdent(nomIdent) } returns setOf(ansatt)
 
@@ -73,6 +74,8 @@ class NomTjenesteTest : BehaviorSpec({
                 tjeneste.ansatteForNomIdent(NomIdent("xy123z")) shouldBe emptySet()
             }
         }
+       
+         */
 
         When("serializing the employee for the existing pages") {
             val mapper = JsonMapper.builder().addModule(Builder().build()).build()

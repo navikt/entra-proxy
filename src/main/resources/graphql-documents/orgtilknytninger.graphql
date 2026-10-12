@@ -4,6 +4,7 @@ query orgtilknytninger($navident: String!) {
         visningsnavn
         gjeldendeSektor
         orgTilknytninger (utvalg: AKTIVE) {
+            erDagligOppfolging
             orgEnhet {
                 id
                 navn

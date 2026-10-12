@@ -2,7 +2,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -115,7 +116,12 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @GetMapping("nom/ansatte/{tilgangsenhetId}")
     @Operation(summary = "Hent ansatte i en tilgangsenhet fra NOM")
     fun ansatteForTilgangsenhet(@PathVariable tilgangsenhetId: Enhetnummer) =
-        nom.ansatteForTilgangsenhet(tilgangsenhetId)
+        nom.ansatteForEnhet(tilgangsenhetId)
+
+    @GetMapping("nom/ansatte/enhet/{nomId}")
+    @Operation(summary = "Hent ansatte i en nom-enhet og underliggende enheter fra NOM")
+    fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =
+        nom.ansatteForNomIdent(nomId)
 
     companion object {
         const val API_V1 = "/api/v1"

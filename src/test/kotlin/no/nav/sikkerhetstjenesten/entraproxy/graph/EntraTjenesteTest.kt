@@ -3,8 +3,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheTestConfig
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CaffeineCacheOperations
+import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER

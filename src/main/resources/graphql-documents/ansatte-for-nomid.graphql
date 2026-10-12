@@ -1,0 +1,21 @@
+query ansatteIEnheterUnderNomId($organisertUnderOrgEnhetId: String!) {
+    orgEnheter(filter:  {
+        organiseringSelection: UNDER_ANGITT_ORGENHET,
+        organisertUnderOrgEnhetId:  $organisertUnderOrgEnhetId,
+        periodiskUtvalg: AKTIVE,
+        lovnodeSelection: LOVNODE_ENHET
+    }) {
+        orgEnhet {
+            id
+            navn
+            orgTilknytninger (utvalg: AKTIVE) {
+                ressurs {
+                    navident
+                    visningsnavn
+                    gjeldendeSektor
+                }
+                erDagligOppfolging
+            }
+        }
+    }
+}

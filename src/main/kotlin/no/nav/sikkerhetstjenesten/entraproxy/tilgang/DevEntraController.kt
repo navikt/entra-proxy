@@ -2,7 +2,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -32,6 +33,10 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
     fun orgDataBulk(@RequestBody identer: Set<AnsattId>) =
         nom.orgDataBulk(identer)
 
+    @GetMapping("/nom/enhet/{nomId}")
+    fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =
+        nom.ansatteForNomIdent(nomId)
+
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
         oidTjeneste.ansattOid(navIdent)?.let {
@@ -55,7 +60,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("navn/{enhetsnummer}")
     fun norgNavn(@PathVariable enhetsnummer: Enhetnummer) =
-       norgTjeneste.navnFor(enhetsnummer)
+       norgTjeneste.navn(enhetsnummer)
 
     @GetMapping("tema/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =

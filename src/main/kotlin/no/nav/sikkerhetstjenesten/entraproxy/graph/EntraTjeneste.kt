@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
+import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -95,7 +95,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                         surname,
                         TIdent(jobTitle ?: TIDENT_DEFAULT),
                         mail,
-                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer))
+                        Enhet(enhetsNummer, norg.navn(enhetsNummer))
                     ).also {
                         log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
                     }
@@ -157,7 +157,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 Enhetnummer(it.displayName)
             }
             .parallelStream()
-            .map { Enhet(it, norg.navnFor(it)) }
+            .map { Enhet(it, norg.navn(it)) }
             .collect(toSet())
 
     private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {

@@ -135,8 +135,8 @@
     </form>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
-            <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet</label>
-            <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" required placeholder="4 siffer">
+            <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
+            <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text" pattern="[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]" minlength="4" maxlength="6" required placeholder="4 siffer (tilgangsenhet) eller 6 tegn (enhet)">
         </div>
         <div class="sok-knapper">
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
@@ -430,8 +430,10 @@
                     return;
                 }
                 const verdi = input.value.trim();
+                const erTilgangsenhet = /^[0-9]{4}$/.test(verdi);
+                const erNomEnhet = /^[a-z]{2}[0-9]{3}[a-z]$/.test(verdi);
                 const sokId = ++sisteSok;
-                const gruppeNavn = erNomSok ? `Nom tilgangsenhet ${verdi}` : verdi;
+                const gruppeNavn = erNomSok ? (erNomEnhet ? `Nom-enhet ${verdi}` : `Nom tilgangsenhet ${verdi}`) : verdi;
                 panel.dataset.populert = 'false';
                 gruppemedlemmer.delete(panel);
                 oppdaterFellesMedlemmer();
@@ -440,8 +442,8 @@
                     sokStatus.classList.remove('error');
                 }
 
-                if (erNomSok ? !/^[0-9]{4}$/.test(verdi) : !verdi) {
-                    status.textContent = erNomSok ? 'Skriv inn en tilgangsenhetId med 4 siffer.' : 'Skriv inn et gruppenavn.';
+                if (erNomSok ? !(erTilgangsenhet || erNomEnhet) : !verdi) {
+                    status.textContent = erNomSok ? 'Skriv inn en tilgangsenhetId (4 siffer) eller en nom-enhet (6 tegn).' : 'Skriv inn et gruppenavn.';
                     status.classList.add('error');
                     return;
                 }
@@ -465,7 +467,7 @@
 
                 try {
                     const url = erNomSok
-                        ? `/api/v1/nom/ansatte/${verdi}`
+                        ? (erNomEnhet ? `/api/v1/nom/ansatte/enhet/${verdi}` : `/api/v1/nom/ansatte/${verdi}`)
                         : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`;
                     const response = await fetch(url, {
                         headers: {'Accept': 'application/json'}
@@ -492,13 +494,13 @@
                     if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
                         throw new Error('Uventet respons: mangler nav-ident eller navn.');
                     }
-                    const enhetsnavn = erNomSok
+                    const enhetsnavn = (erNomSok && erTilgangsenhet)
                         ? resultat.flatMap(ressurs => ressurs.orgTilknytninger ?? [])
                             .find(tilknytning => tilknytning.orgEnhet?.tilgangsenhetId === verdi
                                 && typeof tilknytning.orgEnhet.navn === 'string'
                                 && tilknytning.orgEnhet.navn.trim())?.orgEnhet.navn
                         : undefined;
-                    const resultatnavn = erNomSok ? enhetsnavn ?? `tilgangsenhet ${verdi}` : gruppeNavn;
+                    const resultatnavn = erNomSok ? (enhetsnavn ?? (erNomEnhet ? `nom-enhet ${verdi}` : `tilgangsenhet ${verdi}`)) : gruppeNavn;
                     gruppemedlemmer.set(panel, medlemmer);
                     panel.dataset.gruppeNavn = gruppeNavn;
                     panel.dataset.populert = 'true';

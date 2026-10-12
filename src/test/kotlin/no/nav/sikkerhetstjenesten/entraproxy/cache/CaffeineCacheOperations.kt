@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
+package no.nav.sikkerhetstjenesten.entraproxy.cache
 
+import com.github.benmanes.caffeine.cache.Cache
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.slf4j.LoggerFactory.getLogger
@@ -53,7 +54,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     override fun clear(cache: CacheNøkkelConfig): Long {
         val springCache = cacheManager.getCache(cache.name) ?: return 0L
-        val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
+        val nativeCache = springCache.nativeCache as Cache<*, *>
         return if (cache.extraPrefix == null) {
             val deleted = nativeCache.estimatedSize()
             springCache.clear()
@@ -73,7 +74,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         caches.associate { cache ->
             val springCache = cacheManager.getCache(cache.name) ?: error("Cache $cache ikke funnet")
             val count = run {
-                val nativeCache = springCache.nativeCache as com.github.benmanes.caffeine.cache.Cache<*, *>
+                val nativeCache = springCache.nativeCache as Cache<*, *>
                 if (cache.extraPrefix == null) {
                     nativeCache.estimatedSize()
                 } else {

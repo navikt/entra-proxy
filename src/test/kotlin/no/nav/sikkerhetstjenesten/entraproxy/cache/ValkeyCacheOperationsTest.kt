@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
+package no.nav.sikkerhetstjenesten.entraproxy.cache
 
 
 import com.ninjasquad.springmockk.MockkBean
@@ -14,7 +14,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.verify
-import no.nav.sikkerhetstjenesten.entraproxy.felles.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
+import no.nav.sikkerhetstjenesten.entraproxy.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
@@ -51,7 +51,7 @@ import org.springframework.data.redis.cache.RedisCacheManager.builder
 import org.springframework.data.redis.config.RedisListenerConfigurer
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.data.redis.serializer.RedisMessageConverters
+import org.springframework.data.redis.serializer.RedisMessageConverters.Builder
 import org.springframework.test.context.ContextConfiguration
 import java.time.Duration.ofSeconds
 import java.util.UUID
@@ -79,7 +79,7 @@ class ValkeyCacheOperationsTest(
             CacheNøkkelConfig(NORG),
         )
 
-        override fun configureMessageConverters(builder: RedisMessageConverters.Builder) {
+        override fun configureMessageConverters(builder: Builder) {
             builder.addCustomConverter(CacheNøkkelMessageConverter())
         }
 
@@ -533,8 +533,8 @@ class ValkeyCacheOperationsTest(
         private val U2 = UtvidetAnsatt(A2, "Visning 2", "Fornavn 2", "Etternavn 2", TIdent("DEF5678"), "e2@test", E2)
         private val M1 = Ansatt(A1, "Visning 1", "Fornavn 1", "Etternavn 1")
         private val M2 = Ansatt(A2, "Visning 2", "Fornavn 2", "Etternavn 2")
-        private val O1 = java.util.UUID.fromString("11111111-1111-1111-1111-111111111111")
-        private val O2 = java.util.UUID.fromString("22222222-2222-2222-2222-222222222222")
+        private val O1 = UUID.fromString("11111111-1111-1111-1111-111111111111")
+        private val O2 = UUID.fromString("22222222-2222-2222-2222-222222222222")
 
         private val ALL_TEST_CACHES = setOf(
             GRUPPER_FOR_ANSATT_GRAPH_CACHE,

@@ -11,9 +11,11 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomAnsatt
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomOrgTilknytning
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ANSATT_ID
@@ -276,8 +278,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         gjeldendeSektor = "STAT",
                         orgTilknytninger = setOf(
                             NomOrgTilknytning(
-                                NomOrgTilknytning.NomEnhet(
-                                    NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                NomEnhet(
+                                    NomIdent("ra656d"),
                                     "Testenhet",
                                     TEST_ENHET.enhetnummer
                                 )
@@ -304,8 +306,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             gjeldendeSektor = "STAT",
                             orgTilknytninger = setOf(
                                 NomOrgTilknytning(
-                                    NomOrgTilknytning.NomEnhet(
-                                        NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                                    NomEnhet(
+                                        NomIdent("ra656d"),
                                         "Testenhet",
                                         TEST_ENHET.enhetnummer
                                     )

@@ -1,6 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLConfig.Companion.NOMGRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor

@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.utils.extensions
+package no.nav.sikkerhetstjenesten.entraproxy.utils.extensions
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe

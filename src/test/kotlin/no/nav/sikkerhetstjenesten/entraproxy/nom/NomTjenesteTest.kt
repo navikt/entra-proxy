@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
@@ -6,8 +6,10 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.KotlinModule
+import tools.jackson.module.kotlin.KotlinModule.Builder
 
 class NomTjenesteTest : BehaviorSpec({
     val nom = mockk<NomPort>()
@@ -16,8 +18,8 @@ class NomTjenesteTest : BehaviorSpec({
     val enhetsnummer = Enhetnummer("0315")
     val tilknytninger = setOf(
         NomOrgTilknytning(
-            NomOrgTilknytning.NomEnhet(
-                NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+            NomEnhet(
+                NomIdent("ra656d"),
                 "Testenhet",
                 enhetsnummer
             )
@@ -62,7 +64,7 @@ class NomTjenesteTest : BehaviorSpec({
         }
 
         When("serializing the employee for the existing pages") {
-            val mapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+            val mapper = JsonMapper.builder().addModule(Builder().build()).build()
 
             Then("the JSON structure is unchanged") {
                 mapper.readTree(mapper.writeValueAsString(ansatt)) shouldBe mapper.readTree(

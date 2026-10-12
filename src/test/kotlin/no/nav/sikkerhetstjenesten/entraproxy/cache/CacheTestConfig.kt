@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.cache
+package no.nav.sikkerhetstjenesten.entraproxy.cache
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import org.springframework.boot.test.context.TestConfiguration

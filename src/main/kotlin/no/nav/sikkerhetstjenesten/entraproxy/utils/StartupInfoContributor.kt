@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.utils
+package no.nav.sikkerhetstjenesten.entraproxy.utils
 
 import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
 import no.nav.sikkerhetstjenesten.felles.utils.extensions.TimeExtensions.local

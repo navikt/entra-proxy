@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer

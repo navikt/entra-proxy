@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste

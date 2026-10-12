@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -8,7 +8,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import org.springframework.graphql.client.GraphQlClient
+import org.springframework.graphql.client.GraphQlClient.RequestSpec
+import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
 import org.springframework.graphql.client.toEntityList
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
@@ -16,8 +20,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val tilgangsenhetId = Enhetnummer("0315")
     Given("bulk queries") {
         val client = mockk<GraphQlClient>()
-        val request = mockk<GraphQlClient.RequestSpec>()
-        val retrieve = mockk<GraphQlClient.RetrieveSyncSpec>()
+        val request = mockk<RequestSpec>()
+        val retrieve = mockk<RetrieveSyncSpec>()
         val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
 
         every { client.documentName("orgtilknytninger-bulk") } returns request
@@ -26,8 +30,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         When("the response contains resources") {
             val tilknytninger = setOf(
                 NomOrgTilknytning(
-                    NomOrgTilknytning.NomEnhet(
-                        NomOrgTilknytning.NomEnhet.NomIdent("ra656d"),
+                    NomEnhet(
+                        NomIdent("ra656d"),
                         "Testenhet",
                         tilgangsenhetId
                     )
@@ -91,8 +95,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
     Given("ansatte for tilgangsenhet") {
         val client = mockk<GraphQlClient>()
-        val request = mockk<GraphQlClient.RequestSpec>()
-        val retrieve = mockk<GraphQlClient.RetrieveSyncSpec>()
+        val request = mockk<RequestSpec>()
+        val retrieve = mockk<RetrieveSyncSpec>()
         val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client)
 
         every { client.documentName("ansatte-for-tilgangsenhet") } returns request

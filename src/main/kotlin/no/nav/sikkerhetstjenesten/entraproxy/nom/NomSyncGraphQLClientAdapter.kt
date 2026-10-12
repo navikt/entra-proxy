@@ -1,6 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLConfig.Companion.NOMGRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter

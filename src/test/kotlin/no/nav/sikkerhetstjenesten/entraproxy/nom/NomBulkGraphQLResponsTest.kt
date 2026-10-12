@@ -1,12 +1,12 @@
-package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
+package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.KotlinModule
+import tools.jackson.module.kotlin.KotlinModule.Builder
 
 class NomBulkGraphQLResponsTest : BehaviorSpec({
-    val mapper = JsonMapper.builder().addModule(KotlinModule.Builder().build()).build()
+    val mapper = JsonMapper.builder().addModule(Builder().build()).build()
 
     Given("a bulk response element from NOM") {
         When("ressurs is missing") {

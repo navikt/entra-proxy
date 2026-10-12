@@ -12,7 +12,7 @@ import java.time.Duration
 
 @Component
 class NorgConfig(@Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl: URI,
-                @param:Value("\${norg.varighet:3h}") override val varighet: Duration) : CachableRestConfig, RestConfig(baseUrl, PING_PATH, NORG) {
+                @param:Value($$"${norg.varighet:3h}") override val varighet: Duration) : CachableRestConfig, RestConfig(baseUrl, PING_PATH, NORG) {
     override val navn = name
     override val caches = setOf(CacheNøkkelConfig(NORG))
 

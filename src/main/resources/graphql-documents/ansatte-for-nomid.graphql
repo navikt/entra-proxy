@@ -1,7 +1,7 @@
-query ansatteIEnheterUnderNomId($nomId: String!) {
+query ansatteIEnheterUnderNomId($organisertUnderOrgEnhetId: String!) {
     orgEnheter(filter:  {
         organiseringSelection: UNDER_ANGITT_ORGENHET,
-        organisertUnderOrgEnhetId:  $nomId,
+        organisertUnderOrgEnhetId:  $organisertUnderOrgEnhetId,
         periodiskUtvalg: AKTIVE,
         lovnodeSelection: LOVNODE_ENHET
     }) {

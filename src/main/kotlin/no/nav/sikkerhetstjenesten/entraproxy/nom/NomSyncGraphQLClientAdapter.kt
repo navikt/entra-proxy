@@ -72,7 +72,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
     private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
 
     private companion object {
-        private const val NOMIDENT = "nomId"
+        private const val NOMIDENT = "organisertUnderOrgEnhetId"
         private const val IDENT = "navident"
         private const val IDENTER = "navidenter"
         private const val TILGANGSENHET = "tilgangsenhetId"

@@ -3,8 +3,9 @@ package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import org.springframework.stereotype.Service
+import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 
-@Service
+@RestRetryingWhenRecoverableService
 class NomTjeneste(private val nom: NomPort) {
 
 

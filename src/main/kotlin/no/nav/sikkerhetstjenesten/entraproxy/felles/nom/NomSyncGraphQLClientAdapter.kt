@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.felles.nom
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter
@@ -9,7 +10,7 @@ import org.springframework.graphql.client.toEntityList
 import org.springframework.stereotype.Component
 
 @Component
-class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLConfig.NOMGRAPH) client: GraphQlClient) : AbstractSyncGraphQLClientAdapter(cfg, client), NomPort {
+class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient) : AbstractSyncGraphQLClientAdapter(cfg, client), NomPort {
 
     override fun ansatt(ident: AnsattId): NomAnsatt =
         queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt()
@@ -17,8 +18,8 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NomGraphQLCo
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt> =
         hentRessurser(BULK_TILKNYTNINGER_QUERY, identer(identer.map { it.verdi }.toSet()))
 
-    override fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
-        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(tilgangsenhetId.verdi))
+    override fun ansatteForTilgangsenhet(enhet: Enhetnummer): Set<NomAnsatt> =
+        hentRessurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
 
     private fun hentRessurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
         client.documentName(query.first)

@@ -18,6 +18,6 @@ class NomTjeneste(private val nom: NomPort) {
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#root.methodName + ':' + #tilgangsenhetId.verdi")
     fun ansatteForTilgangsenhet(tilgangsenhetId: Enhetnummer): Set<NomAnsatt> =
-        nom.ansatteForTilgangsenhet(tilgangsenhetId)
+        nom.ansatteForEenhet(tilgangsenhetId)
 
 }

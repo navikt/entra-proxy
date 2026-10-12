@@ -18,7 +18,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt> =
         ressurser(BULK_TILKNYTNINGER_QUERY, identer(identer.map { it.verdi }.toSet()))
 
-    override fun ansatteForTilgangsenhet(enhet: Enhetnummer): Set<NomAnsatt> =
+    override fun ansatteForEenhet(enhet: Enhetnummer): Set<NomAnsatt> =
         ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
 
     private fun ressurser(query: Pair<String, String>, variabler: Map<String, Any>): Set<NomAnsatt> =
@@ -39,9 +39,9 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"
         private val TILGANGSENHET_ANSATTE_QUERY = "ansatte-for-tilgangsenhet" to "ressurser"
 
-        private fun ident(navident: String) = mapOf(IDENT to navident)
-        private fun identer(navidenter: Set<String>) = mapOf(IDENTER to navidenter)
-        private fun tilgangsenhet(tilgangsenhetId: String) = mapOf(TILGANGSENHET to tilgangsenhetId)
+        private fun ident(ident: String) = mapOf(IDENT to ident)
+        private fun identer(identer: Set<String>) = mapOf(IDENTER to identer)
+        private fun tilgangsenhet(enhetId: String) = mapOf(TILGANGSENHET to enhetId)
 
 
 

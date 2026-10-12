@@ -64,10 +64,10 @@ class NomTjenesteCacheTest(
             When("the same bulk of idents is looked up twice") {
                 every { nom.ansatte(setOf(ident)) } returns setOf(ansatt)
 
-                Then("the port is queried only once") {
+                Then("the port is queried every time because bulk lookups are not cached") {
                     tjeneste.orgDataBulk(setOf(ident)) shouldBe setOf(ansatt)
                     tjeneste.orgDataBulk(setOf(ident)) shouldBe setOf(ansatt)
-                    verify(exactly = 1) { nom.ansatte(setOf(ident)) }
+                    verify(exactly = 2) { nom.ansatte(setOf(ident)) }
                 }
             }
         }

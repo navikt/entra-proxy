@@ -1,0 +1,541 @@
+{
+  "orgEnheter": [
+    {
+      "orgEnhet": {
+        "id": "fa515j",
+        "navn": "Arbeidsgiverseksjonen",
+        "orgTilknytninger": [
+          {
+            "ressurs": {
+              "navident": "H176430",
+              "visningsnavn": "Anita Haugen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S109104",
+              "visningsnavn": "Gunvor Sverdrup",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M122948",
+              "visningsnavn": "Aisha Mehdi",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S111042",
+              "visningsnavn": "Rune Sevatdal",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "T110709",
+              "visningsnavn": "Harald Torgersen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H143768",
+              "visningsnavn": "Mari Katrine B Hoff",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "B139849",
+              "visningsnavn": "Katrine Bjærum",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M145664",
+              "visningsnavn": "Maria Mathisen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S178904",
+              "visningsnavn": "Hanna Stien",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "O176429",
+              "visningsnavn": "Øivin Køber Opstad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K105165",
+              "visningsnavn": "Liv-Grethe Kolberg",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "L119227",
+              "visningsnavn": "Marit Lillehammer",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "N178574",
+              "visningsnavn": "Katrine Nilsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "J118075",
+              "visningsnavn": "Knut Ove Jevne",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "G146544",
+              "visningsnavn": "Anette Mittet Gjertsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M178903",
+              "visningsnavn": "Sayumi Morita",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "A172672",
+              "visningsnavn": "Mari Alstad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "orgEnhet": {
+        "id": "ke465u",
+        "navn": "HMS- og styringsseksjonen",
+        "orgTilknytninger": [
+          {
+            "ressurs": {
+              "navident": "D154627",
+              "visningsnavn": "Kine Sunde Dragnes",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M162828",
+              "visningsnavn": "Sølvi Agnete Minde",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "N129323",
+              "visningsnavn": "Miriam Valerio Nordgård",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "N110704",
+              "visningsnavn": "Vivi Cesilie Næss",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "N179235",
+              "visningsnavn": "Zsuzsanna Noszlopi",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S110401",
+              "visningsnavn": "Jessica Sandh",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H177836",
+              "visningsnavn": "Kristine Guldvog Haider",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S175550",
+              "visningsnavn": "Marie Lorentsen Strømstad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "W178042",
+              "visningsnavn": "Einar Wisth",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "L118542",
+              "visningsnavn": "Nelly Ann Lindland",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "A100262",
+              "visningsnavn": "Angelica Almlid Barrows",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "F144278",
+              "visningsnavn": "Linn Renate Fredriksen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R164221",
+              "visningsnavn": "Rasa Smestad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R167524",
+              "visningsnavn": "Ingun Elisabeth Rosenberg",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K178389",
+              "visningsnavn": "Heidi Skyberg Knutsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R107827",
+              "visningsnavn": "Viggo Røberg",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "O113979",
+              "visningsnavn": "Birthe Olsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "orgEnhet": {
+        "id": "de122m",
+        "navn": "Seksjon for kompetanseutvikling",
+        "orgTilknytninger": [
+          {
+            "ressurs": {
+              "navident": "R175872",
+              "visningsnavn": "Anne Røkenes",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "W178280",
+              "visningsnavn": "Elin Stabell Wiggen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H178915",
+              "visningsnavn": "Vilde Heimdal",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "T168579",
+              "visningsnavn": "Hilde Huse Tautra",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S178902",
+              "visningsnavn": "Henriette Berg Sandlie",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "G144064",
+              "visningsnavn": "Lise Gurine Gleditsch",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R115897",
+              "visningsnavn": "Bente Reed",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M106462",
+              "visningsnavn": "Odd Inge Myhre",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "O178914",
+              "visningsnavn": "Turid Fjeld Olsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K176358",
+              "visningsnavn": "Mona Mareen Kegel",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "G178408",
+              "visningsnavn": "Christer Reinholdsson Gjesdal",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "J178528",
+              "visningsnavn": "Jonas Jøssund",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "V176024",
+              "visningsnavn": "Ada Rosvoll Viken",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M162488",
+              "visningsnavn": "Vegar Mørk",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "B175830",
+              "visningsnavn": "Liv Modig Bauer",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "J176023",
+              "visningsnavn": "Sivert Myrland Johansen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "orgEnhet": {
+        "id": "de150v",
+        "navn": "Avdeling for mennesker og organisasjon",
+        "orgTilknytninger": [
+          {
+            "ressurs": {
+              "navident": "H175510",
+              "visningsnavn": "Linn Huse-Amundsen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "orgEnhet": {
+        "id": "hy893h",
+        "navn": "Seksjon for leder- og teamutvikling",
+        "orgTilknytninger": [
+          {
+            "ressurs": {
+              "navident": "B165841",
+              "visningsnavn": "Gunvor Bottheim",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "G169119",
+              "visningsnavn": "Marthe Lybak Greve",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K147067",
+              "visningsnavn": "Steinar Kyrkjebø",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H166686",
+              "visningsnavn": "Tove Folden Holm",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "J111036",
+              "visningsnavn": "Kari Jørstad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R145246",
+              "visningsnavn": "Annette Reiakvam",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H178028",
+              "visningsnavn": "Henriette Høie",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "L144951",
+              "visningsnavn": "Maria Thi Le",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K105321",
+              "visningsnavn": "Kari Krogsmyr",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S176936",
+              "visningsnavn": "Martin Perminow Skjønsberg",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H111057",
+              "visningsnavn": "Evelyn Hveding",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "S162072",
+              "visningsnavn": "Ingrid Søgaard",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "T114000",
+              "visningsnavn": "Eugenia Filip Tecusan",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "K167335",
+              "visningsnavn": "Line Federley Kirkemo",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "J111035",
+              "visningsnavn": "Håkon Jørgensen",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M166685",
+              "visningsnavn": "Vibeke Myrstad",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "R107763",
+              "visningsnavn": "Ina Rudå",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "H161669",
+              "visningsnavn": "Jørgen Holst",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "T164633",
+              "visningsnavn": "Elen-Marie Meggison Tandberg",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          },
+          {
+            "ressurs": {
+              "navident": "M111040",
+              "visningsnavn": "Ingunn Myklegard",
+              "gjeldendeSektor": "NAV_STATLIG"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

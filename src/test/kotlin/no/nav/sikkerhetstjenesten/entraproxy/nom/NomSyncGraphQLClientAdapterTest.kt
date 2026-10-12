@@ -191,4 +191,86 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
     }
+
+    Given("ansatte for nomident") {
+        val client = mockk<GraphQlClient>()
+        val request = mockk<RequestSpec>()
+        val retrieve = mockk<RetrieveSyncSpec>()
+        val cache = mockk<CacheOperations>(relaxed = true)
+        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
+        val nomId = NomIdent("fa515j")
+
+        every { client.documentName("ansatte-for-nomid") } returns request
+        every { request.variables(mapOf("nomId" to "fa515j")) } returns request
+        every { request.retrieveSync("orgEnheter") } returns retrieve
+
+        When("the org units contain resources") {
+            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", "NAV_STATLIG")
+            val second = NomGraphQLRespons(AnsattId("S109104"), "Gunvor Sverdrup", "NAV_STATLIG")
+            val third = NomGraphQLRespons(AnsattId("D154627"), "Kine Sunde Dragnes", "NAV_STATLIG")
+            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                NomOrgEnhetRespons(
+                    NomEnhetMedAnsatte(
+                        NomIdent("fa515j"), "Arbeidsgiverseksjonen",
+                        listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
+                    )
+                ),
+                NomOrgEnhetRespons(
+                    NomEnhetMedAnsatte(
+                        NomIdent("ke465u"), "HMS- og styringsseksjonen",
+                        listOf(NomBulkGraphQLRespons(third))
+                    )
+                )
+            )
+
+            Then("the nomId variable is sent and resources from all org units are flattened") {
+                adapter.ansatteForNomIdent(nomId) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor),
+                    NomAnsatt(third.navident, third.visningsnavn, third.gjeldendeSektor)
+                )
+                verify { request.variables(mapOf("nomId" to "fa515j")) }
+                verify { request.retrieveSync("orgEnheter") }
+            }
+        }
+
+        When("no org units are returned") {
+            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
+
+            Then("an empty set is returned") {
+                adapter.ansatteForNomIdent(nomId) shouldBe emptySet()
+            }
+        }
+
+        When("an org unit is missing or a tilknytning has no resource") {
+            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", "NAV_STATLIG")
+            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                NomOrgEnhetRespons(
+                    NomEnhetMedAnsatte(
+                        NomIdent("fa515j"), "Arbeidsgiverseksjonen",
+                        listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
+                    )
+                ),
+                NomOrgEnhetRespons(NomEnhetMedAnsatte(NomIdent("de150v"), "Tom enhet")),
+                NomOrgEnhetRespons(null)
+            )
+
+            Then("available resources are returned") {
+                adapter.ansatteForNomIdent(nomId) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                )
+            }
+        }
+
+        When("the query fails") {
+            val failure = IllegalStateException("GraphQL query failed")
+            every { request.retrieveSync("orgEnheter") } throws failure
+
+            Then("the failure is propagated") {
+                shouldThrow<IllegalStateException> {
+                    adapter.ansatteForNomIdent(nomId)
+                } shouldBe failure
+            }
+        }
+    }
 })

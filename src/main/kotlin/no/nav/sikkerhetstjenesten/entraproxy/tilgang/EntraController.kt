@@ -115,7 +115,7 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @GetMapping("nom/ansatte/{tilgangsenhetId}")
     @Operation(summary = "Hent ansatte i en tilgangsenhet fra NOM")
     fun ansatteForTilgangsenhet(@PathVariable tilgangsenhetId: Enhetnummer) =
-        nom.ansatteForTilgangsenhet(tilgangsenhetId)
+        nom.ansatteForEnhet(tilgangsenhetId)
 
     companion object {
         const val API_V1 = "/api/v1"

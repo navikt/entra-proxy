@@ -331,7 +331,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("ubeskyttet endepunkt ${API_V1}/nom/ansatte/{tilgangsenhetId}") {
             When("request mangler bearer-token") {
                 Then("returnerer ansatte fra NOM") {
-                    every { nomTjeneste.ansatteForTilgangsenhet(TEST_ENHET.enhetnummer) } returns setOf(
+                    every { nomTjeneste.ansatteForEnhet(TEST_ENHET.enhetnummer) } returns setOf(
                         NomAnsatt(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",

@@ -56,8 +56,8 @@ class NomTjenesteCacheTest(
                 every { nom.ansatteForEnhet(enhet) } returns setOf(ansatt)
 
                 Then("the port is queried only once") {
-                    tjeneste.ansatteForTilgangsenhet(enhet) shouldBe setOf(ansatt)
-                    tjeneste.ansatteForTilgangsenhet(enhet) shouldBe setOf(ansatt)
+                    tjeneste.ansatteForEnhet(enhet) shouldBe setOf(ansatt)
+                    tjeneste.ansatteForEnhet(enhet) shouldBe setOf(ansatt)
                     verify(exactly = 1) { nom.ansatteForEnhet(enhet) }
                 }
             }

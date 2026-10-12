@@ -4,6 +4,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMG
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOM_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.cache.getMany
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter
@@ -31,16 +32,27 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         return fraCache.values.toSet() + fraNom
     }
 
-    override fun ansatteForEnhet(enhet: Enhetnummer): Set<NomAnsatt> {
-        return ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
+    override fun ansatteForEnhet(enhet: Enhetnummer)  =
+         ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
 
-    }
+    override fun ansatteForNomIdent(ident: NomIdent)  =
+        ansatteIEnheter(NOMID_ANSATTE_QUERY, nomident(ident.verdi))
+
 
     private fun ressurser(query: Pair<String, String>, variabler: Map<String, Any>)  =
         client.documentName(query.first)
             .variables(variabler)
             .retrieveSync(query.second)
             .toEntityList<NomBulkGraphQLRespons>()
+            .mapNotNull { it.ressurs?.toAnsatt() }
+            .toSet()
+
+    private fun ansatteIEnheter(query: Pair<String, String>, variabler: Map<String, Any>)  =
+        client.documentName(query.first)
+            .variables(variabler)
+            .retrieveSync(query.second)
+            .toEntityList<NomOrgEnhetRespons>()
+            .flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
             .mapNotNull { it.ressurs?.toAnsatt() }
             .toSet()
 
@@ -60,13 +72,16 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
     private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
 
     private companion object {
+        private const val NOMIDENT = "nomId"
         private const val IDENT = "navident"
         private const val IDENTER = "navidenter"
         private const val TILGANGSENHET = "tilgangsenhetId"
         private val TILKNYTNINGER_QUERY = "orgtilknytninger" to "ressurs"
         private val BULK_TILKNYTNINGER_QUERY = "orgtilknytninger-bulk" to "ressurser"
         private val TILGANGSENHET_ANSATTE_QUERY = "ansatte-for-tilgangsenhet" to "ressurser"
+        private val NOMID_ANSATTE_QUERY = "ansatte-for-nomid" to "orgEnheter"
 
+        private fun nomident(nomId: String) = mapOf(NOMIDENT to nomId)
         private fun ident(ident: String) = mapOf(IDENT to ident)
         private fun identer(identer: Set<String>) = mapOf(IDENTER to identer)
         private fun tilgangsenhet(enhetId: String) = mapOf(TILGANGSENHET to enhetId)

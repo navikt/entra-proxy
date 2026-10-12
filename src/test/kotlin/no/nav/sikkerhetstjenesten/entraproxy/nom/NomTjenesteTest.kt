@@ -16,6 +16,7 @@ class NomTjenesteTest : BehaviorSpec({
     val tjeneste = NomTjeneste(nom)
     val ident = AnsattId("A123456")
     val enhetsnummer = Enhetnummer("0315")
+    val nomIdent = NomIdent("fa515j")
     val tilknytninger = setOf(
         NomOrgTilknytning(
             NomEnhet(
@@ -49,17 +50,27 @@ class NomTjenesteTest : BehaviorSpec({
             every { nom.ansatteForEnhet(enhetsnummer) } returns setOf(ansatt)
 
             Then("the service returns the employee data") {
-                tjeneste.ansatteForTilgangsenhet(enhetsnummer) shouldBe setOf(ansatt)
+                tjeneste.ansatteForEnhet(enhetsnummer) shouldBe setOf(ansatt)
+            }
+        }
+
+        When("looking up employees for a nom unit") {
+            every { nom.ansatteForNomIdent(nomIdent) } returns setOf(ansatt)
+
+            Then("the service returns the employee data") {
+                tjeneste.ansatteForNomIdent(nomIdent) shouldBe setOf(ansatt)
             }
         }
 
         When("the result is empty") {
             every { nom.ansatte(emptySet()) } returns emptySet()
             every { nom.ansatteForEnhet(Enhetnummer("1234")) } returns emptySet()
+            every { nom.ansatteForNomIdent(NomIdent("xy123z")) } returns emptySet()
 
             Then("the service preserves empty results") {
                 tjeneste.orgDataBulk(emptySet()) shouldBe emptySet()
-                tjeneste.ansatteForTilgangsenhet(Enhetnummer("1234")) shouldBe emptySet()
+                tjeneste.ansatteForEnhet(Enhetnummer("1234")) shouldBe emptySet()
+                tjeneste.ansatteForNomIdent(NomIdent("xy123z")) shouldBe emptySet()
             }
         }
 

@@ -8,14 +8,15 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjenesteCacheTest.CacheTestConfig
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import org.springframework.cache.annotation.EnableCaching
-import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-@SpringBootTest(classes = [NomTjenesteCacheTest.CacheTestConfig::class], webEnvironment = NONE)
+@SpringBootTest(classes = [CacheTestConfig::class], webEnvironment = NONE)
 class NomTjenesteCacheTest(
     private val tjeneste: NomTjeneste,
     private val nom: NomPort
@@ -25,7 +26,7 @@ class NomTjenesteCacheTest(
     @EnableCaching
     class CacheTestConfig {
         @Bean
-        fun cacheManager() = ConcurrentMapCacheManager(NOMGRAPH)
+        fun cacheManager() = CaffeineCacheManager(NOMGRAPH)
 
         @Bean
         fun nomPort(): NomPort = mockk()

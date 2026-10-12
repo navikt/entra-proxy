@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient, private val cache: CacheOperations) : AbstractSyncGraphQLClientAdapter(cfg, client), NomPort {
 
     override fun ansatt(ident: AnsattId): NomAnsatt =
-        queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt()
+        queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt().kunDagligOppfolging()
 
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt>  {
         val fraCache = fraCache(identer)
@@ -28,12 +28,15 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         val mangler = identer.filterNot { it.verdi in fraCache }
         log.trace("Henter ${mangler.size} ansatt(e) som ikke finnes i CACHE fra NOM")
         val fraNom = ressurser(BULK_TILKNYTNINGER_QUERY, identer(mangler.map { it.verdi }.toSet()))
+            .mapTo(mutableSetOf()) { it.kunDagligOppfolging() }
         oppdaterCache(fraNom)
         return fraCache.values.toSet() + fraNom
     }
 
     override fun ansatteForEnhet(enhet: Enhetnummer)  =
          ressurser(TILGANGSENHET_ANSATTE_QUERY, tilgangsenhet(enhet.verdi))
+             .filter { ansatt -> ansatt.orgTilknytninger.any { it.orgEnhet.tilgangsenhetId == enhet && it.erDagligOppfolging } }
+             .toSet()
 
     override fun ansatteForNomIdent(ident: NomIdent)  =
         ansatteIEnheter(NOMID_ANSATTE_QUERY, nomident(ident.verdi))
@@ -53,6 +56,7 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
             .retrieveSync(query.second)
             .toEntityList<NomOrgEnhetRespons>()
             .flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
+            .filter { it.erDagligOppfolging }
             .mapNotNull { it.ressurs?.toAnsatt() }
             .toSet()
 
@@ -70,6 +74,9 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
     }
 
     private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
+
+    private fun NomAnsatt.kunDagligOppfolging() =
+        copy(orgTilknytninger = orgTilknytninger.filterTo(mutableSetOf()) { it.erDagligOppfolging })
 
     private companion object {
         private const val NOMIDENT = "organisertUnderOrgEnhetId"

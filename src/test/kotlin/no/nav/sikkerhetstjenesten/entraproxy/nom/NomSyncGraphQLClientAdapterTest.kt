@@ -144,19 +144,44 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         every { request.variables(mapOf("tilgangsenhetId" to "0315")) } returns request
         every { request.retrieveSync("ressurser") } returns retrieve
 
-        When("the tilgangsenhet has resources") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
+        fun dagligOppfolging(tilgangsenhet: Enhetnummer = tilgangsenhetId) = setOf(
+            NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhet), erDagligOppfolging = true)
+        )
+
+        When("the tilgangsenhet has resources with daily follow-up") {
+            val tilknytninger = dagligOppfolging()
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT", tilknytninger)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
-            Then("the tilgangsenhetId variable is sent and all employees are returned") {
+            Then("the tilgangsenhetId variable is sent and those employees are returned") {
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor, tilknytninger)
                 )
                 verify { request.variables(mapOf("tilgangsenhetId" to "0315")) }
                 verify { request.retrieveSync("ressurser") }
+            }
+        }
+
+        When("resources lack daily follow-up for the tilgangsenhet") {
+            val medOppfolging = dagligOppfolging()
+            val utenOppfolging = setOf(
+                NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhetId))
+            )
+            val annenEnhet = dagligOppfolging(Enhetnummer("0316"))
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", medOppfolging)
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT", utenOppfolging)
+            val third = NomGraphQLRespons(AnsattId("C123456"), "Third", "STAT", annenEnhet)
+            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
+                NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second), NomBulkGraphQLRespons(third)
+            )
+
+            Then("only resources with daily follow-up for the tilgangsenhet are returned") {
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, medOppfolging)
+                )
             }
         }
 
@@ -169,13 +194,14 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
 
         When("a resource is missing") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            val tilknytninger = dagligOppfolging()
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger)
                 )
             }
         }

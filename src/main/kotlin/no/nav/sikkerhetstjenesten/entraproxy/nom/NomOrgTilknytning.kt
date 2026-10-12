@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.nom
 import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
-data class NomOrgTilknytning(val orgEnhet: NomEnhet)  {
+data class NomOrgTilknytning(val orgEnhet: NomEnhet, val erDagligOppfolging: Boolean = false)  {
     data class NomEnhet(val id: NomIdent, val navn: String, val tilgangsenhetId: Enhetnummer? = null) {
         data class NomIdent(@JsonValue val verdi: String) : Comparable<NomIdent> {
 

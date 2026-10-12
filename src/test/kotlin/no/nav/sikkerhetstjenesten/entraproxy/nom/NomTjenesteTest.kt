@@ -91,7 +91,8 @@ class NomTjenesteTest : BehaviorSpec({
                                 "id": "ra656d",
                                 "navn": "Testenhet",
                                 "tilgangsenhetId": "0315"
-                            }
+                            },
+                            "erDagligOppfolging": false
                         }]
                     }"""
                 )

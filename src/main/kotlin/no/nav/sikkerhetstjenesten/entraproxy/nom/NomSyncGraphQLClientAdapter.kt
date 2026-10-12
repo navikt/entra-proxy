@@ -51,10 +51,10 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         client.documentName(query.first)
             .variables(variabler)
             .retrieveSync(query.second)
-            .toEntityList<Any>()
-           // .flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
-           // .mapNotNull { it.ressurs?.toAnsatt() }
-           // .toSet()
+            .toEntityList<NomOrgEnhetRespons>()
+            .flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
+            .mapNotNull { it.ressurs?.toAnsatt() }
+            .toSet()
 
     private fun fraCache(identer: Set<AnsattId>) =
         cache.getMany<NomAnsatt>(NOM_CACHE, buildSet { identer.forEach { add(it.verdi) } })

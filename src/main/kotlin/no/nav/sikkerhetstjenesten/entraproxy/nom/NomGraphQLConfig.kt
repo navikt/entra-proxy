@@ -10,7 +10,8 @@ import java.time.Duration
 
 @Component
 class NomGraphQLConfig(@Value($$"${nomgraph}") nomHost: String,
-                       @param:Value($$"${nom.varighet:3h}") override val varighet: Duration = Duration.ofHours(3)) :
+                       @param:Value($$"${nom.varighet:3h}") override val varighet: Duration = Duration.ofHours(3),
+                       @param:Value($$"${nom.lesetimeout:30s}") val lesetimeout: Duration = Duration.ofSeconds(30)) :
     CachableRestConfig, RestConfig(URI.create("http://$nomHost$DEFAULT_GRAPHQL_PATH"), "", NOMGRAPH) {
 
     override val navn = name

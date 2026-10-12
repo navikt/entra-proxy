@@ -6,6 +6,13 @@ import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder.httpComponents
+import org.springframework.boot.http.client.HttpClientSettings
+import org.springframework.boot.http.client.HttpClientSettings.defaults
+import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
+import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.graphql.client.HttpSyncGraphQlClient.builder
@@ -15,6 +22,7 @@ import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpReq
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.Builder
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
+import java.time.Duration
 
 @Configuration
 @NoCoverageAnalysis
@@ -24,9 +32,18 @@ class NomBeanConfig {
     @Bean
     @Qualifier(NOMGRAPH)
     fun nomGraphRestClient(builder: Builder,
+                           cfg: NomGraphQLConfig,
+                           factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
+                           @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
                            logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
                            mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder
+            .requestFactory(
+                factoryBuilderCustomizer
+                    .customize(httpComponents())
+                    .build(defaults()
+                        .withConnectTimeout(connectTimeout)
+                        .withReadTimeout(cfg.lesetimeout)))
             .requestInterceptors {
                 logbookInterceptor.ifAvailable {
                         interceptor -> it.add(interceptor)

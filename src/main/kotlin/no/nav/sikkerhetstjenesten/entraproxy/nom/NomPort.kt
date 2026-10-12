@@ -8,5 +8,5 @@ interface NomPort {
     fun ansatt(ident: AnsattId): NomAnsatt
     fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt>
     fun ansatteForEnhet(enhet: Enhetnummer): Set<NomAnsatt>
-    fun ansatteForNomIdent(ident: NomIdent): Set<NomAnsatt>
+    fun ansatteForNomIdent(ident: NomIdent): List<Any>
 }

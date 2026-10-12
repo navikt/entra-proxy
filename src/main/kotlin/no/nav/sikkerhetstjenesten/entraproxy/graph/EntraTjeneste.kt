@@ -95,7 +95,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                         surname,
                         TIdent(jobTitle ?: TIDENT_DEFAULT),
                         mail,
-                        Enhet(enhetsNummer, norg.navnFor(enhetsNummer))
+                        Enhet(enhetsNummer, norg.navn(enhetsNummer))
                     ).also {
                         log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
                     }
@@ -157,7 +157,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 Enhetnummer(it.displayName)
             }
             .parallelStream()
-            .map { Enhet(it, norg.navnFor(it)) }
+            .map { Enhet(it, norg.navn(it)) }
             .collect(toSet())
 
     private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {

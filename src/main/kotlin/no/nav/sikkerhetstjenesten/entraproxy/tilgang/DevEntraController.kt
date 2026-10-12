@@ -55,7 +55,7 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("navn/{enhetsnummer}")
     fun norgNavn(@PathVariable enhetsnummer: Enhetnummer) =
-       norgTjeneste.navnFor(enhetsnummer)
+       norgTjeneste.navn(enhetsnummer)
 
     @GetMapping("tema/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =

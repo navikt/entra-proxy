@@ -8,5 +8,5 @@ import org.springframework.cache.annotation.Cacheable
 @RestRetryingWhenRecoverableService
 class NorgTjeneste(private val norg: NorgPort) {
     @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
-    fun navnFor(enhetnummer: Enhetnummer) = norg.navnFor(enhetnummer)
+    fun navn(enhetnummer: Enhetnummer) = norg.navn(enhetnummer)
 }

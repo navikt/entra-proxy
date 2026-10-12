@@ -18,7 +18,7 @@ class NorgClientAdapterTest : BehaviorSpec({
             every { client.enhetFor("0315") } returns NorgEnhetRespons(315, "NAV Testenhet")
 
             Then("the transport-independent unit name is returned") {
-                adapter.navnFor(enhet) shouldBe "NAV Testenhet"
+                adapter.navn(enhet) shouldBe "NAV Testenhet"
                 verify { client.enhetFor("0315") }
             }
         }
@@ -29,7 +29,7 @@ class NorgClientAdapterTest : BehaviorSpec({
 
             Then("the failure is propagated") {
                 shouldThrow<IllegalStateException> {
-                    adapter.navnFor(enhet)
+                    adapter.navn(enhet)
                 } shouldBe failure
             }
         }

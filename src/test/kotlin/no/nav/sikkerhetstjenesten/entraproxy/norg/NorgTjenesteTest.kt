@@ -13,10 +13,10 @@ class NorgTjenesteTest : BehaviorSpec({
 
     Given("a unit name from the port") {
         When("looking up the name for a unit") {
-            every { norg.navnFor(enhetsnummer) } returns "NAV Testenhet"
+            every { norg.navn(enhetsnummer) } returns "NAV Testenhet"
 
             Then("the service returns the name from the port") {
-                tjeneste.navnFor(enhetsnummer) shouldBe "NAV Testenhet"
+                tjeneste.navn(enhetsnummer) shouldBe "NAV Testenhet"
             }
         }
     }

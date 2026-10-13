@@ -56,6 +56,17 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+        groups:
+          - id: "{{groups.utforsker}}"
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - "/api/v1/**"
+        - "/monitoring/**"
+        - "/swagger-ui/**"
+        - "/swagger-ui.html"
+        - "/v3/api-docs/**"
   accessPolicy:
     outbound:
       rules:
@@ -77,6 +88,8 @@ spec:
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
+    - name: GROUPS_UTFORSKER
+      value: {{groups.utforsker}}
     - name: NOMGRAPH
       value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE

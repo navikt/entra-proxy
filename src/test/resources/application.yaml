@@ -8,7 +8,11 @@ spring:
       client:
         provider:
           azuread:
+            authorization-uri: http://mock-oauth2-server/authorize
             token-uri: http://mock-oauth2-server/token
+            jwk-set-uri: http://mock-oauth2-server/jwks
+            user-info-uri: http://mock-oauth2-server/userinfo
+            user-name-attribute: sub
         registration:
           norg:
             provider: azuread
@@ -21,8 +25,10 @@ spring:
             provider: azuread
             client-id: test
             client-secret: test
-            authorization-grant-type: client_credentials
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             scope:
-              - entra-scope
+              - openid
+              - profile
 
 

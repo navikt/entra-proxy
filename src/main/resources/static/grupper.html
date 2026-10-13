@@ -113,6 +113,13 @@
             text-align: right;
         }
         th, td { overflow-wrap: anywhere; }
+        .utlogging {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d1d6db;
+            display: flex;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -133,6 +140,7 @@
         </div>
         <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </form>
+    <p class="aksel-body-short" aria-hidden="true" style="font-weight: bold; font-size: 1.25rem;">eller</p>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
@@ -171,12 +179,17 @@
             </table>
         </div>
     </section>
+
+    <div class="utlogging">
+        <a class="aksel-button" data-variant="secondary" data-color="neutral" href="/oauth2/logout">Logg ut</a>
+    </div>
 </main>
 <script>
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
     panelMal.querySelector('.nom-form').remove();
+    panelMal.querySelector('.hovedsok > p').remove();
     panelMal.querySelector('form .sok-knapper').insertBefore(
         panelMal.querySelector('.nytt-sok'),
         panelMal.querySelector('.fjern-gruppe')

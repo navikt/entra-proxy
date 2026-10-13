@@ -76,10 +76,11 @@ class OAuth2SecurityBeanConfig(
                                          entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
         http.securityMatcher(*UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
-                if (utforskerGruppeId.isNotBlank()) { 
-                     requests.anyRequest().hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
-                }
-                requests.anyRequest().authenticated()
+                val regel = requests.anyRequest()
+                if (utforskerGruppeId.isNotBlank())
+                    regel.hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                else
+                    regel.authenticated()
             }
             .csrf {
                 it.disable()

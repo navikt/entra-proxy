@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,6 +32,7 @@ import org.springframework.security.oauth2.client.web.client.support.OAuth2RestC
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
@@ -41,6 +43,8 @@ import java.net.URI
 
 @Configuration
 class OAuth2SecurityBeanConfig {
+
+    private val log = LoggerFactory.getLogger(javaClass)
 
     private val UNPROTECTED_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
         arrayOf(
@@ -62,6 +66,11 @@ class OAuth2SecurityBeanConfig {
         "/logout",
     )
 
+    private val innloggingFeiletHandler = AuthenticationFailureHandler { _, response, exception ->
+        log.warn("Interaktiv innlogging feilet: {}", exception.message, exception)
+        response.sendRedirect("/innlogging-feilet.html")
+    }
+
     @Bean
     fun authContext() = AuthContext()
 
@@ -80,6 +89,7 @@ class OAuth2SecurityBeanConfig {
             }
             .oauth2Login { login ->
                 login.defaultSuccessUrl("/utforsker.html")
+                login.failureHandler(innloggingFeiletHandler)
             }
             .logout { logout ->
                 logout.logoutSuccessUrl("/utforsker.html")

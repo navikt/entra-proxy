@@ -40,6 +40,7 @@ springBootStarterActuator = { module = "org.springframework.boot:spring-boot-sta
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
 springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
 springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }

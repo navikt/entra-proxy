@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GRUPPE_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
 import no.nav.sikkerhetstjenesten.felles.security.AbstractOAuth2JsonAccessDeniedHandler
@@ -70,18 +71,19 @@ class OAuth2SecurityBeanConfig(
 
     @Bean
     @Order(1)
-    fun utforskerSideSecurityFilterChain(http: HttpSecurity,
+    fun utforskerSecurityFilterChain(http: HttpSecurity,
                                          converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
                                          entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
         http.securityMatcher(*UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
-                if (utforskerGruppeId.isNotBlank()) {
-                    // Gruppebegrensning kan aktiveres her når gruppe-claim følger med i tokenet fra Wonderwall:
-                    // requests.anyRequest().hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                if (utforskerGruppeId.isNotBlank()) { 
+                     requests.anyRequest().hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
                 }
                 requests.anyRequest().authenticated()
             }
-            .csrf { it.disable() }
+            .csrf {
+                it.disable()
+            }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
                     jwt.jwtAuthenticationConverter(converter)
@@ -101,11 +103,13 @@ class OAuth2SecurityBeanConfig(
                                converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
                                deniedHandler: AccessDeniedHandler,
                                entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
-        http.securityMatcher(API_ENDPOINTS)
-            .authorizeHttpRequests { requests ->
-                requests.anyRequest().authenticated()
+        http.authorizeHttpRequests { requests ->
+                requests.requestMatchers(API_ENDPOINTS).authenticated()
+                requests.anyRequest().permitAll()
             }
-            .csrf { it.disable() }
+            .csrf {
+                it.disable()
+            }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->
                     jwt.jwtAuthenticationConverter(converter)
@@ -116,16 +120,6 @@ class OAuth2SecurityBeanConfig(
                 it.authenticationEntryPoint(entryPoint)
                 it.accessDeniedHandler(deniedHandler)
             }
-            .stateless()
-            .build()
-
-    @Bean
-    @Order(3)
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain =
-        http.authorizeHttpRequests { requests ->
-            requests.anyRequest().permitAll()
-        }
-            .csrf { it.disable() }
             .stateless()
             .build()
 

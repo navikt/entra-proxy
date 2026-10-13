@@ -49,7 +49,8 @@ class OAuth2SecurityBeanConfig(
     private val API_ENDPOINTS = PathPatternRequestMatcher.withDefaults().matcher("$API_V1/**")
 
     private val UTFORSKER_SIDER = arrayOf(
-        "/utforsker.html",
+        "/",
+        "/index.html",
         "/grupper.html",
     )
 

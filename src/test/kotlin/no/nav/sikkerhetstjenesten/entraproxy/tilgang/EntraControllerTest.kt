@@ -99,7 +99,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                     .andExpect(status().isNotFound())
                     .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
                     .andExpect(content().string(containsString("Siden finnes ikke")))
-                    .andExpect(content().string(containsString("href=\"/utforsker.html\"")))
+                    .andExpect(content().string(containsString("href=\"/\"")))
             }
             Then("beholder standard feilbehandling for en JSON-klient") {
                 mockMvc.perform(get("/grupper1.html").accept(APPLICATION_JSON))
@@ -122,11 +122,22 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("den statiske utforskersiden") {
+        Given("forsiden (index.html på rot)") {
             When("request mangler innlogget sesjon") {
-                Then("sender brukeren til Entra-innlogging") {
-                    mockMvc.perform(get("/utforsker.html"))
+                Then("returnerer 401 slik at Wonderwall kan starte innlogging") {
+                    mockMvc.perform(get("/"))
                         .andExpect(status().isUnauthorized())
+                    mockMvc.perform(get("/index.html"))
+                        .andExpect(status().isUnauthorized())
+                }
+            }
+            When("request har gyldig token") {
+                Then("serverer utforskersiden") {
+                    mockMvc.perform(get("/").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                        .andExpect(status().isOk())
+                    mockMvc.perform(get("/index.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("Utforsker")))
                 }
             }
         }

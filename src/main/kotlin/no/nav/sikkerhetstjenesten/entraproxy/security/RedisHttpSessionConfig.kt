@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.GCP
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession
@@ -15,6 +16,6 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  * Lokalt og i test kjører appen som én instans, og bruker standard in-memory-sesjon.
  */
 @Configuration
-@Profile("gcp")
+@Profile(GCP)
 @EnableRedisHttpSession
 class RedisHttpSessionConfig

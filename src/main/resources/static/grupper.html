@@ -113,6 +113,13 @@
             text-align: right;
         }
         th, td { overflow-wrap: anywhere; }
+        .utlogging {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d1d6db;
+            display: flex;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -171,6 +178,10 @@
             </table>
         </div>
     </section>
+
+    <div class="utlogging">
+        <a class="aksel-button" data-variant="secondary" data-color="neutral" href="/logout">Logg ut</a>
+    </div>
 </main>
 <script>
     const sok = document.getElementById('sok');

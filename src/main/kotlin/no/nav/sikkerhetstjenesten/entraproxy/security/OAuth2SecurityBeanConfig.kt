@@ -92,7 +92,8 @@ class OAuth2SecurityBeanConfig {
                 login.failureHandler(innloggingFeiletHandler)
             }
             .logout { logout ->
-                logout.logoutSuccessUrl("/utforsker.html")
+                logout.logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(GET, "/logout"))
+                logout.logoutSuccessUrl("/grupper.html")
             }
             .build()
 

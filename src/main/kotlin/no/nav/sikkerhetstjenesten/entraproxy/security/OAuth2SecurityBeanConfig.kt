@@ -49,7 +49,7 @@ import kotlin.text.Charsets.UTF_8
 
 
 @Configuration
-class OAuth2SecurityBeanConfig {
+class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractAuthenticationToken>,private val entryPoint: AuthenticationEntryPoint) {
 
     private val log = getLogger(javaClass)
 
@@ -79,8 +79,6 @@ class OAuth2SecurityBeanConfig {
     @Bean
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
-                                     converter:  Converter<Jwt, AbstractAuthenticationToken>,
-                                     entryPoint: AuthenticationEntryPoint,
                                      @Qualifier(UTFORSKER_MANGLER) handler: AccessDeniedHandler,
                                      @Value($$"${groups.utforsker:}")  utforskerGruppe: String)  =
         http.securityMatcher(*UTFORSKER_SIDER)
@@ -99,9 +97,7 @@ class OAuth2SecurityBeanConfig {
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity,
-                               converter:  Converter<Jwt, AbstractAuthenticationToken>,
-                               @Qualifier(API_MANGLER) handler: AccessDeniedHandler,
-                               entryPoint: AuthenticationEntryPoint)  =
+                               @Qualifier(API_MANGLER) handler: AccessDeniedHandler)  =
         http.authorizeHttpRequests { requests ->
                 requests.requestMatchers(API_ENDPOINTS).authenticated()
                 requests.anyRequest().permitAll()

@@ -150,11 +150,11 @@ class OAuth2SecurityBeanConfig {
         }
 
     private fun HttpSecurity.asResourceServer(converter: Converter<Jwt, AbstractAuthenticationToken>, entryPoint: AuthenticationEntryPoint, deniedHandler: AccessDeniedHandler) =
-        oauth2ResourceServer { oauth2 ->
-            oauth2.jwt { jwt ->
+        oauth2ResourceServer {
+            it.jwt { jwt ->
                 jwt.jwtAuthenticationConverter(converter)
             }
-            oauth2.authenticationEntryPoint(entryPoint)
+            it.authenticationEntryPoint(entryPoint)
         }
             .exceptionHandling {
                 it.authenticationEntryPoint(entryPoint)

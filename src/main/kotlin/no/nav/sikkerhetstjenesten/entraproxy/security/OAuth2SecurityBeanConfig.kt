@@ -45,7 +45,7 @@ import java.net.URI
 
 @Configuration
 class OAuth2SecurityBeanConfig(
-    @param:Value($$"${groups.utforsker:}") private val utforskerGruppeId: String) {
+    @param:Value($$"${groups.utforsker:}") private val utforskerGruppe: String) {
 
     private val log = getLogger(javaClass)
 
@@ -76,8 +76,8 @@ class OAuth2SecurityBeanConfig(
         http.securityMatcher(*UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
                 with(requests.anyRequest()) {
-                    if (utforskerGruppeId.isNotBlank())  {
-                        hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                    if (utforskerGruppe.isNotBlank())  {
+                        hasAuthority("$GRUPPE_PREFIX$utforskerGruppe")
                     }
                     else {
                         authenticated()
@@ -101,12 +101,12 @@ class OAuth2SecurityBeanConfig(
             .build()
 
     @Bean
-    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager,  logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
+    fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
-                    logbookInterceptor.ifAvailable {
+                    logbook.ifAvailable {
                         interceptor -> it.add(interceptor)
                     }
                     it.addFirst(DownstreamUriCapturingInterceptor())

@@ -79,10 +79,10 @@ class OAuth2SecurityBeanConfig {
                 requests.anyRequest().authenticated()
             }
             .oauth2Login { login ->
-                login.defaultSuccessUrl("/", true)
+                login.defaultSuccessUrl("/utforsker.html")
             }
             .logout { logout ->
-                logout.logoutSuccessUrl("/")
+                logout.logoutSuccessUrl("/utforsker.html")
             }
             .build()
 

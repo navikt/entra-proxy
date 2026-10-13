@@ -140,6 +140,7 @@
         </div>
         <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </form>
+    <p class="aksel-body-short" aria-hidden="true">eller</p>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
@@ -188,6 +189,7 @@
     const forstePanel = sok.querySelector('.sok-panel');
     const panelMal = forstePanel.cloneNode(true);
     panelMal.querySelector('.nom-form').remove();
+    panelMal.querySelector('.hovedsok > p').remove();
     panelMal.querySelector('form .sok-knapper').insertBefore(
         panelMal.querySelector('.nytt-sok'),
         panelMal.querySelector('.fjern-gruppe')

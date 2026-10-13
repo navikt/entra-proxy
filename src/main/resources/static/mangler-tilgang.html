@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mangler tilgang</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: #f3f3f4;
+            color: #1f1f1f;
+            font-family: Arial, sans-serif;
+        }
+        main {
+            max-width: 40rem;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #fff;
+            border: 1px solid #d1d6db;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1 class="aksel-heading aksel-heading--large">Mangler tilgang</h1>
+    <p class="aksel-body-long">
+        Du er innlogget, men mangler medlemskap i Entra-gruppen som kreves for å bruke Utforsker.
+        Ta kontakt med din leder eller gruppeeier for å få tilgang.
+    </p>
+    <p class="aksel-body-short" id="navident" hidden>
+        Innlogget som: <strong id="navident-verdi"></strong>
+    </p>
+    <p>
+        <a class="aksel-link" href="/oauth2/logout">Logg ut</a>
+    </p>
+</main>
+<script>
+    (function () {
+        const navident = new URLSearchParams(window.location.search).get("navident");
+        if (navident) {
+            document.getElementById("navident-verdi").textContent = navident;
+            document.getElementById("navident").hidden = false;
+        }
+    })();
+</script>
+</body>
+</html>

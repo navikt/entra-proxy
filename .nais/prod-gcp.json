@@ -1,8 +1,26 @@
 {
   "ingresses": [
-    "https://entraproxy.intern.nav.no"
+    "https://entraproxy.intern.nav.no",
+    "https://entraproxy.ansatt.nav.no"
   ],
+
+  "nomgraph": "nom-api.nom",
+
+  "groups" : {
+    "utforsker": "537789c0-f3b9-4e4d-aecf-078defe9ec18",
+    "disabled": "23429545-36e9-446e-8927-211e2929b6a4"
+  },
   "inbound": [
+    {
+      "name":  "syk-dig-backend",
+      "namespace": "teamsykmelding",
+      "cluster": "prod-gcp"
+    },
+    {
+      "name": "gosys-backend",
+      "namespace": "isa",
+      "cluster": "prod-gcp"
+    },
     {
       "name": "klage-lookup",
       "namespace": "klage",
@@ -146,6 +164,7 @@
   ],
   "nais": {
     "cluster": {
+      "type": "prod",
       "cache": "cache",
       "endpoint": "76685598-1048-4f56-b34a-9769ef747a92"
     }

@@ -1,0 +1,17 @@
+query ansatteForTilgangsenhet($tilgangsenhetId: String!){
+    ressurser(filter: {tilgangsenhetId: $tilgangsenhetId, periodiskUtvalg: AKTIVE} ) {
+        ressurs {
+            navident
+            visningsnavn
+            gjeldendeSektor
+            orgTilknytninger (utvalg: AKTIVE) {
+                erDagligOppfolging
+                orgEnhet {
+                    id
+                    navn
+                    tilgangsenhetId
+                }
+            }
+        }
+    }
+}

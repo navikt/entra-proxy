@@ -20,7 +20,7 @@ Disse to kallmønstrene har ulike behov:
 Dagens løsning skiller allerede mellom disse modellene i kodebasen:
 
 - `EntraController` ligger bak `ProtectedRestController` og Azure AD-validering
-- `Token` klassifiserer token som `OBO`, `CCF` eller `UNAUTHENTICATED`
+- `AuthContext` klassifiserer token som `OBO`, `CCF` eller `UNAUTHENTICATED`
 - OBO identifiseres ved at tokenet inneholder brukerens `oid` og `NAVident`
 - CC identifiseres ved at claim `idtyp` er `app`
 - Produksjonsendepunktene skiller mellom varianter som bruker path-parameter for ansatt og varianter som bruker identitet fra tokenet
@@ -37,7 +37,7 @@ Dette innebærer:
 - CC-endepunkter kan ta inn `navIdent` som input når brukstilfellet krever system-til-system-oppslag
 - endepunkter skal eksplisitt håndheve hvilken tokenmodell de støtter
 
-`Token` fungerer som det sentrale abstraheringslaget for claim-utlesing og klassifisering av tokenkontekst.
+`AuthContext` fungerer som det sentrale abstraheringslaget for claim-utlesing og klassifisering av tokenkontekst.
 
 ## Hvorfor dette er valgt
 
@@ -78,7 +78,7 @@ Eksempler fra dagens løsning:
 ### Identitetskilde
 - OBO-kall skal bruke identitet fra tokenet som sannhetskilde
 - CC-kall kan bruke inputparameter for målansatt, men bare når endepunktet eksplisitt er laget for dette
-- Claim-utlesing og tokenklassifisering skal holdes samlet i `Token`
+- Claim-utlesing og tokenklassifisering skal holdes samlet i `AuthContext`
 
 ### Endepunktsdesign
 - Endepunkter skal eksplisitt uttrykke om de støtter OBO, CC eller begge deler gjennom separate operasjoner
@@ -105,12 +105,12 @@ Eksempler fra dagens løsning:
 ### Risiko
 - Nye endepunkter kan få feil sikkerhetsmodell dersom OBO og CC ikke vurderes eksplisitt
 - Manglende eller feil claims i token kan gi uklar feiladferd dersom controllerlaget ikke håndhever modellen tydelig
-- For mye logikk utenfor `Token` kan føre til inkonsistent tolkning av claims
+- For mye logikk utenfor `AuthContext` kan føre til inkonsistent tolkning av claims
 
 ## Aksjonspunkter
 
 - [x] Behold `ProtectedRestController` og Azure AD-validering for produksjons-API-et
-- [x] Behold `Token` som samlet abstraksjon for claim-utlesing og tokenklassifisering
+- [x] Behold `AuthContext` som samlet abstraksjon for claim-utlesing og tokenklassifisering
 - [x] Behold eksplisitt skille mellom OBO- og CC-endepunkter der sikkerhetskonteksten er forskjellig
 - [ ] Vurder å dokumentere støttet tokenmodell per produksjonsendepunkt i API-dokumentasjonen
 - [ ] Vurder å utvide tester som dokumenterer hvilke claims som er minimumskrav for OBO og CC

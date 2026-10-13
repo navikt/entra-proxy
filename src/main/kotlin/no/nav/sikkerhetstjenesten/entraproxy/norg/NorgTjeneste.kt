@@ -1,17 +1,12 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 
-import io.opentelemetry.instrumentation.annotations.WithSpan
-import no.nav.sikkerhetstjenesten.entraproxy.felles.rest.RetryingWhenRecoverable
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
+import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.stereotype.Service
 
-@RetryingWhenRecoverable
-@Service
-class NorgTjeneste(private val client: NorgProxyClient) {
-    @WithSpan
+@RestRetryingWhenRecoverableService
+class NorgTjeneste(private val norg: NorgPort) {
     @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
-    fun navnFor(enhetnummer: Enhetnummer) = client.enhetFor(enhetnummer.verdi).navn
-
+    fun navn(enhetnummer: Enhetnummer) = norg.navn(enhetnummer)
 }

@@ -35,6 +35,10 @@ on:
         required: false
         type: string
         default: ""
+    secrets:
+      READER_TOKEN:
+        description: "Token for lesetilgang til GitHub Packages (navikt/sikkerhetstjenesten-felles)"
+        required: false
     outputs:
       image:
         description: "Fullt image-ref med tag"
@@ -63,7 +67,7 @@ jobs:
       digest: ${{ steps.docker-push.outputs.digest }}
     steps:
       - name: Sjekker ut kode
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.checkout-ref || github.ref }}
           repository: ${{ inputs.checkout-repository || github.repository }}
@@ -71,14 +75,14 @@ jobs:
           persist-credentials: false
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
-      - name: Install Java 25
-        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
+      - name: Install Java 26
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
-          java-version: 25
+          java-version: 26
           distribution: temurin
 
       - name: Setter tag-navn
@@ -86,11 +90,13 @@ jobs:
 
 
       - name: Test og bygg
+        env:
+          READER_TOKEN: ${{ secrets.READER_TOKEN }}
         run: ./gradlew --warning-mode all test jacocoTestReport cyclonedxBom bootJar
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512 # v0
+        uses: nais/docker-build-push@bfe52e3ad6d0e96fd1056a03acb7b619aaffb39d # v0
         with:
           team: sikkerhetstjenesten
           tag: ${{ env.TAG }}
@@ -135,4 +141,4 @@ jobs:
       - name: Deploy to GitHub Pages
         if: ${{ inputs.publish-pages }}
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

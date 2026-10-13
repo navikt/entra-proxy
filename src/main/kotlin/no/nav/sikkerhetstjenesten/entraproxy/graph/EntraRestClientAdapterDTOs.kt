@@ -7,21 +7,21 @@ import java.net.URI
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class Grupper(
+data class Grupper(
     @param:JsonProperty("@odata.context") val next: URI? = null,
     val value: Set<IdentifiserbartObjekt> = emptySet()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class AnsattOids(
+data class AnsattOids(
     @param:JsonProperty(VALUE) val oids: Set<AnsattOid>
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
-    internal data class AnsattOid(val id: UUID)
+    data class AnsattOid(val id: UUID)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class Tilganger(
+data class Tilganger(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
     val value: Set<IdentifiserbartObjekt> = emptySet()
 )
@@ -34,7 +34,7 @@ data class EntraSaksbehandlerRespons(
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattRespons(
         val id: UUID,
-        val onPremisesSamAccountName: String,
+        val onPremisesSamAccountName: String? = null,
         val displayName: String? = UKJENT,
         val givenName: String? = UKJENT,
         val surname: String? = UKJENT,
@@ -45,13 +45,13 @@ data class EntraSaksbehandlerRespons(
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class IdentifiserbartObjekt(
+data class IdentifiserbartObjekt(
     val id: UUID,
     val displayName: String = UKJENT
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-internal data class GruppeMedlemmer(
+data class GruppeMedlemmer(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
     val value: Set<AnsattRespons> = emptySet()
 )

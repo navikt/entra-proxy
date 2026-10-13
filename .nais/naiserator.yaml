@@ -29,12 +29,15 @@ spec:
   prometheus:
     enabled: true
     path: /monitoring/prometheus
-  readiness:
-    path: /monitoring/health/readiness
-    initialDelay: 30
-  liveness:
+  startup:
     path: /monitoring/health/liveness
     initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /monitoring/health/readiness
+  liveness:
+    path: /monitoring/health/liveness
   port: 8080
   replicas:
     max: {{replica.max}}
@@ -53,6 +56,17 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+        groups:
+          - id: "{{groups.utforsker}}"
+    sidecar:
+      enabled: true
+      autoLogin: true
+      autoLoginIgnorePaths:
+        - "/api/v1/**"
+        - "/monitoring/**"
+        - "/swagger-ui/**"
+        - "/swagger-ui.html"
+        - "/v3/api-docs/**"
   accessPolicy:
     outbound:
       rules:
@@ -60,6 +74,8 @@ spec:
         namespace: nais-system
       - application: norg2
         namespace: org
+      - application: nom-api
+        namespace: nom
     inbound:
       rules:
         {{#each inbound as |app|}}
@@ -70,8 +86,13 @@ spec:
             - application: alloy
               namespace: nais-system
   env:
+    - name: GROUPS_DISABLED
+      value: {{groups.disabled}}
+    - name: GROUPS_UTFORSKER
+      value: {{groups.utforsker}}
+    - name: NOMGRAPH
+      value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE
       value: {{nais.cluster.type}}
     - name: NAIS_CLUSTER_CACHE
       value: {{nais.cluster.cache}}
-

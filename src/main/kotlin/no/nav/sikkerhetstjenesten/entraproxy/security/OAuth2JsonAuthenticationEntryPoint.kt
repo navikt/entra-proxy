@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.security
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig.Companion.TYPE_URI
 import no.nav.sikkerhetstjenesten.felles.security.securityProblemDetail
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus.UNAUTHORIZED

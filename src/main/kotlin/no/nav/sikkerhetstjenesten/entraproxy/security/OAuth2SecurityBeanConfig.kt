@@ -9,6 +9,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.A
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
 import no.nav.sikkerhetstjenesten.felles.security.AbstractOAuth2JsonAccessDeniedHandler
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
@@ -32,6 +33,9 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolder.getContext
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
@@ -41,28 +45,34 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.databind.json.JsonMapper
 import java.net.URI
+import java.net.URLEncoder
+import kotlin.text.Charsets.UTF_8
 
 
 @Configuration
-class OAuth2SecurityBeanConfig(
-    @param:Value($$"${groups.utforsker:}") private val utforskerGruppe: String) {
+class OAuth2SecurityBeanConfig {
 
     private val log = getLogger(javaClass)
 
-    private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
-    private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html")
 
     @Bean
+    @Qualifier(UTFORSKER_MANGLER)
     fun manglerTilgangHandler() = AccessDeniedHandler { _, response, e ->
-        log.warn("Bruker mangler påkrevd gruppetilgang til utforsker: {}", e.message)
-        response.sendRedirect("/mangler-tilgang.html")
+        val navIdent = (getContext().authentication?.principal as? OAuth2AuthenticatedPrincipal)
+            ?.getAttribute<String>(NAVIDENT)
+        log.warn("Bruker {} mangler påkrevd gruppetilgang til utforsker: {}", navIdent, e.message)
+        val query = navIdent?.let { "?navident=${URLEncoder.encode(it, UTF_8)}" }.orEmpty()
+        response.sendRedirect("/mangler-tilgang.html$query")
     }
 
     @Bean
-    fun authContext() = AuthContext()
+    fun authContext() =
+        AuthContext()
 
     @Bean
-    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
+    @Qualifier(API_MANGLER)
+    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper,
+                                      ctx: AuthContext) =
         object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
             override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
         }
@@ -72,7 +82,8 @@ class OAuth2SecurityBeanConfig(
     fun utforskerSecurityFilterChain(http: HttpSecurity,
                                      converter:  Converter<Jwt, AbstractAuthenticationToken>,
                                      entryPoint: AuthenticationEntryPoint,
-                                     @Qualifier("manglerTilgangHandler") handler: AccessDeniedHandler)  =
+                                     @Qualifier(UTFORSKER_MANGLER) handler: AccessDeniedHandler,
+                                     @Value($$"${groups.utforsker:}")  utforskerGruppe: String)  =
         http.securityMatcher(*UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
                 with(requests.anyRequest()) {
@@ -91,7 +102,7 @@ class OAuth2SecurityBeanConfig(
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity,
                                converter:  Converter<Jwt, AbstractAuthenticationToken>,
-                               @Qualifier("oauth2JsonAccessDeniedHandler") handler: AccessDeniedHandler,
+                               @Qualifier(API_MANGLER) handler: AccessDeniedHandler,
                                entryPoint: AuthenticationEntryPoint)  =
         http.authorizeHttpRequests { requests ->
                 requests.requestMatchers(API_ENDPOINTS).authenticated()
@@ -152,9 +163,18 @@ class OAuth2SecurityBeanConfig(
                 it.accessDeniedHandler(deniedHandler)
             }
             .stateless()
+
+
+    companion object {
+        private const val UTFORSKER_MANGLER = "mangler"
+        private const val API_MANGLER = "json"
+        private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
+        private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html")
+        val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
+        private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
+    }
 }
 
 
-val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
 
-private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
+

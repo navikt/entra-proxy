@@ -30,9 +30,21 @@
         Du er innlogget, men mangler medlemskap i Entra-gruppen som kreves for å bruke Utforsker.
         Ta kontakt med din leder eller gruppeeier for å få tilgang.
     </p>
+    <p class="aksel-body-short" id="navident" hidden>
+        Innlogget som: <strong id="navident-verdi"></strong>
+    </p>
     <p>
         <a class="aksel-link" href="/oauth2/logout">Logg ut</a>
     </p>
 </main>
+<script>
+    (function () {
+        const navident = new URLSearchParams(window.location.search).get("navident");
+        if (navident) {
+            document.getElementById("navident-verdi").textContent = navident;
+            document.getElementById("navident").hidden = false;
+        }
+    })();
+</script>
 </body>
 </html>

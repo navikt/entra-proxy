@@ -14,11 +14,14 @@ import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSucc
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.ObjectProvider
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
+import org.springframework.core.convert.converter.Converter
 import org.springframework.http.HttpStatusCode
+import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
@@ -29,10 +32,10 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
-import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
-import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
@@ -42,21 +45,16 @@ import java.net.URI
 
 @Configuration
 class OAuth2SecurityBeanConfig(
-    @param:Value($$"${groups.utforsker:}") private val utforskerGruppeId: String,
-) {
+    @param:Value($$"${groups.utforsker:}") private val utforskerGruppeId: String) {
 
     private val log = getLogger(javaClass)
 
-    private val API_ENDPOINTS = PathPatternRequestMatcher.withDefaults().matcher("$API_V1/**")
+    private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
+    private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html")
 
-    private val UTFORSKER_SIDER = arrayOf(
-        "/",
-        "/index.html",
-        "/grupper.html",
-    )
-
-    private val manglerTilgangHandler = AccessDeniedHandler { _, response, exception ->
-        log.warn("Bruker mangler påkrevd gruppetilgang til utforsker: {}", exception.message)
+    @Bean
+    fun manglerTilgangHandler() = AccessDeniedHandler { _, response, e ->
+        log.warn("Bruker mangler påkrevd gruppetilgang til utforsker: {}", e.message)
         response.sendRedirect("/mangler-tilgang.html")
     }
 
@@ -72,58 +70,35 @@ class OAuth2SecurityBeanConfig(
     @Bean
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
-                                         converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
-                                         entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
+                                     converter:  Converter<Jwt, AbstractAuthenticationToken>,
+                                     entryPoint: AuthenticationEntryPoint,
+                                     @Qualifier("manglerTilgangHandler") handler: AccessDeniedHandler)  =
         http.securityMatcher(*UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
-                val regel = requests.anyRequest()
-                if (utforskerGruppeId.isNotBlank())
-                    regel.hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
-                else
-                    regel.authenticated()
-            }
-            .csrf {
-                it.disable()
-            }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(converter)
+                with(requests.anyRequest()) {
+                    if (utforskerGruppeId.isNotBlank())  {
+                        hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                    }
+                    else {
+                        authenticated()
+                    }
                 }
-                oauth2.authenticationEntryPoint(entryPoint)
             }
-            .exceptionHandling {
-                it.authenticationEntryPoint(entryPoint)
-                it.accessDeniedHandler(manglerTilgangHandler)
-            }
-            .stateless()
+            .asResourceServer(converter, entryPoint, handler)
             .build()
 
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity,
-                               converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
-                               deniedHandler: AccessDeniedHandler,
-                               entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
+                               converter:  Converter<Jwt, AbstractAuthenticationToken>,
+                               @Qualifier("oauth2JsonAccessDeniedHandler") handler: AccessDeniedHandler,
+                               entryPoint: AuthenticationEntryPoint)  =
         http.authorizeHttpRequests { requests ->
                 requests.requestMatchers(API_ENDPOINTS).authenticated()
                 requests.anyRequest().permitAll()
             }
-            .csrf {
-                it.disable()
-            }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(converter)
-                }
-                oauth2.authenticationEntryPoint(entryPoint)
-            }
-            .exceptionHandling {
-                it.authenticationEntryPoint(entryPoint)
-                it.accessDeniedHandler(deniedHandler)
-            }
-            .stateless()
+            .asResourceServer(converter, entryPoint, handler)
             .build()
-
 
     @Bean
     fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager,  logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
@@ -164,6 +139,19 @@ class OAuth2SecurityBeanConfig(
             setAuthorizationSuccessHandler(successHandler)
             setAuthorizationFailureHandler(failureHandler)
         }
+
+    private fun HttpSecurity.asResourceServer(converter: Converter<Jwt, AbstractAuthenticationToken>, entryPoint: AuthenticationEntryPoint, deniedHandler: AccessDeniedHandler) =
+        oauth2ResourceServer { oauth2 ->
+            oauth2.jwt { jwt ->
+                jwt.jwtAuthenticationConverter(converter)
+            }
+            oauth2.authenticationEntryPoint(entryPoint)
+        }
+            .exceptionHandling {
+                it.authenticationEntryPoint(entryPoint)
+                it.accessDeniedHandler(deniedHandler)
+            }
+            .stateless()
 }
 
 

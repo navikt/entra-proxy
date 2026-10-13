@@ -27,6 +27,7 @@ import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
+import org.springframework.http.HttpHeaders.LOCATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
@@ -35,6 +36,7 @@ import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
@@ -122,14 +124,12 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        xGiven("den statiske utforskersiden") {
-            When("request mangler bearer-token") {
-                Then("viser linker til ansatt og gruppemedlemmer") {
+        Given("den statiske utforskersiden") {
+            When("request mangler innlogget sesjon") {
+                Then("sender brukeren til Entra-innlogging") {
                     mockMvc.perform(get("/utforsker.html"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().contentTypeCompatibleWith("text/html"))
-                        .andExpect(content().string(containsString("href=\"/ansatt.html\"")))
-                        .andExpect(content().string(containsString("href=\"/grupper.html\"")))
+                        .andExpect(status().is3xxRedirection())
+                        .andExpect(header().string(LOCATION, containsString("/oauth2/authorization/entra")))
                 }
             }
         }

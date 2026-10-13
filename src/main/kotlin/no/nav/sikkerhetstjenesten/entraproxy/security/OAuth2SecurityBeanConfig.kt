@@ -14,6 +14,7 @@ import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatusCode
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
 import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
@@ -53,6 +55,13 @@ class OAuth2SecurityBeanConfig {
         )
     }
 
+    private val LOGIN_ENDPOINTS = arrayOf(
+        "/utforsker.html",
+        "/oauth2/authorization/**",
+        "/login/oauth2/code/**",
+        "/logout",
+    )
+
     @Bean
     fun authContext() = AuthContext()
 
@@ -63,6 +72,22 @@ class OAuth2SecurityBeanConfig {
         }
 
     @Bean
+    @Order(1)
+    fun authorizationCodeLoginSecurityFilterChain(http: HttpSecurity): SecurityFilterChain =
+        http.securityMatcher(*LOGIN_ENDPOINTS)
+            .authorizeHttpRequests { requests ->
+                requests.anyRequest().authenticated()
+            }
+            .oauth2Login { login ->
+                login.defaultSuccessUrl("/", true)
+            }
+            .logout { logout ->
+                logout.logoutSuccessUrl("/")
+            }
+            .build()
+
+    @Bean
+    @Order(2)
     fun securityFilterChain(http: HttpSecurity,
                             converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
                             deniedHandler: AccessDeniedHandler,
@@ -117,7 +142,12 @@ class OAuth2SecurityBeanConfig {
     fun oauth2AuthorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
         AuthorizedClientServiceOAuth2AuthorizedClientManager(
             repo, service).apply {
-            setAuthorizedClientProvider(OAuth2AuthorizedClientProviderBuilder.builder().clientCredentials().build())
+            setAuthorizedClientProvider(
+                OAuth2AuthorizedClientProviderBuilder.builder()
+                    .authorizationCode()
+                    .refreshToken()
+                    .clientCredentials()
+                    .build())
             setAuthorizationSuccessHandler(successHandler)
             setAuthorizationFailureHandler(failureHandler)
         }

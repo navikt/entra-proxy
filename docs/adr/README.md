@@ -11,4 +11,5 @@ Arkitekturbeslutninger for `entra-proxy`, dokumentert etter [Architecture Advice
 | [ADR-003](ADR-003-separasjon-mellom-produksjons-api-og-dev-endepunkter.md) | Separasjon mellom produksjons-API og dev-endepunkter | Godkjent | 2026-06-16 |
 | [ADR-004](ADR-004-sikkerhetsmodell-for-obo-og-cc.md) | Sikkerhetsmodell for OBO og CC | Godkjent | 2026-06-16 |
 | [ADR-005](ADR-005-resiliens-mot-entra-og-norg.md) | Resiliens mot Entra og NORG | Godkjent | 2026-06-16 |
+| [ADR-006](ADR-006-authorization-code-flow-for-innlogging.md) | Authorization Code Flow for interaktiv innlogging | Godkjent | 2026-10-13 |
 

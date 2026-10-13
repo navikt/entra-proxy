@@ -52,6 +52,10 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
+      replyURLs:
+        {{#each ingresses as |ingress|}}
+        - "{{ingress}}/login/oauth2/code/entra"
+        {{/each}}
       claims:
         extra:
           - "NAVident"

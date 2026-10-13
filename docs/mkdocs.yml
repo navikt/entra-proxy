@@ -15,3 +15,4 @@ nav:
   - ADR-003 Produksjons-API og dev-endepunkter: ADR-003-separasjon-mellom-produksjons-api-og-dev-endepunkter.md
   - ADR-004 Sikkerhetsmodell for OBO og CC: ADR-004-sikkerhetsmodell-for-obo-og-cc.md
   - ADR-005 Resiliens mot Entra og NORG: ADR-005-resiliens-mot-entra-og-norg.md
+  - ADR-006 Authorization Code Flow for innlogging: ADR-006-authorization-code-flow-for-innlogging.md

@@ -33,7 +33,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolder.getContext
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
@@ -149,16 +148,16 @@ class OAuth2SecurityBeanConfig {
             setAuthorizationFailureHandler(failureHandler)
         }
 
-    private fun HttpSecurity.asResourceServer(converter: Converter<Jwt, AbstractAuthenticationToken>, entryPoint: AuthenticationEntryPoint, deniedHandler: AccessDeniedHandler) =
+    private fun HttpSecurity.asResourceServer(converter: Converter<Jwt, AbstractAuthenticationToken>, entry: AuthenticationEntryPoint, handler: AccessDeniedHandler) =
         oauth2ResourceServer {
             it.jwt { jwt ->
                 jwt.jwtAuthenticationConverter(converter)
             }
-            it.authenticationEntryPoint(entryPoint)
+            it.authenticationEntryPoint(entry)
         }
             .exceptionHandling {
-                it.authenticationEntryPoint(entryPoint)
-                it.accessDeniedHandler(deniedHandler)
+                it.authenticationEntryPoint(entry)
+                it.accessDeniedHandler(handler)
             }
             .stateless().build()
 

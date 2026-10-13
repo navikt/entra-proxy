@@ -96,7 +96,6 @@ class OAuth2SecurityBeanConfig {
                 }
             }
             .asResourceServer(converter, entryPoint, handler)
-            .build()
 
     @Bean
     @Order(2)
@@ -109,7 +108,6 @@ class OAuth2SecurityBeanConfig {
                 requests.anyRequest().permitAll()
             }
             .asResourceServer(converter, entryPoint, handler)
-            .build()
 
     @Bean
     fun oauth2GroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
@@ -162,7 +160,7 @@ class OAuth2SecurityBeanConfig {
                 it.authenticationEntryPoint(entryPoint)
                 it.accessDeniedHandler(deniedHandler)
             }
-            .stateless()
+            .stateless().build()
 
 
     companion object {

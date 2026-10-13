@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.security
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.ROLES
 import no.nav.sikkerhetstjenesten.felles.security.GRANTED_CCF_AUTHORITY
 import no.nav.sikkerhetstjenesten.felles.security.GRANTED_OBO_AUTHORITY
@@ -45,7 +46,7 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
     private fun authority(jwt: Jwt) =
         when {
             jwt.getClaimAsStringList(ROLES).orEmpty().contains(CLIENT_CREDENTIALS) -> GRANTED_CCF_AUTHORITY
-            jwt.getClaimAsString(AuthContext.OID) != null -> GRANTED_OBO_AUTHORITY
+            jwt.getClaimAsString(OID) != null -> GRANTED_OBO_AUTHORITY
             else -> null
         }
 

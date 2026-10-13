@@ -60,6 +60,8 @@ spec:
         extra:
           - "NAVident"
           - "azp_name"
+        groups:
+          - id: "{{groups.utforsker}}"
   accessPolicy:
     outbound:
       rules:
@@ -81,6 +83,8 @@ spec:
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
+    - name: GROUPS_UTFORSKER
+      value: {{groups.utforsker}}
     - name: NOMGRAPH
       value: {{nomgraph}}
     - name: NAIS_CLUSTER_TYPE

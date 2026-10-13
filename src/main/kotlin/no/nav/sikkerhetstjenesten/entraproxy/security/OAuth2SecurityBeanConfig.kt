@@ -12,6 +12,7 @@ import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFail
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
 import org.slf4j.LoggerFactory
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -51,7 +52,7 @@ class OAuth2SecurityBeanConfig(
     @param:Value($$"${groups.utforsker:}") private val utforskerGruppeId: String,
 ) {
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = getLogger(javaClass)
 
     private val UTFORSKER_API_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
         arrayOf(
@@ -133,7 +134,7 @@ class OAuth2SecurityBeanConfig(
         http.securityMatcher(*LOGIN_ENDPOINTS)
             .authorizeHttpRequests { requests ->
                 if (utforskerGruppeId.isNotBlank()) {
-                    requests.requestMatchers("/utforsker.html", "/grupper.html").hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                  //  requests.requestMatchers("/utforsker.html", "/grupper.html").hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
                 }
                 requests.anyRequest().authenticated()
             }

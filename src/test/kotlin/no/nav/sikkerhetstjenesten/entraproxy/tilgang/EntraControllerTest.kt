@@ -27,17 +27,14 @@ import org.hamcrest.Matchers.containsString
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpHeaders.LOCATION
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
@@ -129,8 +126,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request mangler innlogget sesjon") {
                 Then("sender brukeren til Entra-innlogging") {
                     mockMvc.perform(get("/utforsker.html"))
-                        .andExpect(status().is3xxRedirection())
-                        .andExpect(header().string(LOCATION, containsString("/oauth2/authorization/entra")))
+                        .andExpect(status().isUnauthorized())
                 }
             }
         }
@@ -227,13 +223,13 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("medlemsoppslag i utforskeren") {
             When("request har innlogget sesjon") {
                 Then("returnerer medlemmer som JSON") {
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").with(oidcLogin()))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden bruker gruppe-endepunktet") {
-                    mockMvc.perform(get("/grupper.html").with(oidcLogin()))
+                    mockMvc.perform(get("/grupper.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
@@ -245,8 +241,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 }
                 Then("krever innlogget sesjon ved direkte tilgang") {
                     mockMvc.perform(get("/grupper.html"))
-                        .andExpect(status().is3xxRedirection())
-                        .andExpect(header().string(LOCATION, containsString("/oauth2/authorization/entra")))
+                        .andExpect(status().isUnauthorized())
                 }
                 Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
@@ -264,7 +259,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("gruppen ikke finnes") {
                 Then("returnerer en tom liste") {
                     every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").with(oidcLogin()))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(content().json("[]"))
                 }
@@ -275,7 +270,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request har innlogget sesjon") {
                 Then("returnerer antall som tekst") {
                     every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
-                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").with(oidcLogin()))
+                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(content().string("1535"))
                 }
@@ -299,7 +294,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             )
                         )
                     )
-                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").with(oidcLogin()))
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
@@ -342,7 +337,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         post("${API_V1}/nom/enhet/bulk")
                             .contentType(APPLICATION_JSON)
                             .content("[\"${TEST_ANSATT_ID.verdi}\"]")
-                            .with(oidcLogin())
+                            .header(AUTHORIZATION, "Bearer ${oboJwt()}")
                     )
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
@@ -362,7 +357,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             gjeldendeSektor = "STAT"
                         )
                     )
-                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").with(oidcLogin()))
+                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
@@ -400,7 +395,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("endepunkt ${API_V1}/ansatt/{navIdent}") {
             When("request har innlogget sesjon") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/ansatt/${TEST_ANSATT_ID}").with(oidcLogin()))
+                    mockMvc.perform(get("${API_V1}/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                 }
             }
@@ -424,7 +419,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("utforsker-endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
             When("request har innlogget sesjon") {
                 Then("returnerer gruppemedlemskap") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID").with(oidcLogin()))
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }

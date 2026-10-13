@@ -3,15 +3,6 @@ spring:
     oauth2:
       client:
         registration:
-          entra:
-            provider: azuread
-            client-id: mock-client-id
-            client-secret: mock-client-secret
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-            scope:
-              - openid
-              - profile
           graph:
             provider: azuread
             client-id: mock-client-id

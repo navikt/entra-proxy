@@ -27,6 +27,7 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
             val authorities = buildSet {
                 addAll(jwt.authorities)
                 addAll(roller(jwt.token))
+                addAll(grupper(jwt.token))
                 authority(jwt.token)?.let(::add)
             }
             JwtAuthenticationToken(jwt.token, principal(jwt.token, authorities), authorities)
@@ -59,8 +60,13 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
             }
         }
 
+    private fun grupper(jwt: Jwt) =
+        jwt.getClaimAsStringList(GROUPS_CLAIM).orEmpty().map { SimpleGrantedAuthority("$GRUPPE_PREFIX$it") }
+
     companion object {
         private const val ROLLE = "ROLE_"
+        const val GROUPS_CLAIM = "groups"
+        const val GRUPPE_PREFIX = "GRUPPE_"
 
     }
 }

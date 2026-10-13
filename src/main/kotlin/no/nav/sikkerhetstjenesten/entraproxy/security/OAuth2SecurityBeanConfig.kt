@@ -38,6 +38,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
@@ -52,7 +53,7 @@ class OAuth2SecurityBeanConfig(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    private val UNPROTECTED_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
+    private val UTFORSKER_API_ENDPOINTS = PathPatternRequestMatcher.withDefaults().let {
         arrayOf(
             it.matcher(GET, "$API_V1/ansatt/{navIdent}"),
             it.matcher(GET, "$API_V1/ansatt/tilganger/{navIdent}"),
@@ -105,6 +106,29 @@ class OAuth2SecurityBeanConfig(
 
     @Bean
     @Order(1)
+    fun utforskerApiSecurityFilterChain(http: HttpSecurity,
+                                        converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
+                                        deniedHandler: AccessDeniedHandler,
+                                        entryPoint: AuthenticationEntryPoint): SecurityFilterChain =
+        http.securityMatcher(OrRequestMatcher(*UTFORSKER_API_ENDPOINTS))
+            .authorizeHttpRequests { requests ->
+                requests.anyRequest().authenticated()
+            }
+            .csrf { it.disable() }
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt { jwt ->
+                    jwt.jwtAuthenticationConverter(converter)
+                }
+                oauth2.authenticationEntryPoint(entryPoint)
+            }
+            .exceptionHandling {
+                it.authenticationEntryPoint(entryPoint)
+                it.accessDeniedHandler(deniedHandler)
+            }
+            .build()
+
+    @Bean
+    @Order(2)
     fun authorizationCodeLoginSecurityFilterChain(http: HttpSecurity): SecurityFilterChain =
         http.securityMatcher(*LOGIN_ENDPOINTS)
             .authorizeHttpRequests { requests ->
@@ -126,13 +150,12 @@ class OAuth2SecurityBeanConfig(
             .build()
 
     @Bean
-    @Order(2)
+    @Order(3)
     fun securityFilterChain(http: HttpSecurity,
                             converter: OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter,
                             deniedHandler: AccessDeniedHandler,
                             entryPoint: AuthenticationEntryPoint) =
         http.authorizeHttpRequests { requests ->
-            requests.requestMatchers(*UNPROTECTED_ENDPOINTS).permitAll()
             requests.requestMatchers(PathPatternRequestMatcher.withDefaults().matcher("$API_V1/**")).authenticated()
             requests.anyRequest().permitAll()
         }

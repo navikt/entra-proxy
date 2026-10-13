@@ -225,9 +225,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
 
         Given("medlemsoppslag i utforskeren") {
-            When("request mangler bearer-token") {
+            When("request har innlogget sesjon") {
                 Then("returnerer medlemmer som JSON") {
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
@@ -248,17 +248,23 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().is3xxRedirection())
                         .andExpect(header().string(LOCATION, containsString("/oauth2/authorization/entra")))
                 }
-                Then("gruppe-endepunktet returnerer medlemmer uten token") {
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
             }
+            When("request mangler både sesjon og token") {
+                Then("returnerer 401") {
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))
+                        .andExpect(status().isUnauthorized())
+                }
+            }
             When("gruppen ikke finnes") {
                 Then("returnerer en tom liste") {
                     every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().json("[]"))
                 }
@@ -266,18 +272,18 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
 
         Given("antall medlemmer i gruppe") {
-            When("request mangler bearer-token") {
+            When("request har innlogget sesjon") {
                 Then("returnerer antall som tekst") {
                     every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
-                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe"))
+                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string("1535"))
                 }
             }
         }
 
-        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/{navIdent}") {
-            When("request mangler bearer-token") {
+        Given("utforsker-endepunkt ${API_V1}/nom/enhet/{navIdent}") {
+            When("request har innlogget sesjon") {
                 Then("returnerer ansattdata og org-tilknytninger fra NOM") {
                     every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomAnsatt(
                         navident = TEST_ANSATT_ID,
@@ -293,7 +299,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             )
                         )
                     )
-                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}"))
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
@@ -303,8 +309,18 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("ubeskyttet endepunkt ${API_V1}/nom/enhet/bulk") {
-            When("request mangler bearer-token") {
+        Given("utforsker-endepunkt ${API_V1}/nom/enhet/bulk") {
+            When("request mangler både sesjon og token") {
+                Then("returnerer 401") {
+                    mockMvc.perform(
+                        post("${API_V1}/nom/enhet/bulk")
+                            .contentType(APPLICATION_JSON)
+                            .content("[\"${TEST_ANSATT_ID.verdi}\"]")
+                    )
+                        .andExpect(status().isUnauthorized())
+                }
+            }
+            When("request har innlogget sesjon") {
                 Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
                     every { nomTjeneste.orgDataBulk(any()) } returns setOf(
                         NomAnsatt(
@@ -326,6 +342,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         post("${API_V1}/nom/enhet/bulk")
                             .contentType(APPLICATION_JSON)
                             .content("[\"${TEST_ANSATT_ID.verdi}\"]")
+                            .with(oidcLogin())
                     )
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
@@ -335,8 +352,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("ubeskyttet endepunkt ${API_V1}/nom/ansatte/{tilgangsenhetId}") {
-            When("request mangler bearer-token") {
+        Given("utforsker-endepunkt ${API_V1}/nom/ansatte/{tilgangsenhetId}") {
+            When("request har innlogget sesjon") {
                 Then("returnerer ansatte fra NOM") {
                     every { nomTjeneste.ansatteForEnhet(TEST_ENHET.enhetnummer) } returns setOf(
                         NomAnsatt(
@@ -345,7 +362,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             gjeldendeSektor = "STAT"
                         )
                     )
-                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}"))
+                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))
@@ -381,31 +398,33 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
 
         Given("endepunkt ${API_V1}/ansatt/{navIdent}") {
-            When("request har gyldig navIdent") {
+            When("request har innlogget sesjon") {
                 Then("returnerer 200") {
+                    mockMvc.perform(get("${API_V1}/ansatt/${TEST_ANSATT_ID}").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                }
+            }
+            When("request mangler både sesjon og token") {
+                Then("returnerer 401") {
                     mockMvc.perform(get("${API_V1}/ansatt/${TEST_ANSATT_ID}"))
-                        .andExpect {
-                            status().isOk
-                        }
+                        .andExpect(status().isUnauthorized())
                 }
             }
         }
 
         Given("endepunkt ${API_V1}/ansatt/tident/{tIdent}") {
-            When("request har gyldig tIdent") {
+            When("request har gyldig token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tident/A123456"))
-                        .andExpect {
-                            status().isOk
-                        }
+                    mockMvc.perform(get("${API_V1}/ansatt/tident/A123456").header(AUTHORIZATION, "Bearer ${ccJwt()}"))
+                        .andExpect(status().isOk())
                 }
             }
         }
 
-        Given("ubeskyttet endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
-            When("request mangler bearer-token") {
+        Given("utforsker-endepunkt ${API_V1}/ansatt/tilganger/{navIdent}") {
+            When("request har innlogget sesjon") {
                 Then("returnerer gruppemedlemskap") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID"))
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
@@ -414,21 +433,23 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isNotFound())
                 }
             }
+            When("request mangler både sesjon og token") {
+                Then("returnerer 401") {
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID"))
+                        .andExpect(status().isUnauthorized())
+                }
+            }
             When("request har OBO-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, oboJwt()))
-                        .andExpect {
-                            status().isOk
-                        }
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                        .andExpect(status().isOk())
                 }
             }
 
             When("request har gyldig CCF-token") {
                 Then("returnerer 200") {
-                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, ccJwt()))
-                        .andExpect {
-                            status().isOk
-                        }
+                    mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${ccJwt()}"))
+                        .andExpect(status().isOk())
                 }
             }
         }

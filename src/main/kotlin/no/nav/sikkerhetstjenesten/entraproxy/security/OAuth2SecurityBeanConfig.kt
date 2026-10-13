@@ -67,6 +67,7 @@ class OAuth2SecurityBeanConfig(
 
     private val LOGIN_ENDPOINTS = arrayOf(
         "/utforsker.html",
+        "/grupper.html",
         "/oauth2/authorization/**",
         "/login/oauth2/code/**",
         "/logout",
@@ -108,7 +109,7 @@ class OAuth2SecurityBeanConfig(
         http.securityMatcher(*LOGIN_ENDPOINTS)
             .authorizeHttpRequests { requests ->
                 if (utforskerGruppeId.isNotBlank()) {
-                    requests.requestMatchers("/utforsker.html").hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
+                    requests.requestMatchers("/utforsker.html", "/grupper.html").hasAuthority("$GRUPPE_PREFIX$utforskerGruppeId")
                 }
                 requests.anyRequest().authenticated()
             }
@@ -120,7 +121,7 @@ class OAuth2SecurityBeanConfig(
             .exceptionHandling { it.accessDeniedHandler(manglerTilgangHandler) }
             .logout { logout ->
                 logout.logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(GET, "/logout"))
-                logout.logoutSuccessUrl("/grupper.html")
+                logout.logoutSuccessUrl("/logout.html")
             }
             .build()
 

@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
@@ -232,7 +233,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden bruker gruppe-endepunktet") {
-                    mockMvc.perform(get("/grupper.html"))
+                    mockMvc.perform(get("/grupper.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
@@ -241,6 +242,11 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().string(containsString("/api/v1/nom/ansatte/enhet/")))
                         .andExpect(content().string(containsString("name=\"tilgangsenhetId\"")))
                         .andExpect(content().string(containsString("pattern=\"[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]\"")))
+                }
+                Then("krever innlogget sesjon ved direkte tilgang") {
+                    mockMvc.perform(get("/grupper.html"))
+                        .andExpect(status().is3xxRedirection())
+                        .andExpect(header().string(LOCATION, containsString("/oauth2/authorization/entra")))
                 }
                 Then("gruppe-endepunktet returnerer medlemmer uten token") {
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe"))

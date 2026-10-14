@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Medlemmer i Entra-grupper</title>
+    <title>Medlemmer i grupper</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
     <style>
         * { box-sizing: border-box; }
@@ -134,18 +134,6 @@
     <section class="sok-panel" aria-label="Gruppesøk 1">
     <h2 class="aksel-heading aksel-heading--medium">Gruppe som skal utforskes</h2>
     <div class="hovedsok">
-    <form id="gruppe-form">
-        <div class="aksel-form-field" style="margin-top: 1rem;">
-            <label class="aksel-label" for="gruppeNavn">Gruppenavn</label>
-            <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Gruppenavn">
-        </div>
-        <div class="sok-knapper">
-            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
-            <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
-        </div>
-        <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
-    </form>
-    <p class="aksel-body-short" aria-hidden="true" style="font-weight: bold; font-size: 1.25rem;">eller</p>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
@@ -155,6 +143,18 @@
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
         </div>
         <p class="aksel-body-short status" id="nom-status" role="status" aria-live="polite"></p>
+    </form>
+    <p class="aksel-body-short" aria-hidden="true" style="font-weight: bold; font-size: 1.25rem;">eller</p>
+    <form id="gruppe-form">
+        <div class="aksel-form-field" style="margin-top: 1rem;">
+            <label class="aksel-label" for="gruppeNavn">Entra gruppenavn</label>
+            <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Gruppenavn">
+        </div>
+        <div class="sok-knapper">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
+            <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
+        </div>
+        <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </form>
     </div>
     <div class="sok-knapper sammenligningsknapp">

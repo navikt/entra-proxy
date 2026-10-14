@@ -42,24 +42,9 @@
     <h1 class="aksel-heading aksel-heading--large">Utforsker</h1>
     <img class="professor" src="    explorer.png" alt="Professor Drøvel">
     <nav aria-label="Utforskersider">
-        <a class="aksel-link" id="ansatt-lenke" href="/ansatt.html">Ansatt</a>
+        <a class="aksel-link" href="/ansatt.html">Ansatt</a>
         <a class="aksel-link" href="/grupper.html">Grupper</a>
     </nav>
 </main>
-<script>
-    // ansatt.html er kun tilgjengelig i milj\u00f8er som ikke er prod (f.eks. ikke i prod-gcp).
-    // Vi skjuler lenken der siden bekreftet ikke finnes (HTTP 404), men "feiler \u00e5pent"
-    // (behold lenken) ved usikre feil som nettverksfeil eller blokkerte foresp\u00f8rsler,
-    // slik at vi ikke risikerer \u00e5 skjule en fungerende lenke ved f.eks. proxy-/CSP-kvirker.
-    fetch('/ansatt.html', {method: 'GET', cache: 'no-store'})
-        .then(response => {
-            if (response.status === 404) {
-                document.getElementById('ansatt-lenke').remove();
-            }
-        })
-        .catch(() => {
-            // Usikker feil (nettverk, CSP, proxy o.l.) \u2013 behold lenken synlig.
-        });
-</script>
 </body>
 </html>

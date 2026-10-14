@@ -378,16 +378,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("request har gyldig gruppe") {
-                Then("ansatt.html er ikke tilgjengelig i prod") {
+                Then("ansatt.html krever innlogging") {
                     mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isNotFound())
+                        .andExpect(status().isUnauthorized())
                 }
-                Then("klassepath-stien til ansatt.html er heller ikke en gyldig URL i prod") {
-                    // /dev-static/ er ikke en av Spring Boots standard static-lokasjoner, s\u00e5 stien
-                    // finnes ikke som rute i det hele tatt \u2013 den blir aldri servert (200), uansett
-                    // om kallet er autentisert eller ikke.
-                    mockMvc.perform(get("/dev-static/ansatt.html").header(AUTHORIZATION, oboJwt()))
-                        .andExpect(status().is4xxClientError())
+                Then("ansatt.html er tilgjengelig i prod") {
+                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("/api/v1/gruppe/antall?")))
+                        .andExpect(content().string(containsString("Antall medlemmer")))
+                        .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
+                        .andExpect(content().string(containsString("Gruppemedlemskap")))
                 }
             }
         }
@@ -434,9 +435,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
-                Then("ansatt.html er ikke tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isNotFound())
+                Then("ansatt.html er tilgjengelig i prod") {
+                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                        .andExpect(status().isOk())
                 }
             }
             When("request mangler både sesjon og token") {

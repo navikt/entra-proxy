@@ -20,9 +20,11 @@ import java.util.stream.Collectors.toSet
 
 const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
-private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled"
+private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled"
 
 private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
+
+private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
 
 @RestRetryingWhenRecoverableService
 class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
@@ -136,7 +138,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
 
     fun grupperForAnsattFiltrert(ansattId: AnsattId,ansattOid: String) =
-        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER_FILTRERT,"securityEnabled eq true"), Tilganger::next, client::tilgangerSide)
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)

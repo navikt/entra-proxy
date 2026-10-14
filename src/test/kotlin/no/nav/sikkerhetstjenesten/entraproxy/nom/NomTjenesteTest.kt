@@ -34,7 +34,7 @@ class NomTjenesteTest : BehaviorSpec({
             every { nom.ansatt(ident) } returns ansatt
 
             Then("the service returns a transport-independent employee") {
-                tjeneste.orgData(ident) shouldBe ansatt
+                tjeneste.ansatt(ident) shouldBe ansatt
             }
         }
 
@@ -42,7 +42,7 @@ class NomTjenesteTest : BehaviorSpec({
             every { nom.ansatte(setOf(ident)) } returns setOf(ansatt)
 
             Then("the service returns the employee data") {
-                tjeneste.orgDataBulk(setOf(ident)) shouldBe setOf(ansatt)
+                tjeneste.ansatte(setOf(ident)) shouldBe setOf(ansatt)
             }
         }
 

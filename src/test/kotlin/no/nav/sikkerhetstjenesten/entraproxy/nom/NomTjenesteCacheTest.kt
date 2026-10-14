@@ -46,8 +46,8 @@ class NomTjenesteCacheTest(
                 every { nom.ansatt(ident) } returns ansatt
 
                 Then("the port is queried only once") {
-                    tjeneste.orgData(ident) shouldBe ansatt
-                    tjeneste.orgData(ident) shouldBe ansatt
+                    tjeneste.ansatt(ident) shouldBe ansatt
+                    tjeneste.ansatt(ident) shouldBe ansatt
                     verify(exactly = 1) { nom.ansatt(ident) }
                 }
             }
@@ -66,8 +66,8 @@ class NomTjenesteCacheTest(
                 every { nom.ansatte(setOf(ident)) } returns setOf(ansatt)
 
                 Then("the port is queried every time because bulk lookups are not cached") {
-                    tjeneste.orgDataBulk(setOf(ident)) shouldBe setOf(ansatt)
-                    tjeneste.orgDataBulk(setOf(ident)) shouldBe setOf(ansatt)
+                    tjeneste.ansatte(setOf(ident)) shouldBe setOf(ansatt)
+                    tjeneste.ansatte(setOf(ident)) shouldBe setOf(ansatt)
                     verify(exactly = 2) { nom.ansatte(setOf(ident)) }
                 }
             }

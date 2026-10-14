@@ -80,7 +80,7 @@
         <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelig enheter (Nom)</h2>
             <table>
-                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
+                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th><th scope="col">Ledere</th></tr></thead>
                 <tbody id="enheter-rader"></tbody>
             </table>
         </section>
@@ -163,22 +163,13 @@
         status.textContent = 'Henter ansatt...';
 
         try {
-            const response = await hentResponse(`/api/v1/ansatt/${encodeURIComponent(ansattid)}`, 'ansatt');
-            if (response.status === 204) {
-                status.textContent = 'Ingen ansatt funnet.';
-                return;
-            }
-            const ansatt = await response.json();
-            if (ansatt === null) {
-                status.textContent = 'Ingen ansatt funnet.';
-                return;
-            }
             const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-data');
             const nomData = await nomResponse.json();
             const enheter = nomData.orgTilknytninger.map(tilknytning => ({
                 enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
                 navn: tilknytning.orgEnhet.navn,
-                nomId: tilknytning.orgEnhet.id
+                nomId: tilknytning.orgEnhet.id,
+                ledere: (tilknytning.orgEnhet.ledere ?? []).map(leder => `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`)
             }));
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
@@ -214,7 +205,9 @@
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');
                 nomIdCelle.textContent = enhet.nomId ?? '';
-                rad.append(nummerCelle, navnCelle, nomIdCelle);
+                const ledereCelle = document.createElement('td');
+                ledereCelle.textContent = enhet.ledere.length ? enhet.ledere.join(', ') : '';
+                rad.append(nummerCelle, navnCelle, nomIdCelle, ledereCelle);
                 enheterRader.appendChild(rad);
             }
             for (const gruppe of grupper) {

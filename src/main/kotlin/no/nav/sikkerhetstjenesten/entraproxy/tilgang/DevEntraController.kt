@@ -27,11 +27,11 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("/nom/{ansattId}")
     fun orgData(@PathVariable ansattId: AnsattId) =
-        nom.orgData(ansattId)
+        nom.ansatt(ansattId)
 
     @PostMapping("/nom/bulk")
     fun orgDataBulk(@RequestBody identer: Set<AnsattId>) =
-        nom.orgDataBulk(identer)
+        nom.ansatte(identer)
 
     @GetMapping("/nom/enhet/{nomId}")
     fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =

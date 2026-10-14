@@ -9,6 +9,12 @@ query orgtilknytninger($navident: String!) {
                 id
                 navn
                 tilgangsenhetId
+                ledere {
+                    ressurs {
+                        navident
+                        visningsnavn
+                    }
+                }
             }
         }
     }

@@ -11,10 +11,10 @@ import org.springframework.cache.annotation.Cacheable
 class NomTjeneste(private val nom: NomPort) {
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#ident.verdi")
-    fun orgData(ident: AnsattId)  =
+    fun ansatt(ident: AnsattId)  =
         nom.ansatt(ident)
 
-    fun orgDataBulk(identer: Set<AnsattId>) =
+    fun ansatte(identer: Set<AnsattId>) =
         nom.ansatte(identer)
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#enhet.verdi")

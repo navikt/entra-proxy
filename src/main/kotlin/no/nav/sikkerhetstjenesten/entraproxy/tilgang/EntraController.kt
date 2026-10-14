@@ -33,7 +33,7 @@ import java.util.UUID
 @RequestMapping(API_V1)
 class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
-    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt")
+    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
         oid.ansattOid(navIdent)?.let {
             entra.enheter(navIdent, it)
@@ -41,12 +41,12 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
     @GetMapping("enhet")
     @OAuth2RequireOBO
-    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra, forutsetter OBO-flow")
     fun enheterForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
             entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId),principal.requiredAttribute(OID,UUID::fromString))
 
     @GetMapping("tema/ansatt/{navIdent}")
-    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter CC-flow")
+    @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun temaForAnsatt(@PathVariable navIdent: AnsattId) =
             oid.ansattOid(navIdent)?.let {
@@ -54,40 +54,40 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
             } ?: emptySet()
 
     @GetMapping("tema")
-    @Operation(summary = "Hent alle tilgjengelige tema for ansatt, forutsetter OBO-flow")
+    @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter OBO-flow")
     @OAuth2RequireOBO
     fun temaForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
             entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId), principal.requiredAttribute(OID,UUID::fromString))
 
     @GetMapping("enhet/{enhetsnummer}")
-    @Operation(summary = "Hent alle medlemmer for en gitt enhet")
+    @Operation(summary = "Hent alle medlemmer fra Entra for en gitt enhet")
     fun medlemmerForEnhet(@PathVariable enhetsnummer: Enhetnummer) =
         medlemmerIGruppe(enhetsnummer.gruppeNavn)
 
     @GetMapping("tema/{tema}")
-    @Operation(summary = "Hent alle medlemmer for et gitt tema")
+    @Operation(summary = "Hent alle medlemmer fra Entra for et gitt tema")
     fun medlemmerForTema(@PathVariable tema: Tema) =
         medlemmerIGruppe(tema.gruppeNavn)
 
     @GetMapping("ansatt/{navIdent}")
-    @Operation(summary = "Hent informasjon om ansatt ved bruk av NavIdent")
+    @Operation(summary = "Hent informasjon om ansatt fra Entra")
     fun utvidetAnsattForNavIdent(@PathVariable navIdent: AnsattId) =
         entra.utvidetAnsatt(navIdent)
 
     @GetMapping("ansatt/tident/{tIdent}")
-    @Operation(summary = "Hent informasjon om ansatt ved bruk av (AAA1234)")
+    @Operation(summary = "Hent informasjon om ansatt fra Entra fot TIdent")
     fun utvidetAnsattForTIdent(@PathVariable tIdent: TIdent) =
         entra.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
-    @Operation(summary = "Hent informasjon om ansatts tilganger")
+    @Operation(summary = "Hent informasjon om ansatts tilganger fra Entra")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oid.ansattOid(navIdent)?.let {
             entra.grupperForAnsatt(navIdent, it)
         } ?: emptySet()
 
     @GetMapping("gruppe/medlemmer")
-    @Operation(summary = "Hent ansatte i en gitt gruppe")
+    @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)
 
@@ -97,29 +97,29 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
         } ?: emptySet()
 
     @GetMapping("gruppe/antall")
-    @Operation(summary = "Hent antall medlemmer i en gitt gruppe")
+    @Operation(summary = "Hent antall medlemmer i en gitt gruppe fra Entra")
     fun antallMedlemmerIGruppe(@RequestParam gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
             entra.antallMedlemmerIGruppe(it)
         } ?: "0"
 
     @GetMapping("nom/enhet/{navIdent}")
-    @Operation(summary = "Hent org-tilknytninger for ansatt fra NOM")
-    fun orgTilknytningerForAnsatt(@PathVariable navIdent: AnsattId) =
-        nom.orgData(navIdent)
+    @Operation(summary = "Hent ansatt og org-tilknytninger fra NOM")
+    fun ansatt(@PathVariable navIdent: AnsattId) =
+        nom.ansatt(navIdent)
 
     @PostMapping("nom/enhet/bulk")
-    @Operation(summary = "Hent org-tilknytninger for ansatte fra NOM")
-    fun orgTilknytningerForAnsatteBulk(@RequestBody identer: Set<AnsattId>) =
-        nom.orgDataBulk(identer)
+    @Operation(summary = "Hent ansatte og org-tilknytninger fra NOM")
+    fun ansatte(@RequestBody identer: Set<AnsattId>) =
+        nom.ansatte(identer)
 
     @GetMapping("nom/ansatte/{tilgangsenhetId}")
     @Operation(summary = "Hent ansatte i en tilgangsenhet fra NOM")
-    fun ansatteForTilgangsenhet(@PathVariable tilgangsenhetId: Enhetnummer) =
+    fun ansatteForEnhet(@PathVariable tilgangsenhetId: Enhetnummer) =
         nom.ansatteForEnhet(tilgangsenhetId)
 
     @GetMapping("nom/ansatte/enhet/{nomId}")
-    @Operation(summary = "Hent ansatte i en nom-enhet og underliggende enheter fra NOM")
+    @Operation(summary = "Hent ansatte i en nom-enhet og underliggende enheter")
     fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =
         nom.ansatteForNomIdent(nomId)
 

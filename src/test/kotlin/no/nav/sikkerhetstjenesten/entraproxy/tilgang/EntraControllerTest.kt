@@ -291,7 +291,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("utforsker-endepunkt ${API_V1}/nom/enhet/{navIdent}") {
             When("request har innlogget sesjon") {
                 Then("returnerer ansattdata og org-tilknytninger fra NOM") {
-                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomAnsatt(
+                    every { nomTjeneste.ansatt(TEST_ANSATT_ID) } returns NomAnsatt(
                         navident = TEST_ANSATT_ID,
                         visningsnavn = "Test Ansatt",
                         gjeldendeSektor = "STAT",
@@ -328,7 +328,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
             When("request har innlogget sesjon") {
                 Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
-                    every { nomTjeneste.orgDataBulk(any()) } returns setOf(
+                    every { nomTjeneste.ansatte(any()) } returns setOf(
                         NomAnsatt(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",

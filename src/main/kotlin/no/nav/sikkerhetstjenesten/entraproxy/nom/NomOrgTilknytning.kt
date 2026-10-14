@@ -1,10 +1,20 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
 data class NomOrgTilknytning(val orgEnhet: NomEnhet, val erDagligOppfolging: Boolean = false)  {
-    data class NomEnhet(val id: NomIdent, val navn: String, val tilgangsenhetId: Enhetnummer? = null) {
+    data class NomEnhet(
+        val id: NomIdent,
+        val navn: String,
+        val tilgangsenhetId: Enhetnummer? = null,
+        val ledere: List<NomLeder> = emptyList()
+    ) {
+        data class NomLeder(val ressurs: NomLederRessurs) {
+            data class NomLederRessurs(val navident: AnsattId, val visningsnavn: String)
+        }
+
         data class NomIdent(@JsonValue val verdi: String) : Comparable<NomIdent> {
 
             init {

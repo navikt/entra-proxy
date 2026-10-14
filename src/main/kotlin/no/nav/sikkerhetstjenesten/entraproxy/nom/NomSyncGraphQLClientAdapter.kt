@@ -73,7 +73,9 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         log.trace("Oppdaterte CACHE med ${ansatte.size} ansatt(e) fra NOM")
     }
 
-    private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
+    private fun NomGraphQLRespons.toAnsatt()  =
+        NomAnsatt(navident, visningsnavn, gjeldendeSektor.tekst, orgTilknytninger)
+
 
     private fun NomAnsatt.kunDagligOppfolging() =
         copy(orgTilknytninger = orgTilknytninger.filterTo(mutableSetOf()) { it.erDagligOppfolging })

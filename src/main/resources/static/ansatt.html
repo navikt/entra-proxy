@@ -174,9 +174,11 @@
                 navn: tilknytning.orgEnhet.navn,
                 nomId: tilknytning.orgEnhet.id
             }));
-            const naermesteLeder = (nomData.orgTilknytninger[0]?.orgEnhet.ledere ?? [])
-                .map(leder => `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`)
-                .join(', ');
+            const naermesteLeder = [...new Map(
+                nomData.orgTilknytninger
+                    .flatMap(tilknytning => tilknytning.orgEnhet.ledere ?? [])
+                    .map(leder => [leder.ressurs.navident, `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`])
+            ).values()].join(', ');
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
             const antallMedlemmer = new Map();

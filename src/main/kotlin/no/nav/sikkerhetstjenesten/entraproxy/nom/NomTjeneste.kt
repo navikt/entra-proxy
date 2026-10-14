@@ -14,7 +14,7 @@ class NomTjeneste(private val nom: NomPort) {
     private val log = getLogger(javaClass)
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#ident.verdi")
-    fun ansatt(ident: AnsattId)  =
+    fun ansatt(ident: AnsattId): NomAnsatt? =
         nom.ansatt(ident).also {
             log.info("Hentet ansatt $it for navIdent $ident")
         }

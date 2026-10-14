@@ -75,15 +75,22 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
         entra.utvidetAnsatt(navIdent)
 
     @GetMapping("ansatt/tident/{tIdent}")
-    @Operation(summary = "Hent informasjon om ansatt fra Entra fot TIdent")
+    @Operation(summary = "Hent informasjon om en ansatt fra Entra fot TIdent")
     fun utvidetAnsattForTIdent(@PathVariable tIdent: TIdent) =
         entra.utvidetAnsatt(tIdent)
 
     @GetMapping("/ansatt/tilganger/{navIdent}")
-    @Operation(summary = "Hent informasjon om ansatts tilganger fra Entra")
+    @Operation(summary = "Hent informasjon om den ansattes tilganger fra Entra")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         oid.ansattOid(navIdent)?.let {
             entra.grupperForAnsatt(navIdent, it)
+        } ?: emptySet()
+
+    @GetMapping("/ansatt/tilganger/filtrert/{navIdent}")
+    @Operation(summary = "Hent informasjon om den ansattes tilganger fra Entra")
+    fun grupperForAnsattFiltrert(@PathVariable navIdent: AnsattId) =
+        oid.ansattOid(navIdent)?.let {
+            entra.grupperForAnsattFiltrert(navIdent, it.toString())
         } ?: emptySet()
 
     @GetMapping("gruppe/medlemmer")

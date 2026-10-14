@@ -20,6 +20,8 @@ import java.util.stream.Collectors.toSet
 
 const val BRUKER = "onPremisesSamAccountName"
 private const val MINIMUM_FELTER = "id,displayName"
+private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled"
+
 private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
 
 @RestRetryingWhenRecoverableService
@@ -132,6 +134,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)
             }
+
+    fun grupperForAnsattFiltrert(ansattId: AnsattId,ansattOid: String) =
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER_FILTRERT,"securityEnabled eq true"), Tilganger::next, client::tilgangerSide)
+            .flatMapTo(mutableSetOf()) { it.value }
+            .mapTo(sortedSetOf()) {
+                EntraGruppe(it.displayName)
+            }
+
 
      fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)

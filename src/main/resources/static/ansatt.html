@@ -28,6 +28,7 @@
             margin-top: 1rem;
         }
         .sok-knapp { margin-top: 1rem; }
+        #ansattid { width: auto; max-width: 12rem; }
         .medlemskap-resultat {
             grid-column: 1 / -1;
         }
@@ -80,7 +81,7 @@
         <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelig enheter (Nom)</h2>
             <table>
-                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
+                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th><th scope="col" id="enheter-ledere-kolonne" hidden>Ledere</th></tr></thead>
                 <tbody id="enheter-rader"></tbody>
             </table>
         </section>
@@ -107,6 +108,7 @@
     const enheterResultat = document.getElementById('enheter-resultat');
     const grupperResultat = document.getElementById('grupper-resultat');
     const enheterRader = document.getElementById('enheter-rader');
+    const enheterLedereKolonne = document.getElementById('enheter-ledere-kolonne');
     const grupperRader = document.getElementById('grupper-rader');
     const grupperStatus = document.getElementById('grupper-status');
     const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
@@ -169,16 +171,17 @@
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
             }
+            const formaterLedere = ledere => (ledere ?? [])
+                .map(leder => `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`)
+                .join(', ');
+            const flereTilknytninger = nomData.orgTilknytninger.length > 1;
             const enheter = nomData.orgTilknytninger.map(tilknytning => ({
                 enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
                 navn: tilknytning.orgEnhet.navn,
-                nomId: tilknytning.orgEnhet.id
+                nomId: tilknytning.orgEnhet.id,
+                ledere: formaterLedere(tilknytning.orgEnhet.ledere)
             }));
-            const naermesteLeder = [...new Map(
-                nomData.orgTilknytninger
-                    .flatMap(tilknytning => tilknytning.orgEnhet.ledere ?? [])
-                    .map(leder => [leder.ressurs.navident, `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`])
-            ).values()].join(', ');
+            enheterLedereKolonne.hidden = !flereTilknytninger;
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
             const antallMedlemmer = new Map();
@@ -193,9 +196,11 @@
             const verdier = [
                 ['Nav-ident', nomData.navident],
                 ['Navn', nomData.visningsnavn],
-                ['Sektor', nomData.gjeldendeSektor],
-                ['N\u00e6rmeste leder', naermesteLeder]
+                ['Sektor', nomData.gjeldendeSektor]
             ];
+            if (!flereTilknytninger && nomData.orgTilknytninger.length === 1) {
+                verdier.push(['N\u00e6rmeste leder', enheter[0].ledere]);
+            }
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');
                 const feltCelle = document.createElement('th');
@@ -214,7 +219,10 @@
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');
                 nomIdCelle.textContent = enhet.nomId ?? '';
-                rad.append(nummerCelle, navnCelle, nomIdCelle);
+                const ledereCelle = document.createElement('td');
+                ledereCelle.textContent = enhet.ledere;
+                ledereCelle.hidden = !flereTilknytninger;
+                rad.append(nummerCelle, navnCelle, nomIdCelle, ledereCelle);
                 enheterRader.appendChild(rad);
             }
             for (const gruppe of grupper) {

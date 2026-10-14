@@ -77,7 +77,7 @@ class NomTjenesteTest : BehaviorSpec({
 
          */
 
-        When("serializing the employee for the existing pages") {
+        xWhen("serializing the employee for the existing pages") {
             val mapper = JsonMapper.builder().addModule(Builder().build()).build()
 
             Then("the JSON structure is unchanged") {

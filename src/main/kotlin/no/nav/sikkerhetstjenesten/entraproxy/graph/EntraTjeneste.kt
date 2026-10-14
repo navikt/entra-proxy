@@ -138,7 +138,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
 
     fun grupperForAnsattFiltrert(ansattId: AnsattId,ansattOid: String) =
-        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName)

@@ -33,6 +33,15 @@ interface EntraGraphClient {
         @RequestParam($$"$count") count: String = "true"
     ): Tilganger
 
+    @GetExchange("/users/{ansattId}/memberOf/microsoft.graph.group")
+    fun memberOfGrupper(
+        @PathVariable ansattId: String,
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$filter", required = false) filter: String? = null,
+        @RequestParam($$"$top") top: Int = TOP,
+        @RequestParam($$"$count") count: String = "true"
+    ): Tilganger
+
     @GetExchange("/groups/{gruppeId}/members")
     fun members(
         @PathVariable gruppeId: String,

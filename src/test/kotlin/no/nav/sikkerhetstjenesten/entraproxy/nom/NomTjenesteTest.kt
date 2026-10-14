@@ -6,6 +6,8 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_STATLIG
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import tools.jackson.databind.json.JsonMapper
@@ -26,7 +28,7 @@ class NomTjenesteTest : BehaviorSpec({
             )
         )
     )
-    val respons = NomGraphQLRespons(ident, "Test Ansatt", "STAT", tilknytninger)
+    val respons = NomGraphQLRespons(ident, "Test Ansatt", NAV_STATLIG, tilknytninger)
     val ansatt = NomAnsatt(ident, "Test Ansatt", "STAT", tilknytninger)
 
     Given("employee data from the port") {

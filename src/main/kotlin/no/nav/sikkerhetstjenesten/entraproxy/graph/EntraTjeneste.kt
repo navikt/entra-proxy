@@ -8,6 +8,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
@@ -217,7 +218,11 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
         val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
         val forespørsler = idTilGruppe.map { (id, gruppeId) ->
-            BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
+            BatchSubRequest(
+                id = id,
+                url = $$"/groups/$$gruppeId/members/$count",
+                headers = mapOf(HEADER_CONSISTENCY_LEVEL)
+            )
         }
         return client.batch(BatchRequest(forespørsler)).responses
             .mapNotNull { respons ->

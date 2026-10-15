@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -16,6 +17,7 @@ import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_PLAIN
+import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
@@ -74,6 +76,17 @@ class EntraTjenesteTest(
 
                     resultat.size shouldBe 20
                     resultat shouldBe gruppeIder.associateWith { 1L }
+                }
+                Then("sendes ConsistencyLevel: eventual på hver delforespørsel") {
+                    val gruppeIder = (1..1).map { randomUUID() }
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        (request as MockClientHttpRequest).bodyAsString shouldContain
+                            """"headers":{"ConsistencyLevel":"eventual"}"""
+                    }.andRespond(withSuccess(batchRespons(gruppeIder), APPLICATION_JSON))
+
+                    entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
                 }
             }
             When("én delforespørsel feiler med et feilobjekt som body") {

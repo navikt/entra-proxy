@@ -166,7 +166,7 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
         private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
         private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
-        private val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
+        val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
     }
 }
 

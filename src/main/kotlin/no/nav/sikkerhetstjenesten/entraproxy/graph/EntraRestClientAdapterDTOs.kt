@@ -60,7 +60,8 @@ data class BatchRequest(val requests: List<BatchSubRequest>)
 data class BatchSubRequest(
     val id: String,
     val url: String,
-    val method: String = "GET"
+    val method: String = "GET",
+    val headers: Map<String, String> = emptyMap()
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -183,7 +183,8 @@
 
         try {
             const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-data');
-            const nomData = nomResponse.status === 204 ? null : await nomResponse.json();
+            const nomTekst = await nomResponse.text();
+            const nomData = nomTekst.trim() ? JSON.parse(nomTekst) : null;
             if (nomData === null) {
                 status.textContent = 'Ingen ansatt funnet.';
                 return;

@@ -103,13 +103,6 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
             entra.medlemmerIGruppe( gruppeNavn, it)
         } ?: emptySet()
 
-    @GetMapping("gruppe/antall")
-    @Operation(summary = "Hent antall medlemmer i en gitt gruppe fra Entra")
-    fun antallMedlemmerIGruppe(@RequestParam gruppeNavn: String) =
-        oid.gruppeOid(gruppeNavn)?.let {
-            entra.antallMedlemmerIGruppe(it)
-        } ?: "0"
-
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
     fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>): Map<UUID, Long> =

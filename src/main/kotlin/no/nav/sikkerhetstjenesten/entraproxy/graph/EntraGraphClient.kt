@@ -52,9 +52,6 @@ interface EntraGraphClient {
         @RequestParam($$"$count") count: String = "true"
     ): GruppeMedlemmer
 
-    @GetExchange( $$"/groups/{gruppeId}/members/$count")
-    fun antallMedlemmer(@PathVariable gruppeId: String): String
-
     @PostExchange($$"/$batch")
     fun batch(@RequestBody request: BatchRequest): BatchRespons
 

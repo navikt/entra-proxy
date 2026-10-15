@@ -278,17 +278,6 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("antall medlemmer i gruppe") {
-            When("request har innlogget sesjon") {
-                Then("returnerer antall som tekst") {
-                    every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
-                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
-                        .andExpect(status().isOk())
-                        .andExpect(content().string("1535"))
-                }
-            }
-        }
-
         Given("antall medlemmer for flere grupper") {
             When("request har innlogget sesjon") {
                 Then("returnerer antall per gruppe som JSON") {

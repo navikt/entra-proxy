@@ -192,11 +192,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return oid.ansattOid(navIdent)?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
-    override fun toString() =
-        "${javaClass.simpleName} [client=$client, norg=$norg]"
 
-    fun antallMedlemmerIGruppe(it: UUID) =
-        client.antallMedlemmer("$it")
 
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
         gruppeIder.asList()
@@ -230,5 +226,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
         private const val BATCH_STØRRELSE = 20
     }
-
+    override fun toString() =
+        "${javaClass.simpleName} [client=$client, norg=$norg]"
 }

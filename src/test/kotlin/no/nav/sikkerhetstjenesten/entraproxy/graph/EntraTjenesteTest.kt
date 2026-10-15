@@ -46,19 +46,6 @@ class EntraTjenesteTest(
             server.verify()
         }
 
-        Given("antall medlemmer fra Graph") {
-            When("Graph returnerer antallet som ren tekst") {
-                Then("brukes count-endepunktet") {
-                    server.expect { request ->
-                        request.method shouldBe GET
-                        request.uri.toString() shouldBe $$"$$baseUrl/groups/$$GROUP_ID/members/$count"
-                    }.andRespond(withSuccess("1535", TEXT_PLAIN))
-
-                    client.antallMedlemmer("$GROUP_ID") shouldBe "1535"
-                }
-            }
-        }
-
         Given("antall medlemmer for flere grupper via batch") {
             When("det er flere grupper enn det får plass til i én batch") {
                 Then("deles kallene i batcher på 20 og resultatet slås sammen") {

@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component
 @Component
 class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient, private val cache: CacheOperations) : AbstractSyncGraphQLClientAdapter(cfg, client), NomPort {
 
-    override fun ansatt(ident: AnsattId): NomAnsatt =
-        queryRequired<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi)).toAnsatt().kunDagligOppfolging()
+    override fun ansatt(ident: AnsattId): NomAnsatt? =
+        query<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi))?.toAnsatt()?.kunDagligOppfolging()
 
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt>  {
         val fraCache = fraCache(identer)
@@ -73,7 +73,9 @@ class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) cl
         log.trace("Oppdaterte CACHE med ${ansatte.size} ansatt(e) fra NOM")
     }
 
-    private fun NomGraphQLRespons.toAnsatt() = NomAnsatt(navident, visningsnavn, gjeldendeSektor, orgTilknytninger)
+    private fun NomGraphQLRespons.toAnsatt()  =
+        NomAnsatt(navident, visningsnavn, gjeldendeSektor.tekst, orgTilknytninger)
+
 
     private fun NomAnsatt.kunDagligOppfolging() =
         copy(orgTilknytninger = orgTilknytninger.filterTo(mutableSetOf()) { it.erDagligOppfolging })

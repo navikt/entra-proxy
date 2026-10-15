@@ -24,7 +24,7 @@ class NomBulkGraphQLResponsTest : BehaviorSpec({
         When("ressurs is present") {
             Then("the resource is preserved") {
                 val respons = mapper.readValue(
-                    """{"ressurs":{"navident":"A123456","visningsnavn":"First","gjeldendeSektor":"STAT"}}""",
+                    """{"ressurs":{"navident":"A123456","visningsnavn":"First","gjeldendeSektor":"NAV_STATLIG"}}""",
                     NomBulkGraphQLRespons::class.java
                 )
                 respons.ressurs?.navident?.verdi shouldBe "A123456"

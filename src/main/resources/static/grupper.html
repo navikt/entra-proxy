@@ -3,24 +3,28 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Medlemmer i Entra-grupper</title>
+    <title>Medlemmer i grupper</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
     <style>
         * { box-sizing: border-box; }
         [hidden] { display: none !important; }
         body {
             margin: 0;
-            background: #f3f3f4;
-            color: #1f1f1f;
+            min-height: 100vh;
+            background-color: #283b38;
+            background-image: url("/wildlife.svg");
+            background-position: center;
+            background-size: 720px 600px;
+            color: #fff;
             font-family: Arial, sans-serif;
         }
         main {
             max-width: 90rem;
             margin: 2rem auto;
             padding: 2rem;
-            background: #fff;
-            border: 1px solid #d1d6db;
-            border-radius: 8px;
+        }
+        h1 {
+            text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
         }
         #sok {
             display: grid;
@@ -39,8 +43,21 @@
         }
         .hovedsok {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
-            gap: 2rem;
+            grid-template-columns: 1fr;
+            max-width: 32rem;
+            gap: 1.5rem;
+        }
+        .hovedsok > p {
+            text-align: left;
+            margin: 0;
+        }
+        .aksel-text-field__input,
+        .aksel-text-field__input:autofill,
+        .aksel-text-field__input:-webkit-autofill {
+            background-color: #e3ebe6;
+        }
+        .aksel-text-field__input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #e3ebe6 inset;
         }
         .inaktivt-sok {
             filter: grayscale(1);
@@ -62,18 +79,21 @@
         .status.error { color: #a40000; }
         .oppsummering {
             width: 100%;
-            background: #f3f3f4;
+            background: #e3ebe6;
             border-collapse: collapse;
             text-align: left;
+            color: #1f1f1f;
         }
         .oppsummering th,
         .oppsummering td {
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
         }
+        tbody tr:nth-child(even) { background: #d9e3dd; }
         .sammenligning-tabell {
-            background: #f3f3f4;
+            background: #e3ebe6;
             overflow-x: auto;
+            color: #1f1f1f;
         }
         #sammenligning-detaljer {
             margin-top: 3rem;
@@ -124,23 +144,11 @@
 </head>
 <body>
 <main>
-    <h1 class="aksel-heading aksel-heading--large">Medlemmer i Entra-grupper</h1>
+    <h1 class="aksel-heading aksel-heading--large">Medlemmer i grupper</h1>
     <div id="sok">
     <section class="sok-panel" aria-label="Gruppesøk 1">
     <h2 class="aksel-heading aksel-heading--medium">Gruppe som skal utforskes</h2>
     <div class="hovedsok">
-    <form id="gruppe-form">
-        <div class="aksel-form-field" style="margin-top: 1rem;">
-            <label class="aksel-label" for="gruppeNavn">Gruppenavn</label>
-            <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Gruppenavn">
-        </div>
-        <div class="sok-knapper">
-            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
-            <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
-        </div>
-        <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
-    </form>
-    <p class="aksel-body-short" aria-hidden="true" style="font-weight: bold; font-size: 1.25rem;">eller</p>
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">
             <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
@@ -150,6 +158,18 @@
             <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
         </div>
         <p class="aksel-body-short status" id="nom-status" role="status" aria-live="polite"></p>
+    </form>
+    <p class="aksel-body-short" aria-hidden="true" style="font-weight: bold; font-size: 1.25rem;">eller</p>
+    <form id="gruppe-form">
+        <div class="aksel-form-field" style="margin-top: 1rem;">
+            <label class="aksel-label" for="gruppeNavn">Entra gruppenavn</label>
+            <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required placeholder="Gruppenavn">
+        </div>
+        <div class="sok-knapper">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="vis-medlemmer" type="submit">Hent medlemmer</button>
+            <button class="aksel-button fjern-gruppe" data-variant="secondary" data-color="danger" type="button" hidden>Fjern gruppe</button>
+        </div>
+        <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
     </form>
     </div>
     <div class="sok-knapper sammenligningsknapp">

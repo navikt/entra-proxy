@@ -22,16 +22,16 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
-@Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til testing")
+@Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
 class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste, private val nom: NomTjeneste) {
 
     @GetMapping("/nom/{ansattId}")
     fun orgData(@PathVariable ansattId: AnsattId) =
-        nom.orgData(ansattId)
+        nom.ansatt(ansattId)
 
     @PostMapping("/nom/bulk")
     fun orgDataBulk(@RequestBody identer: Set<AnsattId>) =
-        nom.orgDataBulk(identer)
+        nom.ansatte(identer)
 
     @GetMapping("/nom/enhet/{nomId}")
     fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =

@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import java.net.URI
 import java.util.UUID
 
@@ -53,7 +54,25 @@ data class IdentifiserbartObjekt(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GruppeMedlemmer(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<AnsattRespons> = emptySet()
+    val value: Set<AnsattRespons> = emptySet())
+
+data class BatchRequest(val requests: List<BatchSubRequest>)
+
+data class BatchSubRequest(
+    val id: String,
+    val url: String,
+    val method: String = "GET",
+    val headers: Map<String, String> = mapOf(HEADER_CONSISTENCY_LEVEL)
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BatchSubRespons(
+    val id: String,
+    val status: Int,
+    val body: Any? = null
 )
 
 internal const val TIDENT_DEFAULT = "AAA1234"

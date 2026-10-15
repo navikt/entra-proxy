@@ -122,14 +122,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 Tema(it.displayName)
             }
 
-    private fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
+    private fun grupperForAnsattOriginal(ansattId: AnsattId,ansattOid: String) =
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
                 EntraGruppe(it.displayName, it.id)
             }
 
-    fun grupperForAnsattFiltrert(ansattId: AnsattId,ansattOid: String) =
+    fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {

@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -65,7 +66,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { entraTjeneste.enheter(any(), any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any(), any()) } returns sortedSetOf(Tema("AAP"))
             every { entraTjeneste.medlemmerIGruppe(any(), any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
-            every { entraTjeneste.grupperForAnsatt(any(), any()) } returns sortedSetOf(EntraGruppe("test-rolle"))
+            every { entraTjeneste.grupperForAnsatt(any<AnsattId>(), any<UUID>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
                 "Test Ansatt",

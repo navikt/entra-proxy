@@ -184,7 +184,7 @@
                 ledere: formaterLedere(tilknytning.orgEnhet.ledere)
             }));
             enheterLedereKolonne.hidden = !flereTilknytninger;
-            const grupperResponse = await hentResponse(`/api/v1/ansatt/tilgangerE/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
+            const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
             const gruppeIder = grupper.map(gruppe => gruppe.gruppeId).filter(Boolean);
             const antallMedlemmer = gruppeIder.length

@@ -33,7 +33,14 @@
         }
         .sok-knapp { margin-top: 1rem; }
         #ansattid { width: auto; max-width: 12rem; }
-        .aksel-text-field__input { background: #e3ebe6; }
+        .aksel-text-field__input,
+        .aksel-text-field__input:autofill,
+        .aksel-text-field__input:-webkit-autofill {
+            background-color: #e3ebe6;
+        }
+        .aksel-text-field__input:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 1000px #e3ebe6 inset;
+        }
         .medlemskap-resultat {
             grid-column: 1 / -1;
         }

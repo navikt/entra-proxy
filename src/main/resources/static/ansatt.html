@@ -263,6 +263,12 @@
             knapp.disabled = false;
         }
     });
+
+    const ansattidFraUrl = new URLSearchParams(window.location.search).get('ansattid');
+    if (ansattidFraUrl) {
+        input.value = ansattidFraUrl;
+        form.requestSubmit();
+    }
 </script>
 </body>
 </html>

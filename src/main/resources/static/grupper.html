@@ -109,6 +109,7 @@
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
         }
+        .navident-lenke { color: #00557d; }
         .sorter-knapp {
             padding: 0;
             border: 0;
@@ -341,7 +342,11 @@
             const rad = document.createElement('tr');
             const navIdentCelle = document.createElement('th');
             navIdentCelle.scope = 'row';
-            navIdentCelle.textContent = medlem.navIdent;
+            const navIdentLenke = document.createElement('a');
+            navIdentLenke.className = 'navident-lenke';
+            navIdentLenke.href = `/ansatt.html?ansattid=${encodeURIComponent(medlem.navIdent)}`;
+            navIdentLenke.textContent = medlem.navIdent;
+            navIdentCelle.appendChild(navIdentLenke);
             const navnCelle = document.createElement('td');
             navnCelle.textContent = medlem.visningNavn ?? '';
             const tilgangsenhetCelle = document.createElement('td');

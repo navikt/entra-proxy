@@ -24,6 +24,7 @@
             padding: 2rem;
         }
         h1 {
+            text-align: center;
             text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
         }
         #sok {
@@ -34,6 +35,9 @@
         }
         .sok-panel:first-child {
             grid-column: 1 / -1;
+        }
+        .sok-panel:first-child > h2 {
+            text-align: center;
         }
         #sammenligningsoverskrift {
             grid-column: 1 / -1;
@@ -158,7 +162,7 @@
     <h1 class="aksel-heading aksel-heading--large">Medlemmer i grupper</h1>
     <div id="sok">
     <section class="sok-panel" aria-label="Gruppesøk 1">
-    <h2 class="aksel-heading aksel-heading--medium">Gruppe som skal utforskes</h2>
+    <h2 class="aksel-heading aksel-heading--medium">Velg gruppe som skal utforskes</h2>
     <div class="hovedsok">
     <form id="nom-form" class="nom-form">
         <div class="aksel-form-field" style="margin-top: 1rem;">

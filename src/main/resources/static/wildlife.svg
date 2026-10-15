@@ -71,10 +71,10 @@
         <circle cx="70" cy="520" r="4"/>
         <circle cx="440" cy="340" r="4"/>
     </g>
-    <use href="#lion" transform="translate(135 110) rotate(-8)"/>
-    <use href="#elephant" transform="translate(470 120) rotate(8)"/>
+    <use href="#lion" transform="translate(135 110) rotate(-8) scale(.75)"/>
+    <use href="#elephant" transform="translate(470 120) rotate(8) scale(.75)"/>
     <use href="#giraffe" transform="translate(300 310) rotate(-8)"/>
-    <use href="#zebra" transform="translate(620 360) rotate(10)"/>
-    <use href="#zebra" transform="translate(110 410) rotate(-10)"/>
-    <use href="#lion" transform="translate(470 490) rotate(8) scale(.85)"/>
+    <use href="#zebra" transform="translate(620 360) rotate(10) scale(.75)"/>
+    <use href="#zebra" transform="translate(110 410) rotate(-10) scale(.75)"/>
+    <use href="#lion" transform="translate(470 490) rotate(8) scale(.75)"/>
 </svg>

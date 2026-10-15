@@ -405,7 +405,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("ansatt.html er tilgjengelig i prod") {
                     mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/antall?")))
+                        .andExpect(content().string(containsString("/api/v1/gruppe/antall/bulk")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
                         .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
                         .andExpect(content().string(containsString("Gruppemedlemskap")))

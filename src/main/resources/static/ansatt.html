@@ -46,6 +46,10 @@
         }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
+        html.soker,
+        html.soker * {
+            cursor: url("/kikkert.svg") 16 16, wait !important;
+        }
         table {
             width: 100%;
             background: #d3dfd7;
@@ -179,6 +183,7 @@
         }
         status.classList.remove('error');
         knapp.disabled = true;
+        document.documentElement.classList.add('soker');
         status.textContent = 'Henter ansatt...';
 
         try {
@@ -271,6 +276,7 @@
             status.classList.add('error');
         } finally {
             knapp.disabled = false;
+            document.documentElement.classList.remove('soker');
         }
     });
 

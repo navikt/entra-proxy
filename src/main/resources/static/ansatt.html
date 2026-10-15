@@ -44,6 +44,18 @@
         .medlemskap-resultat {
             grid-column: 1 / -1;
         }
+        .grupper-tabell {
+            overflow-x: auto;
+        }
+        .grupper-tabell.med-rullefelt {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .grupper-tabell.med-rullefelt thead {
+            position: sticky;
+            top: 0;
+            background: #d3dfd7;
+        }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
         html.soker,
@@ -106,6 +118,7 @@
         <section class="medlemskap-resultat" id="grupper-resultat" aria-labelledby="grupper-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
+            <div class="grupper-tabell" tabindex="0" role="region" aria-labelledby="grupper-overskrift">
             <table>
                 <thead><tr>
                     <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="0">Gruppenavn</button></th>
@@ -115,6 +128,7 @@
                 </tr></thead>
                 <tbody id="grupper-rader"></tbody>
             </table>
+            </div>
         </section>
     </div>
 </main>
@@ -127,6 +141,7 @@
     const felter = document.getElementById('ansatt-felter');
     const enheterResultat = document.getElementById('enheter-resultat');
     const grupperResultat = document.getElementById('grupper-resultat');
+    const grupperTabell = grupperResultat.querySelector('.grupper-tabell');
     const enheterRader = document.getElementById('enheter-rader');
     const enheterLedereKolonne = document.getElementById('enheter-ledere-kolonne');
     const grupperRader = document.getElementById('grupper-rader');
@@ -178,6 +193,8 @@
         felter.replaceChildren();
         enheterRader.replaceChildren();
         grupperRader.replaceChildren();
+        grupperTabell.classList.remove('med-rullefelt');
+        grupperTabell.scrollTop = 0;
         for (const sorterKnapp of sorterKnapper) {
             sorterKnapp.closest('th').removeAttribute('aria-sort');
         }
@@ -267,6 +284,7 @@
                 grupperRader.appendChild(rad);
             }
             grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
+            grupperTabell.classList.toggle('med-rullefelt', grupper.length > 50);
             resultat.hidden = false;
             enheterResultat.hidden = false;
             grupperResultat.hidden = false;

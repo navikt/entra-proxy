@@ -118,6 +118,7 @@
         </section>
     </div>
 </main>
+<script src="/innlogging.js"></script>
 <script>
     const form = document.getElementById('ansatt-form');
     const input = document.getElementById('ansattid');
@@ -154,7 +155,7 @@
     }
 
     async function hentResponse(url, beskrivelse, innstillinger = {}) {
-        const response = await fetch(url, {
+        const response = await hentMedInnlogging(url, {
             ...innstillinger,
             headers: {'Accept': 'application/json', ...innstillinger.headers}
         });

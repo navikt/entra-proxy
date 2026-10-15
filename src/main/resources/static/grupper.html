@@ -219,6 +219,7 @@
         <a class="aksel-button" data-variant="secondary" data-color="neutral" href="/oauth2/logout">Logg ut</a>
     </div>
 </main>
+<script src="/innlogging.js"></script>
 <script>
     const sok = document.getElementById('sok');
     const forstePanel = sok.querySelector('.sok-panel');
@@ -384,7 +385,7 @@
         }
         oppdaterSokemarkering(1);
         try {
-            const response = await fetch('/api/v1/nom/enhet/bulk', {
+            const response = await hentMedInnlogging('/api/v1/nom/enhet/bulk', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
                 body: JSON.stringify([...celler.keys()])
@@ -520,7 +521,7 @@
                     const url = erNomSok
                         ? (erNomEnhet ? `/api/v1/nom/ansatte/enhet/${verdi}` : `/api/v1/nom/ansatte/${verdi}`)
                         : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`;
-                    const response = await fetch(url, {
+                    const response = await hentMedInnlogging(url, {
                         headers: {'Accept': 'application/json'}
                     });
                     if (!response.ok) {

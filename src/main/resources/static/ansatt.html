@@ -88,6 +88,13 @@
         .sorter-knapp::after { content: " \2195"; }
         th[aria-sort="ascending"] .sorter-knapp::after { content: " \2191"; }
         th[aria-sort="descending"] .sorter-knapp::after { content: " \2193"; }
+        .utlogging {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d1d6db;
+            display: flex;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
@@ -130,6 +137,9 @@
             </table>
             </div>
         </section>
+    </div>
+    <div class="utlogging">
+        <a class="aksel-button" data-variant="primary" data-color="danger" href="/oauth2/logout">Logg ut</a>
     </div>
 </main>
 <script>

@@ -26,6 +26,8 @@ private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,s
 
 private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
 
+private const val BATCH_STØRRELSE = 19
+
 @RestRetryingWhenRecoverableService
 class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
@@ -134,14 +136,14 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName)
+                EntraGruppe(it.displayName, it.id)
             }
 
     fun grupperForAnsattFiltrert(ansattId: AnsattId,ansattOid: String) =
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName)
+                EntraGruppe(it.displayName, it.id)
             }
 
 
@@ -205,5 +207,28 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
 
     fun antallMedlemmerIGruppe(it: UUID) =
         client.antallMedlemmer("$it")
+
+    fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
+        gruppeIder.asList()
+            .chunked(BATCH_STØRRELSE)
+            .flatMap { antallForBatch(it).toList() }
+            .toMap()
+
+    private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
+        val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
+        val forespørsler = idTilGruppe.map { (id, gruppeId) ->
+            BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
+        }
+        return client.batch(BatchRequest(forespørsler)).responses
+            .mapNotNull { respons ->
+                val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
+                if (respons.status == 200 && respons.body != null) {
+                    gruppeId to respons.body
+                } else {
+                    log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")
+                    null
+                }
+            }.toMap()
+    }
 
 }

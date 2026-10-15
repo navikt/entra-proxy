@@ -110,6 +110,14 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
             entra.antallMedlemmerIGruppe(it)
         } ?: "0"
 
+    @PostMapping("gruppe/antall/bulk")
+    @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
+    fun antallMedlemmerIGrupper(@RequestBody gruppeNavn: Set<String>): Map<String, Long> {
+        val navnTilOid = gruppeNavn.associateWith { oid.gruppeOid(it) }
+        val antallPerOid = entra.antallMedlemmerIGrupper(*navnTilOid.values.filterNotNull().toTypedArray())
+        return navnTilOid.mapValues { (_, gruppeOid) -> gruppeOid?.let { antallPerOid[it] } ?: 0L }
+    }
+
     @GetMapping("nom/enhet/{navIdent}")
     @Operation(summary = "Hent ansatt og org-tilknytninger fra NOM")
     fun ansatt(@PathVariable navIdent: AnsattId) =

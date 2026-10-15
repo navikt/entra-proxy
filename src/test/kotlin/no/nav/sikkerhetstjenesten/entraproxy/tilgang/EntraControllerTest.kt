@@ -32,6 +32,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -284,6 +285,27 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                     mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(content().string("1535"))
+                }
+            }
+        }
+
+        Given("antall medlemmer for flere grupper") {
+            When("request har innlogget sesjon") {
+                Then("returnerer antall per gruppe som JSON") {
+                    val oid1 = UUID.randomUUID()
+                    val oid2 = UUID.randomUUID()
+                    every { oidTjeneste.gruppeOid("gruppe-1") } returns oid1
+                    every { oidTjeneste.gruppeOid("gruppe-2") } returns oid2
+                    every { entraTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)
+                    mockMvc.perform(
+                        post("$API_V1/gruppe/antall/bulk")
+                            .contentType(APPLICATION_JSON)
+                            .content("[\"gruppe-1\",\"gruppe-2\"]")
+                            .with(jwt())
+                    )
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$['gruppe-1']").value(10))
+                        .andExpect(jsonPath("$['gruppe-2']").value(20))
                 }
             }
         }

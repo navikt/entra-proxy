@@ -13,6 +13,7 @@ import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.test.web.client.MockRestServiceServer
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
 import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
 import org.springframework.web.service.invoker.createClient
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @RestClientTest
@@ -51,6 +53,27 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess("1535", TEXT_PLAIN))
 
                     client.antallMedlemmer("$GROUP_ID") shouldBe "1535"
+                }
+            }
+        }
+
+        Given("antall medlemmer for flere grupper via batch") {
+            When("det er flere grupper enn det får plass til i én batch") {
+                Then("deles kallene i batcher på 19 og resultatet slås sammen") {
+                    val gruppeIder = (1..20).map { randomUUID() }
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.take(19)), APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.drop(19)), APPLICATION_JSON))
+
+                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+
+                    resultat.size shouldBe 20
+                    resultat shouldBe gruppeIder.associateWith { 1L }
                 }
             }
         }
@@ -191,7 +214,7 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE"))
+                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                     }
                 }
             }
@@ -239,6 +262,7 @@ class EntraTjenesteTest(
         private val GROUP_ID = randomUUID()
         private val OID = randomUUID()
         private val GRUPPE_OID = randomUUID()
+        private val GRUPPE_ID = randomUUID()
         private val ANSATT_OID = randomUUID()
         private val ANSATT = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
         private val medlemId = "${randomUUID()}"
@@ -293,11 +317,19 @@ class EntraTjenesteTest(
             }
         """.trimIndent()
 
+        private fun batchRespons(gruppeIder: List<UUID>) = """
+            {
+              "responses": [
+                ${gruppeIder.mapIndexed { index, _ -> """{ "id": "$index", "status": 200, "body": 1 }""" }.joinToString(",\n                ")}
+              ]
+            }
+        """.trimIndent()
+
         private val grupperContract = """
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
               "value": [
-                { "id": "${randomUUID()}", "displayName": "0000-GA-MIN_ROLLE" }
+                { "id": "$GRUPPE_ID", "displayName": "0000-GA-MIN_ROLLE" }
               ]
             }
         """.trimIndent()

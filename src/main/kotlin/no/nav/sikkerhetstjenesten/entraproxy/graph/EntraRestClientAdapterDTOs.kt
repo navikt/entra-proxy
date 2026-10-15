@@ -53,7 +53,24 @@ data class IdentifiserbartObjekt(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GruppeMedlemmer(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<AnsattRespons> = emptySet()
+    val value: Set<AnsattRespons> = emptySet())
+
+data class BatchRequest(val requests: List<BatchSubRequest>)
+
+data class BatchSubRequest(
+    val id: String,
+    val url: String,
+    val method: String = "GET"
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class BatchSubRespons(
+    val id: String,
+    val status: Int,
+    val body: Long? = null
 )
 
 internal const val TIDENT_DEFAULT = "AAA1234"

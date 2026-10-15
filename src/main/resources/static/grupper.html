@@ -109,6 +109,15 @@
             overflow-x: auto;
             color: #1f1f1f;
         }
+        .sammenligning-tabell.med-rullefelt {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .sammenligning-tabell.med-rullefelt thead {
+            position: sticky;
+            top: 0;
+            background: #d3dfd7;
+        }
         #sammenligning-detaljer {
             margin-top: 3rem;
             padding-top: 1.5rem;
@@ -207,7 +216,7 @@
         <h2 class="aksel-heading aksel-heading--medium" id="sammenligning-detaljer-overskrift">Detaljvisning</h2>
         <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="kopier-detaljvisning" type="button">Kopier til utklippstavlen</button>
         <p class="aksel-body-short status" id="kopier-status" role="status" aria-live="polite"></p>
-        <div class="sammenligning-tabell">
+        <div class="sammenligning-tabell" tabindex="0" role="region" aria-labelledby="sammenligning-detaljer-overskrift">
             <table aria-label="Medlemskap i sammenligningsgrupper">
                 <thead id="sammenligning-tabell-overskrift"></thead>
                 <tbody id="sammenligning-tabell-rader"></tbody>
@@ -232,6 +241,7 @@
     panelMal.querySelector('.sammenligningsknapp').remove();
     const fellesResultat = document.getElementById('felles-resultat');
     const sammenligningDetaljer = document.getElementById('sammenligning-detaljer');
+    const sammenligningTabell = sammenligningDetaljer.querySelector('.sammenligning-tabell');
     const fellesStatus = document.getElementById('felles-status');
     const fellesListe = document.getElementById('felles-medlemmer');
     const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
@@ -295,6 +305,8 @@
         fellesListe.replaceChildren();
         sammenligningTabellOverskrift.replaceChildren();
         sammenligningTabellRader.replaceChildren();
+        sammenligningTabell.classList.toggle('med-rullefelt', forsteMedlemmer.length > 50);
+        sammenligningTabell.scrollTop = 0;
         kopierStatus.textContent = '';
         kopierStatus.classList.remove('error');
         if (fellesResultat.hidden) {

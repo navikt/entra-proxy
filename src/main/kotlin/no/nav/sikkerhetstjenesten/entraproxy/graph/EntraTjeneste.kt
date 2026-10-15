@@ -218,11 +218,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
         val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
         val forespørsler = idTilGruppe.map { (id, gruppeId) ->
-            BatchSubRequest(
-                id = id,
-                url = $$"/groups/$$gruppeId/members/$count",
-                headers = mapOf(HEADER_CONSISTENCY_LEVEL)
-            )
+            BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
         }
         return client.batch(BatchRequest(forespørsler)).responses
             .mapNotNull { respons ->

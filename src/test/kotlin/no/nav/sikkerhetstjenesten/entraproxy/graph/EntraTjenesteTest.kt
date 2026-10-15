@@ -76,6 +76,31 @@ class EntraTjenesteTest(
                     resultat shouldBe gruppeIder.associateWith { 1L }
                 }
             }
+            When("én delforespørsel feiler med et feilobjekt som body") {
+                Then("hoppes den gruppen over uten å feile hele batchen") {
+                    val gruppeIder = (1..2).map { randomUUID() }
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(
+                        withSuccess(
+                            """
+                            {
+                              "responses": [
+                                { "id": "0", "status": 200, "body": 3 },
+                                { "id": "1", "status": 404, "body": { "error": { "code": "ResourceNotFound" } } }
+                              ]
+                            }
+                            """.trimIndent(),
+                            APPLICATION_JSON
+                        )
+                    )
+
+                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+
+                    resultat shouldBe mapOf(gruppeIder[0] to 3L)
+                }
+            }
         }
 
         Given("medlemmer-endepunkt") {

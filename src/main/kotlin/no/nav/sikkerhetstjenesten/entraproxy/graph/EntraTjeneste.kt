@@ -222,8 +222,9 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return client.batch(BatchRequest(forespørsler)).responses
             .mapNotNull { respons ->
                 val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
-                if (respons.status == 200 && respons.body != null) {
-                    gruppeId to respons.body
+                val antall = (respons.body as? Number)?.toLong()
+                if (respons.status == 200 && antall != null) {
+                    gruppeId to antall
                 } else {
                     log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")
                     null

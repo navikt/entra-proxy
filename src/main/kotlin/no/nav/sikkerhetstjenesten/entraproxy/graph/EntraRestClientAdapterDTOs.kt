@@ -70,7 +70,7 @@ data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
 data class BatchSubRespons(
     val id: String,
     val status: Int,
-    val body: Long? = null
+    val body: Any? = null
 )
 
 internal const val TIDENT_DEFAULT = "AAA1234"

@@ -106,7 +106,7 @@
                 <thead><tr>
                     <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="0">Gruppenavn</button></th>
                     <th scope="col" hidden>Gruppe-Id</th>
-                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="2">Beskrivelse</button></th>
+                    <th scope="col" hidden><button class="sorter-knapp" type="button" data-kolonne="2">Beskrivelse</button></th>
                     <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="3">Antall medlemmer</button></th>
                 </tr></thead>
                 <tbody id="grupper-rader"></tbody>
@@ -254,6 +254,7 @@
                 gruppeIdCelle.hidden = true;
                 const beskrivelseCelle = document.createElement('td');
                 beskrivelseCelle.textContent = gruppe.beskrivelse ?? '';
+                beskrivelseCelle.hidden = true;
                 const antallCelle = document.createElement('td');
                 antallCelle.textContent = antallMedlemmer[gruppe.gruppeId] ?? '';
                 rad.append(celle, gruppeIdCelle, beskrivelseCelle, antallCelle);

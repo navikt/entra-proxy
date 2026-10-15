@@ -61,20 +61,20 @@ class EntraTjenesteTest(
 
         Given("antall medlemmer for flere grupper via batch") {
             When("det er flere grupper enn det får plass til i én batch") {
-                Then("deles kallene i batcher på 19 og resultatet slås sammen") {
-                    val gruppeIder = (1..20).map { randomUUID() }
+                Then("deles kallene i batcher på 20 og resultatet slås sammen") {
+                    val gruppeIder = (1..25).map { randomUUID() }
                     server.expect { request ->
                         request.method shouldBe POST
                         request.uri.toString() shouldBe $$"$$baseUrl/$batch"
-                    }.andRespond(withSuccess(batchRespons(gruppeIder.take(19)), APPLICATION_JSON))
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.take(20)), APPLICATION_JSON))
                     server.expect { request ->
                         request.method shouldBe POST
                         request.uri.toString() shouldBe $$"$$baseUrl/$batch"
-                    }.andRespond(withSuccess(batchRespons(gruppeIder.drop(19)), APPLICATION_JSON))
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.drop(20)), APPLICATION_JSON))
 
                     val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
-                    resultat.size shouldBe 20
+                    resultat.size shouldBe 25
                     resultat shouldBe gruppeIder.associateWith { 1L }
                 }
                 Then("sendes ConsistencyLevel: eventual på hver delforespørsel") {

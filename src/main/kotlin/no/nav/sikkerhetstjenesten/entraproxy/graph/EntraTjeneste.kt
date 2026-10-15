@@ -8,7 +8,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
 import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
@@ -18,16 +17,6 @@ import org.springframework.cache.annotation.Cacheable
 import java.net.URI
 import java.util.UUID
 import java.util.stream.Collectors.toSet
-
-const val BRUKER = "onPremisesSamAccountName"
-private const val MINIMUM_FELTER = "id,displayName"
-private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled"
-
-private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
-
-private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
-
-private const val BATCH_STØRRELSE = 19
 
 @RestRetryingWhenRecoverableService
 class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
@@ -181,7 +170,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 sideNummer++
-                log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
+                log.trace("Følger $NEXT_LINK for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
         }.toSet().also {
@@ -231,6 +220,15 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                     null
                 }
             }.toMap()
+    }
+
+    companion object {
+        const val BRUKER = "onPremisesSamAccountName"
+        private const val MINIMUM_FELTER = "id,displayName"
+        private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled"
+        private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
+        private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
+        private const val BATCH_STØRRELSE = 20
     }
 
 }

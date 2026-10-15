@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" fill="none">
+    <defs>
+        <radialGradient id="canopy">
+            <stop stop-color="#6b9360"/>
+            <stop offset="1" stop-color="#123c2a"/>
+        </radialGradient>
+        <linearGradient id="leaf" x2="1" y2="1">
+            <stop stop-color="#57914b"/>
+            <stop offset="1" stop-color="#174c32"/>
+        </linearGradient>
+        <g id="frond">
+            <path d="M0 0Q60-160 0-360" stroke="#95af65" stroke-width="6"/>
+            <g fill="url(#leaf)">
+                <path d="M0-35Q-155-20-190-110Q-65-120 0-35Z"/>
+                <path d="M12-85Q155-30 195-120Q80-140 12-85Z"/>
+                <path d="M17-130Q-115-105-155-210Q-45-210 17-130Z"/>
+                <path d="M18-175Q140-125 160-235Q65-230 18-175Z"/>
+                <path d="M15-220Q-85-210-110-300Q-25-290 15-220Z"/>
+                <path d="M10-265Q100-235 105-325Q40-320 10-265Z"/>
+                <path d="M0-320Q-50-350-15-415Q30-375 0-320Z"/>
+            </g>
+        </g>
+        <g id="broad-leaf">
+            <path d="M0 0C-180-60-170-260 0-350C170-260 180-60 0 0Z" fill="url(#leaf)"/>
+            <path d="M0 0V-320M0-75L-85-140M0-135L85-200M0-195L-65-250" stroke="#89a961" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <path id="vine-rope" d="M0-80C-90 80 95 190 15 340S-65 510 20 650S75 850-5 1030"/>
+        <g id="vine" stroke-linecap="round">
+            <use href="#vine-rope" stroke="#173222" stroke-width="24"/>
+            <use href="#vine-rope" stroke="#a5ad58" stroke-width="15"/>
+            <use href="#vine-rope" transform="translate(-3 0)" stroke="#d2cd80" stroke-width="4"/>
+            <g fill="#7ba54a" stroke="#345c2b" stroke-width="2">
+                <path d="M-9 130Q-100 140-75 65Q-15 65-9 130Z"/>
+                <path d="M25 280Q110 260 95 195Q30 200 25 280Z"/>
+                <path d="M-20 450Q-110 440-90 365Q-25 380-20 450Z"/>
+                <path d="M22 650Q110 640 95 565Q30 575 22 650Z"/>
+                <path d="M26 820Q-65 815-50 745Q15 750 26 820Z"/>
+            </g>
+        </g>
+    </defs>
+    <path fill="url(#canopy)" d="M0 0h1600v1200H0z"/>
+    <g opacity=".35">
+        <use href="#frond" transform="translate(600 850) rotate(-35) scale(1.6)"/>
+        <use href="#frond" transform="translate(1000 900) rotate(40) scale(1.7)"/>
+        <use href="#broad-leaf" transform="translate(750 550) rotate(-45) scale(1.2)"/>
+        <use href="#broad-leaf" transform="translate(950 600) rotate(50)"/>
+        <use href="#frond" transform="translate(800 1300) scale(1.6)"/>
+    </g>
+    <g stroke="#244d30" stroke-width="55">
+        <path d="M140 1200Q260 550 150-100"/>
+        <path d="M1450 1200Q1320 550 1480-100"/>
+    </g>
+    <g stroke="#8b9b55" stroke-width="7" opacity=".6">
+        <path d="M370 0Q250 300 360 520T340 950"/>
+        <path d="M1260 0Q1390 250 1250 470T1300 900"/>
+        <path d="M650-50Q760 150 640 350T700 650"/>
+        <path d="M1000-50Q880 200 1010 400T950 750"/>
+    </g>
+    <g opacity=".55">
+        <use href="#frond" transform="translate(400 1200) rotate(-25) scale(1.4)"/>
+        <use href="#frond" transform="translate(1200 1200) rotate(30) scale(1.5)"/>
+        <use href="#broad-leaf" transform="translate(200 600) rotate(65)"/>
+        <use href="#broad-leaf" transform="translate(1400 650) rotate(-65)"/>
+    </g>
+    <use href="#frond" transform="translate(0 100) rotate(130) scale(1.8)"/>
+    <use href="#frond" transform="translate(400 -80) rotate(165) scale(1.3)"/>
+    <use href="#frond" transform="translate(1200 -80) rotate(195) scale(1.3)"/>
+    <use href="#frond" transform="translate(1600 100) rotate(-130) scale(1.8)"/>
+    <use href="#broad-leaf" transform="translate(-50 950) rotate(60) scale(1.4)"/>
+    <use href="#broad-leaf" transform="translate(1650 950) rotate(-60) scale(1.4)"/>
+    <use href="#frond" transform="translate(0 1250) rotate(35) scale(1.8)"/>
+    <use href="#frond" transform="translate(1600 1250) rotate(-35) scale(1.8)"/>
+    <use href="#broad-leaf" transform="translate(350 1320) rotate(-30) scale(1.2)"/>
+    <use href="#broad-leaf" transform="translate(1250 1320) rotate(30) scale(1.2)"/>
+    <use href="#frond" transform="translate(700 -60) rotate(150) scale(1.1)"/>
+    <use href="#frond" transform="translate(950 -60) rotate(210) scale(1.2)"/>
+    <use href="#broad-leaf" transform="translate(100 300) rotate(115) scale(.9)"/>
+    <use href="#broad-leaf" transform="translate(1500 350) rotate(-115) scale(1.1)"/>
+    <use href="#frond" transform="translate(-100 700) rotate(80) scale(1.3)"/>
+    <use href="#frond" transform="translate(1700 750) rotate(-80) scale(1.4)"/>
+    <use href="#broad-leaf" transform="translate(550 1300) rotate(-15)"/>
+    <use href="#broad-leaf" transform="translate(850 1350) rotate(20) scale(1.2)"/>
+    <use href="#frond" transform="translate(1000 1300) rotate(-15) scale(1.1)"/>
+    <use href="#vine" transform="translate(330 0)"/>
+    <use href="#vine" transform="translate(800 -100) scale(.85)"/>
+    <use href="#vine" transform="translate(1100 -30)"/>
+    <use href="#vine" transform="translate(1380 -180) scale(1.2)"/>
+</svg>

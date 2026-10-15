@@ -277,9 +277,8 @@
 
     function oppdaterFellesMedlemmer() {
         const allePaneler = [...sok.querySelectorAll('.sok-panel')];
-        const hovedsokFullfort = forstePanel.dataset.populert === 'true';
         for (const panel of allePaneler) {
-            panel.querySelector('.nytt-sok').disabled = !hovedsokFullfort;
+            panel.querySelector('.nytt-sok').disabled = panel.dataset.populert !== 'true';
         }
         const alleSokFullfort = allePaneler.every(panel => panel.dataset.populert === 'true');
         const forsteMedlemmer = gruppemedlemmer.get(allePaneler[0]) ?? [];

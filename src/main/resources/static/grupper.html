@@ -564,6 +564,12 @@
     }
 
     klargjorSok(forstePanel);
+
+    const tilgangsenhetIdFraUrl = new URLSearchParams(window.location.search).get('tilgangsenhetId');
+    if (tilgangsenhetIdFraUrl) {
+        document.getElementById('tilgangsenhetId').value = tilgangsenhetIdFraUrl;
+        document.getElementById('nom-form').requestSubmit();
+    }
 </script>
 </body>
 </html>

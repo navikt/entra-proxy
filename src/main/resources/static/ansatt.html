@@ -59,6 +59,7 @@
             border-bottom: 1px solid #d1d6db;
             overflow-wrap: anywhere;
         }
+        .enhetsnummer-lenke { color: #00557d; }
         .sorter-knapp {
             padding: 0;
             border: 0;
@@ -228,7 +229,11 @@
             for (const enhet of enheter) {
                 const rad = document.createElement('tr');
                 const nummerCelle = document.createElement('td');
-                nummerCelle.textContent = enhet.enhetnummer;
+                const nummerLenke = document.createElement('a');
+                nummerLenke.className = 'enhetsnummer-lenke';
+                nummerLenke.href = `/grupper.html?tilgangsenhetId=${encodeURIComponent(enhet.enhetnummer)}`;
+                nummerLenke.textContent = enhet.enhetnummer;
+                nummerCelle.appendChild(nummerLenke);
                 const navnCelle = document.createElement('td');
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');

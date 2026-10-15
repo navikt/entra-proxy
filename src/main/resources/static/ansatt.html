@@ -134,9 +134,10 @@
         });
     }
 
-    async function hentResponse(url, beskrivelse) {
+    async function hentResponse(url, beskrivelse, innstillinger = {}) {
         const response = await fetch(url, {
-            headers: {'Accept': 'application/json'}
+            ...innstillinger,
+            headers: {'Accept': 'application/json', ...innstillinger.headers}
         });
         if (!response.ok) {
             let melding = `Kunne ikke hente ${beskrivelse} (HTTP ${response.status}).`;
@@ -185,15 +186,14 @@
             enheterLedereKolonne.hidden = !flereTilknytninger;
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/filtrert/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
-            const antallMedlemmer = new Map();
-            for (const gruppe of grupper) {
-                const antallResponse = await hentResponse(
-                    `/api/v1/gruppe/antall?${new URLSearchParams({gruppeNavn: gruppe.rolle})}`,
-                    `antall medlemmer i gruppe ${gruppe.rolle}`
-                );
-                const antall = await antallResponse.text();
-                antallMedlemmer.set(gruppe.rolle, antall);
-            }
+            const gruppeIder = grupper.map(gruppe => gruppe.gruppeId).filter(Boolean);
+            const antallMedlemmer = gruppeIder.length
+                ? await (await hentResponse('/api/v1/gruppe/antall/bulk', 'antall medlemmer i grupper', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(gruppeIder)
+                })).json()
+                : {};
             const verdier = [
                 ['Nav-ident', nomData.navident],
                 ['Navn', nomData.visningsnavn],
@@ -233,7 +233,7 @@
                 const gruppeIdCelle = document.createElement('td');
                 gruppeIdCelle.textContent = gruppe.gruppeId ?? '';
                 const antallCelle = document.createElement('td');
-                antallCelle.textContent = antallMedlemmer.get(gruppe.rolle) ?? '';
+                antallCelle.textContent = antallMedlemmer[gruppe.gruppeId] ?? '';
                 rad.append(celle, gruppeIdCelle, antallCelle);
                 grupperRader.appendChild(rad);
             }

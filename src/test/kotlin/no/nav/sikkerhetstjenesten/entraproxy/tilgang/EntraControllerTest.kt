@@ -294,18 +294,16 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("returnerer antall per gruppe som JSON") {
                     val oid1 = UUID.randomUUID()
                     val oid2 = UUID.randomUUID()
-                    every { oidTjeneste.gruppeOid("gruppe-1") } returns oid1
-                    every { oidTjeneste.gruppeOid("gruppe-2") } returns oid2
                     every { entraTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)
                     mockMvc.perform(
                         post("$API_V1/gruppe/antall/bulk")
                             .contentType(APPLICATION_JSON)
-                            .content("[\"gruppe-1\",\"gruppe-2\"]")
+                            .content("[\"$oid1\",\"$oid2\"]")
                             .with(jwt())
                     )
                         .andExpect(status().isOk())
-                        .andExpect(jsonPath("$['gruppe-1']").value(10))
-                        .andExpect(jsonPath("$['gruppe-2']").value(20))
+                        .andExpect(jsonPath("$['$oid1']").value(10))
+                        .andExpect(jsonPath("$['$oid2']").value(20))
                 }
             }
         }

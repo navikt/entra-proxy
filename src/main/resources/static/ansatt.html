@@ -91,7 +91,8 @@
             <table>
                 <thead><tr>
                     <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="0">Gruppenavn</button></th>
-                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="1">Antall medlemmer</button></th>
+                    <th scope="col">Gruppe-Id</th>
+                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="2">Antall medlemmer</button></th>
                 </tr></thead>
                 <tbody id="grupper-rader"></tbody>
             </table>
@@ -229,9 +230,11 @@
                 const rad = document.createElement('tr');
                 const celle = document.createElement('td');
                 celle.textContent = gruppe.rolle;
+                const gruppeIdCelle = document.createElement('td');
+                gruppeIdCelle.textContent = gruppe.gruppeId ?? '';
                 const antallCelle = document.createElement('td');
                 antallCelle.textContent = antallMedlemmer.get(gruppe.rolle) ?? '';
-                rad.append(celle, antallCelle);
+                rad.append(celle, gruppeIdCelle, antallCelle);
                 grupperRader.appendChild(rad);
             }
             grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';

@@ -235,12 +235,25 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
+                        request.uri.query shouldContain "\$select=id,displayName,securityEnabled,mailEnabled,description"
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
+                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe
+                            setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID, "Tilgang til min rolle"))
                     }
+                }
+            }
+            When("gruppen mangler beskrivelse") {
+                Then("skal gruppen returneres uten beskrivelse") {
+                    server.expect { request ->
+                        request.method shouldBe GET
+                    }.andRespond(withSuccess(grupperContract.replace(", \"description\": \"Tilgang til min rolle\"", ""), APPLICATION_JSON))
+
+                    entra.grupperForAnsatt(AnsattId("A123456"), "$ANSATT_OID") shouldBe
+                        setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                 }
             }
         }
@@ -354,7 +367,7 @@ class EntraTjenesteTest(
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
               "value": [
-                { "id": "$GRUPPE_ID", "displayName": "0000-GA-MIN_ROLLE" }
+                { "id": "$GRUPPE_ID", "displayName": "0000-GA-MIN_ROLLE", "description": "Tilgang til min rolle" }
               ]
             }
         """.trimIndent()

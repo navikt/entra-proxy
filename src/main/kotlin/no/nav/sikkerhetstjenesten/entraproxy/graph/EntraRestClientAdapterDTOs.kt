@@ -48,7 +48,8 @@ data class EntraSaksbehandlerRespons(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class IdentifiserbartObjekt(
     val id: UUID,
-    val displayName: String = UKJENT
+    val displayName: String = UKJENT,
+    val description: String? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -80,4 +81,3 @@ internal const val VALUE = "value"
 internal const val UKJENT = "N/A"
 internal  const val UKJENT_ENHET = "0000"
 internal const val NEXT_LINK = "@odata.nextLink"
-

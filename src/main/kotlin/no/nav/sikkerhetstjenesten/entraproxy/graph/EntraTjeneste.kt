@@ -133,7 +133,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName, it.id)
+                EntraGruppe(it.displayName, it.id, it.description)
             }
 
 
@@ -153,6 +153,12 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
             }
         }
     }
+
+    fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
+        gruppeIder.asList()
+            .chunked(BATCH_STØRRELSE)
+            .flatMap { antallForBatch(it).toList() }
+            .toMap()
 
     private fun enheter(ansattOid: UUID) =
         allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
@@ -192,14 +198,6 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return oid.ansattOid(navIdent)?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
-
-
-    fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
-        gruppeIder.asList()
-            .chunked(BATCH_STØRRELSE)
-            .flatMap { antallForBatch(it).toList() }
-            .toMap()
-
     private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
         val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
         val forespørsler = idTilGruppe.map { (id, gruppeId) ->
@@ -221,7 +219,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
     companion object {
         const val BRUKER = "onPremisesSamAccountName"
         private const val MINIMUM_FELTER = "id,displayName"
-        private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled"
+        private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled,description"
         private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
         private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
         private const val BATCH_STØRRELSE = 20

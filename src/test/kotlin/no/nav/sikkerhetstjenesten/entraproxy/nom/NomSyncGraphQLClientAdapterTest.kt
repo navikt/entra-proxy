@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOM_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_STATLIG
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
@@ -56,11 +57,11 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { lokalClient.documentName("orgtilknytninger-bulk") } returns lokalRequest
             every { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) } returns lokalRequest
             every { lokalRequest.retrieveSync("ressurser") } returns lokalRetrieve
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
             every { lokalRetrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
 
             Then("only the missing idents are fetched from NOM and merged with the cache hits") {
-                val forventetB = NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                val forventetB = NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst)
                 adapterMedTreff.ansatte(identer) shouldBe setOf(cachedA, forventetB)
                 verify { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) }
                 verify { cacheMedTreff.putMany(NOM_CACHE, mapOf("B123456" to forventetB)) }
@@ -77,15 +78,15 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                     )
                 )
             )
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT")
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("list variables are sent and resources are unwrapped") {
                 adapter.ansatte(identer) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst)
                 )
                 verify { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) }
                 verify { request.retrieveSync("ressurser") }
@@ -101,13 +102,13 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
 
         When("the response contains a missing resource") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT")
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
                 adapter.ansatte(identer) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst)
                 )
             }
         }
@@ -150,15 +151,15 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
         When("the tilgangsenhet has resources with daily follow-up") {
             val tilknytninger = dagligOppfolging()
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT", tilknytninger)
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG, tilknytninger)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
 
             Then("the tilgangsenhetId variable is sent and those employees are returned") {
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor, tilknytninger)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst, tilknytninger)
                 )
                 verify { request.variables(mapOf("tilgangsenhetId" to "0315")) }
                 verify { request.retrieveSync("ressurser") }
@@ -171,16 +172,16 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhetId))
             )
             val annenEnhet = dagligOppfolging(Enhetnummer("0316"))
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", medOppfolging)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", "STAT", utenOppfolging)
-            val third = NomGraphQLRespons(AnsattId("C123456"), "Third", "STAT", annenEnhet)
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, medOppfolging)
+            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG, utenOppfolging)
+            val third = NomGraphQLRespons(AnsattId("C123456"), "Third", NAV_STATLIG, annenEnhet)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
                 NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second), NomBulkGraphQLRespons(third)
             )
 
             Then("only resources with daily follow-up for the tilgangsenhet are returned") {
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, medOppfolging)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, medOppfolging)
                 )
             }
         }
@@ -195,13 +196,13 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
         When("a resource is missing") {
             val tilknytninger = dagligOppfolging()
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", "STAT", tilknytninger)
+            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
             every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                 listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
             Then("available resources are returned") {
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor, tilknytninger)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger)
                 )
             }
         }
@@ -231,9 +232,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         every { request.retrieveSync("orgEnheter") } returns retrieve
 
         When("the org units contain resources") {
-            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", "NAV_STATLIG")
-            val second = NomGraphQLRespons(AnsattId("S109104"), "Gunvor Sverdrup", "NAV_STATLIG")
-            val third = NomGraphQLRespons(AnsattId("D154627"), "Kine Sunde Dragnes", "NAV_STATLIG")
+            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", NAV_STATLIG)
+            val second = NomGraphQLRespons(AnsattId("S109104"), "Gunvor Sverdrup", NAV_STATLIG)
+            val third = NomGraphQLRespons(AnsattId("D154627"), "Kine Sunde Dragnes", NAV_STATLIG)
             every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                 NomOrgEnhetRespons(
                     NomEnhetMedAnsatte(
@@ -251,9 +252,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("the nomId variable is sent and resources from all org units are flattened") {
                 adapter.ansatteForNomIdent(nomId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor),
-                    NomAnsatt(third.navident, third.visningsnavn, third.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst),
+                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst),
+                    NomAnsatt(third.navident, third.visningsnavn, third.gjeldendeSektor.tekst)
                 )
                 verify { request.variables(mapOf("nomId" to "fa515j")) }
                 verify { request.retrieveSync("orgEnheter") }
@@ -269,7 +270,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
 
         When("an org unit is missing or a tilknytning has no resource") {
-            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", "NAV_STATLIG")
+            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", NAV_STATLIG)
             every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                 NomOrgEnhetRespons(
                     NomEnhetMedAnsatte(
@@ -283,7 +284,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
             Then("available resources are returned") {
                 adapter.ansatteForNomIdent(nomId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor)
+                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst)
                 )
             }
         }

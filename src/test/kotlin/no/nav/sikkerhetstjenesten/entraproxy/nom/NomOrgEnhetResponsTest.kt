@@ -3,6 +3,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.nom
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_STATLIG
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule.Builder
 
@@ -28,14 +30,14 @@ class NomOrgEnhetResponsTest : BehaviorSpec({
                 forste.orgTilknytninger.size shouldBe 17
                 val ansatt = forste.orgTilknytninger.first().ressurs!!
                 ansatt.navident.verdi shouldBe "H176430"
-                ansatt.visningsnavn shouldBe "Anita Haugen"
-                ansatt.gjeldendeSektor shouldBe "NAV_STATLIG"
+                ansatt.visningsnavn shouldBe "Mette Dahl"
+                ansatt.gjeldendeSektor shouldBe NAV_STATLIG
             }
 
             Then("an org unit with a single ansatt is decoded") {
                 val enhet = enheter.single { it.orgEnhet?.id?.verdi == "de150v" }.orgEnhet!!
                 enhet.navn shouldBe "Avdeling for mennesker og organisasjon"
-                enhet.orgTilknytninger.single().ressurs!!.visningsnavn shouldBe "Linn Huse-Amundsen"
+                enhet.orgTilknytninger.single().ressurs!!.visningsnavn shouldBe "Randi Ås"
             }
 
             Then("all ansatte across every org unit are decoded with unique identities") {
@@ -48,8 +50,8 @@ class NomOrgEnhetResponsTest : BehaviorSpec({
             Then("names with special characters are preserved") {
                 val navn = enheter.flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
                     .mapNotNull { it.ressurs?.visningsnavn }
-                navn.contains("Øivin Køber Opstad") shouldBe true
-                navn.contains("Sølvi Agnete Minde") shouldBe true
+                navn.contains("Hege Ødegård") shouldBe true
+                navn.contains("Astrid Dæhlie") shouldBe true
             }
         }
     }

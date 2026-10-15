@@ -5,6 +5,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -32,6 +33,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -64,7 +66,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { entraTjeneste.enheter(any(), any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any(), any()) } returns sortedSetOf(Tema("AAP"))
             every { entraTjeneste.medlemmerIGruppe(any(), any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
-            every { entraTjeneste.grupperForAnsatt(any(), any()) } returns sortedSetOf(EntraGruppe("test-rolle"))
+            every { entraTjeneste.grupperForAnsatt(any<AnsattId>(), any<UUID>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
                 "Test Ansatt",
@@ -277,13 +279,21 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("antall medlemmer i gruppe") {
+        Given("antall medlemmer for flere grupper") {
             When("request har innlogget sesjon") {
-                Then("returnerer antall som tekst") {
-                    every { entraTjeneste.antallMedlemmerIGruppe(any()) } returns "1535"
-                    mockMvc.perform(get("$API_V1/gruppe/antall").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                Then("returnerer antall per gruppe som JSON") {
+                    val oid1 = UUID.randomUUID()
+                    val oid2 = UUID.randomUUID()
+                    every { entraTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)
+                    mockMvc.perform(
+                        post("$API_V1/gruppe/antall/bulk")
+                            .contentType(APPLICATION_JSON)
+                            .content("[\"$oid1\",\"$oid2\"]")
+                            .with(jwt())
+                    )
                         .andExpect(status().isOk())
-                        .andExpect(content().string("1535"))
+                        .andExpect(jsonPath("$['$oid1']").value(10))
+                        .andExpect(jsonPath("$['$oid2']").value(20))
                 }
             }
         }
@@ -291,7 +301,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("utforsker-endepunkt ${API_V1}/nom/enhet/{navIdent}") {
             When("request har innlogget sesjon") {
                 Then("returnerer ansattdata og org-tilknytninger fra NOM") {
-                    every { nomTjeneste.orgData(TEST_ANSATT_ID) } returns NomAnsatt(
+                    every { nomTjeneste.ansatt(TEST_ANSATT_ID) } returns NomAnsatt(
                         navident = TEST_ANSATT_ID,
                         visningsnavn = "Test Ansatt",
                         gjeldendeSektor = "STAT",
@@ -328,7 +338,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
             When("request har innlogget sesjon") {
                 Then("returnerer org-tilknytninger for flere ansatte fra NOM") {
-                    every { nomTjeneste.orgDataBulk(any()) } returns setOf(
+                    every { nomTjeneste.ansatte(any()) } returns setOf(
                         NomAnsatt(
                             navident = TEST_ANSATT_ID,
                             visningsnavn = "Test Ansatt",
@@ -385,7 +395,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("ansatt.html er tilgjengelig i prod") {
                     mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/antall?")))
+                        .andExpect(content().string(containsString("/api/v1/gruppe/antall/bulk")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
                         .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
                         .andExpect(content().string(containsString("Gruppemedlemskap")))

@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -13,14 +14,17 @@ import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_PLAIN
+import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
 import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
 import org.springframework.web.service.invoker.createClient
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 @RestClientTest
@@ -42,15 +46,59 @@ class EntraTjenesteTest(
             server.verify()
         }
 
-        Given("antall medlemmer fra Graph") {
-            When("Graph returnerer antallet som ren tekst") {
-                Then("brukes count-endepunktet") {
+        Given("antall medlemmer for flere grupper via batch") {
+            When("det er flere grupper enn det får plass til i én batch") {
+                Then("deles kallene i batcher på 20 og resultatet slås sammen") {
+                    val gruppeIder = (1..25).map { randomUUID() }
                     server.expect { request ->
-                        request.method shouldBe GET
-                        request.uri.toString() shouldBe $$"$$baseUrl/groups/$$GROUP_ID/members/$count"
-                    }.andRespond(withSuccess("1535", TEXT_PLAIN))
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.take(20)), APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(withSuccess(batchRespons(gruppeIder.drop(20)), APPLICATION_JSON))
 
-                    client.antallMedlemmer("$GROUP_ID") shouldBe "1535"
+                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+
+                    resultat.size shouldBe 25
+                    resultat shouldBe gruppeIder.associateWith { 1L }
+                }
+                Then("sendes ConsistencyLevel: eventual på hver delforespørsel") {
+                    val gruppeIder = (1..1).map { randomUUID() }
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        (request as MockClientHttpRequest).bodyAsString shouldContain
+                            """"headers":{"ConsistencyLevel":"eventual"}"""
+                    }.andRespond(withSuccess(batchRespons(gruppeIder), APPLICATION_JSON))
+
+                    entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+                }
+            }
+            When("én delforespørsel feiler med et feilobjekt som body") {
+                Then("hoppes den gruppen over uten å feile hele batchen") {
+                    val gruppeIder = (1..2).map { randomUUID() }
+                    server.expect { request ->
+                        request.method shouldBe POST
+                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                    }.andRespond(
+                        withSuccess(
+                            """
+                            {
+                              "responses": [
+                                { "id": "0", "status": 200, "body": 3 },
+                                { "id": "1", "status": 404, "body": { "error": { "code": "ResourceNotFound" } } }
+                              ]
+                            }
+                            """.trimIndent(),
+                            APPLICATION_JSON
+                        )
+                    )
+
+                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+
+                    resultat shouldBe mapOf(gruppeIder[0] to 3L)
                 }
             }
         }
@@ -191,7 +239,7 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE"))
+                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                     }
                 }
             }
@@ -239,6 +287,7 @@ class EntraTjenesteTest(
         private val GROUP_ID = randomUUID()
         private val OID = randomUUID()
         private val GRUPPE_OID = randomUUID()
+        private val GRUPPE_ID = randomUUID()
         private val ANSATT_OID = randomUUID()
         private val ANSATT = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
         private val medlemId = "${randomUUID()}"
@@ -293,11 +342,19 @@ class EntraTjenesteTest(
             }
         """.trimIndent()
 
+        private fun batchRespons(gruppeIder: List<UUID>) = """
+            {
+              "responses": [
+                ${gruppeIder.mapIndexed { index, _ -> """{ "id": "$index", "status": 200, "body": 1 }""" }.joinToString(",\n                ")}
+              ]
+            }
+        """.trimIndent()
+
         private val grupperContract = """
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
               "value": [
-                { "id": "${randomUUID()}", "displayName": "0000-GA-MIN_ROLLE" }
+                { "id": "$GRUPPE_ID", "displayName": "0000-GA-MIN_ROLLE" }
               ]
             }
         """.trimIndent()

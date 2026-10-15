@@ -9,17 +9,21 @@
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            background: #f3f3f4;
-            color: #1f1f1f;
+            min-height: 100vh;
+            background-color: #283b38;
+            background-image: url("/wildlife.svg");
+            background-position: center;
+            background-size: 720px 600px;
+            color: #fff;
             font-family: Arial, sans-serif;
         }
         main {
             max-width: 90rem;
             margin: 2rem auto;
             padding: 2rem;
-            background: #fff;
-            border: 1px solid #d1d6db;
-            border-radius: 8px;
+        }
+        h1 {
+            text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
         }
         .ansatt-visning {
             display: grid;
@@ -28,6 +32,7 @@
             margin-top: 1rem;
         }
         .sok-knapp { margin-top: 1rem; }
+        #ansattid { width: auto; max-width: 12rem; }
         .medlemskap-resultat {
             grid-column: 1 / -1;
         }
@@ -35,9 +40,10 @@
         .status.error { color: #a40000; }
         table {
             width: 100%;
-            background: #f3f3f4;
+            background: #e3ebe6;
             border-collapse: collapse;
             text-align: left;
+            color: #1f1f1f;
         }
         th, td {
             padding: 0.75rem;
@@ -80,7 +86,7 @@
         <section class="medlemskap-resultat" id="enheter-resultat" aria-labelledby="enheter-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="enheter-overskrift">Tilgjengelig enheter (Nom)</h2>
             <table>
-                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th></tr></thead>
+                <thead><tr><th scope="col">Enhetsnummer</th><th scope="col">Enhetsnavn</th><th scope="col">Nom-Id</th><th scope="col" id="enheter-ledere-kolonne" hidden>Ledere</th></tr></thead>
                 <tbody id="enheter-rader"></tbody>
             </table>
         </section>
@@ -90,7 +96,8 @@
             <table>
                 <thead><tr>
                     <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="0">Gruppenavn</button></th>
-                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="1">Antall medlemmer</button></th>
+                    <th scope="col" hidden>Gruppe-Id</th>
+                    <th scope="col"><button class="sorter-knapp" type="button" data-kolonne="2">Antall medlemmer</button></th>
                 </tr></thead>
                 <tbody id="grupper-rader"></tbody>
             </table>
@@ -107,6 +114,7 @@
     const enheterResultat = document.getElementById('enheter-resultat');
     const grupperResultat = document.getElementById('grupper-resultat');
     const enheterRader = document.getElementById('enheter-rader');
+    const enheterLedereKolonne = document.getElementById('enheter-ledere-kolonne');
     const grupperRader = document.getElementById('grupper-rader');
     const grupperStatus = document.getElementById('grupper-status');
     const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
@@ -131,9 +139,10 @@
         });
     }
 
-    async function hentResponse(url, beskrivelse) {
+    async function hentResponse(url, beskrivelse, innstillinger = {}) {
         const response = await fetch(url, {
-            headers: {'Accept': 'application/json'}
+            ...innstillinger,
+            headers: {'Accept': 'application/json', ...innstillinger.headers}
         });
         if (!response.ok) {
             let melding = `Kunne ikke hente ${beskrivelse} (HTTP ${response.status}).`;
@@ -163,39 +172,41 @@
         status.textContent = 'Henter ansatt...';
 
         try {
-            const response = await hentResponse(`/api/v1/ansatt/${encodeURIComponent(ansattid)}`, 'ansatt');
-            if (response.status === 204) {
-                status.textContent = 'Ingen ansatt funnet.';
-                return;
-            }
-            const ansatt = await response.json();
-            if (ansatt === null) {
-                status.textContent = 'Ingen ansatt funnet.';
-                return;
-            }
             const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-data');
-            const nomData = await nomResponse.json();
+            const nomData = nomResponse.status === 204 ? null : await nomResponse.json();
+            if (nomData === null) {
+                status.textContent = 'Ingen ansatt funnet.';
+                return;
+            }
+            const formaterLedere = ledere => (ledere ?? [])
+                .map(leder => `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`)
+                .join(', ');
+            const flereTilknytninger = nomData.orgTilknytninger.length > 1;
             const enheter = nomData.orgTilknytninger.map(tilknytning => ({
                 enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
                 navn: tilknytning.orgEnhet.navn,
-                nomId: tilknytning.orgEnhet.id
+                nomId: tilknytning.orgEnhet.id,
+                ledere: formaterLedere(tilknytning.orgEnhet.ledere)
             }));
+            enheterLedereKolonne.hidden = !flereTilknytninger;
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
             const grupper = await grupperResponse.json();
-            const antallMedlemmer = new Map();
-            for (const gruppe of grupper) {
-                const antallResponse = await hentResponse(
-                    `/api/v1/gruppe/antall?${new URLSearchParams({gruppeNavn: gruppe.rolle})}`,
-                    `antall medlemmer i gruppe ${gruppe.rolle}`
-                );
-                const antall = await antallResponse.text();
-                antallMedlemmer.set(gruppe.rolle, antall);
-            }
+            const gruppeIder = grupper.map(gruppe => gruppe.gruppeId).filter(Boolean);
+            const antallMedlemmer = gruppeIder.length
+                ? await (await hentResponse('/api/v1/gruppe/antall/bulk', 'antall medlemmer i grupper', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(gruppeIder)
+                })).json()
+                : {};
             const verdier = [
                 ['Nav-ident', nomData.navident],
                 ['Navn', nomData.visningsnavn],
                 ['Sektor', nomData.gjeldendeSektor]
             ];
+            if (!flereTilknytninger && nomData.orgTilknytninger.length === 1) {
+                verdier.push(['N\u00e6rmeste leder', enheter[0].ledere]);
+            }
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');
                 const feltCelle = document.createElement('th');
@@ -214,16 +225,22 @@
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');
                 nomIdCelle.textContent = enhet.nomId ?? '';
-                rad.append(nummerCelle, navnCelle, nomIdCelle);
+                const ledereCelle = document.createElement('td');
+                ledereCelle.textContent = enhet.ledere;
+                ledereCelle.hidden = !flereTilknytninger;
+                rad.append(nummerCelle, navnCelle, nomIdCelle, ledereCelle);
                 enheterRader.appendChild(rad);
             }
             for (const gruppe of grupper) {
                 const rad = document.createElement('tr');
                 const celle = document.createElement('td');
                 celle.textContent = gruppe.rolle;
+                const gruppeIdCelle = document.createElement('td');
+                gruppeIdCelle.textContent = gruppe.gruppeId ?? '';
+                gruppeIdCelle.hidden = true;
                 const antallCelle = document.createElement('td');
-                antallCelle.textContent = antallMedlemmer.get(gruppe.rolle) ?? '';
-                rad.append(celle, antallCelle);
+                antallCelle.textContent = antallMedlemmer[gruppe.gruppeId] ?? '';
+                rad.append(celle, gruppeIdCelle, antallCelle);
                 grupperRader.appendChild(rad);
             }
             grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';

@@ -18,10 +18,6 @@ import java.net.URI
 import java.util.UUID
 import java.util.stream.Collectors.toSet
 
-const val BRUKER = "onPremisesSamAccountName"
-private const val MINIMUM_FELTER = "id,displayName"
-private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
-
 @RestRetryingWhenRecoverableService
 class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
 
@@ -126,12 +122,20 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
                 Tema(it.displayName)
             }
 
-    private fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
+    private fun grupperForAnsattOriginal(ansattId: AnsattId,ansattOid: String) =
         allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName)
+                EntraGruppe(it.displayName, it.id)
             }
+
+    fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
+        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
+            .flatMapTo(mutableSetOf()) { it.value }
+            .mapTo(sortedSetOf()) {
+                EntraGruppe(it.displayName, it.id)
+            }
+
 
      fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
@@ -166,7 +170,7 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 sideNummer++
-                log.trace("Følger @odata.nextLink for {}, side {}", beskrivelse, sideNummer)
+                log.trace("Følger $NEXT_LINK for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
         }.toSet().also {
@@ -188,10 +192,40 @@ class EntraTjeneste(private val client: EntraGraphClient, private val norg: Norg
         return oid.ansattOid(navIdent)?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
+
+
+    fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
+        gruppeIder.asList()
+            .chunked(BATCH_STØRRELSE)
+            .flatMap { antallForBatch(it).toList() }
+            .toMap()
+
+    private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
+        val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
+        val forespørsler = idTilGruppe.map { (id, gruppeId) ->
+            BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
+        }
+        return client.batch(BatchRequest(forespørsler)).responses
+            .mapNotNull { respons ->
+                val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
+                val antall = (respons.body as? Number)?.toLong()
+                if (respons.status == 200 && antall != null) {
+                    gruppeId to antall
+                } else {
+                    log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")
+                    null
+                }
+            }.toMap()
+    }
+
+    companion object {
+        const val BRUKER = "onPremisesSamAccountName"
+        private const val MINIMUM_FELTER = "id,displayName"
+        private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled"
+        private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
+        private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
+        private const val BATCH_STØRRELSE = 20
+    }
     override fun toString() =
         "${javaClass.simpleName} [client=$client, norg=$norg]"
-
-    fun antallMedlemmerIGruppe(it: UUID) =
-        client.antallMedlemmer("$it")
-
 }

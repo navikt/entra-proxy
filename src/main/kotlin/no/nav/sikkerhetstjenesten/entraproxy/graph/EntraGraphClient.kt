@@ -56,7 +56,7 @@ interface EntraGraphClient {
     fun batch(@RequestBody request: BatchRequest): BatchRespons
 
     @PostExchange("/users/{avsender}/sendMail")
-    fun sendMail(@PathVariable avsender: String, @RequestBody request: SendMailRequest)
+    fun sendMail(@PathVariable avsender: String, @RequestBody request: EntraMailRequest)
 
     @GetExchange
     fun tilgangerSide(uri: URI): Tilganger

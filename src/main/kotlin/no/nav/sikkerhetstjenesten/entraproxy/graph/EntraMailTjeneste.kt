@@ -20,7 +20,7 @@ class EntraMailTjeneste(
 
     override fun send(vararg simpleMessages: SimpleMailMessage) =
         simpleMessages.forEach {
-          //  client.sendMail(avsender, it.body())
+            client.sendMail(avsender, it.body())
         }
 }
 

@@ -33,6 +33,8 @@
         }
         .sok-knapp { margin-top: 1rem; }
         #ansattid,
+        .filter-rad { display: flex; align-items: center; gap: 0.5rem; }
+        .filter-rad .aksel-label { margin-bottom: 0; }
         #gruppe-filter { width: auto; max-width: 16rem; }
         .aksel-text-field__input,
         .aksel-text-field__input:autofill,
@@ -126,7 +128,7 @@
         <section class="medlemskap-resultat" id="grupper-resultat" aria-labelledby="grupper-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
-            <div class="aksel-form-field">
+            <div class="filter-rad">
                 <label class="aksel-label" for="gruppe-filter">Filter gruppenavn</label>
                 <input class="aksel-text-field__input" id="gruppe-filter" name="filter" type="text" autocomplete="off" placeholder="Starter med...">
             </div>

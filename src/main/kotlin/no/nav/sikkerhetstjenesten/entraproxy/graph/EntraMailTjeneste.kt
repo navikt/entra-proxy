@@ -1,11 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import com.microsoft.graph.models.BodyType
-import com.microsoft.graph.models.EmailAddress
-import com.microsoft.graph.models.ItemBody
-import com.microsoft.graph.models.Message
-import com.microsoft.graph.models.Recipient
-import com.microsoft.graph.users.item.sendmail.SendMailPostRequestBody
 import no.nav.boot.conditionals.ConditionalOnProd
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Fallback
@@ -28,27 +22,45 @@ class EntraMailTjeneste(
 @Fallback
 class EntraDummyMailTjeneste : MailSender {
     override fun send(vararg simpleMessages: SimpleMailMessage) {
-        
+
     }
 }
 
-fun SimpleMailMessage.tilSendMailPostRequestBody() = SendMailPostRequestBody().apply {
-    message = Message().apply {
-        subject = this@tilSendMailPostRequestBody.subject
-        body = ItemBody().apply {
-            contentType = BodyType.Text
-            content = this@tilSendMailPostRequestBody.text
-        }
-        toRecipients = to.tilMottakere()
-        ccRecipients = cc.tilMottakere()
-        bccRecipients = bcc.tilMottakere()
-        replyTo = listOfNotNull(this@tilSendMailPostRequestBody.replyTo).tilMottakere()
-    }
+fun SimpleMailMessage.tilSendMailPostRequestBody() = SendMailRequest(
+    message = MailMessage(
+        subject = subject,
+        body = MailBody(contentType = "text", content = text),
+        toRecipients = to.tilMottakere(),
+        ccRecipients = cc.tilMottakere(),
+        bccRecipients = bcc.tilMottakere(),
+        replyTo = listOfNotNull(replyTo).tilMottakere()
+    ),
     saveToSentItems = false
-}
+)
 
 private fun Array<String>?.tilMottakere() = orEmpty().asList().tilMottakere()
 
-private fun List<String>.tilMottakere() = map {
-    Recipient().apply { emailAddress = EmailAddress().apply { address = it } }
-}
+private fun List<String>.tilMottakere() = map { MailRecipient(MailAddress(it)) }
+
+data class SendMailRequest(
+    val message: MailMessage,
+    val saveToSentItems: Boolean
+)
+
+data class MailMessage(
+    val subject: String?,
+    val body: MailBody,
+    val toRecipients: List<MailRecipient>,
+    val ccRecipients: List<MailRecipient>,
+    val bccRecipients: List<MailRecipient>,
+    val replyTo: List<MailRecipient>
+)
+
+data class MailBody(
+    val contentType: String,
+    val content: String?
+)
+
+data class MailRecipient(val emailAddress: MailAddress)
+
+data class MailAddress(val address: String)

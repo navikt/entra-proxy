@@ -23,7 +23,7 @@ class EntraMailOppstartsTest(
         try {
             mailSender.send(SimpleMailMessage().apply {
                 from = avsender
-                setTo("jan.olav.eide@nav.no")
+                setTo("jan-olav.eide@nav.no")
                 subject = "entra-proxy oppstart"
                 text = "Testmelding sendt ved oppstart av entra-proxy."
             })

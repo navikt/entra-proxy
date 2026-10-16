@@ -25,7 +25,20 @@ class EntraMailOppstartsTest(
                 from = avsender
                 setTo("jan-olav.eide@nav.no")
                 subject = "OVERSTYRING"
-                text = "Testmelding sendt ved oppstart"
+                text = """
+                    <html>
+                    <body>
+                    <p>Testmelding sendt ved oppstart</p>
+                    <table border="1">
+                        <thead><tr><th>Felt</th><th>Verdi</th></tr></thead>
+                        <tbody>
+                            <tr><td>Tjeneste</td><td>entra-proxy</td></tr>
+                            <tr><td>Status</td><td>Oppstart fullført</td></tr>
+                        </tbody>
+                    </table>
+                    </body>
+                    </html>
+                """.trimIndent()
             })
             log.info("Testmelding sendt ved oppstart")
         } catch (e: Exception) {

@@ -188,8 +188,6 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 kotlin {
-   // jvmToolchain(26)
-
     compilerOptions {
         freeCompilerArgs.add("-Xjsr305=strict")
     }

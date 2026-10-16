@@ -33,6 +33,9 @@
         }
         .sok-knapp { margin-top: 1rem; }
         #ansattid { width: auto; max-width: 12rem; }
+        .filter-rad { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+        .filter-rad .aksel-label { margin-bottom: 0; }
+        #gruppe-filter { width: auto; max-width: 16rem; }
         .aksel-text-field__input,
         .aksel-text-field__input:autofill,
         .aksel-text-field__input:-webkit-autofill {
@@ -69,7 +72,7 @@
             text-align: left;
             color: #1f1f1f;
         }
-        tbody tr:nth-child(even) { background: #c5d4cb; }
+        tbody tr:nth-child(odd) { background: #c5d4cb; }
         th, td {
             padding: 0.75rem;
             border-bottom: 1px solid #d1d6db;
@@ -125,6 +128,10 @@
         <section class="medlemskap-resultat" id="grupper-resultat" aria-labelledby="grupper-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
+            <div class="filter-rad">
+                <label class="aksel-label" for="gruppe-filter">Filtrer gruppenavn</label>
+                <input class="aksel-text-field__input" id="gruppe-filter" name="filter" type="text" autocomplete="off" placeholder="Starter med...">
+            </div>
             <div class="grupper-tabell" tabindex="0" role="region" aria-labelledby="grupper-overskrift">
             <table>
                 <thead><tr>
@@ -157,6 +164,26 @@
     const grupperRader = document.getElementById('grupper-rader');
     const grupperStatus = document.getElementById('grupper-status');
     const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
+    const gruppeFilter = document.getElementById('gruppe-filter');
+
+    function oppdaterGruppeFilter() {
+        const prefiks = gruppeFilter.value.trim().toLocaleLowerCase('nb');
+        let synlige = 0;
+        for (const rad of grupperRader.rows) {
+            const gruppenavn = rad.cells[0].textContent.trim().toLocaleLowerCase('nb');
+            rad.hidden = !gruppenavn.startsWith(prefiks);
+            if (!rad.hidden) synlige++;
+        }
+        const totalt = grupperRader.rows.length;
+        if (totalt === 0) {
+            grupperStatus.textContent = 'Ingen gruppemedlemskap';
+            return;
+        }
+        const antall = prefiks ? `${synlige} av ${totalt}` : `${totalt}`;
+        grupperStatus.textContent = `${antall} ${totalt === 1 ? 'gruppe' : 'grupper'}`;
+    }
+
+    gruppeFilter.addEventListener('input', oppdaterGruppeFilter);
 
     for (const sorterKnapp of sorterKnapper) {
         sorterKnapp.addEventListener('click', () => {
@@ -293,7 +320,7 @@
                 rad.append(celle, gruppeIdCelle, beskrivelseCelle, antallCelle);
                 grupperRader.appendChild(rad);
             }
-            grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
+            oppdaterGruppeFilter();
             grupperTabell.classList.toggle('med-rullefelt', grupper.length > 50);
             resultat.hidden = false;
             enheterResultat.hidden = false;

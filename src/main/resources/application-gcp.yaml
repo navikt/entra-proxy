@@ -1,7 +1,13 @@
 management:
   info:
+    os:
+      enabled: true
     git:
-      mode: simple
+      enabled: true
+    java:
+      enabled: true
+    env:
+      enabled: true
   observations:
     annotations:
       enabled: true
@@ -129,5 +135,6 @@ valkey:
   uri: ${valkey.uri.${nais.cluster.cache}}
   port: ${valkey.port.${nais.cluster.cache}}
   host: ${valkey.host.${nais.cluster.cache}}
+
 info:
   image: ${nais.app.image:unknown}

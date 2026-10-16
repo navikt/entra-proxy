@@ -32,7 +32,8 @@
             margin-top: 1rem;
         }
         .sok-knapp { margin-top: 1rem; }
-        #ansattid { width: auto; max-width: 12rem; }
+        #ansattid,
+        #gruppe-filter { width: auto; max-width: 16rem; }
         .aksel-text-field__input,
         .aksel-text-field__input:autofill,
         .aksel-text-field__input:-webkit-autofill {
@@ -125,6 +126,10 @@
         <section class="medlemskap-resultat" id="grupper-resultat" aria-labelledby="grupper-overskrift" hidden>
             <h2 class="aksel-heading aksel-heading--medium" id="grupper-overskrift">Gruppemedlemskap</h2>
             <p id="grupper-status"></p>
+            <div class="aksel-form-field">
+                <label class="aksel-label" for="gruppe-filter">Filter gruppenavn</label>
+                <input class="aksel-text-field__input" id="gruppe-filter" name="filter" type="text" autocomplete="off" placeholder="Starter med...">
+            </div>
             <div class="grupper-tabell" tabindex="0" role="region" aria-labelledby="grupper-overskrift">
             <table>
                 <thead><tr>
@@ -157,6 +162,17 @@
     const grupperRader = document.getElementById('grupper-rader');
     const grupperStatus = document.getElementById('grupper-status');
     const sorterKnapper = grupperResultat.querySelectorAll('.sorter-knapp');
+    const gruppeFilter = document.getElementById('gruppe-filter');
+
+    function oppdaterGruppeFilter() {
+        const prefiks = gruppeFilter.value.trim().toLocaleLowerCase('nb');
+        for (const rad of grupperRader.rows) {
+            const gruppenavn = rad.cells[0].textContent.trim().toLocaleLowerCase('nb');
+            rad.hidden = !gruppenavn.startsWith(prefiks);
+        }
+    }
+
+    gruppeFilter.addEventListener('input', oppdaterGruppeFilter);
 
     for (const sorterKnapp of sorterKnapper) {
         sorterKnapp.addEventListener('click', () => {
@@ -293,6 +309,7 @@
                 rad.append(celle, gruppeIdCelle, beskrivelseCelle, antallCelle);
                 grupperRader.appendChild(rad);
             }
+            oppdaterGruppeFilter();
             grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
             grupperTabell.classList.toggle('med-rullefelt', grupper.length > 50);
             resultat.hidden = false;

@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import com.microsoft.graph.users.item.sendmail.SendMailPostRequestBody
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import org.springframework.security.oauth2.client.annotation.ClientRegistrationId
 import org.springframework.web.bind.annotation.PathVariable
@@ -54,6 +55,9 @@ interface EntraGraphClient {
 
     @PostExchange($$"/$batch")
     fun batch(@RequestBody request: BatchRequest): BatchRespons
+
+    @PostExchange("/users/{avsender}/sendMail")
+    fun sendMail(@PathVariable avsender: String, @RequestBody request: SendMailPostRequestBody)
 
     @GetExchange
     fun tilgangerSide(uri: URI): Tilganger

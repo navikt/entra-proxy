@@ -1,5 +1,7 @@
 management:
   info:
+    build:
+      enabled: true
     os:
       enabled: true
     git:

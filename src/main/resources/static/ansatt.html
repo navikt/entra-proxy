@@ -131,7 +131,7 @@
             <p id="grupper-status"></p>
             <div class="filter-rad">
                 <label class="aksel-label" for="gruppe-filter">Filtrer gruppenavn</label>
-                <input class="aksel-text-field__input" id="gruppe-filter" name="filter" type="text" autocomplete="off" placeholder="Starter med...">
+                <input class="aksel-text-field__input" id="gruppe-filter" name="filter" type="text" autocomplete="off" placeholder="Inneholder...">
             </div>
             <div class="grupper-tabell" tabindex="0" role="region" aria-labelledby="grupper-overskrift">
             <table>
@@ -168,11 +168,11 @@
     const gruppeFilter = document.getElementById('gruppe-filter');
 
     function oppdaterGruppeFilter() {
-        const prefiks = gruppeFilter.value.trim().toLocaleLowerCase('nb');
+        const sokeTekst = gruppeFilter.value.trim().toLocaleLowerCase('nb');
         let synlige = 0;
         for (const rad of grupperRader.rows) {
             const gruppenavn = rad.cells[0].textContent.trim().toLocaleLowerCase('nb');
-            rad.hidden = !gruppenavn.startsWith(prefiks);
+            rad.hidden = !gruppenavn.includes(sokeTekst);
             if (!rad.hidden) synlige++;
         }
         const totalt = grupperRader.rows.length;
@@ -180,7 +180,7 @@
             grupperStatus.textContent = 'Ingen gruppemedlemskap';
             return;
         }
-        const antall = prefiks ? `${synlige} av ${totalt}` : `${totalt}`;
+        const antall = sokeTekst ? `${synlige} av ${totalt}` : `${totalt}`;
         grupperStatus.textContent = `${antall} ${totalt === 1 ? 'gruppe' : 'grupper'}`;
     }
 

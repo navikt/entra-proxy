@@ -1,3 +1,4 @@
+
 management:
   info:
     build:
@@ -140,3 +141,5 @@ valkey:
 
 info:
   image: ${nais.app.image:unknown}
+server:
+  shutdown: graceful

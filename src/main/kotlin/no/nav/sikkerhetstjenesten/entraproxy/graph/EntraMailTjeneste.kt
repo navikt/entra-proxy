@@ -7,8 +7,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage.
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage.MailRecipient.MailAddress
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Fallback
-import org.springframework.http.MediaType
-import org.springframework.http.MediaType.TEXT_HTML_VALUE
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
@@ -32,7 +30,7 @@ class EntraDummyMailTjeneste : MailSender {
 }
 
 fun SimpleMailMessage.body() = EntraMailRequest(
-    MailMessage(subject, MailBody(TEXT_HTML_VALUE, text),
+    MailMessage(subject, MailBody("html", text),
         to.tilMottakere(),
         cc.tilMottakere(),
         bcc.tilMottakere(),
@@ -42,7 +40,6 @@ fun SimpleMailMessage.body() = EntraMailRequest(
 private fun Array<String>?.tilMottakere() = orEmpty().asList().tilMottakere()
 
 private fun List<String>.tilMottakere() = map { MailRecipient(MailAddress(it)) }
-
 
 
 

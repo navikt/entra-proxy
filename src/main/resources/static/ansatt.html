@@ -168,10 +168,19 @@
 
     function oppdaterGruppeFilter() {
         const prefiks = gruppeFilter.value.trim().toLocaleLowerCase('nb');
+        let synlige = 0;
         for (const rad of grupperRader.rows) {
             const gruppenavn = rad.cells[0].textContent.trim().toLocaleLowerCase('nb');
             rad.hidden = !gruppenavn.startsWith(prefiks);
+            if (!rad.hidden) synlige++;
         }
+        const totalt = grupperRader.rows.length;
+        if (totalt === 0) {
+            grupperStatus.textContent = 'Ingen gruppemedlemskap';
+            return;
+        }
+        const antall = prefiks ? `${synlige} av ${totalt}` : `${totalt}`;
+        grupperStatus.textContent = `${antall} ${totalt === 1 ? 'gruppe' : 'grupper'}`;
     }
 
     gruppeFilter.addEventListener('input', oppdaterGruppeFilter);
@@ -312,7 +321,6 @@
                 grupperRader.appendChild(rad);
             }
             oppdaterGruppeFilter();
-            grupperStatus.textContent = grupper.length ? `${grupper.length} ${grupper.length === 1 ? 'gruppe' : 'grupper'}` : 'Ingen gruppemedlemskap';
             grupperTabell.classList.toggle('med-rullefelt', grupper.length > 50);
             resultat.hidden = false;
             enheterResultat.hidden = false;

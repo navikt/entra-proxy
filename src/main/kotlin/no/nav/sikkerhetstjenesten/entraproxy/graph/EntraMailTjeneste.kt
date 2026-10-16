@@ -1,10 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.boot.conditionals.ConditionalOnProd
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage.MailBody
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage.MailRecipient
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailRequest.MailMessage.MailRecipient.MailAddress
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailBody
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailRecipient
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailRecipient.MailAddress
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Fallback
 import org.springframework.mail.MailSender
@@ -19,7 +20,7 @@ class EntraMailTjeneste(
 
     override fun send(vararg simpleMessages: SimpleMailMessage) =
         simpleMessages.forEach {
-            client.sendMail(avsender, it.body())
+          //  client.sendMail(avsender, it.body())
         }
 }
 
@@ -29,7 +30,7 @@ class EntraDummyMailTjeneste : MailSender {
     }
 }
 
-fun SimpleMailMessage.body() = EntraMailRequest(
+fun SimpleMailMessage.body() = MailRequest(
     MailMessage(subject, MailBody("html", text),
         to.tilMottakere(),
         cc.tilMottakere(),

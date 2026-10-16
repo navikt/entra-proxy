@@ -182,6 +182,11 @@ java {
     }
 }
 
+// Kotlin 2.4.x supports JVM target up to 26, so Java bytecode must match.
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(26)
+}
+
 kotlin {
    // jvmToolchain(26)
 

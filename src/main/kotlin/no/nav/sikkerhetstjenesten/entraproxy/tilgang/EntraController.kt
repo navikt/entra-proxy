@@ -15,6 +15,8 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
+import org.springframework.mail.MailSender
+import org.springframework.mail.SimpleMailMessage
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +33,7 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste) {
+class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste, private val mail: MailSender) {
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
@@ -96,6 +98,11 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
         oid.gruppeOid(gruppeNavn)?.let {
             entra.medlemmerIGruppe( gruppeNavn, it)
         } ?: emptySet()
+
+    @PostMapping("mail")
+    @Operation(summary = "Send e-post")
+    fun sendMail(@RequestBody message: SimpleMailMessage)  =
+        mail.send(message)
 
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")

@@ -118,6 +118,8 @@ springdoc:
 
 graph:
   varighet: 3h
+  mail:
+    avsender: teknologiavdelingen.team-sikkerhetstjenesten@nav.no
 
 norg:
   varighet: 3h

@@ -299,7 +299,14 @@
                 const navnCelle = document.createElement('td');
                 navnCelle.textContent = enhet.navn;
                 const nomIdCelle = document.createElement('td');
-                nomIdCelle.textContent = enhet.nomId ?? '';
+                if (enhet.nomId) {
+                    const lenke = document.createElement('a');
+                    lenke.href = `https://nom.nav.no/org/${encodeURIComponent(enhet.nomId)}`;
+                    lenke.target = '_blank';
+                    lenke.rel = 'noopener noreferrer';
+                    lenke.textContent = enhet.nomId;
+                    nomIdCelle.append(lenke);
+                }
                 const ledereCelle = document.createElement('td');
                 ledereCelle.textContent = enhet.ledere;
                 ledereCelle.hidden = !flereTilknytninger;

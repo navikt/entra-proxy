@@ -33,6 +33,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
+import org.springframework.mail.MailSender
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
@@ -48,6 +49,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
     @MockkBean
     private lateinit var entraTjeneste: EntraTjeneste
+
+    @MockkBean
+    private lateinit var mail: MailSender
 
     @MockkBean
     private lateinit var oidTjeneste: EntraOidTjeneste

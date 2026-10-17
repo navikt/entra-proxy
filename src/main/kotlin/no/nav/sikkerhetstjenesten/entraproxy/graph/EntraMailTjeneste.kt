@@ -14,7 +14,6 @@ import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
 
 @Service
-@ConditionalOnProd
 class EntraMailTjeneste(
     private val client: EntraGraphClient,
     @param:Value($$"${graph.mail.avsender}") private val avsender: String) : MailSender {

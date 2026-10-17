@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailBody
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailRecipient
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailRecipient.MailAddress
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Fallback
 import org.springframework.mail.MailSender
@@ -18,9 +19,13 @@ class EntraMailTjeneste(
     private val client: EntraGraphClient,
     @param:Value($$"${graph.mail.avsender}") private val avsender: String) : MailSender {
 
+    private val log = getLogger(javaClass)
+
+
     override fun send(vararg simpleMessages: SimpleMailMessage) =
         simpleMessages.forEach {
-            client.sendMail(avsender, it.body())
+            log.info("Sender mail $it")
+            //client.sendMail(avsender, it.body())
         }
 }
 

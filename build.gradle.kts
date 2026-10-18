@@ -100,7 +100,6 @@ dependencies {
     // NAV and security
     implementation(libs.bootConditionals)
     implementation(libs.slack)
-    implementation(libs.msGraph)
     implementation(libs.springBootStarterOauth2Client)
     implementation(libs.springBootStarterOauth2ResourceServer)
 

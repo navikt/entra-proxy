@@ -45,3 +45,5 @@ azure:
 
 graph:
   scope: https://graph.microsoft.com/.default
+  mail:
+    avsender: teknologiavdelingen.team-sikkerhetstjenesten@nav.no

@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
@@ -51,7 +52,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
     private lateinit var entraTjeneste: EntraTjeneste
 
     @MockkBean
-    private lateinit var mail: MailSender
+    private lateinit var mail: EntraMailTjeneste
 
     @MockkBean
     private lateinit var oidTjeneste: EntraOidTjeneste

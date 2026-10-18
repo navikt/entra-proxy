@@ -101,17 +101,11 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
     @PostMapping("mail")
     @Operation(summary = "Send e-post")
-    fun sendMail(@RequestBody message: SimpleMailMessage)  =
-        mail.send(message)
-
-    @PostMapping("mail1")
-    @Operation(summary = "Send e-post")
-    fun sendMail1()  =
+    fun sendMail(@RequestBody message: String)  =
         mail.send(SimpleMailMessage().apply {
-            from = "noreply@nav.no"
             setTo("jan-olav.eide@nav.no")
             subject = "Test"
-            text = "Dette er en hardkodet testmelding"
+            text = message
         })
 
     @PostMapping("gruppe/antall/bulk")

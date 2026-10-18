@@ -6,11 +6,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomI
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
@@ -33,7 +35,7 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste, private val mail: MailSender) {
+class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste, private val mail: EntraMailTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
@@ -101,12 +103,8 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
     @PostMapping("mail")
     @Operation(summary = "Send e-post")
-    fun sendMail(@RequestBody message: String)  =
-        mail.send(SimpleMailMessage().apply {
-            setTo("jan-olav.eide@nav.no")
-            subject = "Test"
-            text = message
-        })
+    fun sendMail(@RequestBody message: MailRequest)  =
+        mail.send(message)
 
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")

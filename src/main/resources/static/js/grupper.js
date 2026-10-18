@@ -1,0 +1,366 @@
+    const sok = document.getElementById('sok');
+    const forstePanel = sok.querySelector('.sok-panel');
+    const panelMal = forstePanel.cloneNode(true);
+    panelMal.querySelector('.nom-form').remove();
+    panelMal.querySelector('.hovedsok > p').remove();
+    panelMal.querySelector('form .sok-knapper').insertBefore(
+        panelMal.querySelector('.nytt-sok'),
+        panelMal.querySelector('.fjern-gruppe')
+    );
+    panelMal.querySelector('.sammenligningsknapp').remove();
+    const fellesResultat = document.getElementById('felles-resultat');
+    const sammenligningDetaljer = document.getElementById('sammenligning-detaljer');
+    const sammenligningTabell = sammenligningDetaljer.querySelector('.sammenligning-tabell');
+    const fellesStatus = document.getElementById('felles-status');
+    const fellesListe = document.getElementById('felles-medlemmer');
+    const sammenligningTabellOverskrift = document.getElementById('sammenligning-tabell-overskrift');
+    const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
+    const kopierDetaljvisning = document.getElementById('kopier-detaljvisning');
+    const kopierStatus = document.getElementById('kopier-status');
+    const gruppemedlemmer = new WeakMap();
+    let antallSok = 1;
+    let aktiveOppslag = 0;
+
+    function oppdaterSokemarkering(endring) {
+        aktiveOppslag += endring;
+        document.documentElement.classList.toggle('soker', aktiveOppslag > 0);
+    }
+
+    kopierDetaljvisning.addEventListener('click', async () => {
+        kopierDetaljvisning.disabled = true;
+        kopierStatus.classList.remove('error');
+        kopierStatus.textContent = 'Kopierer...';
+
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error('Utklippstavlen er ikke tilgjengelig. Bruk HTTPS og en nettleser som st\u00f8tter kopiering.');
+            }
+            const rader = [
+                [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
+                    celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
+                ),
+                ...[...sammenligningTabellRader.rows].map(rad =>
+                    [...rad.cells].map((celle, kolonneIndeks) => {
+                        const verdi = celle.textContent.trim();
+                        return kolonneIndeks >= 3 ? String(verdi === '✓') : verdi;
+                    })
+                )
+            ];
+            const kolonneskille = ';';
+            const tekst = rader.map(rad => rad.join(kolonneskille)).join('\r\n');
+            await navigator.clipboard.writeText(tekst);
+            kopierStatus.textContent = 'Tabellen er kopiert til utklippstavlen.';
+        } catch (error) {
+            kopierStatus.textContent = `Kopiering feilet: ${error.message}`;
+            kopierStatus.classList.add('error');
+        } finally {
+            kopierDetaljvisning.disabled = false;
+        }
+    });
+
+    function oppdaterFellesMedlemmer() {
+        const allePaneler = [...sok.querySelectorAll('.sok-panel')];
+        for (const panel of allePaneler) {
+            panel.querySelector('.nytt-sok').disabled = panel.dataset.populert !== 'true';
+        }
+        const alleSokFullfort = allePaneler.every(panel => panel.dataset.populert === 'true');
+        const forsteMedlemmer = gruppemedlemmer.get(allePaneler[0]) ?? [];
+        const sammenligningsPaneler = allePaneler.slice(1).filter(panel =>
+            (gruppemedlemmer.get(panel)?.length ?? 0) > 0
+        );
+        const visResultat = alleSokFullfort && forsteMedlemmer.length > 0 && sammenligningsPaneler.length > 0;
+        fellesResultat.hidden = !visResultat;
+        sammenligningDetaljer.hidden = !visResultat;
+        fellesListe.replaceChildren();
+        sammenligningTabellOverskrift.replaceChildren();
+        sammenligningTabellRader.replaceChildren();
+        sammenligningTabell.classList.toggle('med-rullefelt', forsteMedlemmer.length > 50);
+        sammenligningTabell.scrollTop = 0;
+        kopierStatus.textContent = '';
+        kopierStatus.classList.remove('error');
+        if (fellesResultat.hidden) {
+            return;
+        }
+
+        const paneler = [allePaneler[0], ...sammenligningsPaneler];
+        const panelMedlemmer = [forsteMedlemmer, ...sammenligningsPaneler.map(panel => gruppemedlemmer.get(panel))];
+        const medlemssett = panelMedlemmer.map(medlemmer => new Set(medlemmer.map(medlem => medlem.navIdent)));
+        const forsteGruppe = medlemssett[0];
+        const andreGrupper = medlemssett.slice(1);
+        const kunForsteGruppe = [...forsteGruppe].filter(navIdent =>
+            andreGrupper.every(medlemmer => !medlemmer.has(navIdent))
+        );
+        const oppsummeringer = [
+            {grupper: `Kun i ${paneler[0].dataset.gruppeNavn}`, antall: kunForsteGruppe.length},
+            ...andreGrupper.map((medlemmer, indeks) => {
+                const fellesAntall = [...forsteGruppe].filter(navIdent => medlemmer.has(navIdent)).length;
+                return {
+                    grupper: `${paneler[0].dataset.gruppeNavn} og ${paneler[indeks + 1].dataset.gruppeNavn}`,
+                    antall: fellesAntall
+                };
+            })
+        ];
+        fellesListe.replaceChildren();
+        for (const oppsummering of oppsummeringer) {
+            const rad = document.createElement('tr');
+            const gruppeCelle = document.createElement('td');
+            const antallCelle = document.createElement('td');
+            gruppeCelle.textContent = oppsummering.grupper;
+            antallCelle.textContent = oppsummering.antall;
+            rad.append(gruppeCelle, antallCelle);
+            fellesListe.appendChild(rad);
+        }
+        fellesStatus.textContent = 'Antall medlemmer basert på gruppene over.';
+
+        const tabellOverskrift = document.createElement('tr');
+        const navIdentOverskrift = document.createElement('th');
+        navIdentOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(navIdentOverskrift, 'Nav-ident', 0);
+        const navnOverskrift = document.createElement('th');
+        navnOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(navnOverskrift, 'Navn', 1);
+        const tilgangsenhetOverskrift = document.createElement('th');
+        tilgangsenhetOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(tilgangsenhetOverskrift, 'Nom tilgangsenhet', 2);
+        tabellOverskrift.append(navIdentOverskrift, navnOverskrift, tilgangsenhetOverskrift);
+        for (const [indeks, panel] of paneler.slice(1).entries()) {
+            const gruppeOverskrift = document.createElement('th');
+            gruppeOverskrift.scope = 'col';
+            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 3);
+            tabellOverskrift.appendChild(gruppeOverskrift);
+        }
+        sammenligningTabellOverskrift.appendChild(tabellOverskrift);
+
+        const tilgangsenhetCeller = new Map();
+        for (const medlem of panelMedlemmer[0]) {
+            const rad = document.createElement('tr');
+            const navIdentCelle = document.createElement('th');
+            navIdentCelle.scope = 'row';
+            const navIdentLenke = document.createElement('a');
+            navIdentLenke.className = 'navident-lenke';
+            navIdentLenke.href = `/ansatt.html?ansattid=${encodeURIComponent(medlem.navIdent)}`;
+            navIdentLenke.textContent = medlem.navIdent;
+            navIdentCelle.appendChild(navIdentLenke);
+            const navnCelle = document.createElement('td');
+            navnCelle.textContent = medlem.visningNavn ?? '';
+            const tilgangsenhetCelle = document.createElement('td');
+            tilgangsenhetCeller.set(medlem.navIdent, tilgangsenhetCelle);
+            rad.append(navIdentCelle, navnCelle, tilgangsenhetCelle);
+            for (const medlemmer of andreGrupper) {
+                const celle = document.createElement('td');
+                celle.textContent = medlemmer.has(medlem.navIdent) ? '✓' : '';
+                rad.appendChild(celle);
+            }
+            sammenligningTabellRader.appendChild(rad);
+        }
+        hentNomTilgangsenheter(tilgangsenhetCeller);
+    }
+
+    async function hentNomTilgangsenheter(celler) {
+        if (celler.size === 0) {
+            return;
+        }
+        for (const celle of celler.values()) {
+            celle.textContent = 'Henter...';
+        }
+        oppdaterSokemarkering(1);
+        try {
+            const response = await fetch('/api/v1/nom/enhet/bulk', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                body: JSON.stringify([...celler.keys()])
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const ressurser = await response.json();
+            if (!Array.isArray(ressurser)) {
+                throw new Error('Uventet respons fra Nom: forventet en liste med ansatte.');
+            }
+            const tilgangsenheterPerNavIdent = new Map(ressurser.map(ressurs => {
+                if (typeof ressurs?.navident !== 'string' || !Array.isArray(ressurs.orgTilknytninger)) {
+                    throw new Error('Uventet respons fra Nom: mangler navident eller orgTilknytninger.');
+                }
+                const tilgangsenheter = ressurs.orgTilknytninger.map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId);
+                return [ressurs.navident, [...new Set(tilgangsenheter)].join(', ')];
+            }));
+            for (const [navIdent, celle] of celler) {
+                celle.textContent = tilgangsenheterPerNavIdent.get(navIdent) ?? '';
+            }
+        } catch (error) {
+            for (const celle of celler.values()) {
+                celle.textContent = 'Oppslag feilet';
+                celle.title = error.message;
+                celle.classList.add('error');
+            }
+        } finally {
+            oppdaterSokemarkering(-1);
+        }
+    }
+
+    function leggTilSorterbarOverskrift(celle, tekst, kolonneIndeks) {
+        const knapp = document.createElement('button');
+        knapp.className = 'sorter-knapp';
+        knapp.type = 'button';
+        knapp.textContent = tekst;
+        knapp.addEventListener('click', () => {
+            const retning = knapp.dataset.sortering === 'ascending' ? 'descending' : 'ascending';
+            const andreKnapper = sammenligningTabellOverskrift.querySelectorAll('.sorter-knapp');
+            for (const annenKnapp of andreKnapper) {
+                annenKnapp.dataset.sortering = '';
+                annenKnapp.closest('th').removeAttribute('aria-sort');
+            }
+            knapp.dataset.sortering = retning;
+            celle.setAttribute('aria-sort', retning);
+            const rader = [...sammenligningTabellRader.rows];
+            rader.sort((radA, radB) => {
+                const verdiA = radA.cells[kolonneIndeks].textContent.trim();
+                const verdiB = radB.cells[kolonneIndeks].textContent.trim();
+                const sammenligning = verdiA.localeCompare(verdiB, undefined, {numeric: true, sensitivity: 'base'});
+                return retning === 'ascending' ? sammenligning : -sammenligning;
+            });
+            sammenligningTabellRader.append(...rader);
+        });
+        celle.appendChild(knapp);
+    }
+
+    function klargjorSok(panel) {
+        let sisteSok = 0;
+        panel.querySelector('.nytt-sok').addEventListener('click', () => {
+            const nyttPanel = panelMal.cloneNode(true);
+            nyttPanel.querySelector('h2')?.remove();
+            antallSok += 1;
+            nyttPanel.setAttribute('aria-label', `Gruppes\u00f8k ${antallSok}`);
+            for (const element of nyttPanel.querySelectorAll('[id]')) {
+                element.id = `${element.id}-${antallSok}`;
+            }
+            nyttPanel.querySelector('label').htmlFor = nyttPanel.querySelector('input').id;
+            nyttPanel.querySelector('.fjern-gruppe').hidden = false;
+            sok.append(nyttPanel);
+            sok.querySelector('#sammenligningsoverskrift').hidden = false;
+            klargjorSok(nyttPanel);
+            oppdaterFellesMedlemmer();
+            nyttPanel.querySelector('input').focus();
+        });
+
+        panel.querySelector('.fjern-gruppe').addEventListener('click', () => {
+            panel.remove();
+            gruppemedlemmer.delete(panel);
+            const gjenstaendePaneler = [...sok.querySelectorAll('.sok-panel')];
+            sok.querySelector('#sammenligningsoverskrift').hidden = gjenstaendePaneler.length <= 1;
+            oppdaterFellesMedlemmer();
+        });
+
+        for (const form of panel.querySelectorAll('form')) {
+            const input = form.querySelector('input');
+            const button = form.querySelector('button[type="submit"]');
+            const status = form.querySelector('.status');
+            const erNomSok = form.classList.contains('nom-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (button.disabled) {
+                    return;
+                }
+                const verdi = input.value.trim();
+                const erTilgangsenhet = /^[0-9]{4}$/.test(verdi);
+                const erNomEnhet = /^[a-z]{2}[0-9]{3}[a-z]$/.test(verdi);
+                const sokId = ++sisteSok;
+                const gruppeNavn = erNomSok ? (erNomEnhet ? `Nom-enhet ${verdi}` : `Nom tilgangsenhet ${verdi}`) : verdi;
+                panel.dataset.populert = 'false';
+                gruppemedlemmer.delete(panel);
+                oppdaterFellesMedlemmer();
+                for (const sokStatus of panel.querySelectorAll('.status')) {
+                    sokStatus.textContent = '';
+                    sokStatus.classList.remove('error');
+                }
+
+                if (erNomSok ? !(erTilgangsenhet || erNomEnhet) : !verdi) {
+                    status.textContent = erNomSok ? 'Skriv inn en tilgangsenhetId (4 siffer) eller en nom-enhet (6 tegn).' : 'Skriv inn et gruppenavn.';
+                    status.classList.add('error');
+                    return;
+                }
+
+                const alleredeValgt = [...sok.querySelectorAll('.sok-panel')]
+                    .some(annetPanel => annetPanel !== panel
+                        && annetPanel.dataset.gruppeNavn
+                        && annetPanel.dataset.gruppeNavn.toLowerCase() === gruppeNavn.toLowerCase());
+                if (alleredeValgt) {
+                    status.textContent = `Gruppen "${gruppeNavn}" er allerede valgt i et annet s\u00f8k.`;
+                    status.classList.add('error');
+                    return;
+                }
+
+                for (const sokForm of panel.querySelectorAll('form')) {
+                    sokForm.classList.toggle('inaktivt-sok', sokForm !== form);
+                }
+                button.disabled = true;
+                status.textContent = 'Henter medlemmer...';
+                oppdaterSokemarkering(1);
+
+                try {
+                    const url = erNomSok
+                        ? (erNomEnhet ? `/api/v1/nom/ansatte/enhet/${verdi}` : `/api/v1/nom/ansatte/${verdi}`)
+                        : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn})}`;
+                    const response = await fetch(url, {
+                        headers: {'Accept': 'application/json'}
+                    });
+                    if (!response.ok) {
+                        let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
+                        if (response.headers.get('content-type')?.includes('json')) {
+                            const problem = await response.json();
+                            melding = problem.detail ?? melding;
+                        }
+                        throw new Error(melding);
+                    }
+
+                    const resultat = await response.json();
+                    if (sokId !== sisteSok) {
+                        return;
+                    }
+                    if (!Array.isArray(resultat)) {
+                        throw new Error('Uventet respons: forventet en liste med medlemmer.');
+                    }
+                    const medlemmer = erNomSok
+                        ? resultat.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
+                        : resultat;
+                    if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
+                        throw new Error('Uventet respons: mangler nav-ident eller navn.');
+                    }
+                    const enhetsnavn = (erNomSok && erTilgangsenhet)
+                        ? resultat.flatMap(ressurs => ressurs.orgTilknytninger ?? [])
+                            .find(tilknytning => tilknytning.orgEnhet?.tilgangsenhetId === verdi
+                                && typeof tilknytning.orgEnhet.navn === 'string'
+                                && tilknytning.orgEnhet.navn.trim())?.orgEnhet.navn
+                        : undefined;
+                    const resultatnavn = erNomSok ? (enhetsnavn ?? (erNomEnhet ? `nom-enhet ${verdi}` : `tilgangsenhet ${verdi}`)) : gruppeNavn;
+                    gruppemedlemmer.set(panel, medlemmer);
+                    panel.dataset.gruppeNavn = gruppeNavn;
+                    panel.dataset.populert = 'true';
+                    status.textContent = medlemmer.length
+                        ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'} i ${resultatnavn}`
+                        : erNomSok
+                            ? `Ingen medlemmer funnet i ${resultatnavn}.`
+                            : 'Ingen medlemmer funnet. Gruppen kan v\u00e6re tom eller ikke finnes.';
+                } catch (error) {
+                    if (sokId === sisteSok) {
+                        status.textContent = `Henting feilet: ${error.message}`;
+                        status.classList.add('error');
+                    }
+                } finally {
+                    button.disabled = false;
+                    if (sokId === sisteSok) {
+                        oppdaterFellesMedlemmer();
+                    }
+                    oppdaterSokemarkering(-1);
+                }
+            });
+        }
+    }
+
+    klargjorSok(forstePanel);
+
+    const tilgangsenhetIdFraUrl = new URLSearchParams(window.location.search).get('tilgangsenhetId');
+    if (tilgangsenhetIdFraUrl) {
+        document.getElementById('tilgangsenhetId').value = tilgangsenhetIdFraUrl;
+        document.getElementById('nom-form').requestSubmit();
+    }

@@ -24,7 +24,7 @@ class EntraMailTjeneste(
     override fun send(vararg simpleMessages: SimpleMailMessage) =
         simpleMessages.forEach {
             log.info("Sender mail $it")
-            //client.sendMail(avsender, it.body())
+            client.sendMail(avsender, it.body())
         }
 }
 

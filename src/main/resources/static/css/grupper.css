@@ -1,0 +1,168 @@
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background-color: #283b38;
+        background-image: url("/wildlife.svg");
+        background-position: center;
+        background-size: 720px 600px;
+        color: #fff;
+        font-family: Arial, sans-serif;
+    }
+    main {
+        max-width: 90rem;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    h1 {
+        text-align: center;
+        text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
+    }
+    #sok {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+        gap: 2rem;
+        padding-bottom: 1rem;
+    }
+    .sok-panel:first-child {
+        grid-column: 1 / -1;
+    }
+    .sok-panel:first-child > h2 {
+        text-align: center;
+    }
+    #sammenligningsoverskrift {
+        grid-column: 1 / -1;
+    }
+    .sok-panel {
+        min-width: 0;
+    }
+    .hovedsok {
+        display: grid;
+        grid-template-columns: 1fr;
+        max-width: 32rem;
+        gap: 1.5rem;
+    }
+    .hovedsok > p {
+        text-align: left;
+        margin: 0;
+    }
+    @media (min-width: 60rem) {
+        .sok-panel:first-child .hovedsok {
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+            max-width: none;
+        }
+        .hovedsok > p {
+            align-self: start;
+            margin-top: 3rem;
+        }
+    }
+    .aksel-text-field__input,
+    .aksel-text-field__input:autofill,
+    .aksel-text-field__input:-webkit-autofill {
+        background-color: #d3dfd7;
+    }
+    .aksel-text-field__input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px #d3dfd7 inset;
+    }
+    .inaktivt-sok {
+        filter: grayscale(1);
+        opacity: 0.65;
+    }
+    html.soker,
+    html.soker * {
+        cursor: url("/kikkert.svg") 16 16, wait !important;
+    }
+    .sok-knapper {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    .sammenligningsknapp {
+        justify-content: center;
+    }
+    .status { min-height: 1.5rem; margin-top: 1rem; }
+    .status.error { color: #a40000; }
+    .oppsummering {
+        width: 100%;
+        background: #d3dfd7;
+        border-collapse: collapse;
+        text-align: left;
+        color: #1f1f1f;
+    }
+    .oppsummering th,
+    .oppsummering td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #d1d6db;
+    }
+    tbody tr:nth-child(even) { background: #c5d4cb; }
+    thead th { background: #c5d4cb; }
+    .sammenligning-tabell {
+        background: #d3dfd7;
+        overflow-x: auto;
+        color: #1f1f1f;
+    }
+    .sammenligning-tabell.med-rullefelt {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    .sammenligning-tabell.med-rullefelt thead {
+        position: sticky;
+        top: 0;
+        background: #c5d4cb;
+    }
+    #sammenligning-detaljer {
+        margin-top: 3rem;
+        padding-top: 1.5rem;
+    }
+    .sammenligning-tabell table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    .sammenligning-tabell th,
+    .sammenligning-tabell td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #d1d6db;
+    }
+    .navident-lenke { color: #00557d; }
+    .sorter-knapp {
+        padding: 0;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        font-weight: inherit;
+        text-align: left;
+        cursor: pointer;
+    }
+    .sorter-knapp::after {
+        content: " \2195";
+    }
+    th[aria-sort="ascending"] .sorter-knapp::after {
+        content: " \2191";
+    }
+    th[aria-sort="descending"] .sorter-knapp::after {
+        content: " \2193";
+    }
+    .oppsummering td:last-child,
+    .oppsummering th:last-child {
+        text-align: right;
+    }
+    th, td { overflow-wrap: anywhere; }
+    .utlogging {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #d1d6db;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+.mt-1 {
+    margin-top: 1rem;
+}
+
+.eller {
+    font-weight: bold;
+    font-size: 1.25rem;
+}

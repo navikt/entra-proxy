@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.boot.conditionals.ConditionalOnProd
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailBody
@@ -8,7 +7,6 @@ import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.Ma
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest.MailMessage.MailRecipient.MailAddress
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.context.annotation.Fallback
 import org.springframework.mail.MailSender
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.stereotype.Service
@@ -26,12 +24,6 @@ class EntraMailTjeneste(
             log.info("Sender mail $it")
             client.sendMail(avsender, it.body())
         }
-}
-
-@Fallback
-class EntraDummyMailTjeneste : MailSender {
-    override fun send(vararg simpleMessages: SimpleMailMessage) {
-    }
 }
 
 fun SimpleMailMessage.body() = MailRequest(

@@ -104,6 +104,16 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     fun sendMail(@RequestBody message: SimpleMailMessage)  =
         mail.send(message)
 
+    @PostMapping("mail1")
+    @Operation(summary = "Send e-post")
+    fun sendMail1()  =
+        mail.send(SimpleMailMessage().apply {
+            from = "noreply@nav.no"
+            setTo("jan-olav.eide@nav.no")
+            subject = "Test"
+            text = "Dette er en hardkodet testmelding"
+        })
+
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
     fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>): Map<UUID, Long> =

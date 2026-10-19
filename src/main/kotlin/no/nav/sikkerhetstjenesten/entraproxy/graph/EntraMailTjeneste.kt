@@ -14,13 +14,9 @@ class EntraMailTjeneste(
 
 
     fun send(request: MailRequest) =
-        client.sendMail(avsender, request.medGyldigInnholdstype())
+        client.sendMail(avsender, request)
+}
 
-    // Graph forstår kun "Text" og "HTML"; alt annet (f.eks. "JSON") vises som rå tekst
-    private fun MailRequest.medGyldigInnholdstype() =
-        copy(message = message.copy(body = message.body.copy(
-            contentType = if (message.body.contentType.equals("text", ignoreCase = true)) "Text" else "HTML")))
-        }
 
 
 

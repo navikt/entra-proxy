@@ -155,5 +155,6 @@ valkey:
 info:
   image: ${nais.app.image:unknown}
 server:
+  forward-headers-strategy: framework
   shutdown: graceful
   shutdown-delay: 30s

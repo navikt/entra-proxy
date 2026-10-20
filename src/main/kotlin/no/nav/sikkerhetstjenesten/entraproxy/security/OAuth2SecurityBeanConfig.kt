@@ -114,6 +114,8 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
                 }
             }
             .oauth2Login { login ->
+                login.loginPage(INNLOGGING)
+                login.failureUrl(INNLOGGING_FEILET)
                 login.userInfoEndpoint { it.userAuthoritiesMapper(authoritiesMapper) }
             }
             .logout { it.logoutSuccessUrl(LOGOUT_SIDE) }
@@ -191,6 +193,8 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
         private const val UTFORSKER_MANGLER = "mangler"
         private const val API_MANGLER = "json"
         private const val LOGOUT_SIDE = "/logout.html"
+        private const val INNLOGGING = "/oauth2/authorization/entra"
+        private const val INNLOGGING_FEILET = "/innlogging-feilet.html"
         private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
         private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
         private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", "/logout")

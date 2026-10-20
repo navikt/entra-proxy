@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GROUPS_CLAIM
 import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GRUPPE_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
@@ -33,10 +34,15 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder.getContext
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
+import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
@@ -77,13 +83,27 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
         }
 
     @Bean
+    fun utforskerAuthoritiesMapper(): GrantedAuthoritiesMapper =
+        GrantedAuthoritiesMapper { authorities ->
+            buildSet<GrantedAuthority> {
+                addAll(authorities)
+                authorities.filterIsInstance<OidcUserAuthority>().forEach { oidc ->
+                    oidc.idToken.getClaimAsStringList(GROUPS_CLAIM).orEmpty().forEach {
+                        add(SimpleGrantedAuthority("$GRUPPE_PREFIX$it"))
+                    }
+                }
+            }
+        }
+
+    @Bean
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
                                      @Qualifier(UTFORSKER_MANGLER) handler: AccessDeniedHandler,
-                                      entryPoint: AuthenticationEntryPoint,
-                                     @Value($$"${groups.utforsker:}")  utforskerGruppe: String)  =
-        http.securityMatcher(*UTFORSKER_SIDER)
+                                     authoritiesMapper: GrantedAuthoritiesMapper,
+                                     @Value($$"${groups.utforsker:}")  utforskerGruppe: String): SecurityFilterChain =
+        http.securityMatcher(*LOGIN_ENDEPUNKTER, *UTFORSKER_SIDER)
             .authorizeHttpRequests { requests ->
+                requests.requestMatchers(*LOGIN_ENDEPUNKTER).permitAll()
                 with(requests.anyRequest()) {
                     if (utforskerGruppe.isNotBlank())  {
                         hasAuthority("$GRUPPE_PREFIX$utforskerGruppe")
@@ -93,7 +113,12 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
                     }
                 }
             }
-            .asResourceServer(converter, entryPoint, handler)
+            .oauth2Login { login ->
+                login.userInfoEndpoint { it.userAuthoritiesMapper(authoritiesMapper) }
+            }
+            .logout { it.logoutSuccessUrl(LOGOUT_SIDE) }
+            .exceptionHandling { it.accessDeniedHandler(handler) }
+            .build()
 
     @Bean
     @Order(2)
@@ -140,6 +165,8 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
             repo, service).apply {
             setAuthorizedClientProvider(
                 OAuth2AuthorizedClientProviderBuilder.builder()
+                    .authorizationCode()
+                    .refreshToken()
                     .clientCredentials()
                     .build())
             setAuthorizationSuccessHandler(successHandler)
@@ -163,8 +190,10 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
     companion object {
         private const val UTFORSKER_MANGLER = "mangler"
         private const val API_MANGLER = "json"
+        private const val LOGOUT_SIDE = "/logout.html"
         private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
         private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
+        private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", "/logout")
         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
         val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
     }

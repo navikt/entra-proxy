@@ -36,6 +36,7 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.mail.MailSender
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
@@ -131,18 +132,18 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
         Given("forsiden (index.html på rot)") {
             When("request mangler innlogget sesjon") {
-                Then("returnerer 401 slik at Wonderwall kan starte innlogging") {
+                Then("omdirigerer til innlogging") {
                     mockMvc.perform(get("/"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                     mockMvc.perform(get("/index.html"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                 }
             }
-            When("request har gyldig token") {
+            When("request har innlogget sesjon") {
                 Then("serverer utforskersiden") {
-                    mockMvc.perform(get("/").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/").with(oidcLogin()))
                         .andExpect(status().isOk())
-                    mockMvc.perform(get("/index.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/index.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("Utforsker")))
                 }
@@ -247,7 +248,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden bruker gruppe-endepunktet") {
-                    mockMvc.perform(get("/grupper.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/grupper.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
@@ -259,7 +260,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 }
                 Then("krever innlogget sesjon ved direkte tilgang") {
                     mockMvc.perform(get("/grupper.html"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                 }
                 Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
@@ -395,10 +396,10 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request har gyldig gruppe") {
                 Then("ansatt.html krever innlogging") {
                     mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                 }
                 Then("ansatt.html er tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/antall/bulk")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
@@ -451,7 +452,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
                 Then("ansatt.html er tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                 }
             }

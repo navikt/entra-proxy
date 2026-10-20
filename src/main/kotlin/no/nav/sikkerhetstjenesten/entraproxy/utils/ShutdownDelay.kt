@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 
 /**
  * Venter ved SIGTERM før webserveren slutter å ta imot forbindelser, slik at
- * pod'en rekker å bli fjernet fra endpoints (og Wonderwall slutter å sende trafikk).
+ * pod'en rekker å bli fjernet fra endpoints (og ingress-kontrolleren slutter å sende trafikk).
  * Stoppes før WebServerGracefulShutdownLifecycle (fase DEFAULT_PHASE - 1024).
  */
 @Component

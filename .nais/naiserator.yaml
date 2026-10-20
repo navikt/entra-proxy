@@ -53,21 +53,16 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
+      replyURLs:
+        {{#each ingresses as |ingress|}}
+        - "{{ingress}}/login/oauth2/code/entra"
+        {{/each}}
       claims:
         extra:
           - "NAVident"
           - "azp_name"
         groups:
           - id: "{{groups.utforsker}}"
-    sidecar:
-      enabled: true
-      autoLogin: true
-      autoLoginIgnorePaths:
-        - "/api/v1/**"
-        - "/monitoring/**"
-        - "/swagger-ui/**"
-        - "/swagger-ui.html"
-        - "/v3/api-docs/**"
   accessPolicy:
     outbound:
       rules:

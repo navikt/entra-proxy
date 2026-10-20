@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.convert.converter.Converter
+import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpStatusCode
 import org.springframework.security.authentication.AbstractAuthenticationToken
@@ -48,7 +49,13 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
+import org.springframework.security.web.authentication.DelegatingAuthenticationEntryPoint
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
+import org.springframework.security.web.util.matcher.AndRequestMatcher
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
@@ -103,9 +110,11 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
                                      @Qualifier(UTFORSKER_MANGLER) handler: AccessDeniedHandler,
+                                     entryPoint: AuthenticationEntryPoint,
                                      authoritiesMapper: GrantedAuthoritiesMapper,
                                      @Value($$"${groups.utforsker:}")  utforskerGruppe: String): SecurityFilterChain =
-        http.securityMatcher(*LOGIN_ENDEPUNKTER, *UTFORSKER_SIDER)
+        http.securityMatcher(sesjonsMatcher())
+            .csrf { it.ignoringRequestMatchers(API_ENDPOINTS) }
             .authorizeHttpRequests { requests ->
                 requests.requestMatchers(*LOGIN_ENDEPUNKTER).permitAll()
                 with(requests.anyRequest()) {
@@ -129,11 +138,27 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
                 logout.logoutRequestMatcher(withDefaults().matcher(GET, LOGOUT_ENDEPUNKT))
                 logout.logoutSuccessUrl(LOGOUT_SIDE)
             }
-            .exceptionHandling { it.accessDeniedHandler(handler) }
+            .exceptionHandling {
+                it.authenticationEntryPoint(sesjonsEntryPoint(entryPoint))
+                it.accessDeniedHandler(handler)
+            }
+            .build()
+
+    private fun sesjonsEntryPoint(apiEntryPoint: AuthenticationEntryPoint): AuthenticationEntryPoint =
+        DelegatingAuthenticationEntryPoint.builder()
+            .addEntryPointFor(apiEntryPoint, API_ENDPOINTS)
+            .defaultEntryPoint(LoginUrlAuthenticationEntryPoint(INNLOGGING))
             .build()
 
     private fun oidcBrukerTjeneste(): OidcUserService =
         OidcUserService().apply { setRetrieveUserInfo { false } }
+
+    private fun sesjonsMatcher(): RequestMatcher =
+        OrRequestMatcher(
+            buildList {
+                (LOGIN_ENDEPUNKTER + UTFORSKER_SIDER).forEach { add(withDefaults().matcher(it)) }
+                add(BROWSER_API_ENDPOINTS)
+            })
 
     private fun innloggingFeiletHandler(): AuthenticationFailureHandler =
         AuthenticationFailureHandler { _, response, exception ->
@@ -217,6 +242,10 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
         private const val INNLOGGING = "/oauth2/authorization/entra"
         private const val INNLOGGING_FEILET = "/innlogging-feilet.html"
         private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
+        private const val BEARER_PREFIX = "Bearer "
+        private val BROWSER_API_ENDPOINTS: RequestMatcher = AndRequestMatcher(
+            API_ENDPOINTS,
+            NegatedRequestMatcher { it.getHeader(AUTHORIZATION)?.startsWith(BEARER_PREFIX) == true })
         private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
         private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", LOGOUT_ENDEPUNKT)
         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")

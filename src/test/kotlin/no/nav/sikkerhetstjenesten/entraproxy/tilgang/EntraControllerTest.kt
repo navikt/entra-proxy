@@ -346,6 +346,19 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
                 }
             }
+            When("request har innlogget nettlesersesjon uten Bearer-token") {
+                Then("returnerer ansattdata via sesjonen") {
+                    every { nomTjeneste.ansatt(TEST_ANSATT_ID) } returns NomAnsatt(
+                        navident = TEST_ANSATT_ID,
+                        visningsnavn = "Test Ansatt",
+                        gjeldendeSektor = "STAT",
+                        orgTilknytninger = emptySet()
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
+                }
+            }
         }
 
         Given("utforsker-endepunkt ${API_V1}/nom/enhet/bulk") {

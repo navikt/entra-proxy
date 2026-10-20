@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.utils
 import java.time.Duration
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.availability.AvailabilityChangeEvent
+import org.springframework.boot.availability.AvailabilityChangeEvent.publish
 import org.springframework.boot.availability.ReadinessState.REFUSING_TRAFFIC
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.SmartLifecycle
@@ -33,7 +33,7 @@ class ShutdownDelay(
         running = false
         if (!delay.isZero) {
             log.info("Markerer readiness som REFUSING_TRAFFIC og venter {} før nedstenging", delay)
-            AvailabilityChangeEvent.publish(publisher, this, REFUSING_TRAFFIC)
+            publish(publisher, this, REFUSING_TRAFFIC)
             Thread.sleep(delay)
         }
     }

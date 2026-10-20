@@ -32,6 +32,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHand
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor.authorizationFailureHandler
 import org.springframework.security.oauth2.client.web.client.support.OAuth2RestClientHttpServiceGroupConfigurer.from
@@ -40,13 +41,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper
 import org.springframework.security.core.context.SecurityContextHolder.getContext
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
 import org.springframework.security.oauth2.core.oidc.user.OidcUserAuthority
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
@@ -119,7 +120,10 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
             .oauth2Login { login ->
                 login.loginPage(INNLOGGING)
                 login.failureHandler(innloggingFeiletHandler())
-                login.userInfoEndpoint { it.userAuthoritiesMapper(authoritiesMapper) }
+                login.userInfoEndpoint {
+                    it.oidcUserService(oidcBrukerTjeneste())
+                    it.userAuthoritiesMapper(authoritiesMapper)
+                }
             }
             .logout { logout ->
                 logout.logoutRequestMatcher(withDefaults().matcher(GET, LOGOUT_ENDEPUNKT))
@@ -128,13 +132,15 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
             .exceptionHandling { it.accessDeniedHandler(handler) }
             .build()
 
-    private fun innloggingFeiletHandler(): AuthenticationFailureHandler {
-        val delegate = SimpleUrlAuthenticationFailureHandler(INNLOGGING_FEILET)
-        return AuthenticationFailureHandler { request, response, exception ->
-            log.warn("Innlogging feilet: {}", exception.message, exception)
-            delegate.onAuthenticationFailure(request, response, exception)
+    private fun oidcBrukerTjeneste(): OidcUserService =
+        OidcUserService().apply { setRetrieveUserInfo { false } }
+
+    private fun innloggingFeiletHandler(): AuthenticationFailureHandler =
+        AuthenticationFailureHandler { _, response, exception ->
+            val arsak = (exception as? OAuth2AuthenticationException)?.error?.errorCode ?: "ukjent"
+            log.warn("Innlogging feilet [{}]: {}", arsak, exception.message, exception)
+            response.sendRedirect("$INNLOGGING_FEILET?arsak=${URLEncoder.encode(arsak, UTF_8)}")
         }
-    }
 
     @Bean
     @Order(2)

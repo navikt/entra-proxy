@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.core.convert.converter.Converter
+import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpStatusCode
 import org.springframework.security.authentication.AbstractAuthenticationToken
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -44,6 +45,8 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.security.web.authentication.AuthenticationFailureHandler
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler
 import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer
@@ -115,12 +118,23 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
             }
             .oauth2Login { login ->
                 login.loginPage(INNLOGGING)
-                login.failureUrl(INNLOGGING_FEILET)
+                login.failureHandler(innloggingFeiletHandler())
                 login.userInfoEndpoint { it.userAuthoritiesMapper(authoritiesMapper) }
             }
-            .logout { it.logoutSuccessUrl(LOGOUT_SIDE) }
+            .logout { logout ->
+                logout.logoutRequestMatcher(withDefaults().matcher(GET, LOGOUT_ENDEPUNKT))
+                logout.logoutSuccessUrl(LOGOUT_SIDE)
+            }
             .exceptionHandling { it.accessDeniedHandler(handler) }
             .build()
+
+    private fun innloggingFeiletHandler(): AuthenticationFailureHandler {
+        val delegate = SimpleUrlAuthenticationFailureHandler(INNLOGGING_FEILET)
+        return AuthenticationFailureHandler { request, response, exception ->
+            log.warn("Innlogging feilet: {}", exception.message, exception)
+            delegate.onAuthenticationFailure(request, response, exception)
+        }
+    }
 
     @Bean
     @Order(2)
@@ -193,11 +207,12 @@ class OAuth2SecurityBeanConfig( private val converter:  Converter<Jwt, AbstractA
         private const val UTFORSKER_MANGLER = "mangler"
         private const val API_MANGLER = "json"
         private const val LOGOUT_SIDE = "/logout.html"
+        private const val LOGOUT_ENDEPUNKT = "/oauth2/logout"
         private const val INNLOGGING = "/oauth2/authorization/entra"
         private const val INNLOGGING_FEILET = "/innlogging-feilet.html"
         private val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
         private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
-        private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", "/logout")
+        private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", LOGOUT_ENDEPUNKT)
         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
         val HEADER_CONSISTENCY_LEVEL = "ConsistencyLevel" to "eventual"
     }

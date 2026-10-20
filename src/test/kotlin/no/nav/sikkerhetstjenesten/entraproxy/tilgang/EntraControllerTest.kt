@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -127,6 +128,22 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             Then("krever autentisering for POST mot et offentlig GET-endepunkt") {
                 mockMvc.perform(post("$API_V1/nom/enhet/$TEST_ANSATT_ID"))
                     .andExpect(status().isUnauthorized())
+            }
+        }
+
+        Given("innloggings- og utloggings-endepunktene") {
+            When("uinnlogget bruker starter innlogging") {
+                Then("omdirigerer til autorisasjonsserveren") {
+                    mockMvc.perform(get("/oauth2/authorization/entra"))
+                        .andExpect(status().is3xxRedirection())
+                }
+            }
+            When("innlogget bruker logger ut") {
+                Then("omdirigerer til utloggingssiden") {
+                    mockMvc.perform(get("/oauth2/logout").with(oidcLogin()))
+                        .andExpect(status().is3xxRedirection())
+                        .andExpect(redirectedUrl("/logout.html"))
+                }
             }
         }
 

@@ -20,6 +20,7 @@ class ShutdownDelay(@Value($$"${server.shutdown-delay:0s}") private val delay: D
     private var running = false
 
     override fun start() {
+        log.info("Starter")
         running = true
     }
 

@@ -147,4 +147,4 @@ info:
   image: ${nais.app.image:unknown}
 server:
   shutdown: graceful
-  shutdown-delay: 15s
+  shutdown-delay: 25s

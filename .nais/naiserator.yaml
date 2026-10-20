@@ -39,6 +39,7 @@ spec:
   liveness:
     path: /monitoring/health/liveness
   port: 8080
+  terminationGracePeriodSeconds: 45
   replicas:
     max: {{replica.max}}
     min: {{replica.min}}

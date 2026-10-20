@@ -33,7 +33,7 @@ management:
       base-path: /monitoring
 spring:
   lifecycle:
-      timeout-per-shutdown-phase: 40s
+      timeout-per-shutdown-phase: 8s
   http:
     serviceclient:
       norg:
@@ -147,4 +147,4 @@ info:
   image: ${nais.app.image:unknown}
 server:
   shutdown: graceful
-  shutdown-delay: 25s
+  shutdown-delay: 30s

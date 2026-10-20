@@ -9,7 +9,11 @@
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            background: #f3f3f4;
+            min-height: 100vh;
+            background-color: #283b38;
+            background-image: url("/wildlife.svg");
+            background-position: center;
+            background-size: 720px 600px;
             color: #1f1f1f;
             font-family: Arial, sans-serif;
         }
@@ -17,8 +21,15 @@
             max-width: 40rem;
             margin: 2rem auto;
             padding: 2rem;
-            background: #fff;
-            border: 1px solid #d1d6db;
+            background: #d3dfd7;
+            border: 1px solid #c5d4cb;
+            border-radius: 8px;
+        }
+        img.confused {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 1.5rem 0;
             border-radius: 8px;
         }
     </style>
@@ -26,12 +37,25 @@
 <body>
 <main>
     <h1 class="aksel-heading aksel-heading--large">Innlogging feilet</h1>
+    <img class="confused" src="/error/confused.gif" alt="Forvirret reaksjon">
     <p class="aksel-body-long">
         Noe gikk galt under innloggingen. Prøv å logge inn på nytt.
+    </p>
+    <p class="aksel-body-short" id="arsak" hidden>
+        Årsak: <strong id="arsak-verdi"></strong>
     </p>
     <p>
         <a class="aksel-link" href="/oauth2/authorization/entra">Logg inn på nytt</a>
     </p>
 </main>
+<script>
+    (function () {
+        const arsak = new URLSearchParams(window.location.search).get("arsak");
+        if (arsak) {
+            document.getElementById("arsak-verdi").textContent = arsak;
+            document.getElementById("arsak").hidden = false;
+        }
+    })();
+</script>
 </body>
 </html>

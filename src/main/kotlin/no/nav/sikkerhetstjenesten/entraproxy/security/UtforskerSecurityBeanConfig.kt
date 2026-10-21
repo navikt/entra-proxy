@@ -39,32 +39,6 @@ class UtforskerSecurityBeanConfig {
 
     private val log = getLogger(javaClass)
 
-
-    @Bean
-    @Qualifier(UTFORSKER_HANDLER)
-    fun utforskerManglendeTilgangHandler() = AccessDeniedHandler { _, response, e ->
-        val navIdent = (getContext().authentication?.principal as? OAuth2AuthenticatedPrincipal)
-            ?.getAttribute<String>(NAVIDENT)
-        log.warn("Bruker {} mangler påkrevd gruppetilgang til utforsker: {}", navIdent, e.message)
-        val query = navIdent?.let { "?navident=${encode(it, UTF_8)}" }.orEmpty()
-        response.sendRedirect("/mangler-tilgang.html$query")
-    }
-
-
-
-    @Bean
-    fun utforskerAuthoritiesMapper()  =
-        GrantedAuthoritiesMapper { authorities ->
-            buildSet {
-                addAll(authorities)
-                authorities.filterIsInstance<OidcUserAuthority>().forEach { oidc ->
-                    oidc.idToken.getClaimAsStringList(GROUPS_CLAIM).orEmpty().forEach {
-                        add(SimpleGrantedAuthority("$GRUPPE_PREFIX$it"))
-                    }
-                }
-            }
-        }
-
     @Bean
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
@@ -102,6 +76,31 @@ class UtforskerSecurityBeanConfig {
                 it.accessDeniedHandler(handler)
             }
             .build()
+
+    @Bean
+    @Qualifier(UTFORSKER_HANDLER)
+    fun utforskerManglendeTilgangHandler() = AccessDeniedHandler { _, response, e ->
+        val navIdent = (getContext().authentication?.principal as? OAuth2AuthenticatedPrincipal)
+            ?.getAttribute<String>(NAVIDENT)
+        log.warn("Bruker {} mangler påkrevd gruppetilgang til utforsker: {}", navIdent, e.message)
+        val query = navIdent?.let { "?navident=${encode(it, UTF_8)}" }.orEmpty()
+        response.sendRedirect("/mangler-tilgang.html$query")
+    }
+
+
+
+    @Bean
+    fun utforskerAuthoritiesMapper()  =
+        GrantedAuthoritiesMapper { authorities ->
+            buildSet {
+                addAll(authorities)
+                authorities.filterIsInstance<OidcUserAuthority>().forEach { oidc ->
+                    oidc.idToken.getClaimAsStringList(GROUPS_CLAIM).orEmpty().forEach {
+                        add(SimpleGrantedAuthority("$GRUPPE_PREFIX$it"))
+                    }
+                }
+            }
+        }
 
     private fun utforskerSesjonEntryPoint(apiEntryPoint: AuthenticationEntryPoint)  =
         DelegatingAuthenticationEntryPoint.builder()

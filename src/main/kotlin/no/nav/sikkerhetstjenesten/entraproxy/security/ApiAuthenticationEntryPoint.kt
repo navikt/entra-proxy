@@ -25,6 +25,7 @@ class ApiAuthenticationEntryPoint(private val mapper: JsonMapper) : Authenticati
         }
     }
 
-     companion object { val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
+     companion object {
+         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

@@ -51,17 +51,18 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
 
     @Bean
     @Qualifier(API_HANDLER)
-    fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
+    fun apiAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
         object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
             override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
         }
 
     @Bean
-    fun oauth2AuthorizationFailureHandler(service: OAuth2AuthorizedClientService) =
+    fun apiAuthorizationFailureHandler(service: OAuth2AuthorizedClientService) =
         OAuth2LoggingAuthorizationFailureHandler(authorizationFailureHandler(service))
 
     @Bean
-    fun oauth2AuthorizationSuccessHandler(service: OAuth2AuthorizedClientService) =
+    fun apiAuthorizationSuccessHandler(service: OAuth2AuthorizedClientService) =
+
         OAuth2LoggingAuthorizationSuccessHandler(service) { client, principal, _ ->
             service.saveAuthorizedClient(client, principal)
         }

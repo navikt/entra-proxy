@@ -39,20 +39,15 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("enhet/ansatt/{navIdent}")
     fun enheter(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.enheter(navIdent, it)
-        }
+        entraTjeneste.enheter(navIdent)
 
     @GetMapping("tema/ansatt/{navIdent}")
     fun temaer(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.tema(navIdent, it)
-        }
+        entraTjeneste.tema(navIdent)
+
     @GetMapping("tilganger/ansatt/{navIdent}")
     fun ansatteGrupper(@PathVariable navIdent: AnsattId) =
-        oidTjeneste.ansattOid(navIdent)?.let {
-            entraTjeneste.grupperForAnsatt(navIdent, it)
-        }
+        entraTjeneste.grupperForAnsatt(navIdent)
 
     @GetMapping("enhet/{enhetsnummer}")
     fun enhetMedlemmer(@PathVariable enhetsnummer: Enhetnummer) =

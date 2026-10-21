@@ -5,17 +5,14 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.UTVIDET_ANSATT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
-import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID
 import org.slf4j.MDC
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
-class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val cache: CacheOperations) : AbstractCacheOppfrisker() {
+class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker() {
 
     override val cacheName: String = GRAPH
 
@@ -32,30 +29,19 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, private val oidTjen
         val ansattId = AnsattId(elementer.id)
         MDC.put(USER_ID, ansattId.verdi)
         runCatching {
-            var oid  = oidTjeneste.ansattOid(ansattId)
-            if (oid == null) {
-                log.info("INgen oid i cache for ansatt $ansattId, henter på nytt fra Entra og oppfrisker OID-cache")
-                cache.delete(OID_CACHE,elementer.id)
-                oid  = oidTjeneste.ansattOid(ansattId)
-            }
-            if (oid != null) {
-                invoke(metode, ansattId, oid)
-            }
-            else {
-                throw IllegalStateException("Kunne ikke finne oid for ansatt $ansattId, kan ikke oppfriske cache for $metode")
-            }
+            invoke(metode, ansattId)
         }.getOrElse {
                 loggOppfriskingFeilet(elementer, it)
         }
     }
 
-    private fun invoke(metode: String, ansattId: AnsattId, oid: UUID) {
+    private fun invoke(metode: String, ansattId: AnsattId) {
         when (metode) {
-            TEMA -> entra.tema(ansattId, oid)
-            ENHETER -> entra.enheter(ansattId, oid)
+            TEMA -> entra.tema(ansattId)
+            ENHETER -> entra.enheter(ansattId)
             UTVIDET_ANSATT -> entra.utvidetAnsatt(ansattId)
-            GRUPPER_FOR_ANSATT -> entra.grupperForAnsatt(ansattId, oid)
-            else -> log.trace("Ukjent metode {} for ansatt {} og oid {}", metode, ansattId.verdi, oid)
+            GRUPPER_FOR_ANSATT -> entra.grupperForAnsatt(ansattId)
+            else -> log.trace("Ukjent metode {} for ansatt {}", metode, ansattId.verdi)
         }
     }
 }

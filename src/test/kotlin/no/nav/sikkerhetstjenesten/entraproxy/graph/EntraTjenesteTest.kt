@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
@@ -208,11 +207,14 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {
                     server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
                         request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
                     }.andRespond(withSuccess(temaContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.tema(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(Tema("AAP"))
+                        entra.tema(AnsattId("B123456")) shouldBe setOf(Tema("AAP"))
                     }
                 }
             }
@@ -222,11 +224,14 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en enhet-gruppe") {
                 Then("skal enhetsnummeret returneres") {
                     server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
                         request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
                     }.andRespond(withSuccess(enhetContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.enheter(AnsattId("A123456"), ANSATT_OID).map { it.enhetnummer.verdi } shouldBe listOf("1234")
+                        entra.enheter(AnsattId("C123456")).map { it.enhetnummer.verdi } shouldBe listOf("1234")
                     }
                 }
             }
@@ -236,13 +241,16 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
                     server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
                         request.uri.query shouldContain "\$select=id,displayName,securityEnabled,mailEnabled,description"
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe
+                        entra.grupperForAnsatt(AnsattId("D123456")) shouldBe
                             setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID, "Tilgang til min rolle"))
                     }
                 }
@@ -295,7 +303,10 @@ class EntraTjenesteTest(
         fun entraGraphAdapter(client: EntraGraphClient, norg: NorgTjeneste) = EntraGraphAdapter(client, norg)
 
         @Bean
-        fun entraTjeneste(adapter: EntraGraphAdapter, cache: CaffeineCacheOperations, oid: EntraOidTjeneste) =
+        fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): OidOperations = EntraOidOppslag(oid, cache)
+
+        @Bean
+        fun entraTjeneste(adapter: EntraGraphAdapter, cache: CaffeineCacheOperations, oid: OidOperations) =
             EntraTjeneste(adapter, cache, oid)
     }
 
@@ -328,6 +339,15 @@ class EntraTjenesteTest(
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
               "value": [
                 { "id": "$OID" }
+              ]
+            }
+        """.trimIndent()
+
+        private val ansattOidContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
+              "value": [
+                { "id": "$ANSATT_OID" }
               ]
             }
         """.trimIndent()

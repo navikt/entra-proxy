@@ -23,6 +23,7 @@ import java.net.URI
 @Configuration
 class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthenticationToken>) {
 
+
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity,
@@ -50,6 +51,10 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
         object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
             override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
         }
+
+    @Bean
+    fun authContext() =
+        AuthContext()
 
     companion object {
         private const val API_MANGLER = "apiMangler"

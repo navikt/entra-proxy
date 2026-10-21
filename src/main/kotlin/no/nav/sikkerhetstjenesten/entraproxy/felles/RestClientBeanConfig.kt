@@ -25,9 +25,6 @@ import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 class RestClientBeanConfig(private val ctx: AuthContext,
                            private val meterRegistry: MeterRegistry) : WebMvcConfigurer {
 
-    @Bean
-    fun authContext() =
-        AuthContext()
 
     @Bean
     fun handler() = DefaultRestErrorHandler()

@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.Cacheable
 import java.util.UUID
 
 @RestRetryingWhenRecoverableService
-class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: OidOperations, private val enheter: EnhetOperations)  {
+class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: EntraOidOperations, private val enheter: EnhetOperations)  {
 
     private val log = getLogger(javaClass)
 

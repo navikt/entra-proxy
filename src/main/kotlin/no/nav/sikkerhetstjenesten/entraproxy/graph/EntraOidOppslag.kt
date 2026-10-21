@@ -5,7 +5,7 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.slf4j.LoggerFactory.getLogger
 import java.util.UUID
 
-class EntraOidOppslag(private val oid: EntraOidTjeneste, private val cache: CacheOperations) : OidOperations {
+class EntraOidOppslag(private val oid: EntraOidTjeneste, private val cache: CacheOperations) : EntraOidOperations {
 
     private val log = getLogger(javaClass)
 

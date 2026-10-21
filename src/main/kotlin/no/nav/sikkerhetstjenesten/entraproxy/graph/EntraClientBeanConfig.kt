@@ -15,7 +15,7 @@ class EntraClientBeanConfig {
     fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
 
     @Bean
-    fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): OidOperations = EntraOidOppslag(oid, cache)
+    fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)
 
     @Bean
     fun entraProxyHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =

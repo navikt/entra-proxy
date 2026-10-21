@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import java.util.UUID
 
-interface OidOperations {
+interface EntraOidOperations {
 
     fun ansattOid(ansattId: AnsattId): UUID?
 

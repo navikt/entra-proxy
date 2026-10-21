@@ -304,13 +304,13 @@ class EntraTjenesteTest(
         fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
 
         @Bean
-        fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): OidOperations = EntraOidOppslag(oid, cache)
+        fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)
 
         @Bean
         fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktiveAnsatte = CacheInaktiveAnsatte(cache)
 
         @Bean
-        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: OidOperations, enhetsnavn: NorgTjeneste) =
+        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: EntraOidOperations, enhetsnavn: NorgTjeneste) =
             EntraTjeneste(adapter, inaktive, oid, enhetsnavn)
     }
 

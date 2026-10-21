@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatusCode
 import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
+import org.springframework.security.oauth2.client.OAuth2AuthorizationSuccessHandler
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
@@ -40,7 +42,7 @@ class ClientSecurityBeanConfig {
         }
 
     @Bean
-    fun authorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService) =
+    fun authorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
         AuthorizedClientServiceOAuth2AuthorizedClientManager(
             repo, service).apply {
             setAuthorizedClientProvider(
@@ -49,6 +51,8 @@ class ClientSecurityBeanConfig {
                     .refreshToken()
                     .clientCredentials()
                     .build())
+            setAuthorizationSuccessHandler(successHandler)
+            setAuthorizationFailureHandler(failureHandler)
         }
 
     companion object {

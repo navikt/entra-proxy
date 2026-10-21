@@ -32,6 +32,7 @@ class EntraTjenesteTest(
     private val server: MockRestServiceServer,
     private val client: EntraGraphClient,
     private val entra: EntraTjeneste,
+    private val adapter: EntraGraphAdapter,
     private val oid: EntraOidTjeneste) : BehaviorSpec() {
 
     @MockkBean(relaxed = true)
@@ -145,7 +146,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
+                    adapter.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -171,7 +172,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
+                    adapter.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -252,7 +253,7 @@ class EntraTjenesteTest(
                         request.method shouldBe GET
                     }.andRespond(withSuccess(grupperContract.replace(", \"description\": \"Tilgang til min rolle\"", ""), APPLICATION_JSON))
 
-                    entra.grupperForAnsatt(AnsattId("A123456"), "$ANSATT_OID") shouldBe
+                    adapter.grupper(AnsattId("A123456"), ANSATT_OID) shouldBe
                         setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                 }
             }
@@ -291,8 +292,11 @@ class EntraTjenesteTest(
         fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
 
         @Bean
-        fun entraTjeneste(client: EntraGraphClient, norg: NorgTjeneste, oid: EntraOidTjeneste, cache: CaffeineCacheOperations) =
-            EntraTjeneste(client, norg, oid, cache)
+        fun entraGraphAdapter(client: EntraGraphClient, norg: NorgTjeneste, cache: CaffeineCacheOperations, oid: EntraOidTjeneste) = EntraGraphAdapter(client, norg, cache, oid)
+
+        @Bean
+        fun entraTjeneste(adapter: EntraGraphAdapter) =
+            EntraTjeneste(adapter)
     }
 
     private companion object {

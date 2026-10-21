@@ -18,7 +18,7 @@ class EntraOidTjeneste(private val client: EntraGraphClient)  {
 
     @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
      fun ansattOid(ansattId: AnsattId) =
-         with(client.users("id", filter = "${EntraTjeneste.BRUKER} eq '${ansattId.verdi}'").oids) {
+         with(client.users("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
              when (size) {
                  0 -> throw NotFoundRestException(currentUri,
                      "Fant ingen oid for  ${ansattId.verdi}, er den fremdeles gyldig?")

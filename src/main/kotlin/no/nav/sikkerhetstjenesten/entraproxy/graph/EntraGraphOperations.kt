@@ -14,7 +14,7 @@ interface EntraGraphOperations {
 
     fun enheter(ansattOid: UUID): Set<Enhet.Enhetnummer>
 
-    fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt>
+    fun gruppeMedlemmer(oid: String): Set<Ansatt>
 
     fun antallMedlemmer(vararg gruppeIder: UUID): Map<UUID, Long>
 }

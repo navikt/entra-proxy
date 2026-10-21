@@ -89,7 +89,7 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
     private fun medlemmerIGruppe(gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
-            entra.medlemmerIGruppe( gruppeNavn, it)
+            entra.medlemmerIGruppe( it)
         } ?: emptySet()
 
     @PostMapping("mail")

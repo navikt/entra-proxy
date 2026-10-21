@@ -14,6 +14,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
@@ -111,7 +112,7 @@ class EntraTjenesteTest(
                         request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$GROUP_ID/members")
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
-                    entra.medlemmerIGruppe("En gruppe", GROUP_ID) shouldBe setOf(ANSATT)
+                    entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -146,7 +147,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    adapter.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
+                    adapter.gruppeMedlemmer("$gruppeId") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -172,7 +173,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    adapter.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
+                    adapter.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -310,6 +311,7 @@ class EntraTjenesteTest(
         fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktiveAnsatte = CacheInaktiveAnsatte(cache)
 
         @Bean
+        @Primary
         fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: EntraOidOperations, enhetsnavn: NorgTjeneste) =
             EntraTjeneste(adapter, inaktive, oid, enhetsnavn)
     }

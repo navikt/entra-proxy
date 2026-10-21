@@ -23,8 +23,8 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         else medOidOppfrisking(ansattId) { graph.enheter(it) }.mapTo(mutableSetOf()) { Enhet(it, enheter.navn(it)) }
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
-    fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
-        graph.gruppeMedlemmer("$gruppeId", gruppeNavn)
+    fun medlemmerIGruppe(gruppeId: UUID) =
+        graph.gruppeMedlemmer("$gruppeId")
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =

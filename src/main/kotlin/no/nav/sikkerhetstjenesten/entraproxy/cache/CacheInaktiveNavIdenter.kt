@@ -23,7 +23,7 @@ class CacheInaktiveNavIdenter(private val graf: EntraGraphOperations, private va
         somLeder {
             val måling = measureTimedValue {
                 runCatching {
-                    cache.putSet(INAKTIVE, graf.gruppeMedlemmer("$uuid", "Alle brukere i permisjon").mapTo(mutableSetOf()) {
+                    cache.putSet(INAKTIVE, graf.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
                     cache.getSet(INAKTIVE)

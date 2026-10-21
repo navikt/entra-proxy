@@ -35,8 +35,8 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
             .also { log.info("Hentet ${it.size} enhet(er) for $ansattOid") }
 
-    override fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+    override fun gruppeMedlemmer(oid: String): Set<Ansatt> {
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true
@@ -49,7 +49,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             with(it) {
                 Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
             }
-        }.also { log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($oid)") }
+        }.also { log.info("Hentet ${it.size} medlem(mer) for gruppe $oid") }
     }
 
     override fun antallMedlemmer(vararg gruppeIder: UUID): Map<UUID, Long> =

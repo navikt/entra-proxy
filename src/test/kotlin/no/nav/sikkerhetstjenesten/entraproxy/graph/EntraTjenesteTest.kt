@@ -253,7 +253,7 @@ class EntraTjenesteTest(
                         request.method shouldBe GET
                     }.andRespond(withSuccess(grupperContract.replace(", \"description\": \"Tilgang til min rolle\"", ""), APPLICATION_JSON))
 
-                    adapter.grupper(AnsattId("A123456"), ANSATT_OID) shouldBe
+                    adapter.grupper(ANSATT_OID) shouldBe
                         setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                 }
             }
@@ -292,11 +292,11 @@ class EntraTjenesteTest(
         fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
 
         @Bean
-        fun entraGraphAdapter(client: EntraGraphClient, norg: NorgTjeneste, cache: CaffeineCacheOperations, oid: EntraOidTjeneste) = EntraGraphAdapter(client, norg, cache, oid)
+        fun entraGraphAdapter(client: EntraGraphClient, norg: NorgTjeneste) = EntraGraphAdapter(client, norg)
 
         @Bean
-        fun entraTjeneste(adapter: EntraGraphAdapter) =
-            EntraTjeneste(adapter)
+        fun entraTjeneste(adapter: EntraGraphAdapter, cache: CaffeineCacheOperations, oid: EntraOidTjeneste) =
+            EntraTjeneste(adapter, cache, oid)
     }
 
     private companion object {

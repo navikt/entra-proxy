@@ -8,11 +8,11 @@ interface EntraGraphOperations {
 
     fun utvidetAnsatt(ident: TIdent): UtvidetAnsatt?
 
-    fun temaer(ansattId: AnsattId, ansattOid: UUID): Set<Tema>
+    fun temaer(ansattOid: UUID): Set<Tema>
 
-    fun grupper(ansattId: AnsattId, ansattOid: UUID): Set<EntraGruppe>
+    fun grupper(ansattOid: UUID): Set<EntraGruppe>
 
-    fun enheter(ansattId: AnsattId, ansattOid: UUID): Set<Enhet>
+    fun enheter(ansattOid: UUID): Set<Enhet>
 
     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt>
 

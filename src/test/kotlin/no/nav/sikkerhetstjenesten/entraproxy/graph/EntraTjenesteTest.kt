@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
@@ -306,8 +307,11 @@ class EntraTjenesteTest(
         fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): OidOperations = EntraOidOppslag(oid, cache)
 
         @Bean
-        fun entraTjeneste(adapter: EntraGraphAdapter, cache: CaffeineCacheOperations, oid: OidOperations) =
-            EntraTjeneste(adapter, cache, oid)
+        fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktiveAnsatte = CacheInaktiveAnsatte(cache)
+
+        @Bean
+        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: OidOperations) =
+            EntraTjeneste(adapter, inaktive, oid)
     }
 
     private companion object {

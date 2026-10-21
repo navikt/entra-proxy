@@ -1,9 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
-import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
@@ -11,7 +9,7 @@ import org.springframework.cache.annotation.Cacheable
 import java.util.UUID
 
 @RestRetryingWhenRecoverableService
-class EntraTjeneste(private val graph: EntraGraphOperations, private val cache: CacheOperations, private val oid: OidOperations)  {
+class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: OidOperations)  {
 
     private val log = getLogger(javaClass)
 
@@ -55,7 +53,7 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val cache: 
         }
 
     private fun erInaktiv(ansattId: AnsattId) =
-        cache.inneholder(INAKTIVE, ansattId.verdi).also {
+        inaktive.erInaktiv(ansattId).also {
             if (it) {
                 log.info("$ansattId er inaktiv")
             }

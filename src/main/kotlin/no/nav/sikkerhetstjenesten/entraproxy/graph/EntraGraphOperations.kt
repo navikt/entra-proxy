@@ -12,7 +12,7 @@ interface EntraGraphOperations {
 
     fun grupper(ansattOid: UUID): Set<EntraGruppe>
 
-    fun enheter(ansattOid: UUID): Set<Enhet>
+    fun enheter(ansattOid: UUID): Set<Enhet.Enhetnummer>
 
     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt>
 

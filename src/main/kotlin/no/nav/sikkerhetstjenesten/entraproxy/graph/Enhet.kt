@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.sikkerhetstjenesten.felles.utils.extensions.DomainExtensions.requireDigits
 
 
-data class Enhet(val enhetnummer: Enhetnummer, val navn: String) : Comparable<Enhet> {
+data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comparable<Enhet> {
 
     override fun compareTo(other: Enhet): Int = enhetnummer.compareTo(other.enhetnummer)
 

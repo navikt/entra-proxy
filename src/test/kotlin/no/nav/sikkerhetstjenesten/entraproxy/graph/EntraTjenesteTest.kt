@@ -301,7 +301,7 @@ class EntraTjenesteTest(
         fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
 
         @Bean
-        fun entraGraphAdapter(client: EntraGraphClient, norg: NorgTjeneste) = EntraGraphAdapter(client, norg)
+        fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
 
         @Bean
         fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): OidOperations = EntraOidOppslag(oid, cache)
@@ -310,8 +310,8 @@ class EntraTjenesteTest(
         fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktiveAnsatte = CacheInaktiveAnsatte(cache)
 
         @Bean
-        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: OidOperations) =
-            EntraTjeneste(adapter, inaktive, oid)
+        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: OidOperations, enhetsnavn: NorgTjeneste) =
+            EntraTjeneste(adapter, inaktive, oid, enhetsnavn)
     }
 
     private companion object {

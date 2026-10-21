@@ -3,12 +3,11 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import org.slf4j.LoggerFactory.getLogger
 import java.net.URI
 import java.util.UUID
 
-class EntraGraphAdapter(private val client: EntraGraphClient, private val norg: NorgTjeneste) : EntraGraphOperations {
+class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperations {
 
     private val log = getLogger(javaClass)
 
@@ -30,13 +29,10 @@ class EntraGraphAdapter(private val client: EntraGraphClient, private val norg: 
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet ${it.size} gruppe(r) for $ansattOid") }
 
-    override fun enheter(ansattOid: UUID): Set<Enhet> =
+    override fun enheter(ansattOid: UUID): Set<Enhetnummer> =
         allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
-            .mapTo(mutableSetOf()) {
-                val enhetsnummer = Enhetnummer(it.displayName)
-                Enhet(enhetsnummer, norg.navn(enhetsnummer))
-            }
+            .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
             .also { log.info("Hentet ${it.size} enhet(er) for $ansattOid") }
 
     override fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
@@ -77,7 +73,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient, private val norg: 
                         surname,
                         TIdent(jobTitle ?: TIDENT_DEFAULT),
                         mail,
-                        Enhet(enhetsNummer, norg.navn(enhetsNummer))
+                        Enhet(enhetsNummer)
                     ).also {
                         log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
                     }

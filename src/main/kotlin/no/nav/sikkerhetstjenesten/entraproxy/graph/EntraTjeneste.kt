@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.Cacheable
 import java.util.UUID
 
 @RestRetryingWhenRecoverableService
-class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: OidOperations)  {
+class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: OidOperations, private val enheter: EnhetOperations)  {
 
     private val log = getLogger(javaClass)
 
@@ -18,9 +18,9 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         else medOidOppfrisking(ansattId) { graph.temaer(it) }
 
     @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun enheter(ansattId: AnsattId) =
+    fun enheter(ansattId: AnsattId): Set<Enhet> =
         if (erInaktiv(ansattId)) emptySet()
-        else medOidOppfrisking(ansattId) { graph.enheter(it) }
+        else medOidOppfrisking(ansattId) { graph.enheter(it) }.mapTo(mutableSetOf()) { Enhet(it, enheter.navn(it)) }
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
     fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
@@ -28,11 +28,11 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
-        graph.utvidetAnsatt(ansattId)
+        graph.utvidetAnsatt(ansattId)?.medEnhetsnavn()
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
-        graph.utvidetAnsatt(ansattId)
+        graph.utvidetAnsatt(ansattId)?.medEnhetsnavn()
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent.verdi")
     fun grupper(navIdent: AnsattId) =
@@ -50,6 +50,9 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
             }
             else throw it
         }
+
+    private fun UtvidetAnsatt.medEnhetsnavn() =
+        copy(enhet = Enhet(enhet.enhetnummer, enheter.navn(enhet.enhetnummer)))
 
     private fun erInaktiv(ansattId: AnsattId) =
         inaktive.erInaktiv(ansattId).also {

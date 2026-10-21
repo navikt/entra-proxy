@@ -80,6 +80,7 @@
             overflow-wrap: anywhere;
         }
         .enhetsnummer-lenke { color: #00557d; }
+        .navident-lenke { color: #00557d; }
         .sorter-knapp {
             padding: 0;
             border: 0;
@@ -222,6 +223,21 @@
         return response;
     }
 
+    function byggLedere(celle, ledere) {
+        (ledere ?? []).forEach((leder, indeks) => {
+            if (indeks > 0) celle.append(', ');
+            const navident = leder.ressurs.navident;
+            celle.append(`${leder.ressurs.visningsnavn} (`);
+            const lenke = document.createElement('a');
+            lenke.className = 'navident-lenke';
+            lenke.href = `https://nom.nav.no/ressurs/${encodeURIComponent(navident)}`;
+            lenke.target = '_blank';
+            lenke.rel = 'noopener noreferrer';
+            lenke.textContent = navident;
+            celle.append(lenke, ')');
+        });
+    }
+
     form.addEventListener('submit', async event => {
         event.preventDefault();
         const ansattid = input.value.trim().toUpperCase();
@@ -249,15 +265,12 @@
                 status.textContent = 'Ingen ansatt funnet.';
                 return;
             }
-            const formaterLedere = ledere => (ledere ?? [])
-                .map(leder => `${leder.ressurs.visningsnavn} (${leder.ressurs.navident})`)
-                .join(', ');
             const flereTilknytninger = nomData.orgTilknytninger.length > 1;
             const enheter = nomData.orgTilknytninger.map(tilknytning => ({
                 enhetnummer: tilknytning.orgEnhet.tilgangsenhetId,
                 navn: tilknytning.orgEnhet.navn,
                 nomId: tilknytning.orgEnhet.id,
-                ledere: formaterLedere(tilknytning.orgEnhet.ledere)
+                ledere: tilknytning.orgEnhet.ledere ?? []
             }));
             enheterLedereKolonne.hidden = !flereTilknytninger;
             const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
@@ -276,7 +289,7 @@
                 ['Sektor', nomData.gjeldendeSektor]
             ];
             if (!flereTilknytninger && nomData.orgTilknytninger.length === 1) {
-                verdier.push(['N\u00e6rmeste leder', enheter[0].ledere]);
+                verdier.push(['N\u00e6rmeste leder', null]);
             }
             for (const [felt, verdi] of verdier) {
                 const rad = document.createElement('tr');
@@ -284,7 +297,11 @@
                 feltCelle.scope = 'row';
                 feltCelle.textContent = felt;
                 const verdiCelle = document.createElement('td');
-                verdiCelle.textContent = verdi ?? '';
+                if (felt === 'N\u00e6rmeste leder') {
+                    byggLedere(verdiCelle, enheter[0].ledere);
+                } else {
+                    verdiCelle.textContent = verdi ?? '';
+                }
                 rad.append(feltCelle, verdiCelle);
                 felter.appendChild(rad);
             }
@@ -308,7 +325,7 @@
                     nomIdCelle.append(lenke);
                 }
                 const ledereCelle = document.createElement('td');
-                ledereCelle.textContent = enhet.ledere;
+                byggLedere(ledereCelle, enhet.ledere);
                 ledereCelle.hidden = !flereTilknytninger;
                 rad.append(nummerCelle, navnCelle, nomIdCelle, ledereCelle);
                 enheterRader.appendChild(rad);

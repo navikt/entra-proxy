@@ -40,7 +40,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppf
             TEMA -> entra.tema(ansattId)
             ENHETER -> entra.enheter(ansattId)
             UTVIDET_ANSATT -> entra.utvidetAnsatt(ansattId)
-            GRUPPER_FOR_ANSATT -> entra.grupperForAnsatt(ansattId)
+            GRUPPER_FOR_ANSATT -> entra.grupper(ansattId)
             else -> log.trace("Ukjent metode {} for ansatt {}", metode, ansattId.verdi)
         }
     }

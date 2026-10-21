@@ -2,8 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
-import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import org.slf4j.LoggerFactory.getLogger
 import java.util.UUID
 
@@ -18,7 +16,7 @@ class EntraOidOppslag(private val oid: EntraOidTjeneste, private val cache: Cach
         cache.delete(OID_CACHE, ansattId.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $ansattId")
         }
-        return oid.ansattOid(ansattId) ?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $ansattId i Entra, selv etter cache-opprydding og nytt oppslag")
+        return oid.ansattOid(ansattId) ?: throw EntraIkkeFunnetException(ansattId, "Fant ikke ny oid for $ansattId i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
     override fun toString() =

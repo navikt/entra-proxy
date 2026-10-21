@@ -251,7 +251,7 @@ class EntraTjenesteTest(
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("D123456")) shouldBe
+                        entra.grupper(AnsattId("D123456")) shouldBe
                             setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID, "Tilgang til min rolle"))
                     }
                 }

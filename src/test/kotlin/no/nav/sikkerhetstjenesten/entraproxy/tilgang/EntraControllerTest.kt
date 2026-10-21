@@ -34,7 +34,6 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
-import org.springframework.mail.MailSender
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -72,7 +71,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { entraTjeneste.enheter(any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any()) } returns sortedSetOf(Tema("AAP"))
             every { entraTjeneste.medlemmerIGruppe(any(), any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
-            every { entraTjeneste.grupperForAnsatt(any<AnsattId>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
+            every { entraTjeneste.grupper(any<AnsattId>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
                 "Test Ansatt",

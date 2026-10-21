@@ -16,8 +16,6 @@ import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
-import org.springframework.mail.MailSender
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -81,7 +79,7 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om den ansattes tilganger fra Entra")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
-        entra.grupperForAnsatt(navIdent)
+        entra.grupper(navIdent)
 
 
     @GetMapping("gruppe/medlemmer")

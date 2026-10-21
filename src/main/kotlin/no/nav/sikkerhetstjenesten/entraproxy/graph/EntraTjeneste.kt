@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
-import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -36,7 +35,7 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         graph.utvidetAnsatt(ansattId)
 
     @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent.verdi")
-    fun grupperForAnsatt(navIdent: AnsattId) =
+    fun grupper(navIdent: AnsattId) =
         medOidOppfrisking(navIdent) { graph.grupper(it) }
 
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
@@ -46,7 +45,7 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         runCatching {
             oppslag(oid.ansattOid(ansattId) ?: return emptySet())
         }.getOrElse {
-            if (it is NotFoundRestException) {
+            if (it is EntraIkkeFunnetException) {
                 oppslag(oid.nyOid(ansattId))
             }
             else throw it

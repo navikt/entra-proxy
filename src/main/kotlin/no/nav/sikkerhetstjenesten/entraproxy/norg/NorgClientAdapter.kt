@@ -7,7 +7,7 @@ import org.springframework.web.service.registry.ImportHttpServices
 
 @Component
 @ImportHttpServices(types = [NorgProxyClient::class], group = NORG)
-class NorgClientAdapter(private val client: NorgProxyClient) : NorgPort {
+class NorgClientAdapter(private val client: NorgProxyClient) : NorgOperations {
 
     override fun navn(enhet: Enhetnummer): String = client.enhetFor(enhet.verdi).navn
 }

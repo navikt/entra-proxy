@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 
 @RestRetryingWhenRecoverableService
-class NomTjeneste(private val nom: NomPort) {
+class NomTjeneste(private val nom: NomOperations) {
 
     private val log = getLogger(javaClass)
 

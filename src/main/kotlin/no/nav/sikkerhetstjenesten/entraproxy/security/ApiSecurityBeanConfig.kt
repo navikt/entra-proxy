@@ -8,9 +8,15 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
+import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.availability.AvailabilityChangeEvent
+import org.springframework.boot.availability.ReadinessState
+import org.springframework.boot.availability.ReadinessState.REFUSING_TRAFFIC
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.ContextClosedEvent
+import org.springframework.context.event.EventListener
 import org.springframework.core.annotation.Order
 import org.springframework.core.convert.converter.Converter
 import org.springframework.security.authentication.AbstractAuthenticationToken
@@ -26,6 +32,7 @@ import java.net.URI
 
 @Configuration
 class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthenticationToken>) {
+    private val log = getLogger(javaClass)
 
 
     @Bean
@@ -66,6 +73,18 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
             service.saveAuthorizedClient(client, principal)
         }
 
+    @EventListener
+    fun onReadinessChange(event: AvailabilityChangeEvent<ReadinessState>) {
+
+        if (event.state == REFUSING_TRAFFIC) {
+            log.info("Application is refusing traffic")
+        }
+    }
+
+    @EventListener
+    fun onContextClosed(event: ContextClosedEvent) {
+        log.info("Spring application context is closing")
+    }
 
     @Bean
     fun authContext() =

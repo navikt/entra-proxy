@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.utils
 
-import java.time.Duration
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.availability.AvailabilityChangeEvent.publish
@@ -9,6 +8,7 @@ import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.SmartLifecycle
 import org.springframework.context.SmartLifecycle.DEFAULT_PHASE
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 /**
  * Venter ved SIGTERM før webserveren slutter å ta imot forbindelser, slik at

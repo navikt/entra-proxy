@@ -8,7 +8,6 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationFailureHandler
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2LoggingAuthorizationSuccessHandler
 import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.stateless
-import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -27,7 +26,6 @@ import java.net.URI
 
 @Configuration
 class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthenticationToken>) {
-    private val log = getLogger(javaClass)
 
 
     @Bean

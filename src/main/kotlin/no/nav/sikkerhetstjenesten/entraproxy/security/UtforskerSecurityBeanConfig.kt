@@ -50,13 +50,9 @@ class UtforskerSecurityBeanConfig {
             .csrf { it.ignoringRequestMatchers(API_ENDPOINTS) }
             .authorizeHttpRequests { requests ->
                 requests.requestMatchers(*LOGIN_ENDEPUNKTER).permitAll()
-                with(requests.anyRequest()) {
-                    if (utforskerGruppe.isNotBlank())  {
-                        hasAuthority("$GRUPPE_PREFIX$utforskerGruppe")
-                    }
-                    else {
-                        authenticated()
-                    }
+                requests.anyRequest().let { request ->
+                    if (utforskerGruppe.isNotBlank()) request.hasAuthority("$GRUPPE_PREFIX$utforskerGruppe")
+                    else request.authenticated()
                 }
             }
             .oauth2Login { login ->
@@ -115,12 +111,9 @@ class UtforskerSecurityBeanConfig {
 
     private fun utforskerSesjonMatcher() =
         OrRequestMatcher(
-            buildList {
-                (LOGIN_ENDEPUNKTER + UTFORSKER_SIDER).forEach {
-                    add(withDefaults().matcher(it))
-                }
-                add(BROWSER_API_ENDPOINTS)
-            })
+            (LOGIN_ENDEPUNKTER + UTFORSKER_SIDER).map {
+                withDefaults().matcher(it)
+            } + BROWSER_API_ENDPOINTS)
 
     private fun utforskerInnloggingFeiletHandler(): AuthenticationFailureHandler =
         AuthenticationFailureHandler { _, response, e ->

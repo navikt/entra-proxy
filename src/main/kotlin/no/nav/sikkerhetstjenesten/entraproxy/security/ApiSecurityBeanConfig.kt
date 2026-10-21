@@ -32,7 +32,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity,
                                entryPoint: AuthenticationEntryPoint,
-                               @Qualifier(API_MANGLER) handler: AccessDeniedHandler) =
+                               @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers(API_ENDPOINTS).authenticated()
             requests.anyRequest().permitAll()
@@ -50,7 +50,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
             .stateless().build()
 
     @Bean
-    @Qualifier(API_MANGLER)
+    @Qualifier(API_HANDLER)
     fun oauth2JsonAccessDeniedHandler(mapper: JsonMapper, ctx: AuthContext) =
         object : AbstractOAuth2JsonAccessDeniedHandler(mapper, ctx, TYPE_URI) {
             override fun preHandle(req: HttpServletRequest, res: HttpServletResponse) = Unit
@@ -71,7 +71,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
         AuthContext()
 
     companion object {
-        private const val API_MANGLER = "apiMangler"
+        private const val API_HANDLER = "apiHandler"
         private val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

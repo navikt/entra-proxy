@@ -41,7 +41,7 @@ class UtforskerSecurityBeanConfig {
 
 
     @Bean
-    @Qualifier(UTFORSKER_MANGLER)
+    @Qualifier(UTFORSKER_HANDLER)
     fun utforskerManglendeTilgangHandler() = AccessDeniedHandler { _, response, e ->
         val navIdent = (getContext().authentication?.principal as? OAuth2AuthenticatedPrincipal)
             ?.getAttribute<String>(NAVIDENT)
@@ -68,7 +68,7 @@ class UtforskerSecurityBeanConfig {
     @Bean
     @Order(1)
     fun utforskerSecurityFilterChain(http: HttpSecurity,
-                                     @Qualifier(UTFORSKER_MANGLER) handler: AccessDeniedHandler,
+                                     @Qualifier(UTFORSKER_HANDLER) handler: AccessDeniedHandler,
                                      entryPoint: AuthenticationEntryPoint,
                                      authoritiesMapper: GrantedAuthoritiesMapper,
                                      @Value($$"${groups.utforsker:}")  utforskerGruppe: String)  =
@@ -131,7 +131,7 @@ class UtforskerSecurityBeanConfig {
         }
 
     companion object {
-        private const val UTFORSKER_MANGLER = "mangler"
+        private const val UTFORSKER_HANDLER = "utforskerHandler"
         private const val LOGOUT_SIDE = "/logout.html"
         private const val LOGOUT_ENDEPUNKT = "/oauth2/logout"
         private const val INNLOGGING = "/oauth2/authorization/entra"

@@ -24,8 +24,4 @@ import org.springframework.context.annotation.Import
     UtforskerSecurityBeanConfig::class,
     NotificationAutoConfiguration::class,
     DefaultRestErrorHandler::class)
-class SecurityTestApplication {
-
-    @Bean
-    fun authContext() = AuthContext()
-}
+class SecurityTestApplication

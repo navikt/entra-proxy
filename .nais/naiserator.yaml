@@ -82,8 +82,6 @@ spec:
             - application: alloy
               namespace: nais-system
   env:
-    - name: WONDERWALL_SHUTDOWN_WAIT_BEFORE_PERIOD
-      value: "0s"
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}
     - name: GROUPS_UTFORSKER

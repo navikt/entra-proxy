@@ -3,6 +3,8 @@ kind: Application
 metadata:
   labels:
     team: sikkerhetstjenesten
+  annotations:
+    haproxy.org/timeout-server: "120s"
   name: entra-proxy
   namespace: sikkerhetstjenesten
 spec:

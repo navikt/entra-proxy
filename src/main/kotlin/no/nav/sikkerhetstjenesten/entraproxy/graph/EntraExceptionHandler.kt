@@ -1,7 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.UNPROCESSABLE_CONTENT
 import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -20,7 +22,7 @@ class EntraExceptionHandler {
 
     @ExceptionHandler(ForMangeMatchendeGrupperException::class)
     fun forMangeGrupper(e: ForMangeMatchendeGrupperException): ProblemDetail =
-        ProblemDetail.forStatusAndDetail(UNPROCESSABLE_ENTITY, e.message ?: "For mange matchende grupper").apply {
+        ProblemDetail.forStatusAndDetail(UNPROCESSABLE_CONTENT, e.message ?: "For mange matchende grupper").apply {
             title = "For bredt søk"
             setProperty("gruppenavnSubstring", e.gruppenavnSubstring)
             setProperty("antall", e.antall)

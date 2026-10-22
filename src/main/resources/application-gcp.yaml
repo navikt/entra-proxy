@@ -42,7 +42,7 @@ spring:
         base-url: "https://graph.microsoft.com/v1.0"
     clients:
       connect-timeout: 3s
-      read-timeout: 5s
+      read-timeout: 10s
   threads:
     virtual:
       enabled: true

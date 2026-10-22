@@ -504,7 +504,7 @@
                 return;
             }
             resultat.hidden = false;
-            settStatus(`Viser ${antallAnsatte} rad(er) (ansatte) og ${antallGrupper} gruppe(r).`);
+            settStatus(`${antallAnsatte} ansatte og ${antallGrupper} grupper`);
         } catch (error) {
             settStatus(error.message, true);
         } finally {

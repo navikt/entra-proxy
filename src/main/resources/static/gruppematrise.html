@@ -55,7 +55,8 @@
             max-height: 75vh;
         }
         table {
-            width: 100%;
+            width: max-content;
+            min-width: 100%;
             border-collapse: collapse;
             text-align: left;
         }
@@ -79,8 +80,21 @@
         }
         tbody tr:nth-child(even) th[scope="row"],
         tbody tr:nth-child(even) td { background: #c5d4cb; }
-        td.ja { color: #0a6e2e; font-weight: bold; }
-        td.nei { color: #6b6b6b; }
+        td.ja { color: #0a6e2e; font-weight: bold; text-align: center; font-size: 1.1rem; }
+        td.nei { color: #6b6b6b; text-align: center; }
+        .sorter-knapp {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .sorter-knapp::after { content: " \2195"; opacity: 0.5; }
+        th[aria-sort="ascending"] .sorter-knapp::after { content: " \2191"; opacity: 1; }
+        th[aria-sort="descending"] .sorter-knapp::after { content: " \2193"; opacity: 1; }
         .utlogging {
             margin-top: 2rem;
             padding-top: 1.5rem;
@@ -139,6 +153,15 @@
         return navn ? `${navn} (${ansatt.navIdent})` : ansatt.navIdent;
     }
 
+    function lagOverskriftsknapp(tekst, kolonne) {
+        const knapp = document.createElement('button');
+        knapp.type = 'button';
+        knapp.className = 'sorter-knapp';
+        knapp.dataset.kolonne = String(kolonne);
+        knapp.textContent = tekst;
+        return knapp;
+    }
+
     function byggTabell(data) {
         const grupper = [...new Set(data.flatMap(ansatt => ansatt.grupper))]
             .sort((a, b) => a.localeCompare(b, 'nb', {sensitivity: 'base'}));
@@ -146,14 +169,14 @@
         const overskriftsrad = document.createElement('tr');
         const ansattOverskrift = document.createElement('th');
         ansattOverskrift.scope = 'col';
-        ansattOverskrift.textContent = 'Ansatt';
+        ansattOverskrift.append(lagOverskriftsknapp('Ansatt', 0));
         overskriftsrad.append(ansattOverskrift);
-        for (const gruppe of grupper) {
+        grupper.forEach((gruppe, indeks) => {
             const celle = document.createElement('th');
             celle.scope = 'col';
-            celle.textContent = gruppe;
+            celle.append(lagOverskriftsknapp(gruppe, indeks + 1));
             overskriftsrad.append(celle);
-        }
+        });
         tabellOverskrift.replaceChildren(overskriftsrad);
 
         const rader = data.map(({ansatt, grupper: medlemAv}) => {
@@ -166,7 +189,10 @@
             for (const gruppe of grupper) {
                 const erMedlem = medlemskap.has(gruppe);
                 const celle = document.createElement('td');
-                celle.textContent = String(erMedlem);
+                celle.textContent = erMedlem ? '✓' : '';
+                if (erMedlem) {
+                    celle.setAttribute('aria-label', 'Medlem');
+                }
                 celle.classList.add(erMedlem ? 'ja' : 'nei');
                 rad.append(celle);
             }
@@ -176,6 +202,28 @@
 
         return grupper.length;
     }
+
+    tabellOverskrift.addEventListener('click', (event) => {
+        const knapp = event.target.closest('.sorter-knapp');
+        if (!knapp) {
+            return;
+        }
+        const overskrift = knapp.closest('th');
+        const retning = overskrift.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+        for (const th of tabellOverskrift.querySelectorAll('th')) {
+            th.removeAttribute('aria-sort');
+        }
+        overskrift.setAttribute('aria-sort', retning);
+        const kolonne = Number(knapp.dataset.kolonne);
+        const rader = [...tabellRader.rows];
+        rader.sort((radA, radB) => {
+            const verdiA = radA.cells[kolonne].textContent.trim();
+            const verdiB = radB.cells[kolonne].textContent.trim();
+            const sammenligning = verdiA.localeCompare(verdiB, 'nb', {numeric: true, sensitivity: 'base'});
+            return retning === 'ascending' ? sammenligning : -sammenligning;
+        });
+        tabellRader.replaceChildren(...rader);
+    });
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();

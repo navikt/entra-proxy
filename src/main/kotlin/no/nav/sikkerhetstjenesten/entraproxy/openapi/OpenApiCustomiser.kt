@@ -25,14 +25,19 @@ class OpenApiCustomiser : OpenApiCustomizer {
             example = Enhet(Enhetnummer("1234"), "Nav Avdeling Sydpolen")
         }
         schemas["Ansatt"] = Schema<Ansatt>().apply {
-            type = "string"
+            type = "object"
             description = "Navn og ident for en ansatt"
-            example = Ansatt(AnsattId("A123456"), "Tore Tang", "Tore", "Tang")
+            example = mapOf(
+                "navIdent" to "A123456",
+                "visningNavn" to "Tore Tang",
+                "fornavn" to "Tore",
+                "etternavn" to "Tang",
+            )
         }
-        schemas["NavIdent"] = Schema<Ansatt>().apply {
+        schemas["NavIdent"] = Schema<AnsattId>().apply {
             type = "string"
             description = "NavIdent (7 siffer)"
-            example = AnsattId("A123456")
+            example = "A123456"
         }
         schemas["Tema"] = Schema<Tema>().apply {
             type = "string"

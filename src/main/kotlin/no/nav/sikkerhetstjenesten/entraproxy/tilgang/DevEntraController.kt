@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -62,17 +63,17 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
         medlemmer(tema.gruppeNavn)
 
     @GetMapping("gruppe/medlemmer")
-     fun medlemmer(gruppeNavn: String) =
+     fun medlemmer(@RequestParam gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmerIGruppe(it)
         }
 
     @GetMapping("gruppe/medlemmer/sok")
-    fun medlemmerIGrupperSomMatcher(gruppeNavn: String) =
+    fun medlemmerIGrupperSomMatcher(@RequestParam gruppeNavn: String) =
         entraTjeneste.medlemmerIGrupperSomMatcher(gruppeNavn)
 
     @GetMapping("gruppe/medlemmer/sok/per-ansatt")
-    fun grupperPerAnsattSomMatcher(gruppeNavn: String) =
+    fun grupperPerAnsattSomMatcher(@RequestParam gruppeNavn: String) =
         entraTjeneste.grupperPerAnsattSomMatcher(gruppeNavn)
 
     @GetMapping("ansatt/{navIdent}")

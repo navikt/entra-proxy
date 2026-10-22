@@ -132,7 +132,7 @@ class UtforskerSecurityBeanConfig {
         private const val BEARER_PREFIX = "Bearer "
         private val BROWSER_API_ENDPOINTS = AndRequestMatcher(API_ENDPOINTS,
             NegatedRequestMatcher { it.getHeader(AUTHORIZATION)?.startsWith(BEARER_PREFIX) == true })
-        private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html")
+        private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html", "/gruppematrise.html")
         private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", LOGOUT_ENDEPUNKT)
     }
 }

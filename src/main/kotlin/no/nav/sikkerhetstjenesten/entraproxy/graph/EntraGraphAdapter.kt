@@ -105,12 +105,9 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         return generateSequence(førsteSide) { side ->
             next(side)?.let { nesteSideUri ->
                 sideNummer++
-                log.trace("Følger $NEXT_LINK for {}, side {}", beskrivelse, sideNummer)
                 hentSide(nesteSideUri)
             }
-        }.toSet().also {
-            log.info("Hentet {} side(r) for {}", it.size, beskrivelse)
-        }
+        }.toSet()
     }
 
     companion object {

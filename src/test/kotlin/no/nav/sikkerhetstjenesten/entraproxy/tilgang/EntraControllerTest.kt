@@ -92,6 +92,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             )
         }
 
+        Given("health-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/health"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/health").with(jwt()))
+                    .andExpect(status().isOk())
+            }
+        }
+
         Given("en side som ikke finnes") {
             Then("returnerer 404 uten å kreve autentisering") {
                 mockMvc.perform(get("/does-not-exist"))

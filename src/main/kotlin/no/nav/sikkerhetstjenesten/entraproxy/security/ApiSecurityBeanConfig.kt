@@ -34,6 +34,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
                                entryPoint: AuthenticationEntryPoint,
                                @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =
         http.authorizeHttpRequests { requests ->
+            requests.requestMatchers("/actuator/health", "/actuator/health/**").authenticated()
             requests.requestMatchers(API_ENDPOINTS).authenticated()
             requests.anyRequest().permitAll()
         }

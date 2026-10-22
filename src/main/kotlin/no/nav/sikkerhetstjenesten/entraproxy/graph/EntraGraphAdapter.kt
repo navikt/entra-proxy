@@ -4,6 +4,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.http.HttpStatus.OK
 import java.net.URI
 import java.util.UUID
 
@@ -90,7 +91,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .mapNotNull { respons ->
                 val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
                 val antall = (respons.body as? Number)?.toLong()
-                if (respons.status == 200 && antall != null) {
+                if (respons.status == OK.value() && antall != null) {
                     gruppeId to antall
                 } else {
                     log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")

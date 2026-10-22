@@ -61,6 +61,8 @@
             .hovedsok > p { align-self: start; margin-top: 3rem; }
         }
         .steg-skille { margin: 2.5rem 0 2rem; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.3); }
+        .kopi-rad { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .kopi-rad .status { margin-top: 0; min-height: 0; }
         html.soker,
         html.soker * {
             cursor: url("/kikkert.svg") 16 16, wait !important;
@@ -184,6 +186,10 @@
 
     <section id="resultat" aria-labelledby="resultat-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium aksel-visually-hidden" id="resultat-overskrift">Medlemskap per ansatt</h2>
+        <div class="kopi-rad">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="kopier-matrise" type="button">Kopier til utklippstavlen</button>
+            <p class="aksel-body-short status" id="kopier-status" role="status" aria-live="polite"></p>
+        </div>
         <div class="tabell-ramme" tabindex="0" role="region" aria-labelledby="resultat-overskrift">
             <table aria-label="Medlemskap per ansatt og gruppe">
                 <thead id="tabell-overskrift"></thead>
@@ -208,6 +214,8 @@
     const resultat = document.getElementById('resultat');
     const tabellOverskrift = document.getElementById('tabell-overskrift');
     const tabellRader = document.getElementById('tabell-rader');
+    const kopierKnapp = document.getElementById('kopier-matrise');
+    const kopierStatus = document.getElementById('kopier-status');
 
     let basisAnsatte = null;
 
@@ -236,6 +244,8 @@
         tabellOverskrift.replaceChildren();
         tabellRader.replaceChildren();
         settStatus('');
+        kopierStatus.textContent = '';
+        kopierStatus.classList.remove('error');
     }
 
     function byggBasisTabell(ansatte) {
@@ -331,6 +341,33 @@
             return retning === 'ascending' ? sammenligning : -sammenligning;
         });
         tabellRader.replaceChildren(...rader);
+    });
+
+    kopierKnapp.addEventListener('click', async () => {
+        kopierKnapp.disabled = true;
+        kopierStatus.classList.remove('error');
+        kopierStatus.textContent = 'Kopierer...';
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error('Utklippstavlen er ikke tilgjengelig. Bruk HTTPS og en nettleser som støtter kopiering.');
+            }
+            const overskrifter = [...tabellOverskrift.rows[0].cells].map(celle =>
+                celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
+            );
+            const rader = [...tabellRader.rows].map(rad =>
+                [...rad.cells].map((celle, kolonne) =>
+                    kolonne >= 2 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim()
+                )
+            );
+            const tekst = [overskrifter, ...rader].map(rad => rad.join(';')).join('\r\n');
+            await navigator.clipboard.writeText(tekst);
+            kopierStatus.textContent = 'Matrisen er kopiert til utklippstavlen.';
+        } catch (error) {
+            kopierStatus.textContent = `Kopiering feilet: ${error.message}`;
+            kopierStatus.classList.add('error');
+        } finally {
+            kopierKnapp.disabled = false;
+        }
     });
 
     for (const skjema of [nomForm, gruppeForm]) {

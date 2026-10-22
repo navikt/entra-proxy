@@ -17,7 +17,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppf
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val argument = argumentFor(nøkkelElementer.id)
-            ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
+            ?: return log.info("Ukjent id-format i nøkkel $nøkkelElementer")
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
             ?: return log.warn("Ukjent nøkkel $nøkkelElementer")
         MDC.put(USER_ID, nøkkelElementer.id)

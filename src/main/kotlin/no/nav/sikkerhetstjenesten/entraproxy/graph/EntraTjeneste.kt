@@ -44,6 +44,7 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
     fun medlemmerIGrupperSomMatcher(gruppenavnSubstring: String): List<GruppeMedMedlemmer> =
         graph.grupperSomMatcher(gruppenavnSubstring)
             .mapNotNull { gruppe ->
+                log.info("Henter medlemmer for gruppe ${gruppe.rolle} med id ${gruppe.gruppeId}")
                 gruppe.gruppeId?.let { gruppeId ->
                     GruppeMedMedlemmer(gruppeId, gruppe.rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }

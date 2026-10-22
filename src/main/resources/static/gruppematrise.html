@@ -218,10 +218,36 @@
     const kopierStatus = document.getElementById('kopier-status');
 
     let basisAnsatte = null;
+    let enhetsnummerPerAnsatt = new Map();
 
     function settStatus(melding, erFeil = false) {
         status.textContent = melding;
         status.classList.toggle('error', erFeil);
+    }
+
+    async function hentEnhetsnummer(navidenter) {
+        enhetsnummerPerAnsatt = new Map();
+        if (navidenter.length === 0) {
+            return;
+        }
+        const response = await fetch('/api/v1/nom/enhet/bulk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify(navidenter),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const ressurser = await response.json();
+        if (!Array.isArray(ressurser)) {
+            throw new Error('Uventet respons fra Nom.');
+        }
+        for (const ressurs of ressurser) {
+            const enheter = (ressurs?.orgTilknytninger ?? [])
+                .map(tilknytning => tilknytning?.orgEnhet?.tilgangsenhetId)
+                .filter(Boolean);
+            enhetsnummerPerAnsatt.set(ressurs?.navident, [...new Set(enheter)].join(', '));
+        }
     }
 
     function settBasisStatus(skjema, melding, erFeil = false) {
@@ -286,11 +312,14 @@
         const navnOverskrift = document.createElement('th');
         navnOverskrift.scope = 'col';
         navnOverskrift.append(lagOverskriftsknapp('Navn', 1));
-        overskriftsrad.append(identOverskrift, navnOverskrift);
+        const enhetOverskrift = document.createElement('th');
+        enhetOverskrift.scope = 'col';
+        enhetOverskrift.append(lagOverskriftsknapp('Enhetsnummer', 2));
+        overskriftsrad.append(identOverskrift, navnOverskrift, enhetOverskrift);
         grupper.forEach((gruppe, indeks) => {
             const celle = document.createElement('th');
             celle.scope = 'col';
-            celle.append(lagOverskriftsknapp(gruppe, indeks + 2));
+            celle.append(lagOverskriftsknapp(gruppe, indeks + 3));
             overskriftsrad.append(celle);
         });
         tabellOverskrift.replaceChildren(overskriftsrad);
@@ -303,7 +332,9 @@
             identCelle.textContent = ansatt.navIdent;
             const navnCelle = document.createElement('td');
             navnCelle.textContent = ansatt.visningNavn ?? '';
-            rad.append(identCelle, navnCelle);
+            const enhetCelle = document.createElement('td');
+            enhetCelle.textContent = enhetsnummerPerAnsatt.get(ansatt.navIdent) ?? '';
+            rad.append(identCelle, navnCelle, enhetCelle);
             for (const gruppe of grupper) {
                 const erMedlem = medlemskap.has(gruppe);
                 const celle = document.createElement('td');
@@ -356,7 +387,7 @@
             );
             const rader = [...tabellRader.rows].map(rad =>
                 [...rad.cells].map((celle, kolonne) =>
-                    kolonne >= 2 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim()
+                    kolonne >= 3 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim()
                 )
             );
             const tekst = [overskrifter, ...rader].map(rad => rad.join(';')).join('\r\n');
@@ -386,6 +417,7 @@
             }
 
             basisAnsatte = null;
+            enhetsnummerPerAnsatt = new Map();
             basisResultat.hidden = true;
             basisRader.replaceChildren();
             nullstillMatrise();
@@ -421,6 +453,11 @@
 
                 basisAnsatte = ansatte;
                 byggBasisTabell(ansatte);
+                try {
+                    await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent));
+                } catch (feil) {
+                    enhetsnummerPerAnsatt = new Map();
+                }
                 settBasisStatus(skjema, ansatte.length
                     ? `${ansatte.length} ansatt(e) valgt. Bygg matrisen under.`
                     : 'Ingen medlemmer funnet.');

@@ -115,6 +115,6 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         "${javaClass.simpleName} [graph=$graph]"
 
     companion object {
-        private const val MAKS_SAMTIDIGE_KALL = 16
+        private const val MAKS_SAMTIDIGE_KALL = 32
     }
 }

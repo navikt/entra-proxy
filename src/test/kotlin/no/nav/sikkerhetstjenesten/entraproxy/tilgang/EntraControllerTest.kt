@@ -104,6 +104,17 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("beans-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/beans"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/beans").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
         Given("en side som ikke finnes") {
             Then("returnerer 404 uten å kreve autentisering") {
                 mockMvc.perform(get("/does-not-exist"))

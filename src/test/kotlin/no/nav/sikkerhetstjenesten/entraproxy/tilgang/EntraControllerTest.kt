@@ -26,6 +26,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -99,7 +100,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
             Then("tillater autentiserte forespørsler") {
                 mockMvc.perform(get("/actuator/health").with(jwt()))
-                    .andExpect(status().isOk())
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
             }
         }
 

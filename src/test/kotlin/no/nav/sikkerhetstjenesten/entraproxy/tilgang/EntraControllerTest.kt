@@ -115,6 +115,50 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
+        Given("configprops-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/configprops"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/configprops").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("env-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/env"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/env").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("loggers-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/loggers"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/loggers").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("caches-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/caches"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/caches").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
         Given("en side som ikke finnes") {
             Then("returnerer 404 uten å kreve autentisering") {
                 mockMvc.perform(get("/does-not-exist"))

@@ -34,8 +34,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
                                entryPoint: AuthenticationEntryPoint,
                                @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =
         http.authorizeHttpRequests { requests ->
-            requests.requestMatchers("/actuator/health", "/actuator/health/**").authenticated()
-            requests.requestMatchers("/actuator/beans").authenticated()
+            requests.requestMatchers(*ACTUATOR_ENDPOINTS).authenticated()
             requests.requestMatchers(API_ENDPOINTS).authenticated()
             requests.anyRequest().permitAll()
         }
@@ -75,6 +74,19 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
 
     companion object {
         private const val API_HANDLER = "apiHandler"
+        private val ACTUATOR_ENDPOINTS = arrayOf(
+            "/actuator/health",
+            "/actuator/health/**",
+            "/actuator/beans",
+            "/actuator/configprops",
+            "/actuator/configprops/**",
+            "/actuator/env",
+            "/actuator/env/**",
+            "/actuator/loggers",
+            "/actuator/loggers/**",
+            "/actuator/caches",
+            "/actuator/caches/**",
+        )
         private val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

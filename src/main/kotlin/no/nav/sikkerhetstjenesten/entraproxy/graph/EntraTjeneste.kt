@@ -6,6 +6,11 @@ import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import java.util.UUID
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors
+import java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor
+import java.util.concurrent.Semaphore
 
 @RestRetryingWhenRecoverableService
 class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: EntraOidOperations, private val enheter: EnhetOperations)  {
@@ -45,13 +50,14 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         graph.grupperSomMatcher(gruppenavnSubstring).also {
             log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
         }
-            .mapNotNull { gruppe ->
-                log.info("Henter medlemmer for gruppe ${gruppe.rolle} med id ${gruppe.gruppeId}")
-                gruppe.gruppeId?.let { gruppeId ->
-                    GruppeMedMedlemmer(gruppeId, gruppe.rolle, graph.gruppeMedlemmer("$gruppeId"))
+            .mapNotNull { gruppe -> gruppe.gruppeId?.let { it to gruppe.rolle } }
+            .let { grupper ->
+                hentParallelt(grupper) { (gruppeId, rolle) ->
+                    log.info("Henter medlemmer for gruppe $rolle med id $gruppeId")
+                    GruppeMedMedlemmer(gruppeId, rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }
             }.also {
-                log.info("Hentet $it med medlemmer som matcher '$gruppenavnSubstring'")
+                log.info("Hentet ${it.size} grupper med medlemmer som matcher '$gruppenavnSubstring'")
             }
 
     fun grupperPerAnsattSomMatcher(gruppenavnSubstring: String): List<AnsattMedGrupper> =
@@ -83,6 +89,32 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
             }
         }
 
+    private fun <T, R> hentParallelt(elementer: List<T>, maksSamtidige: Int = MAKS_SAMTIDIGE_KALL, oppslag: (T) -> R): List<R> {
+        if (elementer.isEmpty()) return emptyList()
+        val grense = Semaphore(maksSamtidige)
+        return newVirtualThreadPerTaskExecutor().use { executor ->
+            elementer
+                .map { element ->
+                    executor.submit(Callable {
+                        grense.acquire()
+                        try {
+                            oppslag(element)
+                        } finally {
+                            grense.release()
+                        }
+                    })
+                }
+                .map { future ->
+                    runCatching { future.get() }
+                        .getOrElse { throw (it as? ExecutionException)?.cause ?: it }
+                }
+        }
+    }
+
     override fun toString() =
         "${javaClass.simpleName} [graph=$graph]"
+
+    companion object {
+        private const val MAKS_SAMTIDIGE_KALL = 16
+    }
 }

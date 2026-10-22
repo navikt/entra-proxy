@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GR
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import org.springframework.boot.restclient.test.MockServerRestClientCustomizer
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -20,6 +21,7 @@ import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.UnorderedRequestExpectationManager
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
@@ -389,6 +391,10 @@ class EntraTjenesteTest(
 
     @TestConfiguration
     class TestBeanConfig {
+
+        @Bean
+        fun mockServerRestClientCustomizer() =
+            MockServerRestClientCustomizer(UnorderedRequestExpectationManager::class.java)
 
         @Bean
         fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =

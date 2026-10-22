@@ -49,11 +49,14 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
     fun medlemmerIGrupperSomMatcher(gruppenavnSubstring: String): List<GruppeMedMedlemmer> =
         graph.grupperSomMatcher(gruppenavnSubstring).also {
             log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
+            if (it.size > MAKS_MATCHENDE_GRUPPER) {
+                throw ForMangeMatchendeGrupperException(gruppenavnSubstring, it.size, MAKS_MATCHENDE_GRUPPER)
+            }
         }
             .mapNotNull { gruppe -> gruppe.gruppeId?.let { it to gruppe.rolle } }
             .let { grupper ->
                 hentParallelt(grupper) { (gruppeId, rolle) ->
-                    log.info("Henter medlemmer for gruppe $rolle med id $gruppeId")
+                    log.info("Henter parallelt medlemmer for gruppe $rolle med id $gruppeId")
                     GruppeMedMedlemmer(gruppeId, rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }
             }.also {
@@ -116,5 +119,6 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
 
     companion object {
         private const val MAKS_SAMTIDIGE_KALL = 32
+        private const val MAKS_MATCHENDE_GRUPPER = 100
     }
 }

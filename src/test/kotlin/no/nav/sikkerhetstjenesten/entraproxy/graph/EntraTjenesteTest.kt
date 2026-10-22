@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldStartWith
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
@@ -111,7 +112,7 @@ class EntraTjenesteTest(
             When("det finnes medlemmer") {
                 Then("skal responsen inneholde forventede medlemmer") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$GROUP_ID/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$GROUP_ID/members"
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
                     entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
@@ -127,7 +128,7 @@ class EntraTjenesteTest(
                     val medlem2Id = "${randomUUID()}"
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
                     }.andRespond(withSuccess(
                         """
                         {
@@ -139,7 +140,7 @@ class EntraTjenesteTest(
                         """.trimIndent(), APPLICATION_JSON))
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString() == nesteSideUri
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteSideUri
                     }.andRespond(withSuccess(
                         """
                         {
@@ -164,7 +165,7 @@ class EntraTjenesteTest(
                     val nøstetGruppeId = "${randomUUID()}"
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
                     }.andRespond(withSuccess(
                         """
                         {
@@ -184,7 +185,7 @@ class EntraTjenesteTest(
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
                     }.andRespond(withSuccess(oidContract, APPLICATION_JSON))
                     repeat(2) {
                         oid.ansattOid(AnsattId("A123456")) shouldBe OID
@@ -197,7 +198,7 @@ class EntraTjenesteTest(
             When("det finnes en gruppe med gitt navn") {
                 Then("skal gruppens oid returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups"
                     }.andRespond(withSuccess(gruppeContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -229,7 +230,7 @@ class EntraTjenesteTest(
                         """.trimIndent(), APPLICATION_JSON))
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString() == nesteGruppeSideUri
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteGruppeSideUri
                     }.andRespond(withSuccess(
                         """
                         {
@@ -240,10 +241,10 @@ class EntraTjenesteTest(
                         """.trimIndent(), APPLICATION_JSON))
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe1Id/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe2Id/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
                     }.andRespond(withSuccess(
                         """
                         {
@@ -279,7 +280,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
                     server.expect { request ->
-                        request.method == GET && request.uri.toString() == nesteGruppeSideUri
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteGruppeSideUri
                     }.andRespond(withSuccess(
                         """
                         {
@@ -290,10 +291,10 @@ class EntraTjenesteTest(
                         """.trimIndent(), APPLICATION_JSON))
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe1Id/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe2Id/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
                     entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
@@ -307,10 +308,10 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
                     }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
                     }.andRespond(withSuccess(temaContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -324,10 +325,10 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en enhet-gruppe") {
                 Then("skal enhetsnummeret returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
                     }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
                     }.andRespond(withSuccess(enhetContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -341,7 +342,7 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users?")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
                     }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
                     server.expect { request ->
                         request.method shouldBe GET
@@ -371,7 +372,7 @@ class EntraTjenesteTest(
             When("det finnes en bruker for navident") {
                 Then("skal utvidet ansatt-informasjon returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
                     }.andRespond(withSuccess(utvidetAnsattContract, APPLICATION_JSON))
 
                     repeat(2) {

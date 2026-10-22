@@ -41,6 +41,21 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
         graph.antallMedlemmer(*gruppeIder)
 
+    fun medlemmerIGrupperSomMatcher(gruppenavnSubstring: String): List<GruppeMedMedlemmer> =
+        graph.grupperSomMatcher(gruppenavnSubstring)
+            .mapNotNull { gruppe ->
+                gruppe.gruppeId?.let { gruppeId ->
+                    GruppeMedMedlemmer(gruppeId, gruppe.rolle, graph.gruppeMedlemmer("$gruppeId"))
+                }
+            }
+
+    fun grupperPerAnsattSomMatcher(gruppenavnSubstring: String): List<AnsattMedGrupper> =
+        medlemmerIGrupperSomMatcher(gruppenavnSubstring)
+            .flatMap { gruppe -> gruppe.medlemmer.map { it to gruppe.gruppenavn } }
+            .groupBy({ it.first }, { it.second })
+            .map { (ansatt, grupper) -> AnsattMedGrupper(ansatt, grupper.toSortedSet()) }
+            .sortedBy { it.ansatt }
+
     private fun <T> medOidOppfrisking(ansattId: AnsattId, oppslag: (UUID) -> Set<T>): Set<T> =
         runCatching {
             oppslag(oid.ansattOid(ansattId) ?: return emptySet())

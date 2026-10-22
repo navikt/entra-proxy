@@ -12,6 +12,8 @@ interface EntraGraphOperations {
 
     fun grupper(ansattOid: UUID): Set<EntraGruppe>
 
+    fun grupperSomMatcher(gruppenavnSubstring: String): Set<EntraGruppe>
+
     fun enheter(ansattOid: UUID): Set<Enhet.Enhetnummer>
 
     fun gruppeMedlemmer(oid: String): Set<Ansatt>

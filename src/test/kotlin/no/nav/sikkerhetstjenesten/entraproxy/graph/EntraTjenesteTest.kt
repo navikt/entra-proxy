@@ -205,6 +205,102 @@ class EntraTjenesteTest(
             }
         }
 
+        Given("groups-endepunkt for søk etter grupper som matcher en substring") {
+            When("flere grupper matcher og søket pagineres via @odata.nextLink") {
+                Then("skal medlemmene i alle matchende grupper returneres med gruppenavn") {
+                    val gruppe1Id = randomUUID()
+                    val gruppe2Id = randomUUID()
+                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/groups"
+                        request.uri.query shouldContain "\$search=\"displayName:MIN_ROLLE\""
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "@odata.nextLink": "$nesteGruppeSideUri",
+                          "value": [
+                            { "id": "$gruppe1Id", "displayName": "0000-GA-MIN_ROLLE_A", "description": "A" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString() == nesteGruppeSideUri
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$gruppe2Id", "displayName": "0000-GA-MIN_ROLLE_B", "description": "B" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe1Id/members")
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe2Id/members")
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "${randomUUID()}", "displayName": "Kari Nordmann", "givenName": "Kari", "surname": "Nordmann", "onPremisesSamAccountName": "E654321" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    entra.medlemmerIGrupperSomMatcher("MIN_ROLLE") shouldBe listOf(
+                        GruppeMedMedlemmer(gruppe1Id, "0000-GA-MIN_ROLLE_A", setOf(ANSATT)),
+                        GruppeMedMedlemmer(gruppe2Id, "0000-GA-MIN_ROLLE_B",
+                            setOf(Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")))
+                    )
+                }
+            }
+            When("samme ansatt er medlem i flere matchende grupper") {
+                Then("skal resultatet per ansatt samle alle gruppene vedkommende er medlem i") {
+                    val gruppe1Id = randomUUID()
+                    val gruppe2Id = randomUUID()
+                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/groups"
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "@odata.nextLink": "$nesteGruppeSideUri",
+                          "value": [
+                            { "id": "$gruppe1Id", "displayName": "0000-GA-MIN_ROLLE_A" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString() == nesteGruppeSideUri
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$gruppe2Id", "displayName": "0000-GA-MIN_ROLLE_B" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe1Id/members")
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppe2Id/members")
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+
+                    entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
+                        AnsattMedGrupper(ANSATT, setOf("0000-GA-MIN_ROLLE_A", "0000-GA-MIN_ROLLE_B"))
+                    )
+                }
+            }
+        }
+
         Given("memberOf-endepunkt for temaer") {
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {

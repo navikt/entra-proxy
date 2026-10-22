@@ -9,7 +9,7 @@ import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Grupper(
-    @param:JsonProperty("@odata.context") val next: URI? = null,
+    @param:JsonProperty(NEXT_LINK) val next: URI? = null,
     val value: Set<IdentifiserbartObjekt> = emptySet()
 )
 

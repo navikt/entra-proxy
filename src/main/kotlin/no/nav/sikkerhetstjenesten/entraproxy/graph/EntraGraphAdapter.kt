@@ -30,6 +30,12 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet ${it.size} gruppe(r) for $ansattOid") }
 
+    override fun grupperSomMatcher(gruppenavnSubstring: String): Set<EntraGruppe> =
+        allSider("grupper som matcher '$gruppenavnSubstring'", client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(gruppenavnSubstring)), Grupper::next, client::grupperSide)
+            .flatMapTo(mutableSetOf()) { it.value }
+            .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
+            .also { log.info("Hentet ${it.size} gruppe(r) som matcher '$gruppenavnSubstring'") }
+
     override fun enheter(ansattOid: UUID): Set<Enhetnummer> =
         allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
@@ -115,6 +121,8 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         const val BRUKER = "onPremisesSamAccountName"
         private const val MINIMUM_FELTER = "id,displayName"
         private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled,description"
+        private const val GRUPPE_FELTER = "$MINIMUM_FELTER,description"
+        private const val GRUPPE_SEARCH = "\"displayName:%s\""
         private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,${BRUKER},givenName,surname,mail,streetAddress"
         private const val BRUKER_FILTER = "$BRUKER eq '%s'"
         private const val TIDENT_FILTER = "jobTitle eq '%s'"

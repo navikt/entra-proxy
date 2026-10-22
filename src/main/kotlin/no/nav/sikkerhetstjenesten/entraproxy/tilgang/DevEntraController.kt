@@ -67,6 +67,14 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
             entraTjeneste.medlemmerIGruppe(it)
         }
 
+    @GetMapping("gruppe/medlemmer/sok")
+    fun medlemmerIGrupperSomMatcher(gruppeNavn: String) =
+        entraTjeneste.medlemmerIGrupperSomMatcher(gruppeNavn)
+
+    @GetMapping("gruppe/medlemmer/sok/per-ansatt")
+    fun grupperPerAnsattSomMatcher(gruppeNavn: String) =
+        entraTjeneste.grupperPerAnsattSomMatcher(gruppeNavn)
+
     @GetMapping("ansatt/{navIdent}")
     fun utvidetAnsatt(@PathVariable navIdent: AnsattId) =
         entraTjeneste.utvidetAnsatt(navIdent)

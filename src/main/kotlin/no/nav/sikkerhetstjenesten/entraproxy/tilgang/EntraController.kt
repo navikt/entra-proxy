@@ -87,6 +87,16 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)
 
+    @GetMapping("gruppe/medlemmer/sok")
+    @Operation(summary = "Hent ansatte i alle grupper som matcher en substring av gruppenavnet fra Entra")
+    fun medlemmerIGrupperSomMatcher(@RequestParam gruppeNavn: String) =
+        entra.medlemmerIGrupperSomMatcher(gruppeNavn)
+
+    @GetMapping("gruppe/medlemmer/sok/per-ansatt")
+    @Operation(summary = "Hent hvilke matchende grupper hver ansatt er medlem i, for grupper som matcher en substring av gruppenavnet")
+    fun grupperPerAnsattSomMatcher(@RequestParam gruppeNavn: String) =
+        entra.grupperPerAnsattSomMatcher(gruppeNavn)
+
     private fun medlemmerIGruppe(gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
             entra.medlemmerIGruppe( it)

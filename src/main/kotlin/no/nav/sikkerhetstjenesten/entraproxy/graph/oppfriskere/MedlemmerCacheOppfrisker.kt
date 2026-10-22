@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel

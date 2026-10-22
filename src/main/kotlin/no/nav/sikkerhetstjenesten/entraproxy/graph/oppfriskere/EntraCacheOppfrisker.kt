@@ -1,6 +1,9 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor.Companion.USER_ID

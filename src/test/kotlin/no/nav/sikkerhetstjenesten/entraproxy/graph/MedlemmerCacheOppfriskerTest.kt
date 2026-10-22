@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.Called
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere.MedlemmerCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import java.util.UUID
 

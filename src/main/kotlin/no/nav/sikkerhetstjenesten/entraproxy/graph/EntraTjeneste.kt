@@ -48,6 +48,8 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
                 gruppe.gruppeId?.let { gruppeId ->
                     GruppeMedMedlemmer(gruppeId, gruppe.rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }
+            }.also {
+                log.info("Hentet $it med medlemmer som matcher '$gruppenavnSubstring'")
             }
 
     fun grupperPerAnsattSomMatcher(gruppenavnSubstring: String): List<AnsattMedGrupper> =

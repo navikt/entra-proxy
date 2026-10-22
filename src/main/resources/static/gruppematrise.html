@@ -314,7 +314,7 @@
         navnOverskrift.append(lagOverskriftsknapp('Navn', 1));
         const enhetOverskrift = document.createElement('th');
         enhetOverskrift.scope = 'col';
-        enhetOverskrift.append(lagOverskriftsknapp('Enhetsnummer', 2));
+        enhetOverskrift.append(lagOverskriftsknapp('Nom-enhet', 2));
         overskriftsrad.append(identOverskrift, navnOverskrift, enhetOverskrift);
         grupper.forEach((gruppe, indeks) => {
             const celle = document.createElement('th');
@@ -331,7 +331,8 @@
             identCelle.scope = 'row';
             identCelle.textContent = ansatt.navIdent;
             const navnCelle = document.createElement('td');
-            navnCelle.textContent = ansatt.visningNavn ?? '';
+            const harMedlemskap = medlemskap.size > 0;
+            navnCelle.textContent = `${ansatt.visningNavn ?? ''}${harMedlemskap ? ' *' : ''}`;
             const enhetCelle = document.createElement('td');
             enhetCelle.textContent = enhetsnummerPerAnsatt.get(ansatt.navIdent) ?? '';
             rad.append(identCelle, navnCelle, enhetCelle);

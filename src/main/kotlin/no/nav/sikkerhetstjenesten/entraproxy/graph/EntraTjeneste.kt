@@ -42,7 +42,9 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         graph.antallMedlemmer(*gruppeIder)
 
     fun medlemmerIGrupperSomMatcher(gruppenavnSubstring: String): List<GruppeMedMedlemmer> =
-        graph.grupperSomMatcher(gruppenavnSubstring)
+        graph.grupperSomMatcher(gruppenavnSubstring).also {
+            log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
+        }
             .mapNotNull { gruppe ->
                 log.info("Henter medlemmer for gruppe ${gruppe.rolle} med id ${gruppe.gruppeId}")
                 gruppe.gruppeId?.let { gruppeId ->
@@ -53,7 +55,9 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
             }
 
     fun grupperPerAnsattSomMatcher(gruppenavnSubstring: String): List<AnsattMedGrupper> =
-        medlemmerIGrupperSomMatcher(gruppenavnSubstring)
+        medlemmerIGrupperSomMatcher(gruppenavnSubstring).also {
+            log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
+        }
             .flatMap { gruppe -> gruppe.medlemmer.map { it to gruppe.gruppenavn } }
             .groupBy({ it.first }, { it.second })
             .map { (ansatt, grupper) -> AnsattMedGrupper(ansatt, grupper.toSortedSet()) }

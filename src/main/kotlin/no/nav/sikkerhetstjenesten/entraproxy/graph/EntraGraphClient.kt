@@ -27,14 +27,6 @@ interface EntraGraphClient {
         @RequestParam($$"$count") count: String = "true"
     ): Grupper
 
-    @GetExchange("/groups")
-    fun grupperSok(
-        @RequestParam($$"$select") select: String,
-        @RequestParam($$"$search") search: String,
-        @RequestParam($$"$top") top: Int = TOP,
-        @RequestParam($$"$count") count: String = "true"
-    ): Grupper
-
     @GetExchange("/users/{ansattId}/memberOf")
     fun memberOf(
         @PathVariable ansattId: String,

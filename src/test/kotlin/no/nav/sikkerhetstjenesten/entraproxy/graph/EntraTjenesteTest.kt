@@ -215,7 +215,7 @@ class EntraTjenesteTest(
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/groups"
-                        request.uri.query shouldContain "\$search=\"displayName:MIN_ROLLE\""
+                        request.uri.query shouldContain "\$filter=startswith(displayName,'MIN_ROLLE')"
                     }.andRespond(withSuccess(
                         """
                         {

@@ -17,11 +17,6 @@ management:
     annotations:
       enabled: true
   health:
-    group:
-      readiness:
-        show-components: never
-      liveness:
-        show-components: never
     redis:
       enabled: false
     ssl:
@@ -30,6 +25,13 @@ management:
       enabled: false
     diskspace:
       enabled: false
+  endpoint:
+    health:
+      group:
+        readiness:
+          show-components: never
+        liveness:
+          show-components: never
   endpoints:
     web:
       base-path: /monitoring

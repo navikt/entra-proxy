@@ -4,6 +4,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMG
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
+import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -15,6 +16,7 @@ import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFacto
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.HttpSyncGraphQlClient.builder
 import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
@@ -64,5 +66,15 @@ class NomBeanConfig {
             .interceptors {
                 it.addFirst(GraphQLLoggingInterceptor())
             }.build()
+
+    @Bean
+    fun nomHealthIndicator(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient) =
+        PingableHealthIndicator(cfg) {
+            client.document(PING_QUERY).executeSync()
+        }
+
+    private companion object {
+        private const val PING_QUERY = "{ __typename }"
+    }
 }
 

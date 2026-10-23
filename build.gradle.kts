@@ -94,8 +94,10 @@ dependencies {
     implementation(libs.opentelemetryInstrumentationAnnotations)
     implementation(libs.opentelemetryLogbackMdc)
     implementation(libs.micrometerRegistryPrometheus)
+    implementation("io.micrometer:context-propagation")
     implementation(libs.logstashLogbackEncoder)
     implementation(libs.logbook)
+    implementation(libs.logbookNetty)
 
     // NAV and security
     implementation(libs.bootConditionals)

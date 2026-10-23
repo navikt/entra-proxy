@@ -26,6 +26,7 @@ opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelem
 micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
 logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
 logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
+logbookNetty = { module = "org.zalando:logbook-netty", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
 slack = { module = "com.slack.api:slack-api-client-kotlin-extension", version.ref = "slackApi" }
 springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }

@@ -13,24 +13,22 @@ class NomCacheOppfrisker(private val nom: NomTjeneste) : AbstractCacheOppfrisker
 
     override val cacheName: String = NOMGRAPH
 
-    override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
-        val oppfrisk = oppfriskingFor(nøkkelElementer.id)
-            ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
+    override fun doOppfrisk(nøkkel: CacheNøkkel) {
+        val oppfrisk = oppfriskingFor(nøkkel.id)
+            ?: return log.warn("Ukjent id-format i nøkkel $nøkkel")
         runCatching {
             oppfrisk()
         }.onFailure {
-            loggOppfriskingFeilet(nøkkelElementer, it)
+            loggOppfriskingFeilet(nøkkel, it)
         }
     }
 
     private fun oppfriskingFor(id: String): (() -> Unit)? =
-        id.somAnsattId()?.let { { nom.ansatt(it) } }
-            ?: id.somNomIdent()?.let { { nom.ansatteForNomIdent(it) } }
-            ?: id.somEnhetnummer()?.let { { nom.ansatteForEnhet(it) } }
-
-    private fun String.somAnsattId() = runCatching { AnsattId(this) }.getOrNull()
-
-    private fun String.somNomIdent() = runCatching { NomIdent(this) }.getOrNull()
-
-    private fun String.somEnhetnummer() = runCatching { Enhetnummer(this) }.getOrNull()
+        AnsattId.parse(id)?.let {
+            { nom.ansatt(it) }
+        } ?: NomIdent.parse(id)?.let {
+            { nom.ansatteForNomIdent(it) }
+        } ?: Enhetnummer.parse(id)?.let {
+            { nom.ansatteForEnhet(it) }
+        }
 }

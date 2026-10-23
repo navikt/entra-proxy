@@ -331,8 +331,7 @@
             identCelle.scope = 'row';
             identCelle.textContent = ansatt.navIdent;
             const navnCelle = document.createElement('td');
-            const harMedlemskap = medlemskap.size > 0;
-            navnCelle.textContent = `${ansatt.visningNavn ?? ''}${harMedlemskap ? ' *' : ''}`;
+            navnCelle.textContent = ansatt.visningNavn ?? '';
             const enhetCelle = document.createElement('td');
             enhetCelle.textContent = enhetsnummerPerAnsatt.get(ansatt.navIdent) ?? '';
             rad.append(identCelle, navnCelle, enhetCelle);

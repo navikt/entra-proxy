@@ -20,6 +20,14 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comp
 
         override fun compareTo(other: Enhetnummer): Int = verdi.compareTo(other.verdi)
 
+        companion object {
+            private const val ENHETNUMMER_LENGTH = 4
+
+            fun parse(nummer: String): Enhetnummer? =
+                nummer.removePrefix(ENHET_PREFIX)
+                    .takeIf { it.length == ENHETNUMMER_LENGTH && it.all(Char::isDigit) }
+                    ?.let { Enhetnummer(nummer) }
+        }
     }
     companion object {
         const val ENHET_PREFIX = "0000-GA-ENHET_"

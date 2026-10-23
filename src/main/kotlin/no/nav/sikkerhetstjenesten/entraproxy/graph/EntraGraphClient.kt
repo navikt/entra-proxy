@@ -22,7 +22,7 @@ interface EntraGraphClient {
 
     @GetExchange("/groups")
         fun groups(
-            @RequestParam($$"$select") select: String,
+        @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
         @RequestParam($$"$count") count: String = "true"
     ): Grupper

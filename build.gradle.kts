@@ -139,7 +139,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:${libs.versions.otelAlpha.get()}")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${libs.versions.otelAlpha.get()}")
     }
 }
 

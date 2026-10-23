@@ -12,7 +12,7 @@ interface EntraGraphOperations {
 
     fun grupper(ansattOid: UUID): Set<EntraGruppe>
 
-    fun grupperSomMatcher(gruppenavnSubstring: String): Set<EntraGruppe>
+    fun grupperSomMatcher(subString: String): Set<EntraGruppe>
 
     fun enheter(ansattOid: UUID): Set<Enhet.Enhetnummer>
 

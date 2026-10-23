@@ -10,7 +10,7 @@ metadata:
 spec:
   strategy:
     rollingUpdate:
-      maxSurge: 100%
+      maxSurge: 50%
   valkey:
     - instance: {{nais.cluster.cache}}
       access: readwrite

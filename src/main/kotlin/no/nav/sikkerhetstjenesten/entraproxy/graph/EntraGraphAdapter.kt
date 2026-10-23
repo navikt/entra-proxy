@@ -30,11 +30,11 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet ${it.size} gruppe(r) for $ansattOid") }
 
-    override fun grupperSomMatcher(gruppenavnSubstring: String): Set<EntraGruppe> =
-        allSider("grupper som matcher '$gruppenavnSubstring'", client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(gruppenavnSubstring)), Grupper::next, client::grupperSide)
+    override fun grupperSomMatcher(subString: String): Set<EntraGruppe> =
+        allSider("grupper som matcher '$subString'", client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)), Grupper::next, client::grupperSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
-            .also { log.info("Hentet ${it.size} gruppe(r) som matcher '$gruppenavnSubstring'") }
+            .also { log.info("Hentet ${it.size} gruppe(r) som matcher '$subString'") }
 
     override fun enheter(ansattOid: UUID): Set<Enhetnummer> =
         allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)

@@ -8,12 +8,11 @@ import org.springframework.cache.annotation.Cacheable
 import java.util.UUID
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
-import java.util.concurrent.Executors
 import java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor
 import java.util.concurrent.Semaphore
 
 @RestRetryingWhenRecoverableService
-class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktiveAnsatte, private val oid: EntraOidOperations, private val enheter: EnhetOperations)  {
+class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktive: InaktivOperations, private val oid: EntraOidOperations, private val enheter: EnhetOperations)  {
 
     private val log = getLogger(javaClass)
 
@@ -46,11 +45,11 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
         graph.antallMedlemmer(*gruppeIder)
 
-    fun medlemmerIGrupperSomMatcher(gruppenavnSubstring: String): List<GruppeMedMedlemmer> =
-        graph.grupperSomMatcher(gruppenavnSubstring).also {
-            log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
+    fun medlemmerIGrupperSomMatcher(subString: String): List<GruppeMedMedlemmer> =
+        graph.grupperSomMatcher(subString).also {
+            log.info("Fant ${it.size} grupper som matcher '$subString'")
             if (it.size > MAKS_MATCHENDE_GRUPPER) {
-                throw ForMangeMatchendeGrupperException(gruppenavnSubstring, it.size, MAKS_MATCHENDE_GRUPPER)
+                throw ForMangeMatchendeGrupperException(subString, it.size, MAKS_MATCHENDE_GRUPPER)
             }
         }
             .mapNotNull { gruppe -> gruppe.gruppeId?.let { it to gruppe.rolle } }
@@ -60,13 +59,11 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
                     GruppeMedMedlemmer(gruppeId, rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }
             }.also {
-                log.info("Hentet ${it.size} grupper med medlemmer som matcher '$gruppenavnSubstring'")
+                log.info("Hentet ${it.size} grupper med medlemmer som matcher '$subString'")
             }
 
     fun grupperPerAnsattSomMatcher(gruppenavnSubstring: String): List<AnsattMedGrupper> =
-        medlemmerIGrupperSomMatcher(gruppenavnSubstring).also {
-            log.info("Fant ${it.size} grupper som matcher '$gruppenavnSubstring'")
-        }
+        medlemmerIGrupperSomMatcher(gruppenavnSubstring)
             .flatMap { gruppe -> gruppe.medlemmer.map { it to gruppe.gruppenavn } }
             .groupBy({ it.first }, { it.second })
             .map { (ansatt, grupper) -> AnsattMedGrupper(ansatt, grupper.toSortedSet()) }
@@ -118,7 +115,7 @@ class EntraTjeneste(private val graph: EntraGraphOperations, private val inaktiv
         "${javaClass.simpleName} [graph=$graph]"
 
     companion object {
-        private const val MAKS_SAMTIDIGE_KALL = 32
+        private const val MAKS_SAMTIDIGE_KALL = 40
         private const val MAKS_MATCHENDE_GRUPPER = 100
     }
 }

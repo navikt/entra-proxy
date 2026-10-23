@@ -411,11 +411,11 @@ class EntraTjenesteTest(
         fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)
 
         @Bean
-        fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktiveAnsatte = CacheInaktiveAnsatte(cache)
+        fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktivOperations = CacheInaktiveAnsatte(cache)
 
         @Bean
         @Primary
-        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktiveAnsatte, oid: EntraOidOperations, enhetsnavn: NorgTjeneste) =
+        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktivOperations, oid: EntraOidOperations, enhetsnavn: NorgTjeneste) =
             EntraTjeneste(adapter, inaktive, oid, enhetsnavn)
     }
 

@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-interface InaktiveAnsatte {
+interface InaktivOperations {
 
     fun erInaktiv(ansattId: AnsattId): Boolean
 }

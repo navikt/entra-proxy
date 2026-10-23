@@ -13,13 +13,13 @@ class NomCacheOppfrisker(private val nom: NomTjeneste) : AbstractCacheOppfrisker
 
     override val cacheName: String = NOMGRAPH
 
-    override fun doOppfrisk(nøkkel: CacheNøkkel) {
-        val oppfrisk = oppfriskingFor(nøkkel.id)
-            ?: return log.warn("Ukjent id-format i nøkkel $nøkkel")
+    override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
+        val oppfrisk = oppfriskingFor(nøkkelElementer.id)
+            ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
         runCatching {
             oppfrisk()
         }.onFailure {
-            loggOppfriskingFeilet(nøkkel, it)
+            loggOppfriskingFeilet(nøkkelElementer, it)
         }
     }
 

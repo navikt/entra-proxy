@@ -101,6 +101,7 @@
         tbody tr:nth-child(even) td { background: #c5d4cb; }
         td.ja { color: #0a6e2e; font-weight: bold; text-align: center; font-size: 1.1rem; }
         td.nei { color: #6b6b6b; text-align: center; }
+        .navident-lenke { color: #00557d; }
         .sorter-knapp {
             padding: 0;
             border: 0;
@@ -274,6 +275,14 @@
         kopierStatus.classList.remove('error');
     }
 
+    function lagNavIdentLenke(navIdent) {
+        const lenke = document.createElement('a');
+        lenke.className = 'navident-lenke';
+        lenke.href = `/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
+        lenke.textContent = navIdent;
+        return lenke;
+    }
+
     function byggBasisTabell(ansatte) {
         const rader = ansatte.map(ansatt => {
             const rad = document.createElement('tr');
@@ -329,7 +338,7 @@
             const rad = document.createElement('tr');
             const identCelle = document.createElement('th');
             identCelle.scope = 'row';
-            identCelle.textContent = ansatt.navIdent;
+            identCelle.appendChild(lagNavIdentLenke(ansatt.navIdent));
             const navnCelle = document.createElement('td');
             navnCelle.textContent = ansatt.visningNavn ?? '';
             const enhetCelle = document.createElement('td');

@@ -19,7 +19,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppf
         val argument = argumentFor(nøkkelElementer.id)
             ?: return log.info("Ukjent id-format i nøkkel $nøkkelElementer")
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
-            ?: return log.warn("Ukjent nøkkel $nøkkelElementer")
+            ?: return log.info("Ukjent nøkkel $nøkkelElementer")
         MDC.put(USER_ID, nøkkelElementer.id)
         runCatching {
             metode.invoke(entra, argument)

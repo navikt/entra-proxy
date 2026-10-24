@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENTRA_CACHES
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
@@ -11,7 +12,7 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Component
 
 @Component
-class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker(GRAPH) {
+class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker(ENTRA_CACHES) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val argument = argumentFor(nøkkelElementer.id)
@@ -19,11 +20,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppf
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
             ?: return log.info("Ukjent nøkkel $nøkkelElementer")
         MDC.put(USER_ID, nøkkelElementer.id)
-        runCatching {
-            metode.invoke(entra, argument)
-        }.onFailure {
-            loggOppfriskingFeilet(nøkkelElementer, it)
-        }
+        metode.invoke(entra, argument)
     }
 
     private fun argumentFor(id: String): Any? =

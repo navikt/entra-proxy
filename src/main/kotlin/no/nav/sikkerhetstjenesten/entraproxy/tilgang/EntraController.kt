@@ -2,8 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
@@ -11,6 +9,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT

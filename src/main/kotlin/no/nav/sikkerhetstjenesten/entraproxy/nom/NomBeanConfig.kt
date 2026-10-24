@@ -8,9 +8,7 @@ import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder.httpComponents
-import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.boot.http.client.HttpClientSettings.defaults
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer

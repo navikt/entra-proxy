@@ -1,10 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.UNPROCESSABLE_CONTENT
-import org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice

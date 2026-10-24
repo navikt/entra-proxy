@@ -13,12 +13,12 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 
 class NomCacheOppfriskerTest : BehaviorSpec({
 
+    val cfg = mockk<NomGraphQLConfig> {
+        every { caches } returns setOf(NOM_CACHE)
+    }
     Given("en nomgraph cache-nøkkel") {
         When("id-en har AnsattId-format") {
             val nom = mockk<NomTjeneste>(relaxed = true)
-            val cfg = mockk<NomGraphQLConfig> {
-                every { caches } returns setOf(NOM_CACHE)
-            }
             NomCacheOppfrisker(nom,cfg).oppfrisk(CacheNøkkel("nomgraph::A123456"))
 
             Then("oppfriskes ansatt med AnsattId") {
@@ -28,9 +28,6 @@ class NomCacheOppfriskerTest : BehaviorSpec({
 
         When("id-en har NomIdent-format") {
             val nom = mockk<NomTjeneste>(relaxed = true)
-            val cfg = mockk<NomGraphQLConfig> {
-                every { caches } returns setOf(NOM_CACHE)
-            }
             NomCacheOppfrisker(nom,cfg).oppfrisk(CacheNøkkel("nomgraph::ab123c"))
 
             Then("oppfriskes ansatteForNomIdent med NomIdent") {
@@ -40,9 +37,7 @@ class NomCacheOppfriskerTest : BehaviorSpec({
 
         When("id-en har Enhetnummer-format") {
             val nom = mockk<NomTjeneste>(relaxed = true)
-            val cfg = mockk<NomGraphQLConfig> {
-                every { caches } returns setOf(NOM_CACHE)
-            }
+
             NomCacheOppfrisker(nom,cfg).oppfrisk(CacheNøkkel("nomgraph::0315"))
 
             Then("oppfriskes ansatteForEnhet med Enhetnummer") {
@@ -54,9 +49,6 @@ class NomCacheOppfriskerTest : BehaviorSpec({
     Given("en nomgraph cache-nøkkel med ugyldig id-format") {
         When("id-en ikke matcher noen av typene") {
             val nom = mockk<NomTjeneste>(relaxed = true)
-            val cfg = mockk<NomGraphQLConfig> {
-                every { caches } returns setOf(NOM_CACHE)
-            }
             NomCacheOppfrisker(nom,cfg).oppfrisk(CacheNøkkel("nomgraph::!ugyldig!"))
 
             Then("oppfriskes ingenting") {

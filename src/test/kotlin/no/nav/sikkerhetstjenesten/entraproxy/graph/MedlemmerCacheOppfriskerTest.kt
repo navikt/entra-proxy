@@ -12,29 +12,30 @@ import java.util.UUID
 
 class MedlemmerCacheOppfriskerTest : BehaviorSpec({
 
+    val cfg = mockk<MedlemmerConfig> {
+        every { caches } returns setOf(MEDLEMMER_CACHE)
+    }
     Given("en MEDLEMMER cache-nøkkel") {
         When("id-en er en gyldig UUID") {
             val entra = mockk<EntraTjeneste>(relaxed = true)
-            val cfg = mockk<MedlemmerConfig> {
-                every { caches } returns setOf(MEDLEMMER_CACHE)
-            }
             val gruppeId = UUID.randomUUID()
             MedlemmerCacheOppfrisker(entra,cfg).oppfrisk(CacheNøkkel("medlemmer::$gruppeId"))
 
             Then("oppfriskes medlemmerIGruppe med gruppe-id-en") {
-                verify(exactly = 1) { entra.medlemmerIGruppe(gruppeId) }
+                verify(exactly = 1) {
+                    entra.medlemmerIGruppe(gruppeId)
+                }
             }
         }
 
         When("id-en ikke er en gyldig UUID") {
             val entra = mockk<EntraTjeneste>(relaxed = true)
-            val cfg = mockk<MedlemmerConfig> {
-                every { caches } returns setOf(MEDLEMMER_CACHE)
-            }
             MedlemmerCacheOppfrisker(entra,cfg).oppfrisk(CacheNøkkel("medlemmer::ikke-en-uuid"))
 
             Then("oppfriskes ingenting") {
-                verify { entra wasNot Called }
+                verify {
+                    entra wasNot Called
+                }
             }
         }
     }

@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENTRA_CACHES
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
@@ -19,14 +18,16 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppf
             ?: return log.info("Ukjent id-format i nøkkel $nøkkelElementer")
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
             ?: return log.info("Ukjent nøkkel $nøkkelElementer")
-        MDC.put(USER_ID, nøkkelElementer.id)
-        metode.invoke(entra, argument)
+        metode(entra, argument)
     }
 
     private fun argumentFor(id: String): Any? =
-        runCatching { AnsattId(id) }.getOrNull()
-            ?: runCatching { TIdent(id) }.getOrNull()
+        AnsattId.parse(id) ?: TIdent.parse(id)
 
     private fun finnMetode(navn: String?, argumentType: Class<*>) =
-        navn?.let { runCatching { entra.javaClass.getMethod(it, argumentType) }.getOrNull() }
+        navn?.let {
+            runCatching {
+                entra.javaClass.getMethod(it, argumentType)
+            }.getOrNull()
+        }
 }

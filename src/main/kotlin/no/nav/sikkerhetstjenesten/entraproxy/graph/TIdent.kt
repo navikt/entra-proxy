@@ -12,7 +12,7 @@ data class TIdent (@JsonValue val verdi: String)  {
         }
     }
 
-    private companion object {
+    companion object {
         fun parse(verdi: String): TIdent? = runCatching {
             TIdent(verdi)
         }.getOrNull()

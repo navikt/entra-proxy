@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOM_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
@@ -13,9 +12,9 @@ import org.springframework.stereotype.Component
 class NomCacheOppfrisker(private val nom: NomTjeneste) : AbstractCacheOppfrisker(setOf(NOM_CACHE)) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
-        val oppfrisk = oppfriskingFor(nøkkelElementer.id)
-            ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
-        oppfrisk()
+        oppfriskingFor(nøkkelElementer.id)?.let {
+            it()
+        } ?: log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
     }
 
     private fun oppfriskingFor(id: String): (() -> Unit)? =

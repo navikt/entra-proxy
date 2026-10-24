@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component
 class NorgCacheOppfrisker(private val norg: NorgTjeneste) : AbstractCacheOppfrisker(NORG_CACHES) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
-        val enhetnummer = parse(nøkkelElementer.id)
-            ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
-        norg.navn(enhetnummer)
+        parse(nøkkelElementer.id)?.let {
+            enhetnummer ->
+            norg.navn(enhetnummer)
+        } ?: log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
     }
-
 }

@@ -26,6 +26,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -34,12 +35,13 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.TEXT_HTML
-import org.springframework.mail.MailSender
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.util.UUID
 
@@ -66,12 +68,11 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
     init {
 
         beforeEach {
-            every { oidTjeneste.ansattOid(TEST_ANSATT_ID) } returns UUID.randomUUID()
             every { oidTjeneste.gruppeOid(any()) } returns UUID.randomUUID()
-            every { entraTjeneste.enheter(any(), any()) } returns sortedSetOf(TEST_ENHET)
-            every { entraTjeneste.tema(any(), any()) } returns sortedSetOf(Tema("AAP"))
-            every { entraTjeneste.medlemmerIGruppe(any(), any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
-            every { entraTjeneste.grupperForAnsatt(any<AnsattId>(), any<UUID>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
+            every { entraTjeneste.enheter(any()) } returns sortedSetOf(TEST_ENHET)
+            every { entraTjeneste.tema(any()) } returns sortedSetOf(Tema("AAP"))
+            every { entraTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
+            every { entraTjeneste.grupper(any<AnsattId>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
                 "Test Ansatt",
@@ -90,6 +91,72 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 "test@nav.no",
                 TEST_ENHET,
             )
+        }
+
+        Given("health-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/health"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/health").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("beans-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/beans"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/beans").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("configprops-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/configprops"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/configprops").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("env-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/env"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/env").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("loggers-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/loggers"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/loggers").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
+        }
+
+        Given("caches-endepunktet") {
+            Then("krever autentisering") {
+                mockMvc.perform(get("/actuator/caches"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("tillater autentiserte forespørsler") {
+                mockMvc.perform(get("/actuator/caches").with(jwt()))
+                    .andExpect { result -> assertNotEquals(401, result.response.status) }
+            }
         }
 
         Given("en side som ikke finnes") {
@@ -129,20 +196,36 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             }
         }
 
-        Given("forsiden (index.html på rot)") {
-            When("request mangler innlogget sesjon") {
-                Then("returnerer 401 slik at Wonderwall kan starte innlogging") {
-                    mockMvc.perform(get("/"))
-                        .andExpect(status().isUnauthorized())
-                    mockMvc.perform(get("/index.html"))
-                        .andExpect(status().isUnauthorized())
+        Given("innloggings- og utloggings-endepunktene") {
+            When("uinnlogget bruker starter innlogging") {
+                Then("omdirigerer til autorisasjonsserveren") {
+                    mockMvc.perform(get("/oauth2/authorization/entra"))
+                        .andExpect(status().is3xxRedirection())
                 }
             }
-            When("request har gyldig token") {
+            When("innlogget bruker logger ut") {
+                Then("omdirigerer til utloggingssiden") {
+                    mockMvc.perform(get("/oauth2/logout").with(oidcLogin()))
+                        .andExpect(status().is3xxRedirection())
+                        .andExpect(redirectedUrl("/logout.html"))
+                }
+            }
+        }
+
+        Given("forsiden (index.html på rot)") {
+            When("request mangler innlogget sesjon") {
+                Then("omdirigerer til innlogging") {
+                    mockMvc.perform(get("/"))
+                        .andExpect(status().is3xxRedirection())
+                    mockMvc.perform(get("/index.html"))
+                        .andExpect(status().is3xxRedirection())
+                }
+            }
+            When("request har innlogget sesjon") {
                 Then("serverer utforskersiden") {
-                    mockMvc.perform(get("/").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/").with(oidcLogin()))
                         .andExpect(status().isOk())
-                    mockMvc.perform(get("/index.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/index.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("Utforsker")))
                 }
@@ -247,7 +330,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden bruker gruppe-endepunktet") {
-                    mockMvc.perform(get("/grupper.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/grupper.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
@@ -259,7 +342,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 }
                 Then("krever innlogget sesjon ved direkte tilgang") {
                     mockMvc.perform(get("/grupper.html"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                 }
                 Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
@@ -326,6 +409,19 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$.visningsnavn").value("Test Ansatt"))
                         .andExpect(jsonPath("$.gjeldendeSektor").value("STAT"))
                         .andExpect(jsonPath("$.orgTilknytninger[0].orgEnhet.navn").value("Testenhet"))
+                }
+            }
+            When("request har innlogget nettlesersesjon uten Bearer-token") {
+                Then("returnerer ansattdata via sesjonen") {
+                    every { nomTjeneste.ansatt(TEST_ANSATT_ID) } returns NomAnsatt(
+                        navident = TEST_ANSATT_ID,
+                        visningsnavn = "Test Ansatt",
+                        gjeldendeSektor = "STAT",
+                        orgTilknytninger = emptySet()
+                    )
+                    mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.navident").value(TEST_ANSATT_ID.verdi))
                 }
             }
         }
@@ -395,10 +491,10 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("request har gyldig gruppe") {
                 Then("ansatt.html krever innlogging") {
                     mockMvc.perform(get("/ansatt.html"))
-                        .andExpect(status().isUnauthorized())
+                        .andExpect(status().is3xxRedirection())
                 }
                 Then("ansatt.html er tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().string(containsString("/api/v1/gruppe/antall/bulk")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
@@ -451,7 +547,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
                 Then("ansatt.html er tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                 }
             }

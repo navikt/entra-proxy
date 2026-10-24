@@ -1,6 +1,8 @@
 
 management:
   info:
+    process:
+      enabled: true
     build:
       enabled: true
     os:
@@ -15,11 +17,6 @@ management:
     annotations:
       enabled: true
   health:
-    group:
-      readiness:
-        show-components: never
-      liveness:
-        show-components: never
     redis:
       enabled: false
     ssl:
@@ -28,6 +25,13 @@ management:
       enabled: false
     diskspace:
       enabled: false
+  endpoint:
+    health:
+      group:
+        readiness:
+          show-components: never
+        liveness:
+          show-components: never
   endpoints:
     web:
       base-path: /monitoring
@@ -42,7 +46,7 @@ spring:
         base-url: "https://graph.microsoft.com/v1.0"
     clients:
       connect-timeout: 3s
-      read-timeout: 5s
+      read-timeout: 10s
   threads:
     virtual:
       enabled: true
@@ -101,6 +105,15 @@ spring:
             authorization-grant-type: client_credentials
             scope:
               - "api://${nais.cluster.type}-gcp.nom.nom-api/.default"
+          entra:
+            provider: azuread
+            client-id: ${azure.app.client.id}
+            client-secret: ${azure.app.client.secret}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
 
         provider:
           azuread:
@@ -146,5 +159,6 @@ valkey:
 info:
   image: ${nais.app.image:unknown}
 server:
+  forward-headers-strategy: framework
   shutdown: graceful
   shutdown-delay: 30s

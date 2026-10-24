@@ -22,8 +22,8 @@ import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 
 
 @Configuration
-class FellesBeanConfig(private val ctx: AuthContext,
-                         private val meterRegistry: MeterRegistry,) : WebMvcConfigurer {
+class RestClientBeanConfig(private val ctx: AuthContext,
+                           private val meterRegistry: MeterRegistry) : WebMvcConfigurer {
 
 
     @Bean
@@ -48,10 +48,10 @@ class FellesBeanConfig(private val ctx: AuthContext,
                 }
         }
 
-
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(ConsumerAwareHandlerInterceptor(ctx, meterRegistry))
     }
+
     override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
         configurer.defaultContentType(APPLICATION_JSON)
     }
@@ -59,6 +59,7 @@ class FellesBeanConfig(private val ctx: AuthContext,
     override fun addFormatters(registry: FormatterRegistry) {
         registry.addConverter(StringToEnhetnummerConverter())
     }
+
     companion object {
         fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
             ClientHttpRequestInterceptor { request, body, next ->

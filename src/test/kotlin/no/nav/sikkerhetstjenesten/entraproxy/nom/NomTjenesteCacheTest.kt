@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration
 @SpringBootTest(classes = [CacheTestConfig::class], webEnvironment = NONE)
 class NomTjenesteCacheTest(
     private val tjeneste: NomTjeneste,
-    private val nom: NomPort
+    private val nom: NomOperations
 ) : BehaviorSpec() {
 
     @Configuration
@@ -29,10 +29,10 @@ class NomTjenesteCacheTest(
         fun cacheManager() = CaffeineCacheManager(NOMGRAPH)
 
         @Bean
-        fun nomPort(): NomPort = mockk()
+        fun nomPort(): NomOperations = mockk()
 
         @Bean
-        fun nomTjeneste(nom: NomPort) = NomTjeneste(nom)
+        fun nomTjeneste(nom: NomOperations) = NomTjeneste(nom)
     }
 
     init {

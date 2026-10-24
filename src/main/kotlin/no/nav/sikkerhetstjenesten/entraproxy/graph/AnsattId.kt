@@ -18,6 +18,11 @@ data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
 
     companion object {
         const val ANSATTID_LENGTH = 7
+
+        fun parse(verdi: String): AnsattId? =
+            runCatching {
+                AnsattId(verdi)
+            }.getOrNull()
     }
 
     override fun toString() = verdi

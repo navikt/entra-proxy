@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sammenlign grupper</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <style>
+        * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #283b38;
+            background-image: url("/wildlife.svg");
+            background-position: center;
+            background-size: 720px 600px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        main {
+            max-width: 90rem;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        h1 {
+            text-align: center;
+            text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr;
+            max-width: 32rem;
+            margin: 0 auto 2rem;
+            gap: 1.5rem;
+        }
+        .aksel-text-field__input {
+            background-color: #d3dfd7;
+        }
+        .sok-knapper {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        .status { min-height: 1.5rem; margin-top: 1rem; }
+        .status.error { color: #ffb4b4; }
+        .sok-panel > h2 { text-align: center; }
+        .hovedsok {
+            display: grid;
+            grid-template-columns: 1fr;
+            max-width: 32rem;
+            margin: 0 auto;
+            gap: 1.5rem;
+        }
+        .hovedsok > p { text-align: center; margin: 0; font-weight: bold; }
+        @media (min-width: 60rem) {
+            .hovedsok {
+                grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+                max-width: none;
+            }
+            .hovedsok > p { align-self: start; margin-top: 3rem; }
+        }
+        .steg-skille { margin: 2.5rem 0 2rem; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.3); }
+        .kopi-rad { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .kopi-rad .status { margin-top: 0; min-height: 0; }
+        html.soker,
+        html.soker * {
+            cursor: url("/kikkert.svg") 16 16, wait !important;
+        }
+        .tabell-ramme {
+            background: #d3dfd7;
+            overflow: auto;
+            color: #1f1f1f;
+            max-height: 75vh;
+        }
+        table {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 0.6rem 0.75rem;
+            border-bottom: 1px solid #d1d6db;
+            overflow-wrap: anywhere;
+            white-space: nowrap;
+        }
+        thead th {
+            position: sticky;
+            top: 0;
+            background: #c5d4cb;
+            vertical-align: bottom;
+        }
+        tbody th[scope="row"] {
+            position: sticky;
+            left: 0;
+            background: #d3dfd7;
+            font-weight: bold;
+        }
+        tbody tr:nth-child(even) th[scope="row"],
+        tbody tr:nth-child(even) td { background: #c5d4cb; }
+        td.ja { color: #0a6e2e; font-weight: bold; text-align: center; font-size: 1.1rem; }
+        td.nei { color: #6b6b6b; text-align: center; }
+        .navident-lenke { color: #00557d; }
+        .sorter-knapp {
+            padding: 0;
+            border: 0;
+            background: none;
+            color: inherit;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .sorter-knapp::after { content: " \2195"; opacity: 0.5; }
+        th[aria-sort="ascending"] .sorter-knapp::after { content: " \2191"; opacity: 1; }
+        th[aria-sort="descending"] .sorter-knapp::after { content: " \2193"; opacity: 1; }
+        .utlogging {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #d1d6db;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1 class="aksel-heading aksel-heading--large">Sammenlign grupper</h1>
+
+    <section class="sok-panel" aria-label="Velg gruppe som skal utforskes">
+        <h2 class="aksel-heading aksel-heading--medium">Velg gruppe som skal utforskes</h2>
+        <div class="hovedsok">
+            <form id="nom-form" class="nom-form">
+                <div class="aksel-form-field">
+                    <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
+                    <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text"
+                           pattern="[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]" minlength="4" maxlength="6" required
+                           autocomplete="off" placeholder="4 siffer (tilgangsenhet) eller 6 tegn (enhet)">
+                </div>
+                <div class="sok-knapper">
+                    <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
+                </div>
+                <p class="aksel-body-short status" id="nom-status" role="status" aria-live="polite"></p>
+            </form>
+            <p class="aksel-body-short" aria-hidden="true">eller</p>
+            <form id="gruppe-form">
+                <div class="aksel-form-field">
+                    <label class="aksel-label" for="basisGruppeNavn">Entra gruppenavn</label>
+                    <input class="aksel-text-field__input" id="basisGruppeNavn" name="basisGruppeNavn" type="text" required
+                           autocomplete="off" placeholder="Gruppenavn">
+                </div>
+                <div class="sok-knapper">
+                    <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
+                </div>
+                <p class="aksel-body-short status" id="basis-status" role="status" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
+
+    <section id="basis-resultat" aria-labelledby="basis-overskrift" hidden>
+        <h2 class="aksel-visually-hidden" id="basis-overskrift">Ansatte som skal utforskes</h2>
+        <table aria-label="Ansatte som skal utforskes">
+            <thead>
+                <tr><th scope="col">Nav-ident</th><th scope="col">Navn</th></tr>
+            </thead>
+            <tbody id="basis-rader"></tbody>
+        </table>
+    </section>
+
+    <hr class="steg-skille">
+
+    <section class="sok-panel" aria-label="Matrisesøk">
+        <h2 class="aksel-heading aksel-heading--medium">Bygg matrise fra gruppenavn</h2>
+        <form id="sok-form">
+            <div class="aksel-form-field">
+                <label class="aksel-label" for="gruppeNavn">Del av gruppenavn</label>
+                <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required
+                       autocomplete="off" placeholder="F.eks. TEMA">
+            </div>
+            <div class="sok-knapper">
+                <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Bygg matrise</button>
+            </div>
+            <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
+        </form>
+    </section>
+
+    <section id="resultat" aria-labelledby="resultat-overskrift" hidden>
+        <h2 class="aksel-heading aksel-heading--medium aksel-visually-hidden" id="resultat-overskrift">Medlemskap per ansatt</h2>
+        <div class="kopi-rad">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="kopier-matrise" type="button">Kopier til utklippstavlen</button>
+            <p class="aksel-body-short status" id="kopier-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="tabell-ramme" tabindex="0" role="region" aria-labelledby="resultat-overskrift">
+            <table aria-label="Medlemskap per ansatt og gruppe">
+                <thead id="tabell-overskrift"></thead>
+                <tbody id="tabell-rader"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="utlogging">
+        <a class="aksel-button" data-variant="secondary" data-color="brand-blue" href="/index.html">Tilbake</a>
+        <a class="aksel-button" data-variant="primary" data-color="danger" href="/oauth2/logout">Logg ut</a>
+    </div>
+</main>
+<script>
+    const nomForm = document.getElementById('nom-form');
+    const gruppeForm = document.getElementById('gruppe-form');
+    const basisResultat = document.getElementById('basis-resultat');
+    const basisRader = document.getElementById('basis-rader');
+    const form = document.getElementById('sok-form');
+    const input = document.getElementById('gruppeNavn');
+    const status = document.getElementById('status');
+    const resultat = document.getElementById('resultat');
+    const tabellOverskrift = document.getElementById('tabell-overskrift');
+    const tabellRader = document.getElementById('tabell-rader');
+    const kopierKnapp = document.getElementById('kopier-matrise');
+    const kopierStatus = document.getElementById('kopier-status');
+
+    let basisAnsatte = null;
+    let enhetsnummerPerAnsatt = new Map();
+
+    function settStatus(melding, erFeil = false) {
+        status.textContent = melding;
+        status.classList.toggle('error', erFeil);
+    }
+
+    async function hentEnhetsnummer(navidenter) {
+        enhetsnummerPerAnsatt = new Map();
+        if (navidenter.length === 0) {
+            return;
+        }
+        const response = await fetch('/api/v1/nom/enhet/bulk', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify(navidenter),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const ressurser = await response.json();
+        if (!Array.isArray(ressurser)) {
+            throw new Error('Uventet respons fra Nom.');
+        }
+        for (const ressurs of ressurser) {
+            const enheter = (ressurs?.orgTilknytninger ?? [])
+                .map(tilknytning => tilknytning?.orgEnhet?.tilgangsenhetId)
+                .filter(Boolean);
+            enhetsnummerPerAnsatt.set(ressurs?.navident, [...new Set(enheter)].join(', '));
+        }
+    }
+
+    function settBasisStatus(skjema, melding, erFeil = false) {
+        const linje = skjema.querySelector('.status');
+        linje.textContent = melding;
+        linje.classList.toggle('error', erFeil);
+    }
+
+    function lagOverskriftsknapp(tekst, kolonne) {
+        const knapp = document.createElement('button');
+        knapp.type = 'button';
+        knapp.className = 'sorter-knapp';
+        knapp.dataset.kolonne = String(kolonne);
+        knapp.textContent = tekst;
+        return knapp;
+    }
+
+    function nullstillMatrise() {
+        resultat.hidden = true;
+        tabellOverskrift.replaceChildren();
+        tabellRader.replaceChildren();
+        settStatus('');
+        kopierStatus.textContent = '';
+        kopierStatus.classList.remove('error');
+    }
+
+    function lagNavIdentLenke(navIdent) {
+        const lenke = document.createElement('a');
+        lenke.className = 'navident-lenke';
+        lenke.href = `/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
+        lenke.textContent = navIdent;
+        return lenke;
+    }
+
+    function byggBasisTabell(ansatte) {
+        const rader = ansatte.map(ansatt => {
+            const rad = document.createElement('tr');
+            const identCelle = document.createElement('th');
+            identCelle.scope = 'row';
+            identCelle.textContent = ansatt.navIdent;
+            const navnCelle = document.createElement('td');
+            navnCelle.textContent = ansatt.visningNavn ?? '';
+            rad.append(identCelle, navnCelle);
+            return rad;
+        });
+        basisRader.replaceChildren(...rader);
+    }
+
+    function byggMatrise(data, substring) {
+        const sok = substring.toLowerCase();
+        const medlemskapPerAnsatt = new Map(
+            data.map(({ansatt, grupper}) => [
+                ansatt.navIdent,
+                new Set(grupper.filter(gruppe => gruppe.toLowerCase().includes(sok))),
+            ])
+        );
+
+        const gruppeSett = new Set();
+        for (const ansatt of basisAnsatte) {
+            for (const gruppe of medlemskapPerAnsatt.get(ansatt.navIdent) ?? []) {
+                gruppeSett.add(gruppe);
+            }
+        }
+        const grupper = [...gruppeSett].sort((a, b) => a.localeCompare(b, 'nb', {sensitivity: 'base'}));
+
+        const overskriftsrad = document.createElement('tr');
+        const identOverskrift = document.createElement('th');
+        identOverskrift.scope = 'col';
+        identOverskrift.append(lagOverskriftsknapp('Nav-ident', 0));
+        const navnOverskrift = document.createElement('th');
+        navnOverskrift.scope = 'col';
+        navnOverskrift.append(lagOverskriftsknapp('Navn', 1));
+        const enhetOverskrift = document.createElement('th');
+        enhetOverskrift.scope = 'col';
+        enhetOverskrift.append(lagOverskriftsknapp('Nom-enhet', 2));
+        overskriftsrad.append(identOverskrift, navnOverskrift, enhetOverskrift);
+        grupper.forEach((gruppe, indeks) => {
+            const celle = document.createElement('th');
+            celle.scope = 'col';
+            celle.append(lagOverskriftsknapp(gruppe, indeks + 3));
+            overskriftsrad.append(celle);
+        });
+        tabellOverskrift.replaceChildren(overskriftsrad);
+
+        const rader = basisAnsatte.map(ansatt => {
+            const medlemskap = medlemskapPerAnsatt.get(ansatt.navIdent) ?? new Set();
+            const rad = document.createElement('tr');
+            const identCelle = document.createElement('th');
+            identCelle.scope = 'row';
+            identCelle.appendChild(lagNavIdentLenke(ansatt.navIdent));
+            const navnCelle = document.createElement('td');
+            navnCelle.textContent = ansatt.visningNavn ?? '';
+            const enhetCelle = document.createElement('td');
+            enhetCelle.textContent = enhetsnummerPerAnsatt.get(ansatt.navIdent) ?? '';
+            rad.append(identCelle, navnCelle, enhetCelle);
+            for (const gruppe of grupper) {
+                const erMedlem = medlemskap.has(gruppe);
+                const celle = document.createElement('td');
+                celle.textContent = erMedlem ? '✓' : '';
+                if (erMedlem) {
+                    celle.setAttribute('aria-label', 'Medlem');
+                }
+                celle.classList.add(erMedlem ? 'ja' : 'nei');
+                rad.append(celle);
+            }
+            return rad;
+        });
+        tabellRader.replaceChildren(...rader);
+
+        return {antallGrupper: grupper.length, antallAnsatte: basisAnsatte.length};
+    }
+
+    tabellOverskrift.addEventListener('click', (event) => {
+        const knapp = event.target.closest('.sorter-knapp');
+        if (!knapp) {
+            return;
+        }
+        const overskrift = knapp.closest('th');
+        const retning = overskrift.getAttribute('aria-sort') === 'ascending' ? 'descending' : 'ascending';
+        for (const th of tabellOverskrift.querySelectorAll('th')) {
+            th.removeAttribute('aria-sort');
+        }
+        overskrift.setAttribute('aria-sort', retning);
+        const kolonne = Number(knapp.dataset.kolonne);
+        const rader = [...tabellRader.rows];
+        rader.sort((radA, radB) => {
+            const verdiA = radA.cells[kolonne].textContent.trim();
+            const verdiB = radB.cells[kolonne].textContent.trim();
+            const sammenligning = verdiA.localeCompare(verdiB, 'nb', {numeric: true, sensitivity: 'base'});
+            return retning === 'ascending' ? sammenligning : -sammenligning;
+        });
+        tabellRader.replaceChildren(...rader);
+    });
+
+    kopierKnapp.addEventListener('click', async () => {
+        kopierKnapp.disabled = true;
+        kopierStatus.classList.remove('error');
+        kopierStatus.textContent = 'Kopierer...';
+        try {
+            if (!navigator.clipboard?.writeText) {
+                throw new Error('Utklippstavlen er ikke tilgjengelig. Bruk HTTPS og en nettleser som støtter kopiering.');
+            }
+            const overskrifter = [...tabellOverskrift.rows[0].cells].map(celle =>
+                celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
+            );
+            const rader = [...tabellRader.rows].map(rad =>
+                [...rad.cells].map((celle, kolonne) =>
+                    kolonne >= 3 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim()
+                )
+            );
+            const tekst = [overskrifter, ...rader].map(rad => rad.join(';')).join('\r\n');
+            await navigator.clipboard.writeText(tekst);
+            kopierStatus.textContent = 'Matrisen er kopiert til utklippstavlen.';
+        } catch (error) {
+            kopierStatus.textContent = `Kopiering feilet: ${error.message}`;
+            kopierStatus.classList.add('error');
+        } finally {
+            kopierKnapp.disabled = false;
+        }
+    });
+
+    for (const skjema of [nomForm, gruppeForm]) {
+        skjema.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const erNomSok = skjema.classList.contains('nom-form');
+            const verdi = skjema.querySelector('input').value.trim();
+            const erTilgangsenhet = /^[0-9]{4}$/.test(verdi);
+            const erNomEnhet = /^[a-z]{2}[0-9]{3}[a-z]$/.test(verdi);
+
+            if (erNomSok ? !(erTilgangsenhet || erNomEnhet) : !verdi) {
+                settBasisStatus(skjema, erNomSok
+                    ? 'Skriv inn en tilgangsenhetId (4 siffer) eller en nom-enhet (6 tegn).'
+                    : 'Skriv inn et gruppenavn.', true);
+                return;
+            }
+
+            basisAnsatte = null;
+            enhetsnummerPerAnsatt = new Map();
+            basisResultat.hidden = true;
+            basisRader.replaceChildren();
+            nullstillMatrise();
+            settBasisStatus(nomForm, '');
+            settBasisStatus(gruppeForm, '');
+            settBasisStatus(skjema, 'Henter medlemmer...');
+            document.documentElement.classList.add('soker');
+
+            try {
+                const url = erNomSok
+                    ? (erNomEnhet ? `/api/v1/nom/ansatte/enhet/${verdi}` : `/api/v1/nom/ansatte/${verdi}`)
+                    : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: verdi})}`;
+                const response = await fetch(url, {headers: {'Accept': 'application/json'}});
+                if (!response.ok) {
+                    let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
+                    if (response.headers.get('content-type')?.includes('json')) {
+                        const problem = await response.json();
+                        melding = problem.detail ?? melding;
+                    }
+                    throw new Error(melding);
+                }
+
+                const data = await response.json();
+                if (!Array.isArray(data)) {
+                    throw new Error('Uventet respons: forventet en liste med medlemmer.');
+                }
+                const ansatte = erNomSok
+                    ? data.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
+                    : data.map(ressurs => ({navIdent: ressurs?.navIdent, visningNavn: ressurs?.visningNavn}));
+                if (ansatte.some(ansatt => typeof ansatt.navIdent !== 'string')) {
+                    throw new Error('Uventet respons: mangler nav-ident.');
+                }
+
+                basisAnsatte = ansatte;
+                byggBasisTabell(ansatte);
+                try {
+                    await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent));
+                } catch (feil) {
+                    enhetsnummerPerAnsatt = new Map();
+                }
+                settBasisStatus(skjema, ansatte.length
+                    ? `${ansatte.length} ansatt(e) valgt. Bygg matrisen under.`
+                    : 'Ingen medlemmer funnet.');
+            } catch (error) {
+                settBasisStatus(skjema, `Henting feilet: ${error.message}`, true);
+            } finally {
+                document.documentElement.classList.remove('soker');
+            }
+        });
+    }
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const gruppeNavn = input.value.trim();
+        if (!gruppeNavn) {
+            return;
+        }
+        if (!basisAnsatte || basisAnsatte.length === 0) {
+            settStatus('Velg først en gruppe som skal utforskes.', true);
+            return;
+        }
+
+        document.documentElement.classList.add('soker');
+        settStatus('Søker...');
+        nullstillMatrise();
+
+        try {
+            const url = `/api/v1/gruppe/medlemmer/sok/per-ansatt?${new URLSearchParams({gruppeNavn})}`;
+            const response = await fetch(url, {headers: {'Accept': 'application/json'}});
+            if (!response.ok) {
+                let melding = `Søket feilet (HTTP ${response.status}).`;
+                if (response.headers.get('content-type')?.includes('json')) {
+                    const problem = await response.json();
+                    melding = problem.detail ?? melding;
+                }
+                throw new Error(melding);
+            }
+
+            const data = await response.json();
+            const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn);
+            if (antallGrupper === 0) {
+                settStatus(`Ingen av de ${antallAnsatte} ansatte er medlem av grupper som inneholder «${gruppeNavn}».`);
+                return;
+            }
+            resultat.hidden = false;
+            settStatus(`${antallAnsatte} ansatte og ${antallGrupper} grupper`);
+        } catch (error) {
+            settStatus(error.message, true);
+        } finally {
+            document.documentElement.classList.remove('soker');
+        }
+    });
+</script>
+</body>
+</html>

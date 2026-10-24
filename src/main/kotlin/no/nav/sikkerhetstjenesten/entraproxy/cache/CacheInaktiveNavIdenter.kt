@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.cache
 
 import no.nav.boot.conditionals.ConditionalOnGCP
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphOperations
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.leder.LeaderAware
 import org.slf4j.LoggerFactory.getLogger
@@ -14,7 +14,7 @@ import kotlin.time.measureTimedValue
 
 @Component
 @ConditionalOnGCP
-class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
+class CacheInaktiveNavIdenter(private val graf: EntraGraphOperations, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
 
     private val log = getLogger(javaClass)
 
@@ -23,7 +23,7 @@ class CacheInaktiveNavIdenter(private val entra: EntraTjeneste, private val cach
         somLeder {
             val måling = measureTimedValue {
                 runCatching {
-                    cache.putSet(INAKTIVE, entra.gruppeMedlemmer("$uuid", "Alle brukere i permisjon").mapTo(mutableSetOf()) {
+                    cache.putSet(INAKTIVE, graf.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) {
                         it.navIdent.verdi
                     })
                     cache.getSet(INAKTIVE)

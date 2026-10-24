@@ -3,4 +3,4 @@ FROM ${BASE_IMAGE}
 ENV TZ="Europe/Oslo"
 WORKDIR /app
 COPY build/libs/app.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Duser.language=nb", "-Duser.country=NO", "-jar", "app.jar"]

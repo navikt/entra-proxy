@@ -4,21 +4,25 @@ import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldStartWith
+import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CaffeineCacheOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import org.springframework.boot.restclient.test.MockServerRestClientCustomizer
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
+import org.springframework.test.web.client.UnorderedRequestExpectationManager
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
@@ -32,6 +36,7 @@ class EntraTjenesteTest(
     private val server: MockRestServiceServer,
     private val client: EntraGraphClient,
     private val entra: EntraTjeneste,
+    private val adapter: EntraGraphAdapter,
     private val oid: EntraOidTjeneste) : BehaviorSpec() {
 
     @MockkBean(relaxed = true)
@@ -107,10 +112,10 @@ class EntraTjenesteTest(
             When("det finnes medlemmer") {
                 Then("skal responsen inneholde forventede medlemmer") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$GROUP_ID/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$GROUP_ID/members"
                     }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
 
-                    entra.medlemmerIGruppe("En gruppe", GROUP_ID) shouldBe setOf(ANSATT)
+                    entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -123,7 +128,7 @@ class EntraTjenesteTest(
                     val medlem2Id = "${randomUUID()}"
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
                     }.andRespond(withSuccess(
                         """
                         {
@@ -135,7 +140,7 @@ class EntraTjenesteTest(
                         """.trimIndent(), APPLICATION_JSON))
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString() == nesteSideUri
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteSideUri
                     }.andRespond(withSuccess(
                         """
                         {
@@ -145,7 +150,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(
+                    adapter.gruppeMedlemmer("$gruppeId") shouldBe setOf(
                         ANSATT,
                         Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")
                     )
@@ -160,7 +165,7 @@ class EntraTjenesteTest(
                     val nøstetGruppeId = "${randomUUID()}"
 
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups/$gruppeId/members")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
                     }.andRespond(withSuccess(
                         """
                         {
@@ -171,7 +176,7 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    entra.gruppeMedlemmer("$gruppeId","Test") shouldBe setOf(ANSATT)
+                    adapter.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -180,7 +185,7 @@ class EntraTjenesteTest(
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
                     }.andRespond(withSuccess(oidContract, APPLICATION_JSON))
                     repeat(2) {
                         oid.ansattOid(AnsattId("A123456")) shouldBe OID
@@ -193,7 +198,7 @@ class EntraTjenesteTest(
             When("det finnes en gruppe med gitt navn") {
                 Then("skal gruppens oid returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/groups")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups"
                     }.andRespond(withSuccess(gruppeContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -203,15 +208,114 @@ class EntraTjenesteTest(
             }
         }
 
+        Given("groups-endepunkt for søk etter grupper som matcher en substring") {
+            When("flere grupper matcher og søket pagineres via @odata.nextLink") {
+                Then("skal medlemmene i alle matchende grupper returneres med gruppenavn") {
+                    val gruppe1Id = randomUUID()
+                    val gruppe2Id = randomUUID()
+                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/groups"
+                        request.uri.query shouldContain "\$search=\"displayName:MIN_ROLLE\""
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "@odata.nextLink": "$nesteGruppeSideUri",
+                          "value": [
+                            { "id": "$gruppe1Id", "displayName": "0000-GA-MIN_ROLLE_A", "description": "A" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteGruppeSideUri
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$gruppe2Id", "displayName": "0000-GA-MIN_ROLLE_B", "description": "B" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "${randomUUID()}", "displayName": "Kari Nordmann", "givenName": "Kari", "surname": "Nordmann", "onPremisesSamAccountName": "E654321" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    entra.medlemmerIGrupperSomMatcher("MIN_ROLLE") shouldBe listOf(
+                        GruppeMedMedlemmer(gruppe1Id, "0000-GA-MIN_ROLLE_A", setOf(ANSATT)),
+                        GruppeMedMedlemmer(gruppe2Id, "0000-GA-MIN_ROLLE_B",
+                            setOf(Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")))
+                    )
+                }
+            }
+            When("samme ansatt er medlem i flere matchende grupper") {
+                Then("skal resultatet per ansatt samle alle gruppene vedkommende er medlem i") {
+                    val gruppe1Id = randomUUID()
+                    val gruppe2Id = randomUUID()
+                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/groups"
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "@odata.nextLink": "$nesteGruppeSideUri",
+                          "value": [
+                            { "id": "$gruppe1Id", "displayName": "0000-GA-MIN_ROLLE_A" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldBe nesteGruppeSideUri
+                    }.andRespond(withSuccess(
+                        """
+                        {
+                          "value": [
+                            { "id": "$gruppe2Id", "displayName": "0000-GA-MIN_ROLLE_B" }
+                          ]
+                        }
+                        """.trimIndent(), APPLICATION_JSON))
+
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
+                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+
+                    entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
+                        AnsattMedGrupper(ANSATT, setOf("0000-GA-MIN_ROLLE_A", "0000-GA-MIN_ROLLE_B"))
+                    )
+                }
+            }
+        }
+
         Given("memberOf-endepunkt for temaer") {
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
                     }.andRespond(withSuccess(temaContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.tema(AnsattId("A123456"), ANSATT_OID) shouldBe setOf(Tema("AAP"))
+                        entra.tema(AnsattId("B123456")) shouldBe setOf(Tema("AAP"))
                     }
                 }
             }
@@ -221,11 +325,14 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en enhet-gruppe") {
                 Then("skal enhetsnummeret returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users/$ANSATT_OID/memberOf")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
                     }.andRespond(withSuccess(enhetContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.enheter(AnsattId("A123456"), ANSATT_OID).map { it.enhetnummer.verdi } shouldBe listOf("1234")
+                        entra.enheter(AnsattId("C123456")).map { it.enhetnummer.verdi } shouldBe listOf("1234")
                     }
                 }
             }
@@ -235,13 +342,16 @@ class EntraTjenesteTest(
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
                     server.expect { request ->
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
+                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
                         request.uri.query shouldContain "\$select=id,displayName,securityEnabled,mailEnabled,description"
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
-                        entra.grupperForAnsatt(AnsattId("A123456"), ANSATT_OID) shouldBe
+                        entra.grupper(AnsattId("D123456")) shouldBe
                             setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID, "Tilgang til min rolle"))
                     }
                 }
@@ -252,7 +362,7 @@ class EntraTjenesteTest(
                         request.method shouldBe GET
                     }.andRespond(withSuccess(grupperContract.replace(", \"description\": \"Tilgang til min rolle\"", ""), APPLICATION_JSON))
 
-                    entra.grupperForAnsatt(AnsattId("A123456"), "$ANSATT_OID") shouldBe
+                    adapter.grupper(ANSATT_OID) shouldBe
                         setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID))
                 }
             }
@@ -262,7 +372,7 @@ class EntraTjenesteTest(
             When("det finnes en bruker for navident") {
                 Then("skal utvidet ansatt-informasjon returneres") {
                     server.expect { request ->
-                        request.method == GET && request.uri.toString().startsWith("$baseUrl/users")
+                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
                     }.andRespond(withSuccess(utvidetAnsattContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -284,6 +394,10 @@ class EntraTjenesteTest(
     class TestBeanConfig {
 
         @Bean
+        fun mockServerRestClientCustomizer() =
+            MockServerRestClientCustomizer(UnorderedRequestExpectationManager::class.java)
+
+        @Bean
         fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
             builderFor(create(builder.baseUrl(baseUrl).build())).build().createClient()
 
@@ -291,8 +405,18 @@ class EntraTjenesteTest(
         fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
 
         @Bean
-        fun entraTjeneste(client: EntraGraphClient, norg: NorgTjeneste, oid: EntraOidTjeneste, cache: CaffeineCacheOperations) =
-            EntraTjeneste(client, norg, oid, cache)
+        fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
+
+        @Bean
+        fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)
+
+        @Bean
+        fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktivOperations = CacheInaktiveAnsatte(cache)
+
+        @Bean
+        @Primary
+        fun entraTjeneste(adapter: EntraGraphAdapter, inaktive: InaktivOperations, oid: EntraOidOperations, enhetsnavn: NorgTjeneste) =
+            EntraTjeneste(adapter, inaktive, oid, enhetsnavn)
     }
 
     private companion object {
@@ -324,6 +448,15 @@ class EntraTjenesteTest(
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
               "value": [
                 { "id": "$OID" }
+              ]
+            }
+        """.trimIndent()
+
+        private val ansattOidContract = """
+            {
+              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
+              "value": [
+                { "id": "$ANSATT_OID" }
               ]
             }
         """.trimIndent()

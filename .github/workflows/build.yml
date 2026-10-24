@@ -5,11 +5,6 @@ name: Build (reusable)
 on:
   workflow_call:
     inputs:
-      publish-pages:
-        description: "Publiser JaCoCo + testrapport til GitHub Pages"
-        required: false
-        type: boolean
-        default: false
       checkout-ref:
         description: "Ref å sjekke ut (tom = default GITHUB_REF)"
         required: false
@@ -58,7 +53,6 @@ jobs:
     timeout-minutes: 30
     environment: ${{ inputs.environment != '' && inputs.environment || null }}
     permissions:
-      pages: write     # actions/deploy-pages når publish-pages=true
       checks: write    # publisere test-resultater til Checks API
       contents: read   # checkout kode
       id-token: write  # nais/docker-build-push (OIDC mot GAR)
@@ -100,45 +94,3 @@ jobs:
         with:
           team: sikkerhetstjenesten
           tag: ${{ env.TAG }}
-
-      - name: Prepare Pages artifact
-        if: ${{ inputs.publish-pages }}
-        run: |
-          echo "--- JaCoCo report ---"
-          ls build/reports/jacoco/test/html/ || echo "Missing JaCoCo report"
-          echo "--- Test report ---"
-          ls build/reports/tests/test/ || echo "Missing test report"
-          mkdir -p build/reports/pages/jacoco
-          mkdir -p build/reports/pages/tests
-          cp -r build/reports/jacoco/test/html/. build/reports/pages/jacoco/
-          cp -r build/reports/tests/test/. build/reports/pages/tests/
-          pip install mkdocs-material==9.7.6
-          mkdocs build -f docs/mkdocs.yml
-          cat > build/reports/pages/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <body>
-            <h1>Test & Coverage</h1>
-            <ul>
-              <li><a href="jacoco/index.html">JaCoCo Coverage</a></li>
-              <li><a href="tests/index.html">Test Report</a></li>
-              <li><a href="adr/">Architecture Decision Records</a></li>
-            </ul>
-          </body>
-          </html>
-          EOF
-
-      - name: Setup Pages
-        if: ${{ inputs.publish-pages }}
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-
-      - name: Upload artifact
-        if: ${{ inputs.publish-pages }}
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: build/reports/pages
-
-      - name: Deploy to GitHub Pages
-        if: ${{ inputs.publish-pages }}
-        id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -3,13 +3,13 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
-import no.nav.sikkerhetstjenesten.entraproxy.security.OAuth2SecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
+import no.nav.sikkerhetstjenesten.entraproxy.security.ClientSecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import java.net.URI
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Grupper(
-    @param:JsonProperty("@odata.context") val next: URI? = null,
+    @param:JsonProperty(NEXT_LINK) val next: URI? = null,
     val value: Set<IdentifiserbartObjekt> = emptySet()
 )
 

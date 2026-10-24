@@ -32,7 +32,9 @@ data class NomOrgTilknytning(val orgEnhet: NomEnhet, val erDagligOppfolging: Boo
                 private val NOM_IDENT_REGEX = Regex("^[a-z]{2}[0-9]{3}[a-z]$")
 
                 fun parse(verdi: String): NomIdent? =
-                    verdi.takeIf(NOM_IDENT_REGEX::matches)?.let(::NomIdent)
+                    runCatching {
+                        NomIdent(verdi)
+                    }.getOrNull()
             }
         }
     }

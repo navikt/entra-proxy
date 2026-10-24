@@ -13,6 +13,9 @@ data class TIdent (@JsonValue val verdi: String)  {
     }
 
     private companion object {
+        fun parse(verdi: String): TIdent? = runCatching {
+            TIdent(verdi)
+        }.getOrNull()
         private const val TIDENT_LENGTH = 7
     }
 

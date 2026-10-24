@@ -20,8 +20,9 @@ data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
         const val ANSATTID_LENGTH = 7
 
         fun parse(verdi: String): AnsattId? =
-            verdi.takeIf { it.length == ANSATTID_LENGTH && it.first().isLetter() && it.drop(1).all(Char::isDigit) }
-                ?.let(::AnsattId)
+            runCatching {
+                AnsattId(verdi)
+            }.getOrNull()
     }
 
     override fun toString() = verdi

@@ -24,9 +24,9 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comp
             private const val ENHETNUMMER_LENGTH = 4
 
             fun parse(nummer: String): Enhetnummer? =
-                nummer.removePrefix(ENHET_PREFIX)
-                    .takeIf { it.length == ENHETNUMMER_LENGTH && it.all(Char::isDigit) }
-                    ?.let { Enhetnummer(nummer) }
+                runCatching {
+                    Enhetnummer(nummer)
+                }.getOrNull()
         }
     }
     companion object {

@@ -85,7 +85,6 @@ configurations.configureEach {
 dependencies {
     // Kotlin
     implementation(libs.sikkerhetstjenestenLib)
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
     implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
     implementation(libs.jackson.module.kotlin)

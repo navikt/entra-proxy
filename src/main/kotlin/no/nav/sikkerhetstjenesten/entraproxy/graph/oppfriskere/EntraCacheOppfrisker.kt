@@ -11,9 +11,7 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Component
 
 @Component
-class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker() {
-
-    override val cacheName: String = GRAPH
+class EntraCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker(GRAPH) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val argument = argumentFor(nøkkelElementer.id)

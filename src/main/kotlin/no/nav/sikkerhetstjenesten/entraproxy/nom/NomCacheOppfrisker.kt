@@ -9,9 +9,7 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component
 
 @Component
-class NomCacheOppfrisker(private val nom: NomTjeneste) : AbstractCacheOppfrisker() {
-
-    override val cacheName: String = NOMGRAPH
+class NomCacheOppfrisker(private val nom: NomTjeneste) : AbstractCacheOppfrisker(NOMGRAPH) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val oppfrisk = oppfriskingFor(nøkkelElementer.id)

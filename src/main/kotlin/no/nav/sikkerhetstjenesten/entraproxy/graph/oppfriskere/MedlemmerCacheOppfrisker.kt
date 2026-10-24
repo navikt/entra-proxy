@@ -8,10 +8,7 @@ import org.springframework.stereotype.Component
 import java.util.UUID
 
 @Component
-class MedlemmerCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker() {
-
-    override val cacheName: String = MEDLEMMER
-
+class MedlemmerCacheOppfrisker(private val entra: EntraTjeneste) : AbstractCacheOppfrisker(MEDLEMMER) {
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val gruppeId = runCatching { UUID.fromString(nøkkelElementer.id) }.getOrNull()
             ?: return log.warn("Ugyldig gruppe-id i nøkkel $nøkkelElementer")

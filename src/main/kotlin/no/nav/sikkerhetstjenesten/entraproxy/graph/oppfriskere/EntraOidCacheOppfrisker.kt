@@ -8,9 +8,7 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component
 
 @Component
-class EntraOidCacheOppfrisker(private val oid: EntraOidTjeneste) : AbstractCacheOppfrisker() {
-
-    override val cacheName: String = ENTRA_OID
+class EntraOidCacheOppfrisker(private val oid: EntraOidTjeneste) : AbstractCacheOppfrisker(ENTRA_OID) {
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val ansattId = runCatching { AnsattId(nøkkelElementer.id) }.getOrNull()

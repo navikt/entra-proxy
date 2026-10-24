@@ -7,10 +7,8 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component
 
 @Component
-class NorgCacheOppfrisker(private val norg: NorgTjeneste) : AbstractCacheOppfrisker() {
-
-    override val cacheName: String = NORG
-
+class NorgCacheOppfrisker(private val norg: NorgTjeneste) : AbstractCacheOppfrisker(NORG) {
+    
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val enhetnummer = nøkkelElementer.id.somEnhetnummer()
             ?: return log.warn("Ukjent id-format i nøkkel $nøkkelElementer")

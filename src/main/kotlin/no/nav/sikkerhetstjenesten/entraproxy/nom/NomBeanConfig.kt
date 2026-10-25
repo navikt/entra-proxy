@@ -31,12 +31,13 @@ class NomBeanConfig {
 
     @Bean
     @Qualifier(NOMGRAPH)
-    fun nomGraphRestClient(builder: Builder,
-                           cfg: NomGraphQLConfig,
-                           factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
-                           @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
-                           logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
-                           mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
+    fun nomGraphRestClient(
+        builder: Builder,
+        cfg: NomGraphQLConfig,
+        factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
+        @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
+        logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
+        mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder
             .requestFactory(
                 factoryBuilderCustomizer
@@ -45,8 +46,8 @@ class NomBeanConfig {
                         .withConnectTimeout(connectTimeout)
                         .withReadTimeout(cfg.lesetimeout)))
             .requestInterceptors {
-                logbookInterceptor.ifAvailable {
-                        interceptor -> it.add(interceptor)
+                logbookInterceptor.ifAvailable { interceptor ->
+                    it.add(interceptor)
                 }
                 it.add(DownstreamUriCapturingInterceptor())
                 it.add(OAuth2ClientHttpRequestInterceptor(mgr).apply {

@@ -14,7 +14,11 @@ import kotlin.time.measureTimedValue
 
 @Component
 @ConditionalOnGCP
-class CacheInaktiveNavIdenter(private val graf: EntraGraphOperations, private val cache: CacheOperations, @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
+class CacheInaktiveNavIdenter(
+    private val graf: EntraGraphOperations,
+    private val cache: CacheOperations,
+    @Value($$"${groups.disabled}") private val uuid: UUID,
+) : LeaderAware(true) {
 
     private val log = getLogger(javaClass)
 

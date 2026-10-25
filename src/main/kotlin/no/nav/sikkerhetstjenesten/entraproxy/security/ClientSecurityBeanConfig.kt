@@ -24,13 +24,16 @@ import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 class ClientSecurityBeanConfig {
 
     @Bean
-    fun securityGroupConfigurer(manager: OAuth2AuthorizedClientManager, logbook: ObjectProvider<LogbookClientHttpRequestInterceptor>, handler: ErrorHandler) =
+    fun securityGroupConfigurer(
+        manager: OAuth2AuthorizedClientManager,
+        logbook: ObjectProvider<LogbookClientHttpRequestInterceptor>,
+        handler: ErrorHandler) =
         RestClientHttpServiceGroupConfigurer { groups ->
             from(manager).configureGroups(groups)
             groups.forEachClient { group, builder ->
                 builder.requestInterceptors {
-                    logbook.ifAvailable {
-                        interceptor -> it.add(interceptor)
+                    logbook.ifAvailable { interceptor ->
+                        it.add(interceptor)
                     }
                     it.addFirst(DownstreamUriCapturingInterceptor())
                     if (group.name() == GRAPH) {
@@ -42,7 +45,11 @@ class ClientSecurityBeanConfig {
         }
 
     @Bean
-    fun authorizedClientManager(repo: ClientRegistrationRepository, service: OAuth2AuthorizedClientService, successHandler: OAuth2AuthorizationSuccessHandler, failureHandler: OAuth2AuthorizationFailureHandler) =
+    fun authorizedClientManager(
+        repo: ClientRegistrationRepository,
+        service: OAuth2AuthorizedClientService,
+        successHandler: OAuth2AuthorizationSuccessHandler,
+        failureHandler: OAuth2AuthorizationFailureHandler) =
         AuthorizedClientServiceOAuth2AuthorizedClientManager(
             repo, service).apply {
             setAuthorizedClientProvider(

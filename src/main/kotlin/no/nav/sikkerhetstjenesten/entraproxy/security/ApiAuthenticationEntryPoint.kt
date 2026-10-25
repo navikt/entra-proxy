@@ -21,11 +21,14 @@ class ApiAuthenticationEntryPoint(private val mapper: JsonMapper) : Authenticati
         with(res) {
             status = UNAUTHORIZED.value()
             contentType = APPLICATION_PROBLEM_JSON_VALUE
-            mapper.writeValue(writer, securityProblemDetail(UNAUTHORIZED, "Bruker er ikke logget inn. Mangler Bearer token i Authorization header", TYPE_URI))
+            mapper.writeValue(writer,
+                securityProblemDetail(UNAUTHORIZED,
+                    "Bruker er ikke logget inn. Mangler Bearer token i Authorization header",
+                    TYPE_URI))
         }
     }
 
-     companion object {
-         val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
+    companion object {
+        val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

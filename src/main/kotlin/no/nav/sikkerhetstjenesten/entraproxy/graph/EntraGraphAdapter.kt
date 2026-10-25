@@ -12,44 +12,61 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
     private val log = getLogger(javaClass)
 
-    override fun utvidetAnsatt(ansattId: AnsattId): UtvidetAnsatt? =
+    override fun utvidetAnsatt(ansattId: AnsattId) =
         utvidetAnsatt(BRUKER_FILTER.format(ansattId.verdi), ansattId.verdi)
 
-    override fun utvidetAnsatt(ident: TIdent): UtvidetAnsatt? =
+    override fun utvidetAnsatt(ident: TIdent) =
         utvidetAnsatt(TIDENT_FILTER.format(ident.verdi), ident.verdi)
 
-    override fun temaer(ansattOid: UUID): Set<Tema> =
-        allSider("temaer for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
+    override fun temaer(ansattOid: UUID) =
+        allSider("temaer for $ansattOid",
+            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"),
+            Tilganger::next,
+            client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
             .also { log.info("Hentet ${it.size} tema for $ansattOid") }
 
-    override fun grupper(ansattOid: UUID): Set<EntraGruppe> =
-        allSider("grupper for $ansattOid", client.memberOfGrupper("$ansattOid", MINIMUM_FELTER_FILTRERT, FILTER_STRING), Tilganger::next, client::tilgangerSide)
+    override fun grupper(ansattOid: UUID) =
+        allSider("grupper for $ansattOid",
+            client.memberOfGrupper("$ansattOid", MINIMUM_FELTER_FILTRERT, FILTER_STRING),
+            Tilganger::next,
+            client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet ${it.size} gruppe(r) for $ansattOid") }
 
-    override fun grupperSomMatcher(subString: String): Set<EntraGruppe> =
-        allSider("grupper som matcher '$subString'", client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)), Grupper::next, client::grupperSide)
+    override fun grupperSomMatcher(subString: String) =
+        allSider("grupper som matcher '$subString'",
+            client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)),
+            Grupper::next,
+            client::grupperSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet ${it.size} gruppe(r) som matcher '$subString'") }
 
-    override fun enheter(ansattOid: UUID): Set<Enhetnummer> =
-        allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
+    override fun enheter(ansattOid: UUID) =
+        allSider("enheter for $ansattOid",
+            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
+            Tilganger::next,
+            client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
             .also { log.info("Hentet ${it.size} enhet(er) for $ansattOid") }
 
     override fun gruppeMedlemmer(oid: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+        val alleMedlemmer = allSider("medlemmer av gruppe $oid",
+            client.members(oid, ANSATTE_FELTER),
+            GruppeMedlemmer::next,
+            client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
-            log.info("Ignorerte {} ugyldige medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (\n${ugyldigeMedlemmer.joinToString("\n")})",
+            log.info("Ignorerte {} ugyldige medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (\n${
+                ugyldigeMedlemmer.joinToString("\n")
+            })",
                 ugyldigeMedlemmer.size, oid)
         }
         return gyldigeMedlemmer.mapTo(sortedSetOf()) {
@@ -65,10 +82,9 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .flatMap { antallForBatch(it).toList() }
             .toMap()
 
-    override fun toString() =
-        "${javaClass.simpleName} [client=$client]"
 
-    private fun utvidetAnsatt(filter: String, verdi: String): UtvidetAnsatt? =
+
+    private fun utvidetAnsatt(filter: String, verdi: String)  =
         client.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->
             with(respons) {
                 onPremisesSamAccountName?.let { navIdent ->
@@ -117,6 +133,9 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         }.toSet()
     }
 
+    override fun toString() =
+        "${javaClass.simpleName} [client=$client]"
+
     companion object {
         const val BRUKER = "onPremisesSamAccountName"
         private const val MINIMUM_FELTER = "id,displayName"
@@ -128,5 +147,6 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         private const val TIDENT_FILTER = "jobTitle eq '%s'"
         private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
         private const val BATCH_STØRRELSE = 20
+        private fun String.erAnsattId() = AnsattId.parse(this) != null
     }
 }

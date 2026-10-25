@@ -14,7 +14,10 @@ import org.springframework.graphql.client.toEntityList
 import org.springframework.stereotype.Component
 
 @Component
-class NomSyncGraphQLClientAdapter(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient, private val cache: CacheOperations) : AbstractSyncGraphQLClientAdapter(cfg, client), NomOperations {
+class NomSyncGraphQLClientAdapter(
+    cfg: NomGraphQLConfig,
+    @Qualifier(NOMGRAPH) client: GraphQlClient,
+    private val cache: CacheOperations) : AbstractSyncGraphQLClientAdapter(cfg, client), NomOperations {
 
     override fun ansatt(ident: AnsattId): NomAnsatt? =
         query<NomGraphQLRespons>(TILKNYTNINGER_QUERY, ident(ident.verdi))?.toAnsatt()?.kunDagligOppfolging()

@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component
 
 @Component
 @Lazy
-class StartupInfoContributor(private val caches : CacheOperations, private val ctx: ConfigurableApplicationContext) :
+class StartupInfoContributor(private val cache: CacheOperations, private val ctx: ConfigurableApplicationContext) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {
         builder.withDetail("startup", ctx.startupDate.local())
-        builder.withDetail("cache størrelser", caches.sizes())
+        builder.withDetail("cache størrelser", cache.sizes())
     }
 }
 

@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import java.util.UUID
 
 interface EntraGraphOperations {
@@ -14,7 +15,7 @@ interface EntraGraphOperations {
 
     fun grupperSomMatcher(subString: String): Set<EntraGruppe>
 
-    fun enheter(ansattOid: UUID): Set<Enhet.Enhetnummer>
+    fun enheter(ansattOid: UUID): Set<Enhetnummer>
 
     fun gruppeMedlemmer(oid: String): Set<Ansatt>
 

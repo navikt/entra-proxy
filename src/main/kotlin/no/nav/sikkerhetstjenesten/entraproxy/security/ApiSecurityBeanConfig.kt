@@ -30,9 +30,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
 
     @Bean
     @Order(2)
-    fun apiSecurityFilterChain(http: HttpSecurity,
-                               entryPoint: AuthenticationEntryPoint,
-                               @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =
+    fun apiSecurityFilterChain(http: HttpSecurity, entryPoint: AuthenticationEntryPoint, @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =
         http.authorizeHttpRequests { requests ->
             requests.requestMatchers(*ACTUATOR_ENDPOINTS).authenticated()
             requests.requestMatchers(API_ENDPOINTS).authenticated()

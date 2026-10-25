@@ -32,7 +32,7 @@ class ApiAuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Abstr
             JwtAuthenticationToken(jwt.token, principal(jwt.token, authorities), authorities)
         }
 
-    override fun convert(jwt: Jwt)  =
+    override fun convert(jwt: Jwt) =
         delegate.convert(jwt) ?: error(
             "JWT konvertering feilet for token med subject='${jwt.subject ?: "unknown"}', claimKeys=${jwt.claims.keys}"
         )

@@ -23,8 +23,13 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
-@Tag(name = "DevEntraController", description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
-class DevEntraController (private val entraTjeneste: EntraTjeneste, private val oidTjeneste: EntraOidTjeneste, private val norgTjeneste: NorgTjeneste, private val nom: NomTjeneste) {
+@Tag(name = "DevEntraController",
+    description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
+class DevEntraController(
+    private val entraTjeneste: EntraTjeneste,
+    private val oidTjeneste: EntraOidTjeneste,
+    private val norgTjeneste: NorgTjeneste,
+    private val nom: NomTjeneste) {
 
     @GetMapping("/nom/{ansattId}")
     fun orgData(@PathVariable ansattId: AnsattId) =
@@ -56,14 +61,14 @@ class DevEntraController (private val entraTjeneste: EntraTjeneste, private val 
 
     @GetMapping("navn/{enhetsnummer}")
     fun norgNavn(@PathVariable enhetsnummer: Enhetnummer) =
-       norgTjeneste.navn(enhetsnummer)
+        norgTjeneste.navn(enhetsnummer)
 
     @GetMapping("tema/{tema}")
     fun temaMedlemmer(@PathVariable tema: Tema) =
         medlemmer(tema.gruppeNavn)
 
     @GetMapping("gruppe/medlemmer")
-     fun medlemmer(@RequestParam gruppeNavn: String) =
+    fun medlemmer(@RequestParam gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
             entraTjeneste.medlemmerIGruppe(it)
         }

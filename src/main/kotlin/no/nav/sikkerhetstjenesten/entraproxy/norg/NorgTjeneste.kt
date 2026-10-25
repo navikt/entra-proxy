@@ -8,6 +8,6 @@ import org.springframework.cache.annotation.Cacheable
 
 @RestRetryingWhenRecoverableService
 class NorgTjeneste(private val norg: NorgOperations) : EnhetOperations {
-    @Cacheable(cacheNames = [NORG],  key = "#root.methodName + ':' + #enhetnummer.verdi")
+    @Cacheable(cacheNames = [NORG], key = "#root.methodName + ':' + #enhetnummer.verdi")
     override fun navn(enhetnummer: Enhetnummer) = norg.navn(enhetnummer)
 }

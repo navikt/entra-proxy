@@ -41,11 +41,12 @@ class UtforskerSecurityBeanConfig {
 
     @Bean
     @Order(1)
-    fun utforskerSecurityFilterChain(http: HttpSecurity,
-                                     @Qualifier(UTFORSKER_HANDLER) handler: AccessDeniedHandler,
-                                     entryPoint: AuthenticationEntryPoint,
-                                     authoritiesMapper: GrantedAuthoritiesMapper,
-                                     @Value($$"${groups.utforsker:}")  utforskerGruppe: String)  =
+    fun utforskerSecurityFilterChain(
+        http: HttpSecurity,
+        @Qualifier(UTFORSKER_HANDLER) handler: AccessDeniedHandler,
+        entryPoint: AuthenticationEntryPoint,
+        authoritiesMapper: GrantedAuthoritiesMapper,
+        @Value($$"${groups.utforsker:}") utforskerGruppe: String) =
         http.securityMatcher(utforskerSesjonMatcher())
             .csrf { it.ignoringRequestMatchers(API_ENDPOINTS) }
             .authorizeHttpRequests { requests ->
@@ -84,9 +85,8 @@ class UtforskerSecurityBeanConfig {
     }
 
 
-
     @Bean
-    fun utforskerAuthoritiesMapper()  =
+    fun utforskerAuthoritiesMapper() =
         GrantedAuthoritiesMapper { authorities ->
             buildSet {
                 addAll(authorities)
@@ -98,7 +98,7 @@ class UtforskerSecurityBeanConfig {
             }
         }
 
-    private fun utforskerSesjonEntryPoint(apiEntryPoint: AuthenticationEntryPoint)  =
+    private fun utforskerSesjonEntryPoint(apiEntryPoint: AuthenticationEntryPoint) =
         DelegatingAuthenticationEntryPoint.builder()
             .addEntryPointFor(apiEntryPoint, API_ENDPOINTS)
             .defaultEntryPoint(LoginUrlAuthenticationEntryPoint(INNLOGGING))
@@ -132,7 +132,8 @@ class UtforskerSecurityBeanConfig {
         private const val BEARER_PREFIX = "Bearer "
         private val BROWSER_API_ENDPOINTS = AndRequestMatcher(API_ENDPOINTS,
             NegatedRequestMatcher { it.getHeader(AUTHORIZATION)?.startsWith(BEARER_PREFIX) == true })
-        private val UTFORSKER_SIDER = arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html", "/gruppematrise.html")
+        private val UTFORSKER_SIDER =
+            arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html", "/gruppematrise.html")
         private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", LOGOUT_ENDEPUNKT)
     }
 }

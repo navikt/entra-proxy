@@ -12,10 +12,12 @@ import org.springframework.web.service.registry.ImportHttpServices
 class EntraClientBeanConfig {
 
     @Bean
-    fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
+    fun entraGraphAdapter(client: EntraGraphClient) =
+        EntraGraphAdapter(client)
 
     @Bean
-    fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)
+    fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): EntraOidOperations =
+        EntraOidOppslag(oid, cache)
 
     @Bean
     fun entraProxyHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =

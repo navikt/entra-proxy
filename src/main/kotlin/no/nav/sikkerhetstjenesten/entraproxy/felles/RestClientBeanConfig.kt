@@ -22,8 +22,10 @@ import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 
 
 @Configuration
-class RestClientBeanConfig(private val ctx: AuthContext,
-                           private val meterRegistry: MeterRegistry) : WebMvcConfigurer {
+class RestClientBeanConfig(
+    private val ctx: AuthContext,
+    private val meterRegistry: MeterRegistry,
+) : WebMvcConfigurer {
 
 
     @Bean
@@ -68,6 +70,7 @@ class RestClientBeanConfig(private val ctx: AuthContext,
             }
 
     }
+
     private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
         override fun convert(source: String) = Enhetnummer(source)
     }

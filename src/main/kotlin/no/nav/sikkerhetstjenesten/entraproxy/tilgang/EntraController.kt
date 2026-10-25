@@ -32,7 +32,11 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste, private val mail: EntraMailTjeneste) {
+class EntraController(
+    private val entra: EntraTjeneste,
+    private val oid: EntraOidTjeneste,
+    private val nom: NomTjeneste,
+    private val mail: EntraMailTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
@@ -42,19 +46,19 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @OAuth2RequireOBO
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra, forutsetter OBO-flow")
     fun enheterForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId))
+        entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId))
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun temaForAnsatt(@PathVariable navIdent: AnsattId) =
-            entra.tema(navIdent)
+        entra.tema(navIdent)
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter OBO-flow")
     @OAuth2RequireOBO
     fun temaForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId))
+        entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId))
 
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer fra Entra for en gitt enhet")
@@ -99,17 +103,17 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
     private fun medlemmerIGruppe(gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
-            entra.medlemmerIGruppe( it)
+            entra.medlemmerIGruppe(it)
         } ?: emptySet()
 
     @PostMapping("mail")
     @Operation(summary = "Send e-post")
-    fun sendMail(@RequestBody message: MailRequest)  =
+    fun sendMail(@RequestBody message: MailRequest) =
         mail.send(message)
 
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
-    fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>): Map<UUID, Long> =
+    fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>) =
         entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
     @GetMapping("nom/enhet/{navIdent}")
@@ -138,5 +142,5 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
 }
 
-fun <R> OAuth2AuthenticatedPrincipal.requiredAttribute(attributeName: String, mapper: (String) -> R): R =
+private fun <R> OAuth2AuthenticatedPrincipal.requiredAttribute(attributeName: String, mapper: (String) -> R): R =
     mapper(requireNotNull(getAttribute(attributeName)) { "Mangler $attributeName i OBO-token" })

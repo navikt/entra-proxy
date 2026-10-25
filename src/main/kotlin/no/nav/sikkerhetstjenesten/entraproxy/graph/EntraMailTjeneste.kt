@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 @Service
 class EntraMailTjeneste(
     private val client: EntraGraphClient,
-    @param:Value($$"${graph.mail.avsender}") private val avsender: String)  {
+    @param:Value($$"${graph.mail.avsender}") private val avsender: String) {
 
     fun send(request: MailRequest) =
         client.sendMail(avsender, request)

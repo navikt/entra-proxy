@@ -10,12 +10,12 @@ import java.util.UUID
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Grupper(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<IdentifiserbartObjekt> = emptySet()
+    val value: Set<IdentifiserbartObjekt> = emptySet(),
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class AnsattOids(
-    @param:JsonProperty(VALUE) val oids: Set<AnsattOid>
+    @param:JsonProperty(VALUE) val oids: Set<AnsattOid>,
 ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattOid(val id: UUID)
@@ -24,12 +24,12 @@ data class AnsattOids(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Tilganger(
     @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<IdentifiserbartObjekt> = emptySet()
+    val value: Set<IdentifiserbartObjekt> = emptySet(),
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class EntraSaksbehandlerRespons(
-    @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>
+    @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>,
 ) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -41,16 +41,14 @@ data class EntraSaksbehandlerRespons(
         val surname: String? = UKJENT,
         val jobTitle: String? = null,
         val mail: String? = UKJENT,
-        val streetAddress: String? = null
-    )
+        val streetAddress: String? = null)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class IdentifiserbartObjekt(
     val id: UUID,
     val displayName: String = UKJENT,
-    val description: String? = null
-)
+    val description: String? = null)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GruppeMedlemmer(
@@ -63,8 +61,7 @@ data class BatchSubRequest(
     val id: String,
     val url: String,
     val method: String = "GET",
-    val headers: Map<String, String> = mapOf(HEADER_CONSISTENCY_LEVEL)
-)
+    val headers: Map<String, String> = mapOf(HEADER_CONSISTENCY_LEVEL))
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
@@ -73,11 +70,10 @@ data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
 data class BatchSubRespons(
     val id: String,
     val status: Int,
-    val body: Any? = null
-)
+    val body: Any? = null)
 
 internal const val TIDENT_DEFAULT = "AAA1234"
 internal const val VALUE = "value"
 internal const val UKJENT = "N/A"
-internal  const val UKJENT_ENHET = "0000"
+internal const val UKJENT_ENHET = "0000"
 internal const val NEXT_LINK = "@odata.nextLink"

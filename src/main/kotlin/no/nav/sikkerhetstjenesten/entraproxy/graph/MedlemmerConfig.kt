@@ -10,11 +10,11 @@ import java.time.Duration
 class MedlemmerConfig(@param:Value("\${medlemmer.varighet:3h}") override val varighet: Duration) :
     CachableRestConfig {
     override val navn = MEDLEMMER
-    override val caches: Set<CacheNøkkelConfig>
-        get() = setOf(MEDLEMMER_CACHE)
+    override val caches = MEDLEMMER_CACHES
 
     companion object {
         val MEDLEMMER_CACHE = CacheNøkkelConfig(MEDLEMMER)
         const val MEDLEMMER = "medlemmer"
+        val MEDLEMMER_CACHES = setOf(MEDLEMMER_CACHE)
     }
 }

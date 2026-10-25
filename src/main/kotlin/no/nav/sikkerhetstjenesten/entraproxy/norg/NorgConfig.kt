@@ -17,7 +17,8 @@ class NorgConfig(@Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl:
     override val caches = NORG_CACHES
 
     companion object {
-        val NORG_CACHES =setOf(CacheNøkkelConfig(NORG))
+        val NORG_CACHE = CacheNøkkelConfig(NORG)
+        val NORG_CACHES =setOf(NORG_CACHE)
     }
 
 }

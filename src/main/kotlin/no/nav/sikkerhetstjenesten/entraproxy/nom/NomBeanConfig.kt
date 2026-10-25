@@ -4,17 +4,17 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMG
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
+import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder.httpComponents
-import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.boot.http.client.HttpClientSettings.defaults
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.HttpSyncGraphQlClient.builder
 import org.springframework.security.oauth2.client.OAuth2AuthorizationFailureHandler
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
@@ -31,12 +31,13 @@ class NomBeanConfig {
 
     @Bean
     @Qualifier(NOMGRAPH)
-    fun nomGraphRestClient(builder: Builder,
-                           cfg: NomGraphQLConfig,
-                           factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
-                           @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
-                           logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
-                           mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
+    fun nomGraphRestClient(
+        builder: Builder,
+        cfg: NomGraphQLConfig,
+        factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
+        @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
+        logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
+        mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder
             .requestFactory(
                 factoryBuilderCustomizer
@@ -45,8 +46,8 @@ class NomBeanConfig {
                         .withConnectTimeout(connectTimeout)
                         .withReadTimeout(cfg.lesetimeout)))
             .requestInterceptors {
-                logbookInterceptor.ifAvailable {
-                        interceptor -> it.add(interceptor)
+                logbookInterceptor.ifAvailable { interceptor ->
+                    it.add(interceptor)
                 }
                 it.add(DownstreamUriCapturingInterceptor())
                 it.add(OAuth2ClientHttpRequestInterceptor(mgr).apply {
@@ -64,5 +65,15 @@ class NomBeanConfig {
             .interceptors {
                 it.addFirst(GraphQLLoggingInterceptor())
             }.build()
+
+    @Bean
+    fun nomHealthIndicator(cfg: NomGraphQLConfig, @Qualifier(NOMGRAPH) client: GraphQlClient) =
+        PingableHealthIndicator(cfg) {
+            client.document(PING_QUERY).executeSync()
+        }
+
+    private companion object {
+        private const val PING_QUERY = "{ __typename }"
+    }
 }
 

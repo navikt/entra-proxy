@@ -11,9 +11,16 @@ import java.net.URI
 import java.time.Duration
 
 @Component
-class NorgConfig(@Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl: URI,
-                @param:Value($$"${norg.varighet:3h}") override val varighet: Duration) : CachableRestConfig, RestConfig(baseUrl, PING_PATH, NORG) {
+class NorgConfig(
+    @Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl: URI,
+    @param:Value($$"${norg.varighet:3h}") override val varighet: Duration,
+) : CachableRestConfig, RestConfig(baseUrl, PING_PATH, NORG) {
     override val navn = name
-    override val caches = setOf(CacheNøkkelConfig(NORG))
+    override val caches = NORG_CACHES
+
+    companion object {
+        val NORG_CACHE = CacheNøkkelConfig(NORG)
+        val NORG_CACHES = setOf(NORG_CACHE)
+    }
 
 }

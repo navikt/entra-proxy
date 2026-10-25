@@ -17,14 +17,22 @@ interface EntraGraphClient {
     fun users(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
     ): AnsattOids
 
     @GetExchange("/groups")
-        fun groups(
-            @RequestParam($$"$select") select: String,
+    fun groups(
+        @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
+    ): Grupper
+
+    @GetExchange("/groups")
+    fun grupperSok(
+        @RequestParam($$"$select") select: String,
+        @RequestParam($$"$search") search: String,
+        @RequestParam($$"$top") top: Int = TOP,
+        @RequestParam($$"$count") count: String = "true",
     ): Grupper
 
     @GetExchange("/users/{ansattId}/memberOf")
@@ -33,7 +41,7 @@ interface EntraGraphClient {
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter", required = false) filter: String? = null,
         @RequestParam($$"$top") top: Int = TOP,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
     ): Tilganger
 
     @GetExchange("/users/{ansattId}/memberOf/microsoft.graph.group")
@@ -42,7 +50,7 @@ interface EntraGraphClient {
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter", required = false) filter: String? = null,
         @RequestParam($$"$top") top: Int = TOP,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
     ): Tilganger
 
     @GetExchange("/groups/{gruppeId}/members")
@@ -50,7 +58,7 @@ interface EntraGraphClient {
         @PathVariable gruppeId: String,
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$top") top: Int = TOP,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
     ): GruppeMedlemmer
 
     @PostExchange($$"/$batch")
@@ -65,11 +73,14 @@ interface EntraGraphClient {
     @GetExchange
     fun gruppeMedlemmerSide(uri: URI): GruppeMedlemmer
 
+    @GetExchange
+    fun grupperSide(uri: URI): Grupper
+
     @GetExchange("/users")
     fun bruker(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
-        @RequestParam($$"$count") count: String = "true"
+        @RequestParam($$"$count") count: String = "true",
     ): EntraSaksbehandlerRespons
 
     @GetExchange(ENTRA_PING_PATH)

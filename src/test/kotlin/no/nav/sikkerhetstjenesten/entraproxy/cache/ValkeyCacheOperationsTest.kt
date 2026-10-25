@@ -19,23 +19,27 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.ENHETER_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.GRUPPER_FOR_ANSATT_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.TEMA_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.Companion.UTVIDET_ANSATT_GRAPH_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyEventListeningCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.getMany
@@ -53,6 +57,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.serializer.RedisMessageConverters.Builder
 import org.springframework.test.context.ContextConfiguration
+import java.net.URI
 import java.time.Duration.ofSeconds
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
@@ -63,21 +68,10 @@ import kotlin.time.Duration.Companion.seconds
 @EnableAutoConfiguration
 class ValkeyCacheOperationsTest(
     private val cache: CacheOperations,
-    private val cacheSizeAware: CacheSizeAware,
     private val valkey: StringRedisTemplate) : BehaviorSpec() {
 
     @TestConfiguration
     class ValkeyCacheTestConfig(private val cf: RedisConnectionFactory) : RedisListenerConfigurer{
-
-        private val allTestCaches = setOf(
-            GRUPPER_FOR_ANSATT_GRAPH_CACHE,
-            UTVIDET_ANSATT_GRAPH_CACHE,
-            ENHETER_GRAPH_CACHE,
-            TEMA_GRAPH_CACHE,
-            MEDLEMMER_CACHE,
-            OID_CACHE,
-            CacheNøkkelConfig(NORG),
-        )
 
         override fun configureMessageConverters(builder: Builder) {
             builder.addCustomConverter(CacheNøkkelMessageConverter())
@@ -87,7 +81,7 @@ class ValkeyCacheOperationsTest(
         fun cacheManager() =
             builder(cf)
                 .withInitialCacheConfigurations(
-                    allTestCaches
+                    ALL_TEST_CACHE_KEYS
                         .groupBy { it.name }
                         .mapValues { (_, caches) ->
                             defaultCacheConfig()
@@ -99,23 +93,7 @@ class ValkeyCacheOperationsTest(
 
         @Bean
         fun valkeyCacheOperations(valkey: StringRedisTemplate) =
-            ValkeyCacheOperations(
-                valkey,
-                object : CachableRestConfig {
-                    override val navn = "entra-test"
-                    override val caches = allTestCaches
-                    override val varighet = ofSeconds(DEFAULT_TTL_SECONDS)
-                }
-            )
-
-        @Bean
-        fun cacheSizeAware(cache: CacheOperations) =
-            CacheSizeAware(
-                cache,
-                object : CachableRestConfig {
-                    override val navn = "entra-test"
-                    override val caches = allTestCaches
-                })
+            ValkeyCacheOperations(valkey, *ALL_TEST_CACHES.toTypedArray())
     }
 
     @MockkBean
@@ -131,7 +109,7 @@ class ValkeyCacheOperationsTest(
         TEMA_GRAPH_CACHE -> setOf(T1)
         MEDLEMMER_CACHE -> setOf(M1)
         OID_CACHE -> O1
-        CacheNøkkelConfig(NORG) -> "Norg 1"
+        NORG_CACHE -> "Norg 1"
         else -> TEST_VALUE_1
     }
 
@@ -142,7 +120,7 @@ class ValkeyCacheOperationsTest(
         TEMA_GRAPH_CACHE -> mapOf(I1 to setOf(T1), I2 to setOf(T2))
         MEDLEMMER_CACHE -> mapOf(I1 to setOf(M1), I2 to setOf(M2))
         OID_CACHE -> mapOf(I1 to O1, I2 to O2)
-        CacheNøkkelConfig(NORG) -> mapOf(I1 to "Norg 1", I2 to "Norg 2")
+        NORG_CACHE -> mapOf(I1 to "Norg 1", I2 to "Norg 2")
         else -> mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2)
     }
 
@@ -153,7 +131,7 @@ class ValkeyCacheOperationsTest(
         TEMA_GRAPH_CACHE -> cache.getMany<Set<Tema>>(cacheConfig, ids)
         MEDLEMMER_CACHE -> cache.getMany<Set<Ansatt>>(cacheConfig, ids)
         OID_CACHE -> cache.getMany<UUID>(cacheConfig, ids)
-        CacheNøkkelConfig(NORG) -> cache.getMany<String>(cacheConfig, ids)
+        NORG_CACHE -> cache.getMany<String>(cacheConfig, ids)
         else -> cache.getMany<String>(cacheConfig, ids)
     }
 
@@ -164,7 +142,7 @@ class ValkeyCacheOperationsTest(
         TEMA_GRAPH_CACHE -> cache.getOne<Set<Tema>>(cacheConfig, key) shouldBe (expected as? Set<Tema>)
         MEDLEMMER_CACHE -> cache.getOne<Set<Ansatt>>(cacheConfig, key) shouldBe (expected as? Set<Ansatt>)
         OID_CACHE -> cache.getOne<UUID>(cacheConfig, key) shouldBe (expected as? UUID)
-        CacheNøkkelConfig(NORG) -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
+        NORG_CACHE -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
         else -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
     }
 
@@ -175,11 +153,11 @@ class ValkeyCacheOperationsTest(
             every { authContext.clusterAndSystem } returns "test:dev-gcp"
             every { oppfrisker.cacheName } returns GRUPPER_FOR_ANSATT_GRAPH_CACHE.name
             every { oppfrisker.oppfrisk(any()) } returns Unit
-            ALL_TEST_CACHES.forEach { cache.clear(it) }
+             cache.clear()
         }
 
         Given("putMany og getMany") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("verdier legges i cache med kort TTL for ${cacheConfig.fullName}") {
                     Then("returneres ved oppslag og fjernes etter TTL") {
                         val values = cacheEntriesFor(cacheConfig)
@@ -208,7 +186,7 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("putOne uten eksplisitt TTL") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("verdien lagres til ${cacheConfig.fullName}") {
                     Then("settes TTL fra CachableRestConfig") {
                         val value = testValueFor(cacheConfig)
@@ -222,7 +200,7 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("sletting av enkeltinnslag") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("nøkkelen eksisterer i ${cacheConfig.fullName}") {
                     Then("returnerer true og verdien er fjernet") {
                         val value = testValueFor(cacheConfig)
@@ -294,7 +272,7 @@ class ValkeyCacheOperationsTest(
 
 
         Given("cache-utløp") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("TTL løper ut for ${cacheConfig.fullName}") {
                     Then("Valkey publiserer expired-event som håndteres av ValkeyListener") {
                         every { oppfrisker.cacheName } returns cacheConfig.name
@@ -329,7 +307,26 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("tømming av cache") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            When("clear kalles uten argumenter med verdier i alle cacher") {
+                Then("fjernes alle innslag fra alle konfigurerte cacher") {
+                    ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
+                        val entries = cacheEntriesFor(cacheConfig)
+                        cache.putMany(cacheConfig, entries, ofSeconds(30))
+                        readMany(cacheConfig, IDS) shouldBe entries
+                    }
+
+                    cache.clear()
+
+                    assertSoftly {
+                        ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
+                            readMany(cacheConfig, IDS).shouldBeEmpty()
+                        }
+                        cache.sizes() shouldBe ALL_TEST_CACHE_KEYS.associate { it.fullName to 0L }
+                    }
+                }
+            }
+
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("cache inneholder verdier for ${cacheConfig.fullName}") {
                     Then("alle verdier i cachen fjernes") {
                         cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(1))
@@ -411,7 +408,7 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("cache-metrikker") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("getOne treffer cache for ${cacheConfig.fullName}") {
                     Then("registreres varighet med cache, operasjon og hit-resultat") {
                         cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(5))
@@ -440,7 +437,7 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("antall innslag i cache") {
-            ALL_TEST_CACHES.forEach { cacheConfig ->
+            ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("cache er tom for ${cacheConfig.fullName}") {
                     Then("returnerer 0") {
                         cache.size(cacheConfig) shouldBe 0
@@ -474,13 +471,13 @@ class ValkeyCacheOperationsTest(
         Given("antall innslag via CacheSizeAware") {
             When("cache er tom") {
                 Then("returnerer cache-størrelse fra valkey") {
-                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { it.fullName to 0L }
+                    cache.sizes() shouldBe ALL_TEST_CACHE_KEYS.associate { it.fullName to 0L }
                 }
             }
             When("cache inneholder verdier") {
                 Then("returnerer antall innslag fra valkey") {
                     cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
-                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { cache ->
+                    cache.sizes() shouldBe ALL_TEST_CACHE_KEYS.associate { cache ->
                         if (cache == GRUPPER_FOR_ANSATT_GRAPH_CACHE) cache.fullName to 2L else cache.fullName to 0L
                     }
                 }
@@ -537,14 +534,12 @@ class ValkeyCacheOperationsTest(
         private val O2 = UUID.fromString("22222222-2222-2222-2222-222222222222")
 
         private val ALL_TEST_CACHES = setOf(
-            GRUPPER_FOR_ANSATT_GRAPH_CACHE,
-            UTVIDET_ANSATT_GRAPH_CACHE,
-            ENHETER_GRAPH_CACHE,
-            TEMA_GRAPH_CACHE,
-            MEDLEMMER_CACHE,
-            OID_CACHE,
-            CacheNøkkelConfig(NORG),
+            NorgConfig(URI("http://localhost"), ofSeconds(DEFAULT_TTL_SECONDS)),
+            EntraConfig(URI("http://localhost"), ofSeconds(DEFAULT_TTL_SECONDS)),
+            EntraOidConfig(ofSeconds(DEFAULT_TTL_SECONDS)),
+            MedlemmerConfig(ofSeconds(DEFAULT_TTL_SECONDS)),
         )
+        private val ALL_TEST_CACHE_KEYS = ALL_TEST_CACHES.flatMap { it.caches }.toSet()
 
         private val IDS = setOf(I1, I2)
         private val TIMEOUT = eventuallyConfig {

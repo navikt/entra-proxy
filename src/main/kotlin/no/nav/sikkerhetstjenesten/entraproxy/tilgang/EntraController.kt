@@ -2,8 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
@@ -11,14 +9,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
-import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
-import org.springframework.mail.MailSender
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,33 +32,33 @@ import java.util.UUID
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EntraController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste, private val nom: NomTjeneste, private val mail: EntraMailTjeneste) {
+class EntraController(
+    private val entra: EntraTjeneste,
+    private val oid: EntraOidTjeneste,
+    private val nom: NomTjeneste,
+    private val mail: EntraMailTjeneste) {
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =
-        oid.ansattOid(navIdent)?.let {
-            entra.enheter(navIdent, it)
-        } ?: emptySet()
+        entra.enheter(navIdent)
 
     @GetMapping("enhet")
     @OAuth2RequireOBO
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra, forutsetter OBO-flow")
     fun enheterForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId),principal.requiredAttribute(OID,UUID::fromString))
+        entra.enheter(principal.requiredAttribute(NAVIDENT, ::AnsattId))
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter CC-flow")
     @OAuth2RequireCCF
     fun temaForAnsatt(@PathVariable navIdent: AnsattId) =
-            oid.ansattOid(navIdent)?.let {
-                entra.tema(navIdent, it)
-            } ?: emptySet()
+        entra.tema(navIdent)
 
     @GetMapping("tema")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter OBO-flow")
     @OAuth2RequireOBO
     fun temaForAnsatt(@AuthenticationPrincipal principal: OAuth2AuthenticatedPrincipal) =
-            entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId), principal.requiredAttribute(OID,UUID::fromString))
+        entra.tema(principal.requiredAttribute(NAVIDENT, ::AnsattId))
 
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer fra Entra for en gitt enhet")
@@ -86,9 +83,7 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     @GetMapping("/ansatt/tilganger/{navIdent}")
     @Operation(summary = "Hent informasjon om den ansattes tilganger fra Entra")
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
-        oid.ansattOid(navIdent)?.let {
-            entra.grupperForAnsatt(navIdent, it)
-        } ?: emptySet()
+        entra.grupper(navIdent)
 
 
     @GetMapping("gruppe/medlemmer")
@@ -96,19 +91,29 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
         medlemmerIGruppe(gruppeNavn)
 
+    @GetMapping("gruppe/medlemmer/sok")
+    @Operation(summary = "Hent ansatte i alle grupper som matcher en substring av gruppenavnet fra Entra")
+    fun medlemmerIGrupperSomMatcher(@RequestParam gruppeNavn: String) =
+        entra.medlemmerIGrupperSomMatcher(gruppeNavn)
+
+    @GetMapping("gruppe/medlemmer/sok/per-ansatt")
+    @Operation(summary = "Hent hvilke matchende grupper hver ansatt er medlem i, for grupper som matcher en substring av gruppenavnet")
+    fun grupperPerAnsattSomMatcher(@RequestParam gruppeNavn: String) =
+        entra.grupperPerAnsattSomMatcher(gruppeNavn)
+
     private fun medlemmerIGruppe(gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
-            entra.medlemmerIGruppe( gruppeNavn, it)
+            entra.medlemmerIGruppe(it)
         } ?: emptySet()
 
     @PostMapping("mail")
     @Operation(summary = "Send e-post")
-    fun sendMail(@RequestBody message: MailRequest)  =
+    fun sendMail(@RequestBody message: MailRequest) =
         mail.send(message)
 
     @PostMapping("gruppe/antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
-    fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>): Map<UUID, Long> =
+    fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>) =
         entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
     @GetMapping("nom/enhet/{navIdent}")
@@ -137,5 +142,5 @@ class EntraController(private val entra: EntraTjeneste, private val oid: EntraOi
 
 }
 
-fun <R> OAuth2AuthenticatedPrincipal.requiredAttribute(attributeName: String, mapper: (String) -> R): R =
+private fun <R> OAuth2AuthenticatedPrincipal.requiredAttribute(attributeName: String, mapper: (String) -> R): R =
     mapper(requireNotNull(getAttribute(attributeName)) { "Mangler $attributeName i OBO-token" })

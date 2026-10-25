@@ -2,6 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.norg
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
-interface NorgPort {
+interface NorgOperations {
     fun navn(enhet: Enhetnummer): String
 }

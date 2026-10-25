@@ -7,7 +7,7 @@ import io.mockk.mockk
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
 class NorgTjenesteTest : BehaviorSpec({
-    val norg = mockk<NorgPort>()
+    val norg = mockk<NorgOperations>()
     val tjeneste = NorgTjeneste(norg)
     val enhetsnummer = Enhetnummer("0315")
 

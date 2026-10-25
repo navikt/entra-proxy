@@ -2,8 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
-import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
-import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -12,22 +10,23 @@ import org.springframework.web.ErrorResponseException
 
 
 @RestRetryingWhenRecoverableService
-class EntraOidTjeneste(private val client: EntraGraphClient)  {
+class EntraOidTjeneste(private val client: EntraGraphClient) {
 
     private val log = getLogger(javaClass)
 
-    @Cacheable(ENTRA_OID,key = "#ansattId.verdi")
-     fun ansattOid(ansattId: AnsattId) =
-         with(client.users("id", filter = "${EntraTjeneste.BRUKER} eq '${ansattId.verdi}'").oids) {
-             when (size) {
-                 0 -> throw NotFoundRestException(currentUri,
-                     "Fant ingen oid for  ${ansattId.verdi}, er den fremdeles gyldig?")
-                 1 -> singleOrNull()?.id.also {
-                     log.info("Fant oid $it i Entra for ${ansattId.verdi}")
-                 }
-                 else -> throw EntraOidException(ansattId.verdi, "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})")
-             }
-         }
+    @Cacheable(ENTRA_OID, key = "#ansattId.verdi")
+    fun ansattOid(ansattId: AnsattId) =
+        with(client.users("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
+            when (size) {
+                0 -> throw EntraIkkeFunnetException(ansattId,
+                    "Fant ingen oid for ${ansattId.verdi}, er den fremdeles gyldig?")
+                1 -> singleOrNull()?.id.also {
+                    log.info("Fant oid $it i Entra for ${ansattId.verdi}")
+                }
+                else -> throw EntraOidException(ansattId.verdi,
+                    "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})")
+            }
+        }
 
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =

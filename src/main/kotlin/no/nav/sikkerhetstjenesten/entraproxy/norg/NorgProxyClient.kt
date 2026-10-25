@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.service.annotation.GetExchange
 
 @ClientRegistrationId(NORG)
-interface NorgProxyClient  {
+interface NorgProxyClient {
 
     @GetExchange(ENHET_PATH)
     fun enhetFor(@PathVariable enhetsnummer: String): NorgEnhetRespons

@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
-import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_CREDENTIALS
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
@@ -18,7 +17,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component
 
 @Component
-class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, AbstractAuthenticationToken> {
+class ApiAuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, AbstractAuthenticationToken> {
 
 
     private val delegate = JwtAuthenticationConverter()
@@ -33,7 +32,7 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
             JwtAuthenticationToken(jwt.token, principal(jwt.token, authorities), authorities)
         }
 
-    override fun convert(jwt: Jwt)  =
+    override fun convert(jwt: Jwt) =
         delegate.convert(jwt) ?: error(
             "JWT konvertering feilet for token med subject='${jwt.subject ?: "unknown"}', claimKeys=${jwt.claims.keys}"
         )
@@ -67,7 +66,6 @@ class OAuth2AuthorityAndRoleAddingJwtAuthenticationConverter : Converter<Jwt, Ab
         private const val ROLLE = "ROLE_"
         const val GROUPS_CLAIM = "groups"
         const val GRUPPE_PREFIX = "GRUPPE_"
-
     }
 }
 

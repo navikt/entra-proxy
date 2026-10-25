@@ -9,10 +9,11 @@ import java.time.Duration
 @Component
 class EntraOidConfig(@param:Value($$"${entraoid.varighet:365d}") override val varighet: Duration) : CachableRestConfig {
     override val navn = ENTRA_OID
-    override val caches = setOf(OID_CACHE)
+    override val caches = OID_CACHES
 
     companion object {
         const val ENTRA_OID = "entraoid"
         val OID_CACHE = CacheNøkkelConfig(ENTRA_OID)
+        val OID_CACHES = setOf(OID_CACHE)
     }
 }

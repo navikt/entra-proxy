@@ -6,5 +6,4 @@ data class NomAnsatt(
     val navident: AnsattId,
     val visningsnavn: String,
     val gjeldendeSektor: String,
-    val orgTilknytninger: Set<NomOrgTilknytning> = emptySet()
-)
+    val orgTilknytninger: Set<NomOrgTilknytning> = emptySet())

@@ -11,8 +11,7 @@ data class Ansatt(
     override val navIdent: AnsattId,
     override val visningNavn: String? = UKJENT,
     override val fornavn: String? = UKJENT,
-    override val etternavn: String? = UKJENT
-) : AnsattBasis, Comparable<Ansatt> {
+    override val etternavn: String? = UKJENT) : AnsattBasis, Comparable<Ansatt> {
 
     override fun compareTo(other: Ansatt): Int = navIdent.compareTo(other.navIdent)
 }
@@ -24,8 +23,7 @@ data class UtvidetAnsatt(
     override val etternavn: String? = UKJENT,
     val tIdent: TIdent,
     val epost: String? = UKJENT,
-    val enhet: Enhet
-) : AnsattBasis, Comparable<UtvidetAnsatt> {
+    val enhet: Enhet) : AnsattBasis, Comparable<UtvidetAnsatt> {
 
     override fun compareTo(other: UtvidetAnsatt): Int = navIdent.compareTo(other.navIdent)
 }

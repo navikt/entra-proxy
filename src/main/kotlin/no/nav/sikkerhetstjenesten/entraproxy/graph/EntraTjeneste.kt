@@ -1,229 +1,148 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
-import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.felles.rest.DownstreamURIContext.currentUri
-import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
-import java.net.URI
 import java.util.UUID
-import java.util.stream.Collectors.toSet
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor
+import java.util.concurrent.Semaphore
 
 @RestRetryingWhenRecoverableService
-class EntraTjeneste(private val client: EntraGraphClient, private val norg: NorgTjeneste, private val oid: EntraOidTjeneste, private val cache: CacheOperations)  {
+class EntraTjeneste(
+    private val graph: EntraGraphOperations,
+    private val inaktive: InaktivOperations,
+    private val oid: EntraOidOperations,
+    private val enheter: EnhetOperations,
+) {
 
     private val log = getLogger(javaClass)
 
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun tema(ansattId: AnsattId, oid: UUID) =
-        runCatching {
-            if (cache.inneholder(ansattId)) {
-                emptySet()
-            }
-            else  {
-                temaerForAnsatt(ansattId,"$oid").also {
-                    log.info("Hentet ${it.size} tema for $ansattId ($oid)")
-                }
-            }
-        }.getOrElse {
-            if (it is NotFoundRestException)  {
-                val nyOid = nyOid(ansattId)
-                temaerForAnsatt(ansattId,"$nyOid").also {
-                    log.info("Hentet ${it.size} tema for $ansattId etter refresh oid til $nyOid")
-                }
-            }
-            else throw it
-        }
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
+    fun tema(ansattId: AnsattId) =
+        if (erInaktiv(ansattId)) emptySet()
+        else medOidOppfrisking(ansattId) { graph.temaer(it) }
 
-    @Cacheable(cacheNames = [GRAPH],  key = "#root.methodName + ':' + #ansattId.verdi")
-    fun enheter(ansattId: AnsattId, oid: UUID) =
-        runCatching {
-            if (cache.inneholder(ansattId)) {
-                emptySet()
+    @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
+    fun enheter(ansattId: AnsattId): Set<Enhet> =
+        if (erInaktiv(ansattId)) emptySet()
+        else medOidOppfrisking(ansattId) {
+            graph.enheter(it) }.mapTo(mutableSetOf()) {
+                Enhet(it, enheter.navn(it))
             }
-            else  {
-                enheter(oid).also {
-                    log.info("Hentet ${it.size} enhet(er) for $ansattId ($oid)")
-                }
-            }
-        }.getOrElse {
-            if (it is NotFoundRestException)  {
-                val nyOid = nyOid(ansattId)
-                enheter(nyOid).also {
-                    log.info("Hentet ${it.size} enhet(er) for $ansattId etter refresh oid til $nyOid")
-                }
-            }
-            else throw it
-        }
 
     @Cacheable(MEDLEMMER, key = "#gruppeId.toString()")
-    fun medlemmerIGruppe(gruppeNavn: String, gruppeId: UUID) =
-            gruppeMedlemmer("$gruppeId", gruppeNavn).also {
-                log.info("Hentet ${it.size} medlem(mer) for gruppe $gruppeNavn ($gruppeId)")
-            }
+    fun medlemmerIGruppe(gruppeId: UUID) =
+        graph.gruppeMedlemmer("$gruppeId")
 
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(GRAPH, key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
-        utvidetAnsatt("$BRUKER eq '${ansattId.verdi}'",ansattId.verdi)
+        graph.utvidetAnsatt(ansattId)?.medEnhetsnavn()
 
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #ansattId.verdi")
+    @Cacheable(GRAPH, key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: TIdent) =
-        utvidetAnsatt("jobTitle eq '${ansattId.verdi}'",ansattId.verdi)
+        graph.utvidetAnsatt(ansattId)?.medEnhetsnavn()
 
-    private fun utvidetAnsatt(filter: String, verdi: String) =
-        client.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->
-            with(respons) {
-                onPremisesSamAccountName?.let { navIdent ->
-                    val enhetsNummer = Enhetnummer(streetAddress ?: UKJENT_ENHET)
-                    UtvidetAnsatt(
-                        AnsattId(navIdent),
-                        displayName,
-                        givenName,
-                        surname,
-                        TIdent(jobTitle ?: TIDENT_DEFAULT),
-                        mail,
-                        Enhet(enhetsNummer, norg.navn(enhetsNummer))
-                    ).also {
-                        log.trace("Hentet utvidet ansatt {} for ident {}", it, verdi)
-                    }
-                }
-            }
-        }
-
-    @Cacheable(GRAPH,key = "#root.methodName + ':' + #navIdent")
-    fun grupperForAnsatt(navIdent: AnsattId, oid: UUID) =
-        runCatching {
-            grupperForAnsatt(navIdent,"$oid").also {
-                log.info("Hentet ${it.size} gruppe(r) for $navIdent ($oid)")
-            }
-        }.getOrElse {
-            if (it is NotFoundRestException)  {
-                val nyOid = nyOid(navIdent)
-                grupperForAnsatt(navIdent,"$nyOid").also {
-                    log.info("Hentet ${it.size} gruppe(r) for $navIdent etter refresh oid til $nyOid")
-                }
-            }
-            else throw it
-        }
-
-    private fun temaerForAnsatt(ansattId: AnsattId, ansattOid: String) =
-        allSider("temaer for $ansattId ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"), Tilganger::next, client::tilgangerSide)
-            .flatMapTo(mutableSetOf()) { it.value }
-            .mapTo(sortedSetOf()) {
-                Tema(it.displayName)
-            }
-
-    private fun grupperForAnsattOriginal(ansattId: AnsattId,ansattOid: String) =
-        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOf(ansattOid, MINIMUM_FELTER), Tilganger::next, client::tilgangerSide)
-            .flatMapTo(mutableSetOf()) { it.value }
-            .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName, it.id)
-            }
-
-    fun grupperForAnsatt(ansattId: AnsattId,ansattOid: String) =
-        allSider("grupper for ${ansattId.verdi} ($ansattOid)", client.memberOfGrupper(ansattOid, MINIMUM_FELTER_FILTRERT,FILTER_STRING), Tilganger::next, client::tilgangerSide)
-            .flatMapTo(mutableSetOf()) { it.value }
-            .mapTo(sortedSetOf()) {
-                EntraGruppe(it.displayName, it.id, it.description)
-            }
-
-
-     fun gruppeMedlemmer(oid: String, gruppeNavn: String): Set<Ansatt> {
-        val alleMedlemmer = allSider("medlemmer av gruppe $oid ($gruppeNavn)", client.members(oid, ANSATTE_FELTER), GruppeMedlemmer::next, client::gruppeMedlemmerSide)
-            .flatMapTo(mutableSetOf()) { it.value }
-        val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
-            it.onPremisesSamAccountName?.erAnsattId() == true
-        }
-        if (ugyldigeMedlemmer.isNotEmpty()) {
-            log.info("Ignorerte {} ugyldige medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (\n${ugyldigeMedlemmer.joinToString("\n")})",
-                ugyldigeMedlemmer.size, oid)
-        }
-        return gyldigeMedlemmer.mapTo(sortedSetOf()) {
-            with(it) {
-                Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
-            }
-        }
-    }
+    @Cacheable(GRAPH, key = "#root.methodName + ':' + #navIdent.verdi")
+    fun grupper(navIdent: AnsattId) =
+        medOidOppfrisking(navIdent) { graph.grupper(it) }
 
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
-        gruppeIder.asList()
-            .chunked(BATCH_STØRRELSE)
-            .flatMap { antallForBatch(it).toList() }
-            .toMap()
+        graph.antallMedlemmer(*gruppeIder)
 
-    private fun enheter(ansattOid: UUID) =
-        allSider("enheter for $ansattOid", client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"), Tilganger::next, client::tilgangerSide)
-            .flatMapTo(mutableSetOf()) { it.value }
-            .mapTo(mutableSetOf()) {
-                Enhetnummer(it.displayName)
+    fun medlemmerIGrupperSomMatcher(substring: String): List<GruppeMedMedlemmer> =
+        graph.grupperSomMatcher(substring).also {
+            log.info("Fant ${it.size} grupper som matcher '$substring'")
+            if (it.size > MAKS_MATCHENDE_GRUPPER) {
+                throw ForMangeMatchendeGrupperException(substring, it.size, MAKS_MATCHENDE_GRUPPER)
             }
-            .parallelStream()
-            .map { Enhet(it, norg.navn(it)) }
-            .collect(toSet())
-
-    private fun <T> allSider(beskrivelse: String, førsteSide: T, next: (T) -> URI?, hentSide: (URI) -> T): Set<T> {
-        log.info("Henter {}", beskrivelse)
-        var sideNummer = 1
-        return generateSequence(førsteSide) { side ->
-            next(side)?.let { nesteSideUri ->
-                sideNummer++
-                log.trace("Følger $NEXT_LINK for {}, side {}", beskrivelse, sideNummer)
-                hentSide(nesteSideUri)
-            }
-        }.toSet().also {
-            log.info("Hentet {} side(r) for {}", it.size, beskrivelse)
         }
-    }
+            .mapNotNull {
+                gruppe -> gruppe.gruppeId?.let {
+                    it to gruppe.rolle
+                }
+            }
+            .let { grupper ->
+                hentParallelt(grupper) { (gruppeId, rolle) ->
+                    log.info("Henter parallelt medlemmer for gruppe $rolle med id $gruppeId")
+                    GruppeMedMedlemmer(gruppeId, rolle, graph.gruppeMedlemmer("$gruppeId"))
+                }
+            }.also {
+                log.info("Hentet ${it.size} grupper med medlemmer som matcher '$substring'")
+            }
 
-    private fun CacheOperations.inneholder(ansattId: AnsattId) =
-        inneholder(INAKTIVE, ansattId.verdi).also {
+    fun grupperPerAnsattSomMatcher(substring: String) =
+        medlemmerIGrupperSomMatcher(substring)
+            .flatMap {
+                gruppe -> gruppe.medlemmer.map {
+                    it to gruppe.gruppenavn
+                }
+            }
+            .groupBy({
+                it.first
+            }, {
+                it.second
+            })
+            .map {
+                (ansatt, grupper) -> AnsattMedGrupper(ansatt, grupper.toSortedSet())
+            }
+            .sortedBy {
+                it.ansatt
+            }
+
+    private fun <T> medOidOppfrisking(ansattId: AnsattId, oppslag: (UUID) -> Set<T>): Set<T> =
+        runCatching {
+            oppslag(oid.ansattOid(ansattId) ?: return emptySet())
+        }.getOrElse {
+            if (it is EntraIkkeFunnetException) {
+                oppslag(oid.nyOid(ansattId))
+            } else throw it
+        }
+
+    private fun UtvidetAnsatt.medEnhetsnavn() =
+        copy(enhet = Enhet(enhet.enhetnummer, enheter.navn(enhet.enhetnummer)))
+
+    private fun erInaktiv(ansattId: AnsattId) =
+        inaktive.erInaktiv(ansattId).also {
             if (it) {
                 log.info("$ansattId er inaktiv")
             }
         }
 
-    private fun nyOid(navIdent: AnsattId): UUID {
-        cache.delete(OID_CACHE,navIdent.verdi).also {
-            log.info("Slettet cache innslag før henting av ny oid $navIdent")
+    private fun <T, R> hentParallelt(
+        elementer: List<T>,
+        maksSamtidige: Int = MAKS_SAMTIDIGE_KALL,
+        oppslag: (T) -> R): List<R> {
+        if (elementer.isEmpty()) return emptyList()
+        val grense = Semaphore(maksSamtidige)
+        return newVirtualThreadPerTaskExecutor().use { executor ->
+            elementer
+                .map { element ->
+                    executor.submit(Callable {
+                        grense.acquire()
+                        try {
+                            oppslag(element)
+                        } finally {
+                            grense.release()
+                        }
+                    })
+                }
+                .map { future ->
+                    runCatching {
+                        future.get()
+                    }.getOrElse { throw (it as? ExecutionException)?.cause ?: it }
+                }
         }
-        return oid.ansattOid(navIdent)?: throw NotFoundRestException(currentUri, "Fant ikke ny oid for $navIdent i Entra, selv etter cache-opprydding og nytt oppslag")
     }
 
-    private fun antallForBatch(gruppeIder: List<UUID>): Map<UUID, Long> {
-        val idTilGruppe = gruppeIder.mapIndexed { index, gruppeId -> "$index" to gruppeId }.toMap()
-        val forespørsler = idTilGruppe.map { (id, gruppeId) ->
-            BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
-        }
-        return client.batch(BatchRequest(forespørsler)).responses
-            .mapNotNull { respons ->
-                val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
-                val antall = (respons.body as? Number)?.toLong()
-                if (respons.status == 200 && antall != null) {
-                    gruppeId to antall
-                } else {
-                    log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")
-                    null
-                }
-            }.toMap()
-    }
+    override fun toString() =
+        "${javaClass.simpleName} [graph=$graph]"
 
     companion object {
-        const val BRUKER = "onPremisesSamAccountName"
-        private const val MINIMUM_FELTER = "id,displayName"
-        private const val MINIMUM_FELTER_FILTRERT = "$MINIMUM_FELTER,securityEnabled,mailEnabled,description"
-        private const val ANSATTE_FELTER = "$MINIMUM_FELTER,jobTitle,$BRUKER,givenName,surname,mail,streetAddress"
-        private const val FILTER_STRING = "securityEnabled eq true and mailEnabled eq false"
-        private const val BATCH_STØRRELSE = 20
+        private const val MAKS_SAMTIDIGE_KALL = 40
+        private const val MAKS_MATCHENDE_GRUPPER = 100
     }
-    override fun toString() =
-        "${javaClass.simpleName} [client=$client, norg=$norg]"
 }

@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.utils
 
-import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.utils.extensions.TimeExtensions.local
 import org.springframework.boot.actuate.info.Info.Builder
 import org.springframework.boot.actuate.info.InfoContributor
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Lazy
-class StartupInfoContributor(private val caches : CacheSizeAware, private val ctx: ConfigurableApplicationContext) :
+class StartupInfoContributor(private val caches : CacheOperations, private val ctx: ConfigurableApplicationContext) :
     InfoContributor {
 
     override fun contribute(builder: Builder) {

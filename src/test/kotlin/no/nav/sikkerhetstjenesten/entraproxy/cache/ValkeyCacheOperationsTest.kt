@@ -35,7 +35,6 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.felles.cache.CacheSizeAware
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyEventListeningCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.getMany
@@ -63,7 +62,6 @@ import kotlin.time.Duration.Companion.seconds
 @EnableAutoConfiguration
 class ValkeyCacheOperationsTest(
     private val cache: CacheOperations,
-    private val cacheSizeAware: CacheSizeAware,
     private val valkey: StringRedisTemplate) : BehaviorSpec() {
 
     @TestConfiguration
@@ -107,15 +105,6 @@ class ValkeyCacheOperationsTest(
                     override val varighet = ofSeconds(DEFAULT_TTL_SECONDS)
                 }
             )
-
-        @Bean
-        fun cacheSizeAware(cache: CacheOperations) =
-            CacheSizeAware(
-                cache,
-                object : CachableRestConfig {
-                    override val navn = "entra-test"
-                    override val caches = allTestCaches
-                })
     }
 
     @MockkBean
@@ -474,13 +463,13 @@ class ValkeyCacheOperationsTest(
         Given("antall innslag via CacheSizeAware") {
             When("cache er tom") {
                 Then("returnerer cache-størrelse fra valkey") {
-                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { it.fullName to 0L }
+                    cache.sizes() shouldBe ALL_TEST_CACHES.associate { it.fullName to 0L }
                 }
             }
             When("cache inneholder verdier") {
                 Then("returnerer antall innslag fra valkey") {
                     cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
-                    cacheSizeAware.sizes() shouldBe ALL_TEST_CACHES.associate { cache ->
+                    cache.sizes() shouldBe ALL_TEST_CACHES.associate { cache ->
                         if (cache == GRUPPER_FOR_ANSATT_GRAPH_CACHE) cache.fullName to 2L else cache.fullName to 0L
                     }
                 }

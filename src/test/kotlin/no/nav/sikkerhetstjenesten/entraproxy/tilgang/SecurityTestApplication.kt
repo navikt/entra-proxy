@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
 import no.nav.sikkerhetstjenesten.entraproxy.felles.PageNotFoundHandler
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthenticationEntryPoint
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter
@@ -22,5 +23,6 @@ import org.springframework.context.annotation.Import
     ClientSecurityBeanConfig::class,
     UtforskerSecurityBeanConfig::class,
     NotificationAutoConfiguration::class,
+    FellesHttpClientInterceptors::class,
     DefaultRestErrorHandler::class)
 class SecurityTestApplication

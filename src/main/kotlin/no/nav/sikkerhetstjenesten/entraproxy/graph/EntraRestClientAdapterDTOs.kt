@@ -4,33 +4,25 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.security.ClientSecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
+import org.springframework.http.HttpMethod.GET
 import java.net.URI
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Grupper(
-    @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<IdentifiserbartObjekt> = emptySet(),
-)
+data class Grupper(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class AnsattOids(
-    @param:JsonProperty(VALUE) val oids: Set<AnsattOid>,
-) {
+data class AnsattOids(@param:JsonProperty(VALUE) val oids: Set<AnsattOid>, ) {
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattOid(val id: UUID)
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Tilganger(
-    @param:JsonProperty(NEXT_LINK) val next: URI? = null,
-    val value: Set<IdentifiserbartObjekt> = emptySet(),
-)
+data class Tilganger(@param:JsonProperty(NEXT_LINK) val next: URI? = null, val value: Set<IdentifiserbartObjekt> = emptySet())
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class EntraSaksbehandlerRespons(
-    @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>,
-) {
+    @param:JsonProperty(VALUE) val ansatte: Set<AnsattRespons>) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class AnsattRespons(
@@ -60,17 +52,14 @@ data class BatchRequest(val requests: List<BatchSubRequest>)
 data class BatchSubRequest(
     val id: String,
     val url: String,
-    val method: String = "GET",
+    val method: String = GET.name(),
     val headers: Map<String, String> = mapOf(HEADER_CONSISTENCY_LEVEL))
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class BatchRespons(val responses: List<BatchSubRespons> = emptyList())
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class BatchSubRespons(
-    val id: String,
-    val status: Int,
-    val body: Any? = null)
+data class BatchSubRespons(val id: String, val status: Int, val body: Any? = null)
 
 internal const val TIDENT_DEFAULT = "AAA1234"
 internal const val VALUE = "value"

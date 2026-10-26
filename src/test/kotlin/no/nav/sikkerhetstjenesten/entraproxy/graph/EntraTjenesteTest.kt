@@ -387,7 +387,7 @@ class EntraTjenesteTest(
         }
     }
 
-    @TestConfiguration
+    @TestConfiguration(proxyBeanMethods = false)
     class EntraTestConfig : CacheTestConfig(MEDLEMMER,GRAPH,ENTRA_OID)
 
     @TestConfiguration

@@ -1,11 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
-import no.nav.sikkerhetstjenesten.felles.rest.DownstreamUriCapturingInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
-import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder.httpComponents
@@ -21,7 +20,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.web.client.OAuth2ClientHttpRequestInterceptor
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClient.Builder
-import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import java.time.Duration
 
 @Configuration
@@ -32,10 +30,10 @@ class NomBeanConfig {
     @Bean
     @Qualifier(NOMGRAPH)
     fun nomGraphRestClient(builder: Builder, cfg: NomGraphQLConfig,
-        factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
-        @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
-        logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,
-        mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
+                           factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
+                           @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
+                           interceptors: FellesHttpClientInterceptors,
+                           mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder
             .requestFactory(
                 factoryBuilderCustomizer
@@ -44,10 +42,7 @@ class NomBeanConfig {
                         .withConnectTimeout(connectTimeout)
                         .withReadTimeout(cfg.lesetimeout)))
             .requestInterceptors {
-                logbookInterceptor.ifAvailable { interceptor ->
-                    it.add(interceptor)
-                }
-                it.add(DownstreamUriCapturingInterceptor())
+                interceptors.configure(it)
                 it.add(OAuth2ClientHttpRequestInterceptor(mgr).apply {
                     setClientRegistrationIdResolver { NOMGRAPH }
                     setAuthorizationFailureHandler(failureHandler)
@@ -74,4 +69,3 @@ class NomBeanConfig {
         private const val PING_QUERY = "{ __typename }"
     }
 }
-

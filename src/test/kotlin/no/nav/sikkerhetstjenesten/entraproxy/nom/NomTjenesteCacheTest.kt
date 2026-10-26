@@ -9,6 +9,7 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import org.springframework.cache.annotation.EnableCaching
@@ -83,6 +84,23 @@ class NomTjenesteCacheTest(
                         first shouldBe setOf(ansatt)
                         second shouldBe setOf(ansatt)
                         verify(exactly = 2) { nom.ansatte(setOf(ident)) }
+                    }
+                }
+
+            }
+
+            When("samme NOM-ident slås opp to ganger") {
+                Then("returneres de ansatte og porten kalles bare én gang") {
+                    val nomIdent = NomIdent("fa515j")
+                    every { nom.ansatteForNomIdent(nomIdent) } returns setOf(ansatt)
+
+                    val first = tjeneste.ansatteForNomIdent(nomIdent)
+                    val second = tjeneste.ansatteForNomIdent(nomIdent)
+
+                    assertSoftly {
+                        first shouldBe setOf(ansatt)
+                        second shouldBe setOf(ansatt)
+                        verify(exactly = 1) { nom.ansatteForNomIdent(nomIdent) }
                     }
                 }
             }

@@ -16,6 +16,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_ST
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import org.springframework.graphql.client.ClientGraphQlResponse
+import org.springframework.graphql.client.ClientResponseField
 import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.GraphQlClient.RequestSpec
 import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
@@ -25,6 +27,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val client = mockk<GraphQlClient>()
     val request = mockk<RequestSpec>()
     val retrieve = mockk<RetrieveSyncSpec>()
+    val response = mockk<ClientGraphQlResponse>()
+    val field = mockk<ClientResponseField>()
     val cache = mockk<CacheOperations>(relaxed = true)
     val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
     val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG)
@@ -43,7 +47,41 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         NomOrgEnhetRespons(NomEnhetMedAnsatte(id, "Testenhet", tilknytninger.toList()))
 
     beforeEach {
-        clearMocks(client, request, retrieve, cache)
+        clearMocks(client, request, retrieve, response, field, cache)
+    }
+
+    Given("oppslag av én ansatt") {
+        beforeEach {
+            every { client.documentName("orgtilknytninger") } returns request
+            every { request.variables(mapOf("navident" to "A123456")) } returns request
+            every { request.executeSync() } returns response
+            every { response.field("ressurs") } returns field
+        }
+
+        When("NOM returnerer en ansatt med flere tilknytninger") {
+            Then("mappes den ansatte og bare daglig oppfølging beholdes") {
+                val medOppfolging = dagligOppfolging()
+                val utenOppfolging = NomOrgTilknytning(NomEnhet(NomIdent("xy123z"), "Annen enhet", tilgangsenhetId))
+                every { field.toEntity(NomGraphQLRespons::class.java) } returns
+                    first.copy(orgTilknytninger = medOppfolging + utenOppfolging)
+
+                val resultat = adapter.ansatt(first.navident)
+
+                assertSoftly {
+                    resultat shouldBe firstAnsatt.copy(orgTilknytninger = medOppfolging)
+                    verify(exactly = 1) { request.variables(mapOf("navident" to "A123456")) }
+                    verify(exactly = 1) { response.field("ressurs") }
+                }
+            }
+        }
+
+        When("NOM ikke finner den ansatte") {
+            Then("returneres null") {
+                every { field.toEntity(NomGraphQLRespons::class.java) } returns null
+
+                adapter.ansatt(first.navident) shouldBe null
+            }
+        }
     }
 
     Given("bulk queries") {
@@ -71,6 +109,23 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             Then("only the missing idents are fetched from NOM and merged with the cache hits") {
                 every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
                     mapOf("A123456" to firstAnsatt)
+                every { request.variables(mapOf("navidenter" to setOf("B123456"))) } returns request
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
+
+                val resultat = adapter.ansatte(identer)
+
+                assertSoftly {
+                    resultat shouldBe setOf(firstAnsatt, secondAnsatt)
+                    verify(exactly = 1) { request.variables(mapOf("navidenter" to setOf("B123456"))) }
+                    verify(exactly = 1) { cache.putMany(NOM_CACHE, mapOf("B123456" to secondAnsatt)) }
+                }
+            }
+        }
+
+        When("cache inneholder et eksplisitt null-innslag") {
+            Then("hentes den manglende ansatte fra NOM og cache oppdateres") {
+                every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
+                    mapOf("A123456" to firstAnsatt, "B123456" to null)
                 every { request.variables(mapOf("navidenter" to setOf("B123456"))) } returns request
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
 

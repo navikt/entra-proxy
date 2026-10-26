@@ -6,9 +6,11 @@ import io.mockk.every
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
@@ -25,12 +27,15 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.matchesPattern
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.http.MediaType.TEXT_HTML
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
@@ -91,6 +96,42 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 "test@nav.no",
                 TEST_ENHET,
             )
+        }
+
+        Given("feilsvar fra Entra-tjenesten") {
+            When("den ansatte ikke finnes") {
+                Then("returneres 404 med navident og feildetaljer") {
+                    every { entraTjeneste.grupper(TEST_ANSATT_ID) } throws
+                        EntraIkkeFunnetException(TEST_ANSATT_ID, "Fant ikke testansatt")
+
+                    mockMvc.perform(get("$API_V1/ansatt/tilganger/$TEST_ANSATT_ID").with(jwt()))
+                        .andExpect(status().isNotFound())
+                        .andExpect(content().contentTypeCompatibleWith(APPLICATION_PROBLEM_JSON))
+                        .andExpect(jsonPath("$.status").value(404))
+                        .andExpect(jsonPath("$.title").value("Fant ikke ansatt i Entra"))
+                        .andExpect(jsonPath("$.detail").value("Fant ikke testansatt"))
+                        .andExpect(jsonPath("$.$NAVIDENT").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$.traceId").value(matchesPattern("[0-9a-f]{32}")))
+                }
+            }
+
+            When("gruppesøket matcher for mange grupper") {
+                Then("returneres 422 med søket og den overskredne grensen") {
+                    val feil = ForMangeMatchendeGrupperException("ROLLE", 101, 100)
+                    every { entraTjeneste.medlemmerIGrupperSomMatcher("ROLLE") } throws feil
+
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer/sok").param("gruppeNavn", "ROLLE").with(jwt()))
+                        .andExpect(status().isUnprocessableContent())
+                        .andExpect(content().contentTypeCompatibleWith(APPLICATION_PROBLEM_JSON))
+                        .andExpect(jsonPath("$.status").value(422))
+                        .andExpect(jsonPath("$.title").value("For bredt søk"))
+                        .andExpect(jsonPath("$.detail").value(feil.message))
+                        .andExpect(jsonPath("$.gruppenavnSubstring").value("ROLLE"))
+                        .andExpect(jsonPath("$.antall").value(101))
+                        .andExpect(jsonPath("$.maks").value(100))
+                        .andExpect(jsonPath("$.traceId").value(matchesPattern("[0-9a-f]{32}")))
+                }
+            }
         }
 
         Given("en side som ikke finnes") {

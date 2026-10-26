@@ -567,6 +567,10 @@
     function klargjorSok(panel) {
         let sisteSok = 0;
         panel.querySelector('.nytt-sok').addEventListener('click', () => {
+            if (visUtforsketMedlemmer.checked) {
+                visUtforsketMedlemmer.checked = false;
+                oppdaterUtforsketMedlemmer();
+            }
             const nyttPanel = panelMal.cloneNode(true);
             nyttPanel.querySelector('h2')?.remove();
             antallSok += 1;

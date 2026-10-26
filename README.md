@@ -6,6 +6,7 @@ Tjeneste for å hente ut:
 4) Medlemmer i en bestemt arkivtema-gruppe
 5) Hente utvidet informasjon om ansatt basert på navIdent eller T-ident
 6) Hente Ansattes grupper (bare SecEnabled)
+7) Hente enhetsnavn fra NORG via `GET /api/v1/navn/{enhetsnummer}` (krever innlogging eller gyldig token; returnerer `text/plain`)
 
 ## Swagger og dokumentasjon
 

@@ -561,12 +561,22 @@
                     if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
                         throw new Error('Uventet respons: mangler nav-ident eller navn.');
                     }
-                    const enhetsnavn = (erNomSok && erTilgangsenhet)
-                        ? resultat.flatMap(ressurs => ressurs.orgTilknytninger ?? [])
-                            .find(tilknytning => tilknytning.orgEnhet?.tilgangsenhetId === verdi
-                                && typeof tilknytning.orgEnhet.navn === 'string'
-                                && tilknytning.orgEnhet.navn.trim())?.orgEnhet.navn
-                        : undefined;
+                    let enhetsnavn;
+                    if (erNomSok && erTilgangsenhet) {
+                        const navnResponse = await fetch(`/api/v1/navn/${verdi}`, {
+                            headers: {'Accept': 'text/plain'}
+                        });
+                        if (!navnResponse.ok) {
+                            throw new Error(`Kunne ikke hente enhetsnavn (HTTP ${navnResponse.status}).`);
+                        }
+                        enhetsnavn = (await navnResponse.text()).trim();
+                        if (!enhetsnavn) {
+                            throw new Error('Uventet respons: mangler enhetsnavn.');
+                        }
+                        if (sokId !== sisteSok) {
+                            return;
+                        }
+                    }
                     const resultatnavn = erNomSok ? (enhetsnavn ?? (erNomEnhet ? `nom-enhet ${verdi}` : `tilgangsenhet ${verdi}`)) : gruppeNavn;
                     gruppemedlemmer.set(panel, medlemmer);
                     panel.dataset.gruppeNavn = gruppeNavn;

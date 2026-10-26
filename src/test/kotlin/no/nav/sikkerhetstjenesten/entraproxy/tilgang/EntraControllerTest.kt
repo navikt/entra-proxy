@@ -37,6 +37,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON
 import org.springframework.http.MediaType.TEXT_HTML
+import org.springframework.http.MediaType.TEXT_PLAIN
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -96,6 +97,32 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 "test@nav.no",
                 TEST_ENHET,
             )
+        }
+
+        Given("enhetsnavn fra NORG i produksjon") {
+            Then("returnerer enhetsnavn som tekst for innlogget bruker") {
+                every { norgTjeneste.navn(TEST_ENHET.enhetnummer) } returns "NAV Testenhet"
+
+                mockMvc.perform(get("$API_V1/navn/${TEST_ENHET.enhetnummer.verdi}").accept(TEXT_PLAIN).with(oidcLogin()))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentTypeCompatibleWith(TEXT_PLAIN))
+                    .andExpect(content().string("NAV Testenhet"))
+            }
+            Then("returnerer enhetsnavn med gyldig token") {
+                every { norgTjeneste.navn(TEST_ENHET.enhetnummer) } returns "NAV Testenhet"
+
+                mockMvc.perform(get("$API_V1/navn/${TEST_ENHET.enhetnummer.verdi}").with(jwt()))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string("NAV Testenhet"))
+            }
+            Then("krever autentisering") {
+                mockMvc.perform(get("$API_V1/navn/${TEST_ENHET.enhetnummer.verdi}"))
+                    .andExpect(status().isUnauthorized())
+            }
+            Then("avviser ugyldig enhetsnummer") {
+                mockMvc.perform(get("$API_V1/navn/ugyldig").with(oidcLogin()))
+                    .andExpect(status().isBadRequest())
+            }
         }
 
         Given("feilsvar fra Entra-tjenesten") {
@@ -312,6 +339,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().string(containsString("/api/v1/nom/enhet/bulk")))
                         .andExpect(content().string(containsString("/api/v1/nom/ansatte/")))
                         .andExpect(content().string(containsString("/api/v1/nom/ansatte/enhet/")))
+                        .andExpect(content().string(containsString("/api/v1/navn/")))
                         .andExpect(content().string(containsString("name=\"tilgangsenhetId\"")))
                         .andExpect(content().string(containsString("pattern=\"[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]\"")))
                 }

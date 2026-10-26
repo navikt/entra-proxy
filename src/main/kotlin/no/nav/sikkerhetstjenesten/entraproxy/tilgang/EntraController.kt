@@ -11,11 +11,13 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
+import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
 import org.springframework.web.bind.annotation.GetMapping
@@ -36,7 +38,13 @@ class EntraController(
     private val entra: EntraTjeneste,
     private val oid: EntraOidTjeneste,
     private val nom: NomTjeneste,
+    private val norg: NorgTjeneste,
     private val mail: EntraMailTjeneste) {
+    @GetMapping("navn/{enhetsnummer}", produces = [TEXT_PLAIN_VALUE])
+    @Operation(summary = "Hent enhetsnavn fra NORG")
+    fun enhetsnavn(@PathVariable enhetsnummer: Enhetnummer) =
+        norg.navn(enhetsnummer)
+
     @GetMapping("enhet/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige enheter for ansatt fra Entra")
     fun enheterForAnsatt(@PathVariable navIdent: AnsattId) =

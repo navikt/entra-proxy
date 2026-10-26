@@ -51,7 +51,7 @@ class EntraOidCacheOppfriskerTest : BehaviorSpec({
     }
 
     Given("et OID-oppslag som feiler") {
-        When("ansattoppslaget kaster exception") {
+        When("ansattoppslaget kaster unntak") {
             Then("håndteres feilen uten å forsøke et gruppeoppslag") {
                 every { oid.ansattOid(any()) } throws IllegalStateException("Entra er utilgjengelig")
 
@@ -67,7 +67,7 @@ class EntraOidCacheOppfriskerTest : BehaviorSpec({
             }
         }
 
-        When("gruppeoppslaget kaster exception") {
+        When("gruppeoppslaget kaster unntak") {
             Then("håndteres feilen uten å forsøke et ansattoppslag") {
                 every { oid.gruppeOid(any()) } throws IllegalStateException("Entra er utilgjengelig")
 

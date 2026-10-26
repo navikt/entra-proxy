@@ -41,12 +41,12 @@ class NomTjenesteCacheTest(
         val enhet = Enhetnummer("0315")
         val ansatt = NomAnsatt(ident, "Test Ansatt", "STAT")
 
-        Given("a cached NomTjeneste backed by a mocked port") {
+        Given("en NomTjeneste med caching og en mocket port") {
 
-            When("the same ident is looked up twice") {
+            When("samme ident slås opp to ganger") {
                 every { nom.ansatt(ident) } returns ansatt
 
-                Then("the port is queried only once") {
+                Then("kalles porten bare én gang") {
                     val first = tjeneste.ansatt(ident)
                     val second = tjeneste.ansatt(ident)
 
@@ -58,10 +58,10 @@ class NomTjenesteCacheTest(
                 }
             }
 
-            When("the same tilgangsenhet is looked up twice") {
+            When("samme tilgangsenhet slås opp to ganger") {
                 every { nom.ansatteForEnhet(enhet) } returns setOf(ansatt)
 
-                Then("the port is queried only once") {
+                Then("kalles porten bare én gang") {
                     val first = tjeneste.ansatteForEnhet(enhet)
                     val second = tjeneste.ansatteForEnhet(enhet)
 
@@ -73,10 +73,10 @@ class NomTjenesteCacheTest(
                 }
             }
 
-            When("the same bulk of idents is looked up twice") {
+            When("samme sett med identer slås opp to ganger") {
                 every { nom.ansatte(setOf(ident)) } returns setOf(ansatt)
 
-                Then("the port is queried every time because bulk lookups are not cached") {
+                Then("kalles porten hver gang fordi oppslag av flere identer ikke caches") {
                     val first = tjeneste.ansatte(setOf(ident))
                     val second = tjeneste.ansatte(setOf(ident))
 

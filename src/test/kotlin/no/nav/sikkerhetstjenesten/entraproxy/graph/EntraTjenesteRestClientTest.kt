@@ -15,6 +15,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTR
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
+import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import org.springframework.boot.restclient.test.MockServerRestClientCustomizer
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -22,11 +23,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpStatusCode
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.mock.http.client.MockClientHttpRequest
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.UnorderedRequestExpectationManager
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
+import org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
 import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
@@ -208,6 +211,41 @@ class EntraTjenesteRestClientTest(
                     assertSoftly {
                         oppfrisket shouldBe nyOid
                         cachet shouldBe nyOid
+                    }
+                }
+            }
+        }
+
+        Given("en cachet OID som ikke lenger finnes i Graph") {
+            When("Graph returnerer HTTP-404 ved gruppeoppslag") {
+                Then("oppfriskes OID og gruppene hentes med den nye verdien") {
+                    val ident = AnsattId("L123456")
+                    val gammelOid = randomUUID()
+                    val nyOid = randomUUID()
+                    cache.putOne(OID_CACHE, ident.verdi, gammelOid)
+                    oidOppslag.ansattOid(ident) shouldBe gammelOid
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/users/$gammelOid/memberOf/microsoft.graph.group"
+                    }.andRespond(withResourceNotFound())
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/users"
+                        request.uri.query shouldContain "\$filter=onPremisesSamAccountName eq '${ident.verdi}'"
+                    }.andRespond(withSuccess(oidRespons(nyOid), APPLICATION_JSON))
+                    server.expect { request ->
+                        request.method shouldBe GET
+                        request.uri.path shouldBe "/users/$nyOid/memberOf/microsoft.graph.group"
+                    }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
+
+                    val resultat = entra.grupper(ident)
+                    val cachetResultat = entra.grupper(ident)
+                    val cachetOid = oidOppslag.ansattOid(ident)
+
+                    assertSoftly {
+                        resultat shouldBe setOf(EntraGruppe("0000-GA-MIN_ROLLE", GRUPPE_ID, "Tilgang til min rolle"))
+                        cachetResultat shouldBe resultat
+                        cachetOid shouldBe nyOid
                     }
                 }
             }
@@ -500,7 +538,10 @@ class EntraTjenesteRestClientTest(
 
         @Bean
         fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
-            builderFor(create(builder.baseUrl(baseUrl).build())).build().createClient()
+            builderFor(create(builder
+                .baseUrl(baseUrl)
+                .defaultStatusHandler(HttpStatusCode::isError, DefaultRestErrorHandler()::handle)
+                .build())).build().createClient()
 
         @Bean
         fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)

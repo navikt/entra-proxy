@@ -31,10 +31,10 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val field = mockk<ClientResponseField>()
     val cache = mockk<CacheOperations>(relaxed = true)
     val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
-    val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG)
-    val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
-    val firstAnsatt = NomAnsatt(AnsattId("A123456"), "First", "Statlig")
-    val secondAnsatt = NomAnsatt(AnsattId("B123456"), "Second", "Statlig")
+    val first = NomGraphQLRespons(AnsattId("A123456"), "Første ansatt", NAV_STATLIG)
+    val second = NomGraphQLRespons(AnsattId("B123456"), "Andre ansatt", NAV_STATLIG)
+    val firstAnsatt = NomAnsatt(AnsattId("A123456"), "Første ansatt", "Statlig")
+    val secondAnsatt = NomAnsatt(AnsattId("B123456"), "Andre ansatt", "Statlig")
     val identer = setOf(first.navident, second.navident)
     val tilgangsenhetId = Enhetnummer("0315")
     val nomId = NomIdent("fa515j")
@@ -84,15 +84,15 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
     }
 
-    Given("bulk queries") {
+    Given("oppslag av flere ansatte") {
         beforeEach {
             every { client.documentName("orgtilknytninger-bulk") } returns request
             every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
             every { request.retrieveSync("ressurser") } returns retrieve
         }
 
-        When("all idents are found in cache") {
-            Then("all employees are returned from cache without querying NOM") {
+        When("alle identene finnes i cache") {
+            Then("returneres alle ansatte fra cache uten oppslag i NOM") {
                 every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
                     mapOf("A123456" to firstAnsatt, "B123456" to secondAnsatt)
 
@@ -105,8 +105,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("only some idents are found in cache") {
-            Then("only the missing idents are fetched from NOM and merged with the cache hits") {
+        When("bare noen av identene finnes i cache") {
+            Then("hentes bare manglende ansatte fra NOM og kombineres med cachetreffene") {
                 every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
                     mapOf("A123456" to firstAnsatt)
                 every { request.variables(mapOf("navidenter" to setOf("B123456"))) } returns request
@@ -139,8 +139,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the response contains resources") {
-            Then("list variables are sent and only daily follow-up affiliations are kept") {
+        When("responsen inneholder ressurser") {
+            Then("sendes identlisten og bare tilknytninger med daglig oppfølging beholdes") {
                 val medOppfolging = dagligOppfolging()
                 val utenOppfolging = NomOrgTilknytning(NomEnhet(NomIdent("xy123z"), "Annen enhet", tilgangsenhetId))
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
@@ -162,16 +162,16 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the response contains an empty resource list") {
-            Then("an empty set is returned") {
+        When("responsen inneholder en tom ressursliste") {
+            Then("returneres et tomt sett") {
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
                 adapter.ansatte(identer) shouldBe emptySet()
             }
         }
 
-        When("the response contains a missing resource") {
-            Then("available resources are returned") {
+        When("en ressurs mangler i responsen") {
+            Then("returneres de tilgjengelige ressursene") {
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                     listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
 
@@ -179,8 +179,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("all resources are missing") {
-            Then("an empty set is returned") {
+        When("alle ressursene mangler") {
+            Then("returneres et tomt sett") {
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
                     listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
@@ -188,9 +188,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the query fails") {
-            Then("the failure is propagated") {
-                val failure = IllegalStateException("GraphQL query failed")
+        When("oppslaget feiler") {
+            Then("kastes feilen videre") {
+                val failure = IllegalStateException("GraphQL-oppslag feilet")
                 every { request.retrieveSync("ressurser") } throws failure
 
                 shouldThrow<IllegalStateException> {
@@ -207,8 +207,8 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { request.retrieveSync("ressurser") } returns retrieve
         }
 
-        When("the tilgangsenhet has resources with daily follow-up") {
-            Then("the tilgangsenhetId variable is sent and those employees are returned") {
+        When("tilgangsenheten har ressurser med daglig oppfølging") {
+            Then("sendes tilgangsenhetId og de ansatte returneres") {
                 val tilknytninger = dagligOppfolging()
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
                     NomBulkGraphQLRespons(first.copy(orgTilknytninger = tilknytninger)),
@@ -228,12 +228,12 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("resources lack daily follow-up for the tilgangsenhet") {
-            Then("only resources with daily follow-up for the tilgangsenhet are returned") {
+        When("ressurser mangler daglig oppfølging for tilgangsenheten") {
+            Then("returneres bare ressurser med daglig oppfølging for tilgangsenheten") {
                 val medOppfolging = dagligOppfolging()
                 val utenOppfolging = medOppfolging.mapTo(mutableSetOf()) { it.copy(erDagligOppfolging = false) }
                 val third = NomGraphQLRespons(
-                    AnsattId("C123456"), "Third", NAV_STATLIG, dagligOppfolging(Enhetnummer("0316"))
+                    AnsattId("C123456"), "Tredje ansatt", NAV_STATLIG, dagligOppfolging(Enhetnummer("0316"))
                 )
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
                     NomBulkGraphQLRespons(first.copy(orgTilknytninger = medOppfolging)),
@@ -246,16 +246,16 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the tilgangsenhet has no resources") {
-            Then("an empty set is returned") {
+        When("tilgangsenheten ikke har ressurser") {
+            Then("returneres et tomt sett") {
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe emptySet()
             }
         }
 
-        When("a resource is missing") {
-            Then("available resources are returned") {
+        When("en ressurs mangler") {
+            Then("returneres de tilgjengelige ressursene") {
                 val tilknytninger = dagligOppfolging()
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
                     NomBulkGraphQLRespons(first.copy(orgTilknytninger = tilknytninger)),
@@ -267,9 +267,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the query fails") {
-            Then("the failure is propagated") {
-                val failure = IllegalStateException("GraphQL query failed")
+        When("oppslaget feiler") {
+            Then("kastes feilen videre") {
+                val failure = IllegalStateException("GraphQL-oppslag feilet")
                 every { request.retrieveSync("ressurser") } throws failure
 
                 shouldThrow<IllegalStateException> {
@@ -286,13 +286,13 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { request.retrieveSync("orgEnheter") } returns retrieve
         }
 
-        When("the org units contain resources with and without daily follow-up") {
-            Then("only daily follow-up resources from all org units are returned") {
+        When("organisasjonsenhetene inneholder ressurser med og uten daglig oppfølging") {
+            Then("returneres bare ressurser med daglig oppfølging fra alle organisasjonsenhetene") {
                 every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                     enhetRespons(
                         nomId,
                         NomBulkGraphQLRespons(first, erDagligOppfolging = true),
-                        NomBulkGraphQLRespons(NomGraphQLRespons(AnsattId("C123456"), "Third", NAV_STATLIG))
+                        NomBulkGraphQLRespons(NomGraphQLRespons(AnsattId("C123456"), "Tredje ansatt", NAV_STATLIG))
                     ),
                     enhetRespons(NomIdent("ke465u"), NomBulkGraphQLRespons(second, erDagligOppfolging = true))
                 )
@@ -307,16 +307,16 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("no org units are returned") {
-            Then("an empty set is returned") {
+        When("ingen organisasjonsenheter returneres") {
+            Then("returneres et tomt sett") {
                 every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
 
                 adapter.ansatteForNomIdent(nomId) shouldBe emptySet()
             }
         }
 
-        When("an org unit is missing or a tilknytning has no resource") {
-            Then("available resources are returned") {
+        When("en organisasjonsenhet mangler eller en tilknytning mangler ressurs") {
+            Then("returneres de tilgjengelige ressursene") {
                 every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                     enhetRespons(
                         nomId,
@@ -331,9 +331,9 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             }
         }
 
-        When("the query fails") {
-            Then("the failure is propagated") {
-                val failure = IllegalStateException("GraphQL query failed")
+        When("oppslaget feiler") {
+            Then("kastes feilen videre") {
+                val failure = IllegalStateException("GraphQL-oppslag feilet")
                 every { request.retrieveSync("orgEnheter") } throws failure
 
                 shouldThrow<IllegalStateException> {

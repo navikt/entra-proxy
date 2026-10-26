@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
@@ -99,7 +100,7 @@ class EntraTjeneste(
         runCatching {
             oppslag(oid.ansattOid(ansattId) ?: return emptySet())
         }.getOrElse {
-            if (it is EntraIkkeFunnetException) {
+            if (it is EntraIkkeFunnetException || it is NotFoundRestException) {
                 oppslag(oid.oppfriskOid(ansattId))
             } else throw it
         }

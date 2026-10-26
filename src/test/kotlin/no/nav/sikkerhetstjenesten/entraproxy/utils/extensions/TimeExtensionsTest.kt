@@ -14,10 +14,10 @@ class TimeExtensionsTest : BehaviorSpec({
 
     Given("Duration.format") {
         When("varighet er kun sekunder") {
-            Then("singular brukes for 1 sekund") {
+            Then("entall brukes for 1 sekund") {
                 1.seconds.format() shouldBe "1 sekund"
             }
-            Then("plural brukes for flere sekunder") {
+            Then("flertall brukes for flere sekunder") {
                 30.seconds.format() shouldBe "30 sekunder"
             }
         }
@@ -30,13 +30,13 @@ class TimeExtensionsTest : BehaviorSpec({
         }
         When("varighet er 1 dag/time/minutt") {
             val s = (1.days + 1.hours + 1.minutes + 1.seconds).format()
-            Then("bruker singular dag") { s shouldContain "1 dag " }
-            Then("bruker singular time") { s shouldContain "1 time " }
-            Then("bruker singular minutt") { s shouldContain "1 minutt " }
-            Then("bruker singular sekund") { s shouldContain "1 sekund" }
+            Then("bruker entall for dag") { s shouldContain "1 dag " }
+            Then("bruker entall for time") { s shouldContain "1 time " }
+            Then("bruker entall for minutt") { s shouldContain "1 minutt " }
+            Then("bruker entall for sekund") { s shouldContain "1 sekund" }
         }
         When("varighet er null") {
-            Then("returnerer tom string") {
+            Then("returnerer tom streng") {
                 0.seconds.format() shouldBe ""
             }
         }
@@ -51,4 +51,3 @@ class TimeExtensionsTest : BehaviorSpec({
         }
     }
 })
-

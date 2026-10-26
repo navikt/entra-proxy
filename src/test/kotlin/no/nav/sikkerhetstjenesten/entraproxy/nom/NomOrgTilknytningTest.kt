@@ -31,9 +31,9 @@ class NomOrgTilknytningTest : BehaviorSpec({
         }
     }
 
-    Given("an org unit from NOM") {
-        When("tilgangsenhetId is missing") {
-            Then("the org unit is decoded without an access unit") {
+    Given("en organisasjonsenhet fra NOM") {
+        When("tilgangsenhetId mangler") {
+            Then("dekodes organisasjonsenheten uten tilgangsenhet") {
                 val enhet = mapper.readValue(
                     """{"id":"ra656d","navn":"Testenhet"}""",
                     NomEnhet::class.java
@@ -42,8 +42,8 @@ class NomOrgTilknytningTest : BehaviorSpec({
             }
         }
 
-        When("tilgangsenhetId is null") {
-            Then("the org unit is decoded without an access unit") {
+        When("tilgangsenhetId er null") {
+            Then("dekodes organisasjonsenheten uten tilgangsenhet") {
                 val enhet = mapper.readValue(
                     """{"id":"ra656d","navn":"Testenhet","tilgangsenhetId":null}""",
                     NomEnhet::class.java
@@ -52,8 +52,8 @@ class NomOrgTilknytningTest : BehaviorSpec({
             }
         }
 
-        When("tilgangsenhetId is present") {
-            Then("the access unit is preserved") {
+        When("tilgangsenhetId finnes") {
+            Then("beholdes tilgangsenheten") {
                 val enhet = mapper.readValue(
                     """{"id":"ra656d","navn":"Testenhet","tilgangsenhetId":"1234"}""",
                     NomEnhet::class.java

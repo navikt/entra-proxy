@@ -168,13 +168,13 @@ class ValkeyCacheOperationsTest(
                         }
                     }
                 }
-                When("kalles med tomt set for ${cacheConfig.fullName}") {
-                    Then("returnerer tomt map") {
+                When("kalles med tomt sett for ${cacheConfig.fullName}") {
+                    Then("returnerer et tomt resultat") {
                         readMany(cacheConfig, emptySet()).shouldBeEmpty()
                     }
                 }
-                When("putMany kalles med tom map for ${cacheConfig.fullName}") {
-                    Then("er kall et no-op uten sideeffekter") {
+                When("putMany kalles uten innslag for ${cacheConfig.fullName}") {
+                    Then("har kallet ingen sideeffekter") {
                         cache.putMany(cacheConfig, emptyMap(), ofSeconds(5))
                         cache.size(cacheConfig) shouldBe 0
                         readMany(cacheConfig, IDS).shouldBeEmpty()
@@ -222,7 +222,7 @@ class ValkeyCacheOperationsTest(
         }
 
         Given("cacheSet") {
-            When("ett sett med strenger legges i en Valkey-set") {
+            When("ett sett med strenger legges i et Valkey-sett") {
                 Then("lagres som medlemmer i den angitte nøkkelen") {
                     val members = setOf("a", "b", "c")
                     cache.putSet("cache-set-test", members)
@@ -336,7 +336,7 @@ class ValkeyCacheOperationsTest(
                     }
                 }
                 When("cache er tom for ${cacheConfig.fullName}") {
-                    Then("clear kaster ikke exception") {
+                    Then("clear kaster ikke unntak") {
                         cache.clear(cacheConfig)
                         cache.getMany<String>(cacheConfig, IDS).shouldBeEmpty()
                         cache.size(cacheConfig) shouldBe 0
@@ -345,9 +345,9 @@ class ValkeyCacheOperationsTest(
             }
         }
 
-        Given("graceful degradation ved Redis-feil") {
+        Given("fortsatt drift med redusert funksjonalitet ved Redis-feil") {
             When("getOne kalles mot utilgjengelig Redis") {
-                Then("returnerer null i stedet for å kaste exception") {
+                Then("returnerer null i stedet for å kaste unntak") {
                     cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, G1, ofSeconds(30))
                     cache.getOne<EntraGruppe>(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1) shouldBe G1
                     redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
@@ -359,7 +359,7 @@ class ValkeyCacheOperationsTest(
                 }
             }
             When("getMany kalles mot utilgjengelig Redis") {
-                Then("returnerer tomt map i stedet for å kaste exception") {
+                Then("returnerer et tomt resultat i stedet for å kaste unntak") {
                     cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(30))
                     redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
                     try {
@@ -370,7 +370,7 @@ class ValkeyCacheOperationsTest(
                 }
             }
             When("putOne kalles mot utilgjengelig Redis") {
-                Then("kaster ikke exception") {
+                Then("kaster ikke unntak") {
                     redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
                     try {
                         cache.putOne(GRUPPER_FOR_ANSATT_GRAPH_CACHE, I1, A1, ofSeconds(30))
@@ -380,7 +380,7 @@ class ValkeyCacheOperationsTest(
                 }
             }
             When("putMany kalles mot utilgjengelig Redis") {
-                Then("kaster ikke exception") {
+                Then("kaster ikke unntak") {
                     redis.dockerClient.pauseContainerCmd(redis.containerId).exec()
                     try {
                         cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to A1, I2 to A2), ofSeconds(30))
@@ -408,13 +408,13 @@ class ValkeyCacheOperationsTest(
         Given("cache-metrikker") {
             ALL_TEST_CACHE_KEYS.forEach { cacheConfig ->
                 When("getOne treffer cache for ${cacheConfig.fullName}") {
-                    Then("registreres varighet med cache, operasjon og hit-resultat") {
+                    Then("registreres varighet med cache, operasjon og treffresultat") {
                         cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(5))
                         cache.getOne<String>(cacheConfig, I1) shouldBe TEST_VALUE_1
                     }
                 }
 
-                When("getMany gir både treff og miss for ${cacheConfig.fullName}") {
+                When("getMany gir oppslag med og uten treff for ${cacheConfig.fullName}") {
                     Then("registreres varighet med delvis-resultat") {
                         cache.putOne(cacheConfig, I1, TEST_VALUE_1, ofSeconds(5))
                         cache.getMany<String>(cacheConfig, setOf(I1, I2)).keys shouldBe setOf(I1)
@@ -448,7 +448,7 @@ class ValkeyCacheOperationsTest(
                     }
                 }
                 When("verdier fjernes fra ${cacheConfig.fullName}") {
-                    Then("size oppdateres") {
+                    Then("oppdateres antall innslag") {
                         cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
                         cache.size(cacheConfig) shouldBe 2
                         cache.delete(cacheConfig, I1)
@@ -456,7 +456,7 @@ class ValkeyCacheOperationsTest(
                     }
                 }
                 When("clear kalles for ${cacheConfig.fullName}") {
-                    Then("size blir 0") {
+                    Then("blir antall innslag 0") {
                         cache.putMany(cacheConfig, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))
                         cache.size(cacheConfig) shouldBe 2
                         cache.clear(cacheConfig)

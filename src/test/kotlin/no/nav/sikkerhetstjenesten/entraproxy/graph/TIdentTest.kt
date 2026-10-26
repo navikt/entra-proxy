@@ -40,7 +40,7 @@ class TIdentTest : BehaviorSpec({
                     TIdent("ABC12345")
                 }
             }
-            Then("tom string kaster IllegalArgumentException") {
+            Then("tom streng kaster IllegalArgumentException") {
                 shouldThrow<IllegalArgumentException> { TIdent("") }
             }
         }

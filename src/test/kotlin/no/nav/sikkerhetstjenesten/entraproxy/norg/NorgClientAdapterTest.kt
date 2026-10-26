@@ -13,21 +13,21 @@ class NorgClientAdapterTest : BehaviorSpec({
     val adapter = NorgClientAdapter(client)
     val enhet = Enhetnummer("0315")
 
-    Given("an access unit") {
-        When("Norg returns unit data") {
+    Given("en tilgangsenhet") {
+        When("Norg returnerer enhetsdata") {
             every { client.enhetFor("0315") } returns NorgEnhetRespons(315, "NAV Testenhet")
 
-            Then("the transport-independent unit name is returned") {
+            Then("returneres det transportuavhengige enhetsnavnet") {
                 adapter.navn(enhet) shouldBe "NAV Testenhet"
                 verify { client.enhetFor("0315") }
             }
         }
 
-        When("the client fails") {
-            val failure = IllegalStateException("Norg query failed")
+        When("klienten feiler") {
+            val failure = IllegalStateException("Norg-oppslag feilet")
             every { client.enhetFor("0315") } throws failure
 
-            Then("the failure is propagated") {
+            Then("kastes feilen videre") {
                 shouldThrow<IllegalStateException> {
                     adapter.navn(enhet)
                 } shouldBe failure

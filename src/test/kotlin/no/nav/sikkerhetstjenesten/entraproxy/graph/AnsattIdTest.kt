@@ -38,7 +38,7 @@ class AnsattIdTest : BehaviorSpec({
             Then("for lang kaster IllegalArgumentException") {
                 shouldThrow<IllegalArgumentException> { AnsattId("A1234567") }
             }
-            Then("tom string kaster IllegalArgumentException") {
+            Then("tom streng kaster IllegalArgumentException") {
                 shouldThrow<IllegalArgumentException> { AnsattId("") }
             }
         }

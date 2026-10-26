@@ -12,12 +12,12 @@ private data class OrgEnheterHolder(val orgEnheter: List<NomOrgEnhetRespons> = e
 class NomOrgEnhetResponsTest : BehaviorSpec({
     val mapper = JsonMapper.builder().addModule(Builder().build()).build()
 
-    Given("an orgEnheter response from NOM with ansatte") {
+    Given("en orgEnheter-respons fra NOM med ansatte") {
         val json = NomOrgEnhetResponsTest::class.java
             .getResource("/nom/orgenheter-med-ansatte.json")!!.readText()
 
-        When("the response is decoded") {
-            Then("the org unit and its employee fields are preserved") {
+        When("responsen dekodes") {
+            Then("beholdes feltene for organisasjonsenheten og den ansatte") {
                 val enheter = mapper.readValue(json, OrgEnheterHolder::class.java).orgEnheter
                 val enhet = enheter.first().orgEnhet!!
                 val ansatt = enhet.orgTilknytninger.first().ressurs!!
@@ -33,15 +33,15 @@ class NomOrgEnhetResponsTest : BehaviorSpec({
         }
     }
 
-    Given("a single orgEnheter element") {
-        When("orgEnhet is missing") {
-            Then("the element is decoded without an org unit") {
+    Given("ett orgEnheter-element") {
+        When("orgEnhet mangler") {
+            Then("dekodes elementet uten organisasjonsenhet") {
                 mapper.readValue("{}", NomOrgEnhetRespons::class.java).orgEnhet shouldBe null
             }
         }
 
-        When("the org unit has no orgTilknytninger") {
-            Then("the ansatte list is empty") {
+        When("organisasjonsenheten mangler orgTilknytninger") {
+            Then("er ansattlisten tom") {
                 val respons = mapper.readValue(
                     """{"orgEnhet":{"id":"ab123c","navn":"Arbeidsgiverseksjonen"}}""",
                     NomOrgEnhetRespons::class.java

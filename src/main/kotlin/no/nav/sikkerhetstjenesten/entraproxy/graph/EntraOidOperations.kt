@@ -6,5 +6,5 @@ interface EntraOidOperations {
 
     fun ansattOid(ansattId: AnsattId): UUID?
 
-    fun nyOid(ansattId: AnsattId): UUID
+    fun oppfriskOid(ansattId: AnsattId): UUID
 }

@@ -12,7 +12,7 @@ class EntraOidOppslag(private val oid: EntraOidTjeneste, private val cache: Cach
     override fun ansattOid(ansattId: AnsattId) =
         oid.ansattOid(ansattId)
 
-    override fun nyOid(ansattId: AnsattId): UUID {
+    override fun oppfriskOid(ansattId: AnsattId): UUID {
         cache.delete(OID_CACHE, ansattId.verdi).also {
             log.info("Slettet cache innslag før henting av ny oid $ansattId")
         }

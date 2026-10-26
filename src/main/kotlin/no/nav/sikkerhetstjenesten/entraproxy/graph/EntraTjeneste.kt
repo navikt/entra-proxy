@@ -100,7 +100,7 @@ class EntraTjeneste(
             oppslag(oid.ansattOid(ansattId) ?: return emptySet())
         }.getOrElse {
             if (it is EntraIkkeFunnetException) {
-                oppslag(oid.nyOid(ansattId))
+                oppslag(oid.oppfriskOid(ansattId))
             } else throw it
         }
 

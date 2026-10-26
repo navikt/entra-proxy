@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -8,7 +9,6 @@ import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjenesteCacheTest.CacheTestConfig
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import org.springframework.cache.annotation.EnableCaching
@@ -16,7 +16,7 @@ import org.springframework.cache.caffeine.CaffeineCacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
-@SpringBootTest(classes = [CacheTestConfig::class], webEnvironment = NONE)
+@SpringBootTest(classes = [NomTjenesteCacheTest.CacheTestConfig::class], webEnvironment = NONE)
 class NomTjenesteCacheTest(
     private val tjeneste: NomTjeneste,
     private val nom: NomOperations
@@ -46,9 +46,14 @@ class NomTjenesteCacheTest(
                 every { nom.ansatt(ident) } returns ansatt
 
                 Then("the port is queried only once") {
-                    tjeneste.ansatt(ident) shouldBe ansatt
-                    tjeneste.ansatt(ident) shouldBe ansatt
-                    verify(exactly = 1) { nom.ansatt(ident) }
+                    val first = tjeneste.ansatt(ident)
+                    val second = tjeneste.ansatt(ident)
+
+                    assertSoftly {
+                        first shouldBe ansatt
+                        second shouldBe ansatt
+                        verify(exactly = 1) { nom.ansatt(ident) }
+                    }
                 }
             }
 
@@ -56,9 +61,14 @@ class NomTjenesteCacheTest(
                 every { nom.ansatteForEnhet(enhet) } returns setOf(ansatt)
 
                 Then("the port is queried only once") {
-                    tjeneste.ansatteForEnhet(enhet) shouldBe setOf(ansatt)
-                    tjeneste.ansatteForEnhet(enhet) shouldBe setOf(ansatt)
-                    verify(exactly = 1) { nom.ansatteForEnhet(enhet) }
+                    val first = tjeneste.ansatteForEnhet(enhet)
+                    val second = tjeneste.ansatteForEnhet(enhet)
+
+                    assertSoftly {
+                        first shouldBe setOf(ansatt)
+                        second shouldBe setOf(ansatt)
+                        verify(exactly = 1) { nom.ansatteForEnhet(enhet) }
+                    }
                 }
             }
 
@@ -66,9 +76,14 @@ class NomTjenesteCacheTest(
                 every { nom.ansatte(setOf(ident)) } returns setOf(ansatt)
 
                 Then("the port is queried every time because bulk lookups are not cached") {
-                    tjeneste.ansatte(setOf(ident)) shouldBe setOf(ansatt)
-                    tjeneste.ansatte(setOf(ident)) shouldBe setOf(ansatt)
-                    verify(exactly = 2) { nom.ansatte(setOf(ident)) }
+                    val first = tjeneste.ansatte(setOf(ident))
+                    val second = tjeneste.ansatte(setOf(ident))
+
+                    assertSoftly {
+                        first shouldBe setOf(ansatt)
+                        second shouldBe setOf(ansatt)
+                        verify(exactly = 2) { nom.ansatte(setOf(ident)) }
+                    }
                 }
             }
         }

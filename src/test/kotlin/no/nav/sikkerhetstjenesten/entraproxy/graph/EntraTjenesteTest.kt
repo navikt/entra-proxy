@@ -124,7 +124,7 @@ class EntraTjenesteTest(
             When("Graph svarer med flere sider via @odata.nextLink") {
                 Then("skal alle sidene hentes og medlemmene fra alle sidene returneres") {
                     val gruppeId = randomUUID()
-                    val nesteSideUri = "$baseUrl/groups/$gruppeId/members?\$skiptoken=abc"
+                    val nesteSideUri = $$"$$baseUrl/groups/$$gruppeId/members?$skiptoken=abc"
 
                     expectGet(
                         "$baseUrl/groups/$gruppeId/members",
@@ -208,12 +208,12 @@ class EntraTjenesteTest(
                 Then("skal medlemmene i alle matchende grupper returneres med gruppenavn") {
                     val gruppe1Id = randomUUID()
                     val gruppe2Id = randomUUID()
-                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+                    val nesteGruppeSideUri = $$"$$baseUrl/groups?$skiptoken=grp"
 
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/groups"
-                        request.uri.query shouldContain "\$search=\"displayName:MIN_ROLLE\""
+                        request.uri.query shouldContain $$"$search=\"displayName:MIN_ROLLE\""
                     }.andRespond(withSuccess(
                         """
                         {
@@ -326,7 +326,7 @@ class EntraTjenesteTest(
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
-                        request.uri.query shouldContain "\$select=id,displayName,securityEnabled,mailEnabled,description"
+                        request.uri.query shouldContain $$"$select=id,displayName,securityEnabled,mailEnabled,description"
                     }.andRespond(withSuccess(grupperContract, APPLICATION_JSON))
 
                     repeat(2) {
@@ -374,11 +374,7 @@ class EntraTjenesteTest(
     }
 
     @TestConfiguration(proxyBeanMethods = false)
-    class EntraTestConfig : CacheTestConfig(MEDLEMMER,GRAPH,ENTRA_OID)
-
-    @TestConfiguration
-    class TestBeanConfig {
-
+    class EntraTestConfig : CacheTestConfig(MEDLEMMER, GRAPH, ENTRA_OID) {
         @Bean
         fun mockServerRestClientCustomizer() =
             MockServerRestClientCustomizer(UnorderedRequestExpectationManager::class.java)

@@ -12,9 +12,8 @@ import java.util.UUID
 
 class MedlemmerCacheOppfriskerTest : BehaviorSpec({
 
-    val cfg = MedlemmerConfig(ofHours(3))
     val entra = mockk<EntraTjeneste>(relaxed = true)
-    val oppfrisker = MedlemmerCacheOppfrisker(entra, cfg)
+    val oppfrisker = MedlemmerCacheOppfrisker(entra, MedlemmerConfig(ofHours(3)))
 
     beforeEach {
         clearMocks(entra)

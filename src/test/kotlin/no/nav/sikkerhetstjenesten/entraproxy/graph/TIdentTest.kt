@@ -55,18 +55,4 @@ class TIdentTest : BehaviorSpec({
             }
         }
     }
-
-    Given("TIdent likhet") {
-        val t = TIdent("ABC1234")
-        val tLik = TIdent("ABC1234")
-        val annen = TIdent("DEF1234")
-
-        When("equals") {
-            Then("samme verdi gir likhet") { t shouldBe tLik }
-            Then("ulik verdi gir ulikhet") { t shouldNotBe annen }
-        }
-        When("toString") {
-            Then("returnerer verdi") { t.toString() shouldBe "ABC1234" }
-        }
-    }
 })

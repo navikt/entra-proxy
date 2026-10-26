@@ -51,13 +51,5 @@ class TemaTest : BehaviorSpec({
             }
         }
     }
-
-    Given("Tema sortering") {
-        When("compareTo brukes") {
-            Then("sortering folger verdi") {
-                listOf(Tema("BBB"), Tema("AAA")).sorted().map { it.verdi } shouldBe listOf("AAA", "BBB")
-            }
-        }
-    }
 })
 

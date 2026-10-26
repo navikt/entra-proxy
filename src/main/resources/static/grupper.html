@@ -350,7 +350,7 @@
                 ...[...sammenligningTabellRader.rows].map(rad =>
                     [...rad.cells].map((celle, kolonneIndeks) => {
                         const verdi = celle.textContent.trim();
-                        return kolonneIndeks >= 3 ? String(verdi === '✓') : verdi;
+                        return kolonneIndeks >= 4 ? String(verdi === '✓') : verdi;
                     })
                 )
             ];
@@ -482,16 +482,20 @@
         const tilgangsenhetOverskrift = document.createElement('th');
         tilgangsenhetOverskrift.scope = 'col';
         leggTilSorterbarOverskrift(tilgangsenhetOverskrift, 'Nom tilgangsenhet', 2);
-        tabellOverskrift.append(navIdentOverskrift, navnOverskrift, tilgangsenhetOverskrift);
+        const tilgangsenhetNavnOverskrift = document.createElement('th');
+        tilgangsenhetNavnOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(tilgangsenhetNavnOverskrift, 'Nom tilgangsenhet navn', 3);
+        tabellOverskrift.append(navIdentOverskrift, navnOverskrift, tilgangsenhetOverskrift, tilgangsenhetNavnOverskrift);
         for (const [indeks, panel] of paneler.slice(1).entries()) {
             const gruppeOverskrift = document.createElement('th');
             gruppeOverskrift.scope = 'col';
-            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 3);
+            leggTilSorterbarOverskrift(gruppeOverskrift, panel.dataset.gruppeNavn, indeks + 4);
             tabellOverskrift.appendChild(gruppeOverskrift);
         }
         sammenligningTabellOverskrift.appendChild(tabellOverskrift);
 
         const tilgangsenhetCeller = new Map();
+        const tilgangsenhetNavnCeller = new Map();
         for (const medlem of panelMedlemmer[0]) {
             const rad = document.createElement('tr');
             const navIdentCelle = document.createElement('th');
@@ -505,7 +509,9 @@
             navnCelle.textContent = medlem.visningNavn ?? '';
             const tilgangsenhetCelle = document.createElement('td');
             tilgangsenhetCeller.set(medlem.navIdent, tilgangsenhetCelle);
-            rad.append(navIdentCelle, navnCelle, tilgangsenhetCelle);
+            const tilgangsenhetNavnCelle = document.createElement('td');
+            tilgangsenhetNavnCeller.set(medlem.navIdent, tilgangsenhetNavnCelle);
+            rad.append(navIdentCelle, navnCelle, tilgangsenhetCelle, tilgangsenhetNavnCelle);
             for (const medlemmer of andreGrupper) {
                 const celle = document.createElement('td');
                 celle.textContent = medlemmer.has(medlem.navIdent) ? '✓' : '';
@@ -513,14 +519,14 @@
             }
             sammenligningTabellRader.appendChild(rad);
         }
-        hentNomTilgangsenheter(tilgangsenhetCeller);
+        hentNomTilgangsenheter(tilgangsenhetCeller, tilgangsenhetNavnCeller);
     }
 
-    async function hentNomTilgangsenheter(celler) {
+    async function hentNomTilgangsenheter(celler, navnCeller) {
         if (celler.size === 0) {
             return;
         }
-        for (const celle of celler.values()) {
+        for (const celle of [...celler.values(), ...navnCeller.values()]) {
             celle.textContent = 'Henter...';
         }
         oppdaterSokemarkering(1);
@@ -542,13 +548,19 @@
                     throw new Error('Uventet respons fra Nom: mangler navident eller orgTilknytninger.');
                 }
                 const tilgangsenheter = ressurs.orgTilknytninger.map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId);
-                return [ressurs.navident, [...new Set(tilgangsenheter)].join(', ')];
+                return [ressurs.navident, [...new Set(tilgangsenheter)]];
             }));
             for (const [navIdent, celle] of celler) {
-                celle.textContent = tilgangsenheterPerNavIdent.get(navIdent) ?? '';
+                celle.textContent = (tilgangsenheterPerNavIdent.get(navIdent) ?? []).join(', ');
+            }
+            const alleTilgangsenheter = [...new Set([...tilgangsenheterPerNavIdent.values()].flat())];
+            const navnPerTilgangsenhet = await hentTilgangsenhetsnavn(alleTilgangsenheter);
+            for (const [navIdent, celle] of navnCeller) {
+                const ider = tilgangsenheterPerNavIdent.get(navIdent) ?? [];
+                celle.textContent = ider.map(id => navnPerTilgangsenhet.get(id) ?? id).join(', ');
             }
         } catch (error) {
-            for (const celle of celler.values()) {
+            for (const celle of [...celler.values(), ...navnCeller.values()]) {
                 celle.textContent = 'Oppslag feilet';
                 celle.title = error.message;
                 celle.classList.add('error');
@@ -556,6 +568,24 @@
         } finally {
             oppdaterSokemarkering(-1);
         }
+    }
+
+    async function hentTilgangsenhetsnavn(tilgangsenheter) {
+        const oppslag = await Promise.all(tilgangsenheter.map(async id => {
+            try {
+                const response = await fetch(`/api/v1/navn/${encodeURIComponent(id)}`, {
+                    headers: {'Accept': 'text/plain'}
+                });
+                if (!response.ok) {
+                    return [id, id];
+                }
+                const navn = (await response.text()).trim();
+                return [id, navn || id];
+            } catch {
+                return [id, id];
+            }
+        }));
+        return new Map(oppslag);
     }
 
     function leggTilSorterbarOverskrift(celle, tekst, kolonneIndeks, overskriftContainer = sammenligningTabellOverskrift, raderContainer = sammenligningTabellRader) {

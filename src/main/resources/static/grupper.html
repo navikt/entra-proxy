@@ -251,7 +251,7 @@
     </div>
     <div class="sok-knapper sammenligningsknapp">
         <button class="aksel-button nytt-sok" data-variant="primary" data-color="brand-blue" type="button" disabled>Ny sammenligningsgruppe</button>
-        <label class="medlemmer-bryter">
+        <label class="medlemmer-bryter" hidden>
             <input type="checkbox" id="vis-utforsket-medlemmer">
             <span class="medlemmer-bryter__spor" aria-hidden="true"></span>
             <span>Vis medlemmer i gruppa som utforskes</span>
@@ -319,6 +319,7 @@
     const kopierDetaljvisning = document.getElementById('kopier-detaljvisning');
     const kopierStatus = document.getElementById('kopier-status');
     const visUtforsketMedlemmer = document.getElementById('vis-utforsket-medlemmer');
+    const medlemmerBryter = document.querySelector('.medlemmer-bryter');
     const utforsketMedlemmerResultat = document.getElementById('utforsket-medlemmer-resultat');
     const utforsketMedlemmerTabell = utforsketMedlemmerResultat.querySelector('.sammenligning-tabell');
     const utforsketMedlemmerStatus = document.getElementById('utforsket-medlemmer-status');
@@ -365,6 +366,11 @@
     });
 
     function oppdaterUtforsketMedlemmer() {
+        const forstePopulert = forstePanel.dataset.populert === 'true';
+        medlemmerBryter.hidden = !forstePopulert;
+        if (!forstePopulert) {
+            visUtforsketMedlemmer.checked = false;
+        }
         if (!visUtforsketMedlemmer.checked) {
             utforsketMedlemmerResultat.hidden = true;
             return;
@@ -375,7 +381,7 @@
         utforsketMedlemmerTabell.classList.toggle('med-rullefelt', medlemmer.length > 50);
         utforsketMedlemmerTabell.scrollTop = 0;
         if (medlemmer.length === 0) {
-            utforsketMedlemmerStatus.textContent = 'Hent medlemmer i gruppa som utforskes for \u00e5 se dem her.';
+            utforsketMedlemmerStatus.textContent = 'Ingen medlemmer i gruppa som utforskes.';
             return;
         }
         utforsketMedlemmerStatus.textContent = `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`;
@@ -395,7 +401,16 @@
         }
     }
 
-    visUtforsketMedlemmer.addEventListener('change', oppdaterUtforsketMedlemmer);
+    visUtforsketMedlemmer.addEventListener('change', () => {
+        if (visUtforsketMedlemmer.checked) {
+            for (const panel of [...sok.querySelectorAll('.sok-panel')].slice(1)) {
+                panel.remove();
+                gruppemedlemmer.delete(panel);
+            }
+            sok.querySelector('#sammenligningsoverskrift').hidden = true;
+        }
+        oppdaterFellesMedlemmer();
+    });
 
     function oppdaterFellesMedlemmer() {
         oppdaterUtforsketMedlemmer();

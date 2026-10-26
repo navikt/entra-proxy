@@ -704,7 +704,11 @@
                     } else if (erNomSok && erNomEnhet) {
                         enhetsnavn = resultat?.navn?.trim() || undefined;
                     }
-                    const resultatnavn = erNomSok ? (enhetsnavn ?? (erNomEnhet ? `nom-enhet ${verdi}` : `tilgangsenhet ${verdi}`)) : gruppeNavn;
+                    const resultatnavn = erNomSok
+                        ? (erNomEnhet
+                            ? (enhetsnavn ? `${enhetsnavn} (${verdi})` : `nom-enhet ${verdi}`)
+                            : (enhetsnavn ?? `tilgangsenhet ${verdi}`))
+                        : gruppeNavn;
                     const visningsnavn = (erNomSok && enhetsnavn)
                         ? (erNomEnhet ? `Nom-enhet ${enhetsnavn} (${verdi})` : `Nom tilgangsenhet ${enhetsnavn} (${verdi})`)
                         : gruppeNavn;

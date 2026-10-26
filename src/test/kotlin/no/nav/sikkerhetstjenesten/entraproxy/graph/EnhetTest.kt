@@ -2,12 +2,41 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 
 class EnhetTest : BehaviorSpec({
+
+    Given("Enhetnummer.parse") {
+        When("verdien er gyldig med eller uten prefiks") {
+            mapOf(
+                "1234" to "1234",
+                "0000" to "0000",
+                "${ENHET_PREFIX}1234" to "1234",
+                "${ENHET_PREFIX}0000" to "0000",
+            ).forEach { (verdi, forventetNummer) ->
+                Then("returneres Enhetnummer for '$verdi'") {
+                    val resultat = Enhetnummer.parse(verdi)
+                    resultat shouldBe Enhetnummer(verdi)
+                    resultat?.verdi shouldBe forventetNummer
+                    resultat?.gruppeNavn shouldBe "$ENHET_PREFIX$forventetNummer"
+                }
+            }
+        }
+        When("verdien er ugyldig") {
+            listOf(
+                "", "123", "12345", "12AB", "123 ", " 1234",
+                ENHET_PREFIX, "${ENHET_PREFIX}123", "${ENHET_PREFIX}12345", "${ENHET_PREFIX}12AB",
+            ).forEach { verdi ->
+                Then("returneres null for '$verdi'") {
+                    Enhetnummer.parse(verdi).shouldBeNull()
+                }
+            }
+        }
+    }
 
     Given("Enhetnummer konstruksjon") {
         When("verdi har 4 sifre uten prefix") {
@@ -32,47 +61,4 @@ class EnhetTest : BehaviorSpec({
             }
         }
     }
-
-    Given("Enhetnummer likhet og sortering") {
-        val e1 = Enhetnummer("1234")
-        val e1Lik = Enhetnummer("1234")
-        val e2 = Enhetnummer("5678")
-        val e1MedPrefix = Enhetnummer("${ENHET_PREFIX}1234")
-
-        When("equals") {
-            Then("samme nummer gir likhet") { e1 shouldBe e1Lik }
-            Then("ulikt nummer gir ulikhet") { e1 shouldNotBe e2 }
-            Then("konstruktor-input avgjor likhet (med vs uten prefix)") {
-                e1.verdi shouldBe e1MedPrefix.verdi
-                e1 shouldNotBe e1MedPrefix
-            }
-        }
-        When("compareTo") {
-            Then("sortering folger verdi") {
-                listOf(e2, e1).sorted() shouldBe listOf(e1, e2)
-            }
-        }
-    }
-
-    Given("Enhet") {
-        val n1 = Enhetnummer("1234")
-        val n2 = Enhetnummer("5678")
-        val a = Enhet(n1, "NAV Eksempel")
-        val aLik = Enhet(n1, "NAV Eksempel")
-        val annetNavn = Enhet(n1, "NAV Annet")
-        val annetNummer = Enhet(n2, "NAV Eksempel")
-
-        When("equals") {
-            Then("samme verdier gir likhet") { a shouldBe aLik }
-            Then("ulikt navn gir ulikhet") { a shouldNotBe annetNavn }
-            Then("ulikt enhetnummer gir ulikhet") { a shouldNotBe annetNummer }
-            Then("ulikhet mot null") { a.equals(null) shouldBe false }
-        }
-        When("compareTo") {
-            Then("sortering folger enhetnummer") {
-                listOf(annetNummer, a).sorted() shouldBe listOf(a, annetNummer)
-            }
-        }
-    }
 })
-

@@ -34,7 +34,6 @@ import java.util.UUID.randomUUID
 @RestClientTest
 class EntraTjenesteTest(
     private val server: MockRestServiceServer,
-    private val client: EntraGraphClient,
     private val entra: EntraTjeneste,
     private val adapter: EntraGraphAdapter,
     private val oid: EntraOidTjeneste) : BehaviorSpec() {

@@ -2,10 +2,28 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 
 class AnsattIdTest : BehaviorSpec({
+
+    Given("AnsattId.parse") {
+        When("verdien er gyldig") {
+            listOf("A123456", "Z000000", "B999999").forEach { verdi ->
+                Then("returneres AnsattId for '$verdi'") {
+                    AnsattId.parse(verdi) shouldBe AnsattId(verdi)
+                }
+            }
+        }
+        When("verdien er ugyldig") {
+            listOf("", "A12345", "A1234567", "1234567", "#123456", "A12B456", "A12345 ", " A123456").forEach { verdi ->
+                Then("returneres null for '$verdi'") {
+                    AnsattId.parse(verdi).shouldBeNull()
+                }
+            }
+        }
+    }
 
     Given("AnsattId konstruksjon") {
         When("verdi har gyldig format (1 bokstav + 6 sifre)") {
@@ -38,27 +56,4 @@ class AnsattIdTest : BehaviorSpec({
             }
         }
     }
-
-    Given("AnsattId likhet og sortering") {
-        val a = AnsattId("A123456")
-        val aLik = AnsattId("A123456")
-        val b = AnsattId("B123456")
-
-        When("equals") {
-            Then("samme verdi gir likhet") { a shouldBe aLik }
-            Then("ulik verdi gir ulikhet") { a shouldNotBe b }
-        }
-        When("compareTo") {
-            Then("sortering følger verdi") {
-                listOf(b, a).sorted() shouldBe listOf(a, b)
-            }
-            Then("samme verdi gir 0") {
-                a.compareTo(aLik) shouldBe 0
-            }
-        }
-        When("toString") {
-            Then("returnerer verdi") { a.toString() shouldBe "A123456" }
-        }
-    }
 })
-

@@ -47,10 +47,8 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         innslag.forEach { (id, value) -> springCache.put(caffeineNøkkel(cache, id), value) }
     }
 
-    private fun caffeineNøkkel(cache: CacheNøkkelConfig, id: String): String {
-        val extra = cache.extraPrefix?.let { "$it:" } ?: ""
-        return "$extra$id"
-    }
+    private fun caffeineNøkkel(cache: CacheNøkkelConfig, id: String) =
+        "${cache.extraPrefix?.let { "$it:" } ?: ""}$id"
 
     override fun clear(cache: CacheNøkkelConfig): Long {
         val springCache = cacheManager.getCache(cache.name) ?: return 0L

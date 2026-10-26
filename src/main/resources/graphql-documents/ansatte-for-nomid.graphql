@@ -1,4 +1,8 @@
 query ansatteIEnheterUnderNomId($organisertUnderOrgEnhetId: String!) {
+    organisertUnderOrgEnhet: orgEnhet(where: { id: $organisertUnderOrgEnhetId }) {
+        id
+        navn
+    }
     orgEnheter(filter:  {
         organiseringSelection: UNDER_ANGITT_ORGENHET,
         organisertUnderOrgEnhetId:  $organisertUnderOrgEnhetId,

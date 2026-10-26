@@ -29,6 +29,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val retrieve = mockk<RetrieveSyncSpec>()
     val response = mockk<ClientGraphQlResponse>()
     val field = mockk<ClientResponseField>()
+    val retrieveField = mockk<ClientResponseField>()
     val cache = mockk<CacheOperations>(relaxed = true)
     val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
     val first = NomGraphQLRespons(AnsattId("A123456"), "Første ansatt", NAV_STATLIG)
@@ -47,7 +48,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         NomOrgEnhetRespons(NomEnhetMedAnsatte(id, "Testenhet", tilknytninger.toList()))
 
     beforeEach {
-        clearMocks(client, request, retrieve, response, field, cache)
+        clearMocks(client, request, retrieve, response, field, retrieveField, cache)
     }
 
     Given("oppslag av én ansatt") {
@@ -283,12 +284,15 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         beforeEach {
             every { client.documentName("ansatte-for-nomid") } returns request
             every { request.variables(mapOf("organisertUnderOrgEnhetId" to "fa515j")) } returns request
-            every { request.retrieveSync("orgEnheter") } returns retrieve
+            every { request.executeSync() } returns response
+            every { response.field("organisertUnderOrgEnhet") } returns field
+            every { response.field("orgEnheter") } returns retrieveField
+            every { field.toEntity(NomEnhet::class.java) } returns NomEnhet(nomId, "Toppenhet")
         }
 
         When("organisasjonsenhetene inneholder ressurser med og uten daglig oppfølging") {
             Then("returneres bare ressurser med daglig oppfølging fra alle organisasjonsenhetene") {
-                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns listOf(
                     enhetRespons(
                         nomId,
                         NomBulkGraphQLRespons(first, erDagligOppfolging = true),
@@ -300,24 +304,24 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                 val resultat = adapter.ansatteForNomIdent(nomId)
 
                 assertSoftly {
-                    resultat shouldBe setOf(firstAnsatt, secondAnsatt)
+                    resultat shouldBe NomEnhetAnsatte(nomId, "Toppenhet", setOf(firstAnsatt, secondAnsatt))
                     verify(exactly = 1) { request.variables(mapOf("organisertUnderOrgEnhetId" to "fa515j")) }
-                    verify(exactly = 1) { request.retrieveSync("orgEnheter") }
+                    verify(exactly = 1) { response.field("orgEnheter") }
                 }
             }
         }
 
         When("ingen organisasjonsenheter returneres") {
             Then("returneres et tomt sett") {
-                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
+                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns emptyList()
 
-                adapter.ansatteForNomIdent(nomId) shouldBe emptySet()
+                adapter.ansatteForNomIdent(nomId) shouldBe NomEnhetAnsatte(nomId, "Toppenhet", emptySet())
             }
         }
 
         When("en organisasjonsenhet mangler eller en tilknytning mangler ressurs") {
             Then("returneres de tilgjengelige ressursene") {
-                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns listOf(
                     enhetRespons(
                         nomId,
                         NomBulkGraphQLRespons(first, erDagligOppfolging = true),
@@ -327,14 +331,14 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
                     NomOrgEnhetRespons(null)
                 )
 
-                adapter.ansatteForNomIdent(nomId) shouldBe setOf(firstAnsatt)
+                adapter.ansatteForNomIdent(nomId) shouldBe NomEnhetAnsatte(nomId, "Toppenhet", setOf(firstAnsatt))
             }
         }
 
         When("oppslaget feiler") {
             Then("kastes feilen videre") {
                 val failure = IllegalStateException("GraphQL-oppslag feilet")
-                every { request.retrieveSync("orgEnheter") } throws failure
+                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } throws failure
 
                 shouldThrow<IllegalStateException> {
                     adapter.ansatteForNomIdent(nomId)

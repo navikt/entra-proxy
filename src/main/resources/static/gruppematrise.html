@@ -450,12 +450,13 @@
                 }
 
                 const data = await response.json();
-                if (!Array.isArray(data)) {
+                const ansatteListe = (erNomSok && erNomEnhet) ? data?.ansatte : data;
+                if (!Array.isArray(ansatteListe)) {
                     throw new Error('Uventet respons: forventet en liste med medlemmer.');
                 }
                 const ansatte = erNomSok
-                    ? data.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
-                    : data.map(ressurs => ({navIdent: ressurs?.navIdent, visningNavn: ressurs?.visningNavn}));
+                    ? ansatteListe.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
+                    : ansatteListe.map(ressurs => ({navIdent: ressurs?.navIdent, visningNavn: ressurs?.visningNavn}));
                 if (ansatte.some(ansatt => typeof ansatt.navIdent !== 'string')) {
                     throw new Error('Uventet respons: mangler nav-ident.');
                 }
@@ -467,9 +468,11 @@
                 } catch (feil) {
                     enhetsnummerPerAnsatt = new Map();
                 }
+                const enhetsnavn = (erNomSok && erNomEnhet) ? data?.navn?.trim() : undefined;
+                const kilde = enhetsnavn ? `${enhetsnavn} (${verdi})` : verdi;
                 settBasisStatus(skjema, ansatte.length
-                    ? `${ansatte.length} ansatt(e) valgt. Bygg matrisen under.`
-                    : 'Ingen medlemmer funnet.');
+                    ? `${ansatte.length} ansatt(e) valgt fra ${kilde}. Bygg matrisen under.`
+                    : `Ingen medlemmer funnet i ${kilde}.`);
             } catch (error) {
                 settBasisStatus(skjema, `Henting feilet: ${error.message}`, true);
             } finally {

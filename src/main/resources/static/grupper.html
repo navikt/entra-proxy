@@ -676,12 +676,13 @@
                     if (sokId !== sisteSok) {
                         return;
                     }
-                    if (!Array.isArray(resultat)) {
+                    const ansatteListe = (erNomSok && erNomEnhet) ? resultat?.ansatte : resultat;
+                    if (!Array.isArray(ansatteListe)) {
                         throw new Error('Uventet respons: forventet en liste med medlemmer.');
                     }
                     const medlemmer = erNomSok
-                        ? resultat.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
-                        : resultat;
+                        ? ansatteListe.map(ressurs => ({navIdent: ressurs?.navident, visningNavn: ressurs?.visningsnavn}))
+                        : ansatteListe;
                     if (medlemmer.some(medlem => typeof medlem?.navIdent !== 'string' || typeof medlem.visningNavn !== 'string')) {
                         throw new Error('Uventet respons: mangler nav-ident eller navn.');
                     }
@@ -700,10 +701,15 @@
                         if (sokId !== sisteSok) {
                             return;
                         }
+                    } else if (erNomSok && erNomEnhet) {
+                        enhetsnavn = resultat?.navn?.trim() || undefined;
                     }
                     const resultatnavn = erNomSok ? (enhetsnavn ?? (erNomEnhet ? `nom-enhet ${verdi}` : `tilgangsenhet ${verdi}`)) : gruppeNavn;
+                    const visningsnavn = (erNomSok && enhetsnavn)
+                        ? (erNomEnhet ? `Nom-enhet ${enhetsnavn} (${verdi})` : `Nom tilgangsenhet ${enhetsnavn} (${verdi})`)
+                        : gruppeNavn;
                     gruppemedlemmer.set(panel, medlemmer);
-                    panel.dataset.gruppeNavn = gruppeNavn;
+                    panel.dataset.gruppeNavn = visningsnavn;
                     panel.dataset.populert = 'true';
                     status.textContent = medlemmer.length
                         ? `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'} i ${resultatnavn}`

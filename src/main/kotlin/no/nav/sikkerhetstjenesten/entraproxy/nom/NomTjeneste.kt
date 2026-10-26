@@ -33,7 +33,7 @@ class NomTjeneste(private val nom: NomOperations) {
     @Cacheable(cacheNames = [NOMGRAPH], key = "#ident.verdi")
     fun ansatteForNomIdent(ident: NomIdent) =
         nom.ansatteForNomIdent(ident).also {
-            log.info("Hentet ansatt $it for nomIdent $ident")
+            log.info("Hentet ${it.ansatte.size} ansatt(e) i ${it.navn ?: ident} for nomIdent $ident")
         }
 
 }

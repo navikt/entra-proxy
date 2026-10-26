@@ -92,14 +92,15 @@ class NomTjenesteCacheTest(
             When("samme NOM-ident slås opp to ganger") {
                 Then("returneres de ansatte og porten kalles bare én gang") {
                     val nomIdent = NomIdent("fa515j")
-                    every { nom.ansatteForNomIdent(nomIdent) } returns setOf(ansatt)
+                    val enhetAnsatte = NomEnhetAnsatte(nomIdent, "Toppenhet", setOf(ansatt))
+                    every { nom.ansatteForNomIdent(nomIdent) } returns enhetAnsatte
 
                     val first = tjeneste.ansatteForNomIdent(nomIdent)
                     val second = tjeneste.ansatteForNomIdent(nomIdent)
 
                     assertSoftly {
-                        first shouldBe setOf(ansatt)
-                        second shouldBe setOf(ansatt)
+                        first shouldBe enhetAnsatte
+                        second shouldBe enhetAnsatte
                         verify(exactly = 1) { nom.ansatteForNomIdent(nomIdent) }
                     }
                 }

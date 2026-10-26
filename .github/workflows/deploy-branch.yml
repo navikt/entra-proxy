@@ -50,4 +50,4 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: nais/deploy/actions/deploy@f93637de5533a1bb573f940ceb7527a5b3b0dea0 # v2
+      - uses: nais/deploy/actions/deploy@1064e26587ab2794266a35f477387e561899a7ef # v2

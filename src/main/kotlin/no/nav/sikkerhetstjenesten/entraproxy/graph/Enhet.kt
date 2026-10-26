@@ -24,7 +24,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comp
         companion object {
             private const val ENHETNUMMER_LENGTH = 4
 
-            fun parse(nummer: String): Enhetnummer? =
+            fun parse(nummer: String) =
                 runCatching {
                     Enhetnummer(nummer)
                 }.getOrNull()

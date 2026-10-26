@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class MedlemmerConfig(@param:Value("\${medlemmer.varighet:3h}") override val varighet: Duration) :
+class MedlemmerConfig(@param:Value($$"${medlemmer.varighet:3h}") override val varighet: Duration) :
     CachableRestConfig {
     override val navn = MEDLEMMER
     override val caches = MEDLEMMER_CACHES

@@ -24,7 +24,9 @@ class EntraTjeneste(
     @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
     fun tema(ansattId: AnsattId) =
         if (erInaktiv(ansattId)) emptySet()
-        else medOidOppfrisking(ansattId) { graph.temaer(it) }
+        else medOidOppfrisking(ansattId) {
+            graph.temaer(it)
+        }
 
     @Cacheable(cacheNames = [GRAPH], key = "#root.methodName + ':' + #ansattId.verdi")
     fun enheter(ansattId: AnsattId): Set<Enhet> =

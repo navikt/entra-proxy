@@ -34,12 +34,10 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_CACHE
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
-import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
-import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyCacheOperations
 import no.nav.sikkerhetstjenesten.felles.cache.ValkeyEventListeningCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.getMany

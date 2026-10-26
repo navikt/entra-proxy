@@ -24,9 +24,7 @@ import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 @Configuration
 class RestClientBeanConfig(
     private val ctx: AuthContext,
-    private val meterRegistry: MeterRegistry,
-) : WebMvcConfigurer {
-
+    private val meterRegistry: MeterRegistry) : WebMvcConfigurer {
 
     @Bean
     fun handler() = DefaultRestErrorHandler()
@@ -68,7 +66,6 @@ class RestClientBeanConfig(
                 verdier.forEach { (key, value) -> request.headers.add(key, value) }
                 next.execute(request, body)
             }
-
     }
 
     private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {

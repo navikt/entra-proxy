@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.NAIS_CLUSTER_NAME
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
@@ -10,6 +9,7 @@ import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.CLIENT_C
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.OID
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.ROLES
+import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.NAIS_CLUSTER_NAME
 import org.springframework.test.context.DynamicPropertyRegistry
 import java.lang.Runtime.getRuntime
 import java.util.UUID

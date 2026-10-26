@@ -13,7 +13,7 @@ class NomCacheOppfrisker(private val nom: NomTjeneste, cfg: NomGraphQLConfig) : 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         oppfriskingFor(nøkkelElementer.id)?.let {
             it()
-        } ?: log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
+        }
     }
 
     private fun oppfriskingFor(id: String): (() -> Unit)? =

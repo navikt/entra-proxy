@@ -48,8 +48,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
     override fun enheter(ansattOid: UUID) =
         allSider("enheter for $ansattOid",
             client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
-            Tilganger::next,
-            client::tilgangerSide)
+            Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
             .also { log.info("Hentet ${it.size} enhet(er) for $ansattOid") }
@@ -57,8 +56,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
     override fun gruppeMedlemmer(oid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid",
             client.members(oid, ANSATTE_FELTER),
-            GruppeMedlemmer::next,
-            client::gruppeMedlemmerSide)
+            GruppeMedlemmer::next, client::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true

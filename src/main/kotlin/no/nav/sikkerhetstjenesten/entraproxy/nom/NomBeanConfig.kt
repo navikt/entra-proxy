@@ -31,9 +31,7 @@ class NomBeanConfig {
 
     @Bean
     @Qualifier(NOMGRAPH)
-    fun nomGraphRestClient(
-        builder: Builder,
-        cfg: NomGraphQLConfig,
+    fun nomGraphRestClient(builder: Builder, cfg: NomGraphQLConfig,
         factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
         @Value($$"${spring.http.serviceclient.clients.connect-timeout:3s}") connectTimeout: Duration,
         logbookInterceptor: ObjectProvider<LogbookClientHttpRequestInterceptor>,

@@ -7,8 +7,7 @@ data class NomGraphQLRespons(
     val navident: AnsattId,
     val visningsnavn: String,
     val gjeldendeSektor: Sektor,
-    val orgTilknytninger: Set<NomOrgTilknytning> = emptySet(),
-) {
+    val orgTilknytninger: Set<NomOrgTilknytning> = emptySet()) {
     enum class Sektor(val tekst: String) {
         NAV_STATLIG("Statlig"),
         NAV_KOMMUNAL("Kommunal"),
@@ -22,5 +21,4 @@ data class NomOrgEnhetRespons(val orgEnhet: NomEnhetMedAnsatte? = null)
 data class NomEnhetMedAnsatte(
     val id: NomIdent,
     val navn: String,
-    val orgTilknytninger: List<NomBulkGraphQLRespons> = emptyList(),
-)
+    val orgTilknytninger: List<NomBulkGraphQLRespons> = emptyList())

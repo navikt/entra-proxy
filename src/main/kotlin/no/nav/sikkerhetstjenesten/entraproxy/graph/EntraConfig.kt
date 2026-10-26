@@ -21,8 +21,8 @@ class EntraConfig(
     companion object {
         const val TEMA = "tema"
         const val ENHETER = "enheter"
-        const val UTVIDET_ANSATT = "utvidetAnsatt"
-        const val GRUPPER_FOR_ANSATT = "grupper"
+        private const val UTVIDET_ANSATT = "utvidetAnsatt"
+        private const val GRUPPER_FOR_ANSATT = "grupper"
         val GRUPPER_FOR_ANSATT_GRAPH_CACHE = CacheNøkkelConfig(GRAPH, GRUPPER_FOR_ANSATT)
         val ENHETER_GRAPH_CACHE = CacheNøkkelConfig(GRAPH, ENHETER)
         val TEMA_GRAPH_CACHE = CacheNøkkelConfig(GRAPH, TEMA)

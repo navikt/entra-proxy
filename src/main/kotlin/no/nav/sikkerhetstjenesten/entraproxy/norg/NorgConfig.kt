@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.PING_PATH
 import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
@@ -19,6 +18,7 @@ class NorgConfig(
     override val caches = NORG_CACHES
 
     companion object {
+        const val NORG = "norg"
         val NORG_CACHE = CacheNøkkelConfig(NORG)
         val NORG_CACHES = setOf(NORG_CACHE)
     }

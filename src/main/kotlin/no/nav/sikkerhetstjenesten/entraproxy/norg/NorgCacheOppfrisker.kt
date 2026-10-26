@@ -11,6 +11,6 @@ class NorgCacheOppfrisker(private val norg: NorgTjeneste, cfg: NorgConfig) : Abs
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         parse(nøkkelElementer.id)?.let { enhetnummer ->
             norg.navn(enhetnummer)
-        } ?: log.warn("Ukjent id-format i nøkkel $nøkkelElementer")
+        }
     }
 }

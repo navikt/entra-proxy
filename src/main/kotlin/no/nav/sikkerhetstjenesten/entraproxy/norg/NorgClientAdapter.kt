@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.NORG
+import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG
 import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component

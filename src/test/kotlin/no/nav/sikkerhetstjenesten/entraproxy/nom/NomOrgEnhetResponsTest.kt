@@ -3,7 +3,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.nom
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_STATLIG
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule.Builder

@@ -266,7 +266,7 @@
         <div class="sammenligning-tabell" tabindex="0" role="region" aria-labelledby="utforsket-medlemmer-overskrift">
             <table aria-label="Medlemmer i gruppa som utforskes">
                 <thead>
-                <tr><th scope="col">Nav-ident</th><th scope="col">Navn</th></tr>
+                <tr id="utforsket-medlemmer-overskrift-rad"></tr>
                 </thead>
                 <tbody id="utforsket-medlemmer-rader"></tbody>
             </table>
@@ -324,6 +324,7 @@
     const utforsketMedlemmerTabell = utforsketMedlemmerResultat.querySelector('.sammenligning-tabell');
     const utforsketMedlemmerStatus = document.getElementById('utforsket-medlemmer-status');
     const utforsketMedlemmerRader = document.getElementById('utforsket-medlemmer-rader');
+    const utforsketMedlemmerOverskrift = document.getElementById('utforsket-medlemmer-overskrift-rad');
     const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
     let aktiveOppslag = 0;
@@ -378,6 +379,10 @@
         utforsketMedlemmerResultat.hidden = false;
         const medlemmer = gruppemedlemmer.get(forstePanel) ?? [];
         utforsketMedlemmerRader.replaceChildren();
+        for (const knapp of utforsketMedlemmerOverskrift.querySelectorAll('.sorter-knapp')) {
+            knapp.dataset.sortering = '';
+            knapp.closest('th').removeAttribute('aria-sort');
+        }
         utforsketMedlemmerTabell.classList.toggle('med-rullefelt', medlemmer.length > 50);
         utforsketMedlemmerTabell.scrollTop = 0;
         if (medlemmer.length === 0) {
@@ -553,31 +558,43 @@
         }
     }
 
-    function leggTilSorterbarOverskrift(celle, tekst, kolonneIndeks) {
+    function leggTilSorterbarOverskrift(celle, tekst, kolonneIndeks, overskriftContainer = sammenligningTabellOverskrift, raderContainer = sammenligningTabellRader) {
         const knapp = document.createElement('button');
         knapp.className = 'sorter-knapp';
         knapp.type = 'button';
         knapp.textContent = tekst;
         knapp.addEventListener('click', () => {
             const retning = knapp.dataset.sortering === 'ascending' ? 'descending' : 'ascending';
-            const andreKnapper = sammenligningTabellOverskrift.querySelectorAll('.sorter-knapp');
+            const andreKnapper = overskriftContainer.querySelectorAll('.sorter-knapp');
             for (const annenKnapp of andreKnapper) {
                 annenKnapp.dataset.sortering = '';
                 annenKnapp.closest('th').removeAttribute('aria-sort');
             }
             knapp.dataset.sortering = retning;
             celle.setAttribute('aria-sort', retning);
-            const rader = [...sammenligningTabellRader.rows];
+            const rader = [...raderContainer.rows];
             rader.sort((radA, radB) => {
                 const verdiA = radA.cells[kolonneIndeks].textContent.trim();
                 const verdiB = radB.cells[kolonneIndeks].textContent.trim();
                 const sammenligning = verdiA.localeCompare(verdiB, undefined, {numeric: true, sensitivity: 'base'});
                 return retning === 'ascending' ? sammenligning : -sammenligning;
             });
-            sammenligningTabellRader.append(...rader);
+            raderContainer.append(...rader);
         });
         celle.appendChild(knapp);
     }
+
+    function byggUtforsketMedlemmerOverskrift() {
+        const navIdentOverskrift = document.createElement('th');
+        navIdentOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(navIdentOverskrift, 'Nav-ident', 0, utforsketMedlemmerOverskrift, utforsketMedlemmerRader);
+        const navnOverskrift = document.createElement('th');
+        navnOverskrift.scope = 'col';
+        leggTilSorterbarOverskrift(navnOverskrift, 'Navn', 1, utforsketMedlemmerOverskrift, utforsketMedlemmerRader);
+        utforsketMedlemmerOverskrift.append(navIdentOverskrift, navnOverskrift);
+    }
+
+    byggUtforsketMedlemmerOverskrift();
 
     function klargjorSok(panel) {
         let sisteSok = 0;

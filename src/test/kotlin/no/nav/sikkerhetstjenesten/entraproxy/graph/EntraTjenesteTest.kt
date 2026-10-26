@@ -1,6 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -65,8 +66,10 @@ class EntraTjenesteTest(
 
                     val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
-                    resultat.size shouldBe 25
-                    resultat shouldBe gruppeIder.associateWith { 1L }
+                    assertSoftly {
+                        resultat.size shouldBe 25
+                        resultat shouldBe gruppeIder.associateWith { 1L }
+                    }
                 }
                 Then("sendes ConsistencyLevel: eventual på hver delforespørsel") {
                     val gruppeIder = (1..1).map { randomUUID() }
@@ -110,9 +113,7 @@ class EntraTjenesteTest(
         Given("medlemmer-endepunkt") {
             When("det finnes medlemmer") {
                 Then("skal responsen inneholde forventede medlemmer") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$GROUP_ID/members"
-                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/groups/$GROUP_ID/members", gruppeMedlemmerContract)
 
                     entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
                 }
@@ -124,19 +125,18 @@ class EntraTjenesteTest(
                 Then("skal alle sidene hentes og medlemmene fra alle sidene returneres") {
                     val gruppeId = randomUUID()
                     val nesteSideUri = "$baseUrl/groups/$gruppeId/members?\$skiptoken=abc"
-                    val medlem2Id = "${randomUUID()}"
 
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
-                    }.andRespond(withSuccess(
+                    expectGet(
+                        "$baseUrl/groups/$gruppeId/members",
                         """
                         {
                           "@odata.nextLink": "$nesteSideUri",
                           "value": [
-                            { "id": "$medlemId", "displayName": "Ola Nordmann", "givenName": "Ola", "surname": "Nordmann", "onPremisesSamAccountName": "E123456" }
+                            $olaMedlemJson
                           ]
                         }
-                        """.trimIndent(), APPLICATION_JSON))
+                        """.trimIndent()
+                    )
 
                     server.expect { request ->
                         request.method shouldBe GET; request.uri.toString() shouldBe nesteSideUri
@@ -144,7 +144,7 @@ class EntraTjenesteTest(
                         """
                         {
                           "value": [
-                            { "id": "$medlem2Id", "displayName": "Kari Nordmann", "givenName": "Kari", "surname": "Nordmann", "onPremisesSamAccountName": "E654321" }
+                            $kariMedlemJson
                           ]
                         }
                         """.trimIndent(), APPLICATION_JSON))
@@ -163,17 +163,17 @@ class EntraTjenesteTest(
                     val gruppeId = randomUUID()
                     val nøstetGruppeId = "${randomUUID()}"
 
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppeId/members"
-                    }.andRespond(withSuccess(
+                    expectGet(
+                        "$baseUrl/groups/$gruppeId/members",
                         """
                         {
                           "value": [
-                            { "id": "$medlemId", "displayName": "Ola Nordmann", "givenName": "Ola", "surname": "Nordmann", "onPremisesSamAccountName": "E123456" },
+                            $olaMedlemJson,
                             { "id": "$nøstetGruppeId", "displayName": "En nøstet gruppe" }
                           ]
                         }
-                        """.trimIndent(), APPLICATION_JSON))
+                        """.trimIndent()
+                    )
 
                     adapter.gruppeMedlemmer("$gruppeId") shouldBe setOf(ANSATT)
                 }
@@ -183,9 +183,7 @@ class EntraTjenesteTest(
         Given("users-endepunkt for oppslag av oid") {
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
-                    }.andRespond(withSuccess(oidContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/users", oidRespons(OID))
                     repeat(2) {
                         oid.ansattOid(AnsattId("A123456")) shouldBe OID
                     }
@@ -196,9 +194,7 @@ class EntraTjenesteTest(
         Given("groups-endepunkt for oppslag av gruppe-oid") {
             When("det finnes en gruppe med gitt navn") {
                 Then("skal gruppens oid returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups"
-                    }.andRespond(withSuccess(gruppeContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/groups", gruppeContract)
 
                     repeat(2) {
                         oid.gruppeOid("En gruppe") shouldBe GRUPPE_OID
@@ -239,19 +235,17 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
-                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
-                    }.andRespond(withSuccess(
+                    expectGet("$baseUrl/groups/$gruppe1Id/members", gruppeMedlemmerContract)
+                    expectGet(
+                        "$baseUrl/groups/$gruppe2Id/members",
                         """
                         {
                           "value": [
-                            { "id": "${randomUUID()}", "displayName": "Kari Nordmann", "givenName": "Kari", "surname": "Nordmann", "onPremisesSamAccountName": "E654321" }
+                            $kariMedlemJson
                           ]
                         }
-                        """.trimIndent(), APPLICATION_JSON))
+                        """.trimIndent()
+                    )
 
                     entra.medlemmerIGrupperSomMatcher("MIN_ROLLE") shouldBe listOf(
                         GruppeMedMedlemmer(gruppe1Id, "0000-GA-MIN_ROLLE_A", setOf(ANSATT)),
@@ -289,12 +283,8 @@ class EntraTjenesteTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe1Id/members"
-                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/groups/$gruppe2Id/members"
-                    }.andRespond(withSuccess(gruppeMedlemmerContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/groups/$gruppe1Id/members", gruppeMedlemmerContract)
+                    expectGet("$baseUrl/groups/$gruppe2Id/members", gruppeMedlemmerContract)
 
                     entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
                         AnsattMedGrupper(ANSATT, setOf("0000-GA-MIN_ROLLE_A", "0000-GA-MIN_ROLLE_B"))
@@ -306,12 +296,8 @@ class EntraTjenesteTest(
         Given("memberOf-endepunkt for temaer") {
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
-                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
-                    }.andRespond(withSuccess(temaContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
+                    expectGet("$baseUrl/users/$ANSATT_OID/memberOf", temaContract)
 
                     repeat(2) {
                         entra.tema(AnsattId("B123456")) shouldBe setOf(Tema("AAP"))
@@ -323,12 +309,8 @@ class EntraTjenesteTest(
         Given("memberOf-endepunkt for enheter") {
             When("ansatt er medlem av en enhet-gruppe") {
                 Then("skal enhetsnummeret returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
-                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users/$ANSATT_OID/memberOf"
-                    }.andRespond(withSuccess(enhetContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
+                    expectGet("$baseUrl/users/$ANSATT_OID/memberOf", enhetContract)
 
                     repeat(2) {
                         entra.enheter(AnsattId("C123456")).map { it.enhetnummer.verdi } shouldBe listOf("1234")
@@ -340,9 +322,7 @@ class EntraTjenesteTest(
         Given("memberOf-endepunkt for grupper") {
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users?"
-                    }.andRespond(withSuccess(ansattOidContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
@@ -370,20 +350,27 @@ class EntraTjenesteTest(
         Given("users-endepunkt for utvidet ansatt") {
             When("det finnes en bruker for navident") {
                 Then("skal utvidet ansatt-informasjon returneres") {
-                    server.expect { request ->
-                        request.method shouldBe GET; request.uri.toString() shouldStartWith "$baseUrl/users"
-                    }.andRespond(withSuccess(utvidetAnsattContract, APPLICATION_JSON))
+                    expectGet("$baseUrl/users", utvidetAnsattContract)
 
                     repeat(2) {
                         val respons = entra.utvidetAnsatt(AnsattId("A123456"))
-                        respons?.navIdent shouldBe AnsattId("A123456")
-                        respons?.fornavn shouldBe "Kari"
-                        respons?.etternavn shouldBe "Nordmann"
-                        respons?.enhet?.enhetnummer?.verdi shouldBe "1234"
+                        assertSoftly {
+                            respons?.navIdent shouldBe AnsattId("A123456")
+                            respons?.fornavn shouldBe "Kari"
+                            respons?.etternavn shouldBe "Nordmann"
+                            respons?.enhet?.enhetnummer?.verdi shouldBe "1234"
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun expectGet(urlPrefix: String, responseJson: String) {
+        server.expect { request ->
+            request.method shouldBe GET
+            request.uri.toString() shouldStartWith urlPrefix
+        }.andRespond(withSuccess(responseJson, APPLICATION_JSON))
     }
 
     @TestConfiguration(proxyBeanMethods = false)
@@ -426,36 +413,40 @@ class EntraTjenesteTest(
         private val GRUPPE_ID = randomUUID()
         private val ANSATT_OID = randomUUID()
         private val ANSATT = Ansatt(AnsattId("E123456"), "Ola Nordmann", "Ola", "Nordmann")
-        private val medlemId = "${randomUUID()}"
+        private val olaMedlemJson = """
+            {
+              "id": "${randomUUID()}",
+              "displayName": "Ola Nordmann",
+              "givenName": "Ola",
+              "surname": "Nordmann",
+              "onPremisesSamAccountName": "E123456"
+            }
+        """.trimIndent()
+
+        private val kariMedlemJson = """
+            {
+              "id": "${randomUUID()}",
+              "displayName": "Kari Nordmann",
+              "givenName": "Kari",
+              "surname": "Nordmann",
+              "onPremisesSamAccountName": "E654321"
+            }
+        """.trimIndent()
+
         private val gruppeMedlemmerContract = """
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#directoryObjects",
               "value": [
-                {
-                  "id": "$medlemId",
-                  "displayName": "Ola Nordmann",
-                  "givenName": "Ola",
-                  "surname": "Nordmann",
-                  "onPremisesSamAccountName": "E123456"
-                }
+                $olaMedlemJson
               ]
             }
         """.trimIndent()
 
-        private val oidContract = """
+        private fun oidRespons(id: UUID) = """
             {
               "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
               "value": [
-                { "id": "$OID" }
-              ]
-            }
-        """.trimIndent()
-
-        private val ansattOidContract = """
-            {
-              "@odata.context": "https://graph.microsoft.com/v1.0/${'$'}metadata#users",
-              "value": [
-                { "id": "$ANSATT_OID" }
+                { "id": "$id" }
               ]
             }
         """.trimIndent()

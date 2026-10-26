@@ -94,6 +94,49 @@
         }
         .sammenligningsknapp {
             justify-content: center;
+            align-items: center;
+        }
+        .medlemmer-bryter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .medlemmer-bryter input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .medlemmer-bryter__spor {
+            position: relative;
+            flex: none;
+            width: 2.75rem;
+            height: 1.5rem;
+            border-radius: 1rem;
+            background: #6b7a74;
+            transition: background 0.15s ease;
+        }
+        .medlemmer-bryter__spor::after {
+            content: "";
+            position: absolute;
+            top: 0.15rem;
+            left: 0.15rem;
+            width: 1.2rem;
+            height: 1.2rem;
+            border-radius: 50%;
+            background: #fff;
+            transition: transform 0.15s ease;
+        }
+        .medlemmer-bryter input:checked + .medlemmer-bryter__spor {
+            background: #06893a;
+        }
+        .medlemmer-bryter input:checked + .medlemmer-bryter__spor::after {
+            transform: translateX(1.25rem);
+        }
+        .medlemmer-bryter input:focus-visible + .medlemmer-bryter__spor {
+            outline: 3px solid #99c4ff;
+            outline-offset: 2px;
         }
         .status { min-height: 1.5rem; margin-top: 1rem; }
         .status.error { color: #a40000; }
@@ -208,10 +251,27 @@
     </div>
     <div class="sok-knapper sammenligningsknapp">
         <button class="aksel-button nytt-sok" data-variant="primary" data-color="brand-blue" type="button" disabled>Ny sammenligningsgruppe</button>
+        <label class="medlemmer-bryter">
+            <input type="checkbox" id="vis-utforsket-medlemmer">
+            <span class="medlemmer-bryter__spor" aria-hidden="true"></span>
+            <span>Vis medlemmer i gruppa som utforskes</span>
+        </label>
     </div>
     </section>
     <h2 class="aksel-heading aksel-heading--medium" id="sammenligningsoverskrift" hidden>Sammenligningsgrupper</h2>
     </div>
+    <section id="utforsket-medlemmer-resultat" aria-labelledby="utforsket-medlemmer-overskrift" hidden>
+        <h2 class="aksel-heading aksel-heading--medium" id="utforsket-medlemmer-overskrift">Medlemmer i gruppa som utforskes</h2>
+        <p class="aksel-body-short status" id="utforsket-medlemmer-status" role="status" aria-live="polite"></p>
+        <div class="sammenligning-tabell" tabindex="0" role="region" aria-labelledby="utforsket-medlemmer-overskrift">
+            <table aria-label="Medlemmer i gruppa som utforskes">
+                <thead>
+                <tr><th scope="col">Nav-ident</th><th scope="col">Navn</th></tr>
+                </thead>
+                <tbody id="utforsket-medlemmer-rader"></tbody>
+            </table>
+        </div>
+    </section>
     <section id="felles-resultat" aria-labelledby="felles-overskrift" hidden>
         <h2 class="aksel-heading aksel-heading--medium" id="felles-overskrift">Oppsummering</h2>
         <p class="aksel-body-short status" id="felles-status" role="status" aria-live="polite"></p>
@@ -258,6 +318,11 @@
     const sammenligningTabellRader = document.getElementById('sammenligning-tabell-rader');
     const kopierDetaljvisning = document.getElementById('kopier-detaljvisning');
     const kopierStatus = document.getElementById('kopier-status');
+    const visUtforsketMedlemmer = document.getElementById('vis-utforsket-medlemmer');
+    const utforsketMedlemmerResultat = document.getElementById('utforsket-medlemmer-resultat');
+    const utforsketMedlemmerTabell = utforsketMedlemmerResultat.querySelector('.sammenligning-tabell');
+    const utforsketMedlemmerStatus = document.getElementById('utforsket-medlemmer-status');
+    const utforsketMedlemmerRader = document.getElementById('utforsket-medlemmer-rader');
     const gruppemedlemmer = new WeakMap();
     let antallSok = 1;
     let aktiveOppslag = 0;
@@ -299,7 +364,41 @@
         }
     });
 
+    function oppdaterUtforsketMedlemmer() {
+        if (!visUtforsketMedlemmer.checked) {
+            utforsketMedlemmerResultat.hidden = true;
+            return;
+        }
+        utforsketMedlemmerResultat.hidden = false;
+        const medlemmer = gruppemedlemmer.get(forstePanel) ?? [];
+        utforsketMedlemmerRader.replaceChildren();
+        utforsketMedlemmerTabell.classList.toggle('med-rullefelt', medlemmer.length > 50);
+        utforsketMedlemmerTabell.scrollTop = 0;
+        if (medlemmer.length === 0) {
+            utforsketMedlemmerStatus.textContent = 'Hent medlemmer i gruppa som utforskes for \u00e5 se dem her.';
+            return;
+        }
+        utforsketMedlemmerStatus.textContent = `${medlemmer.length} ${medlemmer.length === 1 ? 'medlem' : 'medlemmer'}`;
+        for (const medlem of medlemmer) {
+            const rad = document.createElement('tr');
+            const navIdentCelle = document.createElement('th');
+            navIdentCelle.scope = 'row';
+            const navIdentLenke = document.createElement('a');
+            navIdentLenke.className = 'navident-lenke';
+            navIdentLenke.href = `/ansatt.html?ansattid=${encodeURIComponent(medlem.navIdent)}`;
+            navIdentLenke.textContent = medlem.navIdent;
+            navIdentCelle.appendChild(navIdentLenke);
+            const navnCelle = document.createElement('td');
+            navnCelle.textContent = medlem.visningNavn ?? '';
+            rad.append(navIdentCelle, navnCelle);
+            utforsketMedlemmerRader.appendChild(rad);
+        }
+    }
+
+    visUtforsketMedlemmer.addEventListener('change', oppdaterUtforsketMedlemmer);
+
     function oppdaterFellesMedlemmer() {
+        oppdaterUtforsketMedlemmer();
         const allePaneler = [...sok.querySelectorAll('.sok-panel')];
         for (const panel of allePaneler) {
             panel.querySelector('.nytt-sok').disabled = panel.dataset.populert !== 'true';

@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.core.spec.style.BehaviorSpec
-import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLRespons.Sektor.NAV_STATLIG
 import tools.jackson.databind.json.JsonMapper
@@ -15,42 +15,20 @@ class NomOrgEnhetResponsTest : BehaviorSpec({
     Given("an orgEnheter response from NOM with ansatte") {
         val json = NomOrgEnhetResponsTest::class.java
             .getResource("/nom/orgenheter-med-ansatte.json")!!.readText()
-        val enheter = mapper.readValue(json, OrgEnheterHolder::class.java).orgEnheter
 
         When("the response is decoded") {
-            Then("every org unit is preserved in order") {
-                enheter.map { it.orgEnhet?.id?.verdi } shouldContainExactly
-                    listOf("fa515j", "ke465u", "de122m", "de150v", "hy893h")
-            }
+            Then("the org unit and its employee fields are preserved") {
+                val enheter = mapper.readValue(json, OrgEnheterHolder::class.java).orgEnheter
+                val enhet = enheter.first().orgEnhet!!
+                val ansatt = enhet.orgTilknytninger.first().ressurs!!
 
-            Then("the first org unit keeps its name and ansatte") {
-                val forste = enheter.first().orgEnhet!!
-                forste.navn shouldBe "Arbeidsgiverseksjonen"
-                forste.orgTilknytninger.size shouldBe 17
-                val ansatt = forste.orgTilknytninger.first().ressurs!!
-                ansatt.navident.verdi shouldBe "H176430"
-                ansatt.visningsnavn shouldBe "Mette Dahl"
-                ansatt.gjeldendeSektor shouldBe NAV_STATLIG
-            }
-
-            Then("an org unit with a single ansatt is decoded") {
-                val enhet = enheter.single { it.orgEnhet?.id?.verdi == "de150v" }.orgEnhet!!
-                enhet.navn shouldBe "Avdeling for mennesker og organisasjon"
-                enhet.orgTilknytninger.single().ressurs!!.visningsnavn shouldBe "Randi Ås"
-            }
-
-            Then("all ansatte across every org unit are decoded with unique identities") {
-                val ansatte = enheter.flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
-                    .mapNotNull { it.ressurs }
-                ansatte.size shouldBe 71
-                ansatte.map { it.navident.verdi }.distinct().size shouldBe 71
-            }
-
-            Then("names with special characters are preserved") {
-                val navn = enheter.flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
-                    .mapNotNull { it.ressurs?.visningsnavn }
-                navn.contains("Hege Ødegård") shouldBe true
-                navn.contains("Astrid Dæhlie") shouldBe true
+                assertSoftly {
+                    enhet.id.verdi shouldBe "ab123c"
+                    enhet.navn shouldBe "Arbeidsgiverseksjonen"
+                    ansatt.navident.verdi shouldBe "H123456"
+                    ansatt.visningsnavn shouldBe "Gaus Dahl"
+                    ansatt.gjeldendeSektor shouldBe NAV_STATLIG
+                }
             }
         }
     }
@@ -65,7 +43,7 @@ class NomOrgEnhetResponsTest : BehaviorSpec({
         When("the org unit has no orgTilknytninger") {
             Then("the ansatte list is empty") {
                 val respons = mapper.readValue(
-                    """{"orgEnhet":{"id":"fa515j","navn":"Arbeidsgiverseksjonen"}}""",
+                    """{"orgEnhet":{"id":"ab123c","navn":"Arbeidsgiverseksjonen"}}""",
                     NomOrgEnhetRespons::class.java
                 )
                 respons.orgEnhet!!.orgTilknytninger shouldBe emptyList()

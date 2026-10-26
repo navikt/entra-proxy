@@ -1,8 +1,11 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
+import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.Called
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,114 +22,122 @@ import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
 import org.springframework.graphql.client.toEntityList
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
-    val identer = setOf(AnsattId("A123456"), AnsattId("B123456"))
+    val client = mockk<GraphQlClient>()
+    val request = mockk<RequestSpec>()
+    val retrieve = mockk<RetrieveSyncSpec>()
+    val cache = mockk<CacheOperations>(relaxed = true)
+    val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
+    val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG)
+    val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
+    val firstAnsatt = NomAnsatt(AnsattId("A123456"), "First", "Statlig")
+    val secondAnsatt = NomAnsatt(AnsattId("B123456"), "Second", "Statlig")
+    val identer = setOf(first.navident, second.navident)
     val tilgangsenhetId = Enhetnummer("0315")
-    xGiven("bulk queries") {
-        val client = mockk<GraphQlClient>()
-        val request = mockk<RequestSpec>()
-        val retrieve = mockk<RetrieveSyncSpec>()
-        val cache = mockk<CacheOperations>(relaxed = true)
-        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
+    val nomId = NomIdent("fa515j")
 
-        every { client.documentName("orgtilknytninger-bulk") } returns request
-        every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
-        every { request.retrieveSync("ressurser") } returns retrieve
+    fun dagligOppfolging(tilgangsenhet: Enhetnummer = tilgangsenhetId) = setOf(
+        NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhet), erDagligOppfolging = true)
+    )
+
+    fun enhetRespons(id: NomIdent, vararg tilknytninger: NomBulkGraphQLRespons) =
+        NomOrgEnhetRespons(NomEnhetMedAnsatte(id, "Testenhet", tilknytninger.toList()))
+
+    beforeEach {
+        clearMocks(client, request, retrieve, cache)
+    }
+
+    Given("bulk queries") {
+        beforeEach {
+            every { client.documentName("orgtilknytninger-bulk") } returns request
+            every { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) } returns request
+            every { request.retrieveSync("ressurser") } returns retrieve
+        }
+
         When("all idents are found in cache") {
-            val cachedA = NomAnsatt(AnsattId("A123456"), "Cached A", "STAT")
-            val cachedB = NomAnsatt(AnsattId("B123456"), "Cached B", "STAT")
-            val strengClient = mockk<GraphQlClient>()
-            val cacheMedAlle = mockk<CacheOperations>(relaxed = true)
-            val adapterMedAlle = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), strengClient, cacheMedAlle)
-            every { cacheMedAlle.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
-                mapOf("A123456" to cachedA, "B123456" to cachedB)
-
             Then("all employees are returned from cache without querying NOM") {
-                adapterMedAlle.ansatte(identer) shouldBe setOf(cachedA, cachedB)
+                every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
+                    mapOf("A123456" to firstAnsatt, "B123456" to secondAnsatt)
+
+                val resultat = adapter.ansatte(identer)
+
+                assertSoftly {
+                    resultat shouldBe setOf(firstAnsatt, secondAnsatt)
+                    verify { client wasNot Called }
+                }
             }
         }
 
         When("only some idents are found in cache") {
-            val cachedA = NomAnsatt(AnsattId("A123456"), "Cached A", "STAT")
-            val lokalClient = mockk<GraphQlClient>()
-            val lokalRequest = mockk<RequestSpec>()
-            val lokalRetrieve = mockk<RetrieveSyncSpec>()
-            val cacheMedTreff = mockk<CacheOperations>(relaxed = true)
-            val adapterMedTreff = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), lokalClient, cacheMedTreff)
-            every { cacheMedTreff.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
-                mapOf("A123456" to cachedA)
-            every { lokalClient.documentName("orgtilknytninger-bulk") } returns lokalRequest
-            every { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) } returns lokalRequest
-            every { lokalRequest.retrieveSync("ressurser") } returns lokalRetrieve
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
-            every { lokalRetrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
-
             Then("only the missing idents are fetched from NOM and merged with the cache hits") {
-                val forventetB = NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst)
-                adapterMedTreff.ansatte(identer) shouldBe setOf(cachedA, forventetB)
-                verify { lokalRequest.variables(mapOf("navidenter" to setOf("B123456"))) }
-                verify { cacheMedTreff.putMany(NOM_CACHE, mapOf("B123456" to forventetB)) }
+                every { cache.getMany(NOM_CACHE, setOf("A123456", "B123456"), NomAnsatt::class) } returns
+                    mapOf("A123456" to firstAnsatt)
+                every { request.variables(mapOf("navidenter" to setOf("B123456"))) } returns request
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(NomBulkGraphQLRespons(second))
+
+                val resultat = adapter.ansatte(identer)
+
+                assertSoftly {
+                    resultat shouldBe setOf(firstAnsatt, secondAnsatt)
+                    verify(exactly = 1) { request.variables(mapOf("navidenter" to setOf("B123456"))) }
+                    verify(exactly = 1) { cache.putMany(NOM_CACHE, mapOf("B123456" to secondAnsatt)) }
+                }
             }
         }
 
         When("the response contains resources") {
-            val tilknytninger = setOf(
-                NomOrgTilknytning(
-                    NomEnhet(
-                        NomIdent("ra656d"),
-                        "Testenhet",
-                        tilgangsenhetId
-                    )
+            Then("list variables are sent and only daily follow-up affiliations are kept") {
+                val medOppfolging = dagligOppfolging()
+                val utenOppfolging = NomOrgTilknytning(NomEnhet(NomIdent("xy123z"), "Annen enhet", tilgangsenhetId))
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
+                    NomBulkGraphQLRespons(first.copy(orgTilknytninger = medOppfolging + utenOppfolging)),
+                    NomBulkGraphQLRespons(second)
                 )
-            )
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG)
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
+                val forventet = setOf(firstAnsatt.copy(orgTilknytninger = medOppfolging), secondAnsatt)
 
-            Then("list variables are sent and resources are unwrapped") {
-                adapter.ansatte(identer) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst)
-                )
-                verify { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) }
-                verify { request.retrieveSync("ressurser") }
+                val resultat = adapter.ansatte(identer)
+
+                assertSoftly {
+                    resultat shouldBe forventet
+                    verify(exactly = 1) { request.variables(mapOf("navidenter" to setOf("A123456", "B123456"))) }
+                    verify(exactly = 1) { request.retrieveSync("ressurser") }
+                    verify(exactly = 1) {
+                        cache.putMany(NOM_CACHE, forventet.associateBy { it.navident.verdi })
+                    }
+                }
             }
         }
 
         When("the response contains an empty resource list") {
+            Then("an empty set is returned") {
                 every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
 
-            Then("an empty list is returned") {
                 adapter.ansatte(identer) shouldBe emptySet()
             }
         }
 
         When("the response contains a missing resource") {
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG)
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
-
             Then("available resources are returned") {
-                adapter.ansatte(identer) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst)
-                )
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                    listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
+
+                adapter.ansatte(identer) shouldBe setOf(firstAnsatt)
             }
         }
 
         When("all resources are missing") {
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
+            Then("an empty set is returned") {
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
+                    listOf(NomBulkGraphQLRespons(), NomBulkGraphQLRespons(null))
 
-            Then("an empty list is returned") {
                 adapter.ansatte(identer) shouldBe emptySet()
             }
         }
 
         When("the query fails") {
-            val failure = IllegalStateException("GraphQL query failed")
-            every { request.retrieveSync("ressurser") } throws failure
-
             Then("the failure is propagated") {
+                val failure = IllegalStateException("GraphQL query failed")
+                every { request.retrieveSync("ressurser") } throws failure
+
                 shouldThrow<IllegalStateException> {
                     adapter.ansatte(identer)
                 } shouldBe failure
@@ -135,83 +146,77 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     }
 
     Given("ansatte for tilgangsenhet") {
-        val client = mockk<GraphQlClient>()
-        val request = mockk<RequestSpec>()
-        val retrieve = mockk<RetrieveSyncSpec>()
-        val cache = mockk<CacheOperations>(relaxed = true)
-        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
-
-        every { client.documentName("ansatte-for-tilgangsenhet") } returns request
-        every { request.variables(mapOf("tilgangsenhetId" to "0315")) } returns request
-        every { request.retrieveSync("ressurser") } returns retrieve
-
-        fun dagligOppfolging(tilgangsenhet: Enhetnummer = tilgangsenhetId) = setOf(
-            NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhet), erDagligOppfolging = true)
-        )
+        beforeEach {
+            every { client.documentName("ansatte-for-tilgangsenhet") } returns request
+            every { request.variables(mapOf("tilgangsenhetId" to "0315")) } returns request
+            every { request.retrieveSync("ressurser") } returns retrieve
+        }
 
         When("the tilgangsenhet has resources with daily follow-up") {
-            val tilknytninger = dagligOppfolging()
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG, tilknytninger)
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
-
             Then("the tilgangsenhetId variable is sent and those employees are returned") {
-                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst, tilknytninger)
+                val tilknytninger = dagligOppfolging()
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
+                    NomBulkGraphQLRespons(first.copy(orgTilknytninger = tilknytninger)),
+                    NomBulkGraphQLRespons(second.copy(orgTilknytninger = tilknytninger))
                 )
-                verify { request.variables(mapOf("tilgangsenhetId" to "0315")) }
-                verify { request.retrieveSync("ressurser") }
+
+                val resultat = adapter.ansatteForEnhet(tilgangsenhetId)
+
+                assertSoftly {
+                    resultat shouldBe setOf(
+                        firstAnsatt.copy(orgTilknytninger = tilknytninger),
+                        secondAnsatt.copy(orgTilknytninger = tilknytninger)
+                    )
+                    verify(exactly = 1) { request.variables(mapOf("tilgangsenhetId" to "0315")) }
+                    verify(exactly = 1) { request.retrieveSync("ressurser") }
+                }
             }
         }
 
         When("resources lack daily follow-up for the tilgangsenhet") {
-            val medOppfolging = dagligOppfolging()
-            val utenOppfolging = setOf(
-                NomOrgTilknytning(NomEnhet(NomIdent("ra656d"), "Testenhet", tilgangsenhetId))
-            )
-            val annenEnhet = dagligOppfolging(Enhetnummer("0316"))
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, medOppfolging)
-            val second = NomGraphQLRespons(AnsattId("B123456"), "Second", NAV_STATLIG, utenOppfolging)
-            val third = NomGraphQLRespons(AnsattId("C123456"), "Third", NAV_STATLIG, annenEnhet)
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
-                NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second), NomBulkGraphQLRespons(third)
-            )
-
             Then("only resources with daily follow-up for the tilgangsenhet are returned") {
-                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, medOppfolging)
+                val medOppfolging = dagligOppfolging()
+                val utenOppfolging = medOppfolging.mapTo(mutableSetOf()) { it.copy(erDagligOppfolging = false) }
+                val third = NomGraphQLRespons(
+                    AnsattId("C123456"), "Third", NAV_STATLIG, dagligOppfolging(Enhetnummer("0316"))
                 )
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
+                    NomBulkGraphQLRespons(first.copy(orgTilknytninger = medOppfolging)),
+                    NomBulkGraphQLRespons(second.copy(orgTilknytninger = utenOppfolging)),
+                    NomBulkGraphQLRespons(third)
+                )
+
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe
+                    setOf(firstAnsatt.copy(orgTilknytninger = medOppfolging))
             }
         }
 
         When("the tilgangsenhet has no resources") {
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
-
             Then("an empty set is returned") {
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns emptyList()
+
                 adapter.ansatteForEnhet(tilgangsenhetId) shouldBe emptySet()
             }
         }
 
         When("a resource is missing") {
-            val tilknytninger = dagligOppfolging()
-            val first = NomGraphQLRespons(AnsattId("A123456"), "First", NAV_STATLIG, tilknytninger)
-            every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns
-                listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
-
             Then("available resources are returned") {
-                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst, tilknytninger)
+                val tilknytninger = dagligOppfolging()
+                every { retrieve.toEntityList<NomBulkGraphQLRespons>() } returns listOf(
+                    NomBulkGraphQLRespons(first.copy(orgTilknytninger = tilknytninger)),
+                    NomBulkGraphQLRespons(null)
                 )
+
+                adapter.ansatteForEnhet(tilgangsenhetId) shouldBe
+                    setOf(firstAnsatt.copy(orgTilknytninger = tilknytninger))
             }
         }
 
         When("the query fails") {
-            val failure = IllegalStateException("GraphQL query failed")
-            every { request.retrieveSync("ressurser") } throws failure
-
             Then("the failure is propagated") {
+                val failure = IllegalStateException("GraphQL query failed")
+                every { request.retrieveSync("ressurser") } throws failure
+
                 shouldThrow<IllegalStateException> {
                     adapter.ansatteForEnhet(tilgangsenhetId)
                 } shouldBe failure
@@ -219,81 +224,63 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         }
     }
 
-    xGiven("ansatte for nomident") {
-        val client = mockk<GraphQlClient>()
-        val request = mockk<RequestSpec>()
-        val retrieve = mockk<RetrieveSyncSpec>()
-        val cache = mockk<CacheOperations>(relaxed = true)
-        val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
-        val nomId = NomIdent("fa515j")
+    Given("ansatte for nomident") {
+        beforeEach {
+            every { client.documentName("ansatte-for-nomid") } returns request
+            every { request.variables(mapOf("organisertUnderOrgEnhetId" to "fa515j")) } returns request
+            every { request.retrieveSync("orgEnheter") } returns retrieve
+        }
 
-        every { client.documentName("ansatte-for-nomid") } returns request
-        every { request.variables(mapOf("nomId" to "fa515j")) } returns request
-        every { request.retrieveSync("orgEnheter") } returns retrieve
-
-        When("the org units contain resources") {
-            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", NAV_STATLIG)
-            val second = NomGraphQLRespons(AnsattId("S109104"), "Gunvor Sverdrup", NAV_STATLIG)
-            val third = NomGraphQLRespons(AnsattId("D154627"), "Kine Sunde Dragnes", NAV_STATLIG)
-            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
-                NomOrgEnhetRespons(
-                    NomEnhetMedAnsatte(
-                        NomIdent("fa515j"), "Arbeidsgiverseksjonen",
-                        listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(second))
-                    )
-                ),
-                NomOrgEnhetRespons(
-                    NomEnhetMedAnsatte(
-                        NomIdent("ke465u"), "HMS- og styringsseksjonen",
-                        listOf(NomBulkGraphQLRespons(third))
-                    )
+        When("the org units contain resources with and without daily follow-up") {
+            Then("only daily follow-up resources from all org units are returned") {
+                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                    enhetRespons(
+                        nomId,
+                        NomBulkGraphQLRespons(first, erDagligOppfolging = true),
+                        NomBulkGraphQLRespons(NomGraphQLRespons(AnsattId("C123456"), "Third", NAV_STATLIG))
+                    ),
+                    enhetRespons(NomIdent("ke465u"), NomBulkGraphQLRespons(second, erDagligOppfolging = true))
                 )
-            )
 
-            Then("the nomId variable is sent and resources from all org units are flattened") {
-                adapter.ansatteForNomIdent(nomId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst),
-                    NomAnsatt(second.navident, second.visningsnavn, second.gjeldendeSektor.tekst),
-                    NomAnsatt(third.navident, third.visningsnavn, third.gjeldendeSektor.tekst)
-                )
-                verify { request.variables(mapOf("nomId" to "fa515j")) }
-                verify { request.retrieveSync("orgEnheter") }
+                val resultat = adapter.ansatteForNomIdent(nomId)
+
+                assertSoftly {
+                    resultat shouldBe setOf(firstAnsatt, secondAnsatt)
+                    verify(exactly = 1) { request.variables(mapOf("organisertUnderOrgEnhetId" to "fa515j")) }
+                    verify(exactly = 1) { request.retrieveSync("orgEnheter") }
+                }
             }
         }
 
         When("no org units are returned") {
-            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
-
             Then("an empty set is returned") {
+                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
+
                 adapter.ansatteForNomIdent(nomId) shouldBe emptySet()
             }
         }
 
         When("an org unit is missing or a tilknytning has no resource") {
-            val first = NomGraphQLRespons(AnsattId("H176430"), "Anita Haugen", NAV_STATLIG)
-            every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
-                NomOrgEnhetRespons(
-                    NomEnhetMedAnsatte(
-                        NomIdent("fa515j"), "Arbeidsgiverseksjonen",
-                        listOf(NomBulkGraphQLRespons(first), NomBulkGraphQLRespons(null))
-                    )
-                ),
-                NomOrgEnhetRespons(NomEnhetMedAnsatte(NomIdent("de150v"), "Tom enhet")),
-                NomOrgEnhetRespons(null)
-            )
-
             Then("available resources are returned") {
-                adapter.ansatteForNomIdent(nomId) shouldBe setOf(
-                    NomAnsatt(first.navident, first.visningsnavn, first.gjeldendeSektor.tekst)
+                every { retrieve.toEntityList<NomOrgEnhetRespons>() } returns listOf(
+                    enhetRespons(
+                        nomId,
+                        NomBulkGraphQLRespons(first, erDagligOppfolging = true),
+                        NomBulkGraphQLRespons(null, erDagligOppfolging = true)
+                    ),
+                    enhetRespons(NomIdent("de150v")),
+                    NomOrgEnhetRespons(null)
                 )
+
+                adapter.ansatteForNomIdent(nomId) shouldBe setOf(firstAnsatt)
             }
         }
 
         When("the query fails") {
-            val failure = IllegalStateException("GraphQL query failed")
-            every { request.retrieveSync("orgEnheter") } throws failure
-
             Then("the failure is propagated") {
+                val failure = IllegalStateException("GraphQL query failed")
+                every { request.retrieveSync("orgEnheter") } throws failure
+
                 shouldThrow<IllegalStateException> {
                     adapter.ansatteForNomIdent(nomId)
                 } shouldBe failure

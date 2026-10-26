@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.felles.cache.getMany
 import no.nav.sikkerhetstjenesten.felles.graphql.AbstractSyncGraphQLClientAdapter
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.graphql.client.GraphQlClient
+import org.springframework.graphql.client.toEntity
 import org.springframework.graphql.client.toEntityList
 import org.springframework.stereotype.Component
 
@@ -47,9 +48,9 @@ class NomSyncGraphQLClientAdapter(
         val respons = client.documentName(NOMID_ANSATTE_QUERY.first)
             .variables(nomident(ident.verdi))
             .executeSync()
-        val enhet = respons.field(NOMID_ANSATTE_TOPPNODE).toEntity(NomEnhet::class.java)
+        val enhet = respons.field(NOMID_ANSATTE_TOPPNODE).toEntity<NomEnhet>()
         val ansatte = respons.field(NOMID_ANSATTE_QUERY.second)
-            .toEntityList(NomOrgEnhetRespons::class.java)
+            .toEntityList<NomOrgEnhetRespons>()
             .flatMap { it.orgEnhet?.orgTilknytninger.orEmpty() }
             .filter { it.erDagligOppfolging }
             .mapNotNullTo(mutableSetOf()) { it.ressurs?.toAnsatt() }

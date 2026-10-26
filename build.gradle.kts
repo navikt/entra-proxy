@@ -151,9 +151,14 @@ tasks.named<BootJar>("bootJar") {
     archiveFileName = "app.jar"
 }
 
-tasks.named<Test>("test") {
+tasks.withType<Test>().configureEach {
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
     jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
     useJUnitPlatform()
+}
+
+tasks.named<Test>("test") {
     maxParallelForks = 1
     description = "Runs the full test suite serially, including Redis/Testcontainers tests"
 }
@@ -161,20 +166,16 @@ tasks.named<Test>("test") {
 tasks.register<Test>("unitTest") {
     group = "verification"
     description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
-    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
-    useJUnitPlatform()
     maxParallelForks = 2
     include("**/*Test.class")
-    exclude("**/felles/cache/**")
+    exclude("**/ValkeyCacheOperationsTest.class")
 }
 
 tasks.register<Test>("redisTest") {
     group = "verification"
     description = "Runs the Redis/Testcontainers cache tests serially"
-    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
-    useJUnitPlatform()
     maxParallelForks = 1
-    include("**/felles/cache/**")
+    include("**/ValkeyCacheOperationsTest.class")
 }
 
 java {

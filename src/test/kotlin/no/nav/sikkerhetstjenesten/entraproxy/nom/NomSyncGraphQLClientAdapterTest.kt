@@ -21,6 +21,7 @@ import org.springframework.graphql.client.ClientResponseField
 import org.springframework.graphql.client.GraphQlClient
 import org.springframework.graphql.client.GraphQlClient.RequestSpec
 import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
+import org.springframework.graphql.client.toEntity
 import org.springframework.graphql.client.toEntityList
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
@@ -287,12 +288,12 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
             every { request.executeSync() } returns response
             every { response.field("organisertUnderOrgEnhet") } returns field
             every { response.field("orgEnheter") } returns retrieveField
-            every { field.toEntity(NomEnhet::class.java) } returns NomEnhet(nomId, "Toppenhet")
+            every { field.toEntity<NomEnhet>() } returns NomEnhet(nomId, "Toppenhet")
         }
 
         When("organisasjonsenhetene inneholder ressurser med og uten daglig oppfølging") {
             Then("returneres bare ressurser med daglig oppfølging fra alle organisasjonsenhetene") {
-                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns listOf(
+                every { retrieveField.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                     enhetRespons(
                         nomId,
                         NomBulkGraphQLRespons(first, erDagligOppfolging = true),
@@ -313,7 +314,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
         When("ingen organisasjonsenheter returneres") {
             Then("returneres et tomt sett") {
-                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns emptyList()
+                every { retrieveField.toEntityList<NomOrgEnhetRespons>() } returns emptyList()
 
                 adapter.ansatteForNomIdent(nomId) shouldBe NomEnhetAnsatte(nomId, "Toppenhet", emptySet())
             }
@@ -321,7 +322,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
 
         When("en organisasjonsenhet mangler eller en tilknytning mangler ressurs") {
             Then("returneres de tilgjengelige ressursene") {
-                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } returns listOf(
+                every { retrieveField.toEntityList<NomOrgEnhetRespons>() } returns listOf(
                     enhetRespons(
                         nomId,
                         NomBulkGraphQLRespons(first, erDagligOppfolging = true),
@@ -338,7 +339,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
         When("oppslaget feiler") {
             Then("kastes feilen videre") {
                 val failure = IllegalStateException("GraphQL-oppslag feilet")
-                every { retrieveField.toEntityList(NomOrgEnhetRespons::class.java) } throws failure
+                every { retrieveField.toEntityList<NomOrgEnhetRespons>() } throws failure
 
                 shouldThrow<IllegalStateException> {
                     adapter.ansatteForNomIdent(nomId)

@@ -10,6 +10,7 @@
         body {
             margin: 0;
             min-height: 100vh;
+            padding-top: 3.5rem;
             background-color: #283b38;
             background-image: url("/wildlife.svg");
             background-position: center;
@@ -24,9 +25,27 @@
         }
         nav[aria-label="Utforskersider"] {
             position: fixed;
-            top: 1rem;
-            left: 1rem;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem 1rem;
+            background: rgba(18, 43, 40, 0.9);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        nav[aria-label="Utforskersider"] .aksel-button {
+            background: transparent;
+            box-shadow: none;
+            border-radius: 4px;
+        }
+        nav[aria-label="Utforskersider"] .aksel-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        nav[aria-label="Utforskersider"] .logg-ut {
+            margin-left: auto;
         }
         h1 {
             text-shadow: 0 2px 4px #123c2a, 0 0 12px #123c2a;
@@ -99,13 +118,6 @@
         .sorter-knapp::after { content: " \2195"; }
         th[aria-sort="ascending"] .sorter-knapp::after { content: " \2191"; }
         th[aria-sort="descending"] .sorter-knapp::after { content: " \2193"; }
-        .utlogging {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #d1d6db;
-            display: flex;
-            justify-content: flex-end;
-        }
     </style>
 </head>
 <body>
@@ -113,6 +125,8 @@
     <h1 class="aksel-heading aksel-heading--large">Ansatt</h1>
     <nav aria-label="Utforskersider">
         <a class="aksel-button" data-variant="primary" href="/grupper.html">Grupper</a>
+        <a class="aksel-button" data-variant="primary" href="/gruppematrise.html">Gruppematrise</a>
+        <a class="aksel-button logg-ut" data-variant="primary" data-color="danger" href="/oauth2/logout">Logg ut</a>
     </nav>
     <div class="ansatt-visning">
         <form id="ansatt-form">
@@ -156,10 +170,7 @@
             </div>
         </section>
     </div>
-    <div class="utlogging">
-        <a class="aksel-button" data-variant="primary" data-color="danger" href="/oauth2/logout">Logg ut</a>
-    </div>
-</main>
+    </main>
 <script>
     const form = document.getElementById('ansatt-form');
     const input = document.getElementById('ansattid');

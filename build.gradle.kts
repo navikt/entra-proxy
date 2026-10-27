@@ -1,9 +1,9 @@
 
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
-import kotlin.KotlinVersion.Companion.CURRENT
 
 val javaVersion = JavaLanguageVersion.of(27)
 val git = grgit
@@ -27,11 +27,11 @@ plugins {
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.test)
     classDirectories.setFrom(
-        files(classDirectories.files.map {
-            fileTree(it) {
+        sourceSets.main.map {
+            it.output.classesDirs.asFileTree.matching {
                 exclude("**/tilgang/*Swagger*.class", "**/tilgang/dev/*.class")
             }
-        })
+        }
     )
     reports {
         xml.required = true
@@ -43,7 +43,7 @@ springBoot {
     buildInfo {
         properties {
             additional = mapOf(
-                "kotlin.version" to "$CURRENT",
+                "kotlin.version" to libs.versions.kotlin.get(),
                 "jdk.version" to "$javaVersion",
                 "jdk.vendor" to getProperty("java.vendor"),
                 "git.branch" to git.branch.current().name,
@@ -56,7 +56,6 @@ springBoot {
 
 repositories {
     mavenCentral()
-    mavenLocal()
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
@@ -67,9 +66,6 @@ repositories {
             username = "x-access-token"
             password = providers.environmentVariable("READER_TOKEN").orElse(providers.gradleProperty("gpr.token")).orNull
         }
-    }
-    maven {
-        url = uri("https://repo1.maven.org/maven2")
     }
 }
 
@@ -82,7 +78,7 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.22")
+    implementation(libs.jacksonAnnotations)
 
     // Kotlin
     implementation(libs.sikkerhetstjenestenLib)
@@ -180,6 +176,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 kotlin {
     compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_26)
         freeCompilerArgs.add("-Xjsr305=strict")
     }
 }

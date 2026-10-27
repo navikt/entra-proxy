@@ -6,6 +6,7 @@ grgit = "5.3.3"
 cyclonedx = "3.4.1"
 kotest = "6.2.3"
 springdoc = "3.2.0"
+jacksonAnnotations = "2.22"
 mockk = "1.14.9"
 mockOauth2Server = "6.0.2"
 logstashEncoder = "9.0"
@@ -25,6 +26,7 @@ bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "co
 springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }

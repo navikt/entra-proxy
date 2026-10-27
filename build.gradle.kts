@@ -2,6 +2,7 @@
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
 
@@ -21,7 +22,6 @@ plugins {
     alias(libs.plugins.springDependencyManagement)
     alias(libs.plugins.cyclonedx)
     alias(libs.plugins.kotest)
-    application
 }
 
 tasks.named<JacocoReport>("jacocoTestReport") {
@@ -40,6 +40,7 @@ tasks.named<JacocoReport>("jacocoTestReport") {
     }
 }
 springBoot {
+    mainClass.set("no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplicationKt")
     buildInfo {
         properties {
             additional = mapOf(
@@ -129,9 +130,6 @@ dependencyManagement {
     }
 }
 
-application {
-    mainClass.set("no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplicationKt")
-}
 tasks.named<BootJar>("bootJar") {
     archiveFileName = "app.jar"
 }
@@ -143,24 +141,12 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
-tasks.named<Test>("test") {
-    maxParallelForks = 1
-    description = "Runs the full test suite serially, including Redis/Testcontainers tests"
-}
-
 tasks.register<Test>("unitTest") {
     group = "verification"
     description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
     maxParallelForks = 2
     include("**/*Test.class")
     exclude("**/ValkeyCacheOperationsTest.class")
-}
-
-tasks.register<Test>("redisTest") {
-    group = "verification"
-    description = "Runs the Redis/Testcontainers cache tests serially"
-    maxParallelForks = 1
-    include("**/ValkeyCacheOperationsTest.class")
 }
 
 java {
@@ -176,7 +162,7 @@ tasks.withType<JavaCompile>().configureEach {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_26)
+        jvmTarget.set(JVM_26)
         freeCompilerArgs.add("-Xjsr305=strict")
     }
 }

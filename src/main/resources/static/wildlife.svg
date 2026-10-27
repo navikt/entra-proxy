@@ -75,6 +75,82 @@
             </g>
             <circle cx="72" cy="-55" r="3" fill="#332c28"/>
         </g>
+        <g id="crocodile">
+            <g fill="#5f7d4a">
+                <path d="M-95 5-55-8-70 10Z"/>
+                <ellipse cx="-20" cy="8" rx="78" ry="20"/>
+                <path d="M60 2 110 0 95 14 58 18Z"/>
+                <path d="M-70 20-78 46-66 46-58 24Zm40 4-6 26 12-1 2-25Zm40-2-2 26 12-1 4-25Zm34-6 4 26 12-3-4-23Z"/>
+            </g>
+            <path d="M-56-12-48 3-40-12-32 3-24-12-16 3-8-12 0 3 8-12 16 3 24-12 32 3 40-12" fill="none" stroke="#49613a" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M98 2 108-1 98 6Z" fill="#f4ead2"/>
+            <circle cx="-30" cy="-6" r="7" fill="#e8d26a"/>
+            <circle cx="-30" cy="-6" r="3" fill="#2a2a1e"/>
+            <path d="M68 10 108 0 68 4Z" fill="#f4ead2"/>
+        </g>
+        <g id="palm">
+            <path d="M-6 0Q4-60-2-120 2-124 8-120 2-62 8 0Z" fill="#8a6038"/>
+            <path d="M0-115v100" stroke="#6f4a28" stroke-width="2"/>
+            <g fill="#3f7d44">
+                <path d="M2-118Q50-150 95-120 48-128 6-110Z"/>
+                <path d="M2-118Q-46-150-91-120-44-128-2-110Z"/>
+                <path d="M2-118Q40-168 30-210 10-170 -2-116Z"/>
+                <path d="M2-118Q-36-168-26-210-6-170 6-116Z"/>
+                <path d="M2-118Q60-130 96-96 44-116 4-110Z"/>
+                <path d="M2-118Q-56-130-92-96-40-116 0-110Z"/>
+            </g>
+            <g fill="#a8702c">
+                <circle cx="-7" cy="-112" r="5"/>
+                <circle cx="9" cy="-110" r="5"/>
+                <circle cx="0" cy="-104" r="5"/>
+            </g>
+        </g>
+        <g id="hippo">
+            <g fill="#8a7a93">
+                <ellipse cx="-20" cy="18" rx="66" ry="40"/>
+                <rect x="-60" y="42" width="20" height="40" rx="9"/>
+                <rect x="-8" y="42" width="20" height="40" rx="9"/>
+                <ellipse cx="52" cy="12" rx="40" ry="34"/>
+                <ellipse cx="68" cy="30" rx="30" ry="20"/>
+                <circle cx="30" cy="-20" r="9"/>
+                <circle cx="74" cy="-20" r="9"/>
+            </g>
+            <path d="M-78 30Q-96 24-90 44" stroke="#8a7a93" stroke-width="7" stroke-linecap="round"/>
+            <ellipse cx="68" cy="34" rx="26" ry="13" fill="#9c8ca6"/>
+            <circle cx="56" cy="36" r="4" fill="#5c4f66"/>
+            <circle cx="80" cy="36" r="4" fill="#5c4f66"/>
+            <circle cx="30" cy="-22" r="4" fill="#5c4f66"/>
+            <circle cx="74" cy="-22" r="4" fill="#5c4f66"/>
+            <circle cx="34" cy="2" r="4" fill="#2f2835"/>
+            <circle cx="70" cy="2" r="4" fill="#2f2835"/>
+            <path d="M48 44h8v6h-8Z" fill="#f4ead2"/>
+        </g>
+        <g id="gorilla">
+            <g fill="#3a3942">
+                <path d="M-44-16Q-78 14-60 52" stroke="#3a3942" stroke-width="28" stroke-linecap="round"/>
+                <path d="M44-16Q78 14 60 52" stroke="#3a3942" stroke-width="28" stroke-linecap="round"/>
+                <ellipse cx="0" cy="20" rx="54" ry="46"/>
+                <ellipse cx="0" cy="-16" rx="56" ry="30"/>
+                <path d="M-20-60Q0-82 20-60Z"/>
+                <circle cx="0" cy="-46" r="27"/>
+            </g>
+            <ellipse cx="0" cy="20" rx="30" ry="34" fill="#55525c"/>
+            <g fill="#3a3942">
+                <ellipse cx="-24" cy="62" rx="18" ry="12"/>
+                <ellipse cx="24" cy="62" rx="18" ry="12"/>
+            </g>
+            <g fill="#2f2e36">
+                <circle cx="-60" cy="50" r="12"/>
+                <circle cx="60" cy="50" r="12"/>
+            </g>
+            <path d="M-19-50Q0-66 19-50 23-28 0-22-23-28-19-50Z" fill="#7a6a60"/>
+            <ellipse cx="0" cy="-32" rx="15" ry="11" fill="#8a7a70"/>
+            <path d="M-19-52Q0-44 19-52" stroke="#2c2b32" stroke-width="5" fill="none"/>
+            <circle cx="-9" cy="-46" r="4" fill="#201f24"/>
+            <circle cx="9" cy="-46" r="4" fill="#201f24"/>
+            <path d="M-5-33v4M5-33v4" stroke="#3a3942" stroke-width="3" stroke-linecap="round"/>
+            <path d="M-9-24Q0-19 9-24" stroke="#3a3942" stroke-width="3" fill="none"/>
+        </g>
     </defs>
     <path fill="#283b38" d="M0 0h720v600H0z"/>
     <g fill="#52604c" opacity=".5">
@@ -84,11 +160,13 @@
         <circle cx="70" cy="520" r="4"/>
         <circle cx="440" cy="340" r="4"/>
     </g>
-    <use href="#lion" transform="translate(135 110) rotate(-8) scale(.75)"/>
-    <use href="#elephant" transform="translate(470 120) rotate(8) scale(.75)"/>
-    <use href="#giraffe" transform="translate(300 310) rotate(-8)"/>
-    <use href="#zebra" transform="translate(620 360) rotate(10) scale(.75)"/>
-    <use href="#zebra" transform="translate(110 410) rotate(-10) scale(.75)"/>
-    <use href="#lion" transform="translate(470 490) rotate(8) scale(.75)"/>
-    <use href="#camel" transform="translate(260 130) rotate(-5) scale(.7)"/>
+    <use href="#lion" transform="translate(131 87) rotate(-8) scale(.78)"/>
+    <use href="#elephant" transform="translate(370 76) rotate(8) scale(.78)"/>
+    <use href="#giraffe" transform="translate(377 303) rotate(-8)"/>
+    <use href="#zebra" transform="translate(140 287) rotate(-10) scale(.8)"/>
+    <use href="#camel" transform="translate(594 88) rotate(-5) scale(.74)"/>
+    <use href="#palm" transform="translate(608 584) scale(.9)"/>
+    <use href="#crocodile" transform="translate(363 505) rotate(-4) scale(.82)"/>
+    <use href="#hippo" transform="translate(126 478) rotate(-3) scale(.82)"/>
+    <use href="#gorilla" transform="translate(600 300) scale(.85)"/>
 </svg>

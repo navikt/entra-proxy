@@ -87,12 +87,10 @@ dependencies {
 
     // Kotlin
     implementation(libs.sikkerhetstjenestenLib)
-    implementation(libs.kotlinxCoroutinesCore)
     implementation(libs.kotlinReflect)
     implementation(libs.jackson.module.kotlin)
 
     // Observability and logging
-    implementation(libs.opentelemetryInstrumentationAnnotations)
     implementation(libs.opentelemetryLogbackMdc)
     implementation(libs.micrometerRegistryPrometheus)
     implementation(libs.logstashLogbackEncoder)
@@ -100,7 +98,6 @@ dependencies {
 
     // NAV and security
     implementation(libs.bootConditionals)
-    implementation(libs.slack)
     implementation(libs.springBootStarterOauth2Client)
     implementation(libs.springBootStarterOauth2ResourceServer)
 
@@ -118,16 +115,12 @@ dependencies {
     implementation(libs.springBootStarterRestclient)
     implementation(libs.springBootStarterValidation)
     implementation(libs.springBootStarterWeb)
-    implementation(libs.springBootStarterWebclient)
-    implementation(libs.springBootStarterWebflux)
     implementation(libs.springAspects)
 
     // Testing
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
     testImplementation(libs.caffeine)
-    testImplementation(libs.junitJupiter)
-    testImplementation(libs.testcontainersJunitJupiter)
     testImplementation(libs.testcontainersRedis)
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation(libs.springBootStarterDataRedisTest)

@@ -35,11 +35,9 @@ springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-st
 springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
 springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
-springBootStarterValidation = { module = "org.springframework.boot:spring-boot-starter-validation" }
 springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
 springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
 springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
-springAspects = { module = "org.springframework:spring-aspects" }
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 # Testcontainers support for Redis-based integration tests

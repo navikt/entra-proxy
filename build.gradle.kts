@@ -113,9 +113,7 @@ dependencies {
     implementation(libs.springBootStarterGraphql)
     implementation(libs.springBootStarterJetty)
     implementation(libs.springBootStarterRestclient)
-    implementation(libs.springBootStarterValidation)
     implementation(libs.springBootStarterWeb)
-    implementation(libs.springAspects)
 
     // Testing
     testImplementation(libs.springMockk)
@@ -128,7 +126,6 @@ dependencies {
     testImplementation(libs.bundles.kotest)
     testImplementation("no.nav.security:mock-oauth2-server:6.0.2")
     testImplementation("org.springframework.security:spring-security-test")
-    testImplementation(kotlin("test"))
 }
 
 dependencyManagement {

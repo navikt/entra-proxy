@@ -79,10 +79,6 @@ jobs:
           java-version: 27
           distribution: temurin
 
-      - name: Setter tag-navn
-        run: echo "TAG=$(date +%Y.%m.%d.%H%M%S)-$(echo $GITHUB_SHA | cut -c1-7)" >> $GITHUB_ENV
-
-
       - name: Test og bygg
         env:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
@@ -93,4 +89,3 @@ jobs:
         uses: nais/docker-build-push@dd7421d5068057a020ca46ead966c26190c516b1 # v0
         with:
           team: sikkerhetstjenesten
-          tag: ${{ env.TAG }}

@@ -15,7 +15,6 @@ version = "1.0.1"
 plugins {
     id("jacoco")
     alias(libs.plugins.grgit)
-    alias(libs.plugins.dokka)
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinSpring)
     alias(libs.plugins.springBoot)
@@ -120,12 +119,12 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.caffeine)
     testImplementation(libs.testcontainersRedis)
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation(libs.springBootTestcontainers)
     testImplementation(libs.springBootStarterDataRedisTest)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
-    testImplementation("no.nav.security:mock-oauth2-server:6.0.2")
-    testImplementation("org.springframework.security:spring-security-test")
+    testImplementation(libs.mockOauth2Server)
+    testImplementation(libs.springSecurityTest)
 }
 
 dependencyManagement {

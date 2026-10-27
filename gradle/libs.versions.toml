@@ -3,11 +3,11 @@ kotlin = "2.4.21"
 springBoot = "4.1.2"
 springDependencyManagement = "1.1.7"
 grgit = "5.3.3"
-dokka = "2.2.0"
 cyclonedx = "3.4.1"
 kotest = "6.2.3"
 springdoc = "3.2.0"
 mockk = "1.14.9"
+mockOauth2Server = "6.0.2"
 logstashEncoder = "9.0"
 logbook = "4.1.0"
 springMockk = "5.0.1"
@@ -40,8 +40,11 @@ springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starte
 springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockOauth2Server = { module = "no.nav.security:mock-oauth2-server", version.ref = "mockOauth2Server" }
+springSecurityTest = { module = "org.springframework.security:spring-security-test" }
 # Testcontainers support for Redis-based integration tests
 testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "2.2.4" }
+springBootTestcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
 springBootStarterRestclientTest = { module = "org.springframework.boot:spring-boot-starter-restclient-test" }
 kotestRunnerJunit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
@@ -54,7 +57,6 @@ kotest = ["kotestRunnerJunit5", "kotestAssertionsCore", "kotestExtensionsSpring"
 
 [plugins]
 grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }

@@ -763,11 +763,11 @@
                     }
                     const resultatnavn = erNomSok
                         ? (erNomEnhet
-                            ? (enhetsnavn ? `${enhetsnavn} (${verdi})` : `nom-enhet ${verdi}`)
+                            ? (enhetsnavn ? `${verdi} (${enhetsnavn})` : `nom-enhet ${verdi}`)
                             : (enhetsnavn ?? `tilgangsenhet ${verdi}`))
                         : gruppeNavn;
                     const visningsnavn = (erNomSok && enhetsnavn)
-                        ? (erNomEnhet ? `Nom-enhet ${enhetsnavn} (${verdi})` : `Nom tilgangsenhet ${enhetsnavn} (${verdi})`)
+                        ? (erNomEnhet ? `Nom-enhet ${verdi} (${enhetsnavn})` : `Nom tilgangsenhet ${verdi} (${enhetsnavn})`)
                         : gruppeNavn;
                     gruppemedlemmer.set(panel, medlemmer);
                     panel.dataset.gruppeNavn = visningsnavn;

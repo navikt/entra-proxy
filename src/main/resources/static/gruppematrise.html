@@ -487,7 +487,7 @@
                     enhetsnummerPerAnsatt = new Map();
                 }
                 const enhetsnavn = (erNomSok && erNomEnhet) ? data?.navn?.trim() : undefined;
-                const kilde = enhetsnavn ? `${enhetsnavn} (${verdi})` : verdi;
+                const kilde = enhetsnavn ? `${verdi} (${enhetsnavn})` : verdi;
                 settBasisStatus(skjema, ansatte.length
                     ? `${ansatte.length} ansatt(e) valgt fra ${kilde}. Bygg matrisen under.`
                     : `Ingen medlemmer funnet i ${kilde}.`);

@@ -81,10 +81,7 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
             "/actuator/env",
             "/actuator/env/**",
             "/actuator/loggers",
-            "/actuator/loggers/**",
-            "/actuator/caches",
-            "/actuator/caches/**",
-        )
+            "/actuator/loggers/**")
         private val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

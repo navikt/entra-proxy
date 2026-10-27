@@ -174,10 +174,11 @@
     "max": "2Gi"
   },
   "cpu": {
-    "min": "100m"
+    "min": "20m"
   },
   "replica": {
-    "min": 8,
-    "max": 10
+    "min": 2,
+    "max": 10,
+    "cpuThreshold": 200
   }
 }

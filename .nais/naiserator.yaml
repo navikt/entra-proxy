@@ -45,6 +45,9 @@ spec:
   replicas:
     max: {{replica.max}}
     min: {{replica.min}}
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: {{replica.cpuThreshold}}
   resources:
     limits:
       memory: '{{mem.max}}'

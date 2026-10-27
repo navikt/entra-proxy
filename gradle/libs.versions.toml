@@ -16,7 +16,7 @@ slackApi = "1.49.0"
 coroutines = "1.10.2"
 otelAlpha = "2.32.0-alpha"
 testcontainers = "1.21.3"
-sikkerhetstjenestenLib = "0.0.73"
+sikkerhetstjenestenLib = "0.0.74"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }

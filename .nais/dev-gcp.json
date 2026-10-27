@@ -13,6 +13,11 @@
   },
   "inbound": [
     {
+      "name":  "genie",
+      "namespace": "infotek",
+      "cluster": "dev-gcp"
+    },
+    {
       "name":  "grunn-og-hjelpestonad",
       "namespace": "grunn-og-hjelp",
       "cluster": "dev-gcp"

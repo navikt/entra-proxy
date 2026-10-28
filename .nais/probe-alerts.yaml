@@ -10,7 +10,7 @@ spec:
     - name: probe-errors
       rules:
         - alert: HelsesjekkValKeyFeilet
-          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/valkey", namespace="sikkerhetstjenesten"} == 0
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/cache", namespace="sikkerhetstjenesten"} == 0
           for: 2m
           annotations:
             consequence: Valkey er nede

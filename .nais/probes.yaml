@@ -12,6 +12,7 @@ spec:
   targets:
     staticConfig:
       static:
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/cache
       - http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph
       - http://entra-proxy.sikkerhetstjenesten/monitoring/health/nom
       - http://entra-proxy.sikkerhetstjenesten/monitoring/health/entra

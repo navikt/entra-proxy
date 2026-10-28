@@ -80,12 +80,8 @@ spec:
     inbound:
       rules:
         {{#each inbound as |app|}}
-            - application: '{{app.name}}'
-              namespace: '{{app.namespace}}'
-              cluster: '{{app.cluster}}'
-       {{/each}}
-            - application: alloy
-              namespace: nais-system
+        - { application: '{{app.name}}', namespace: '{{app.namespace}}', cluster: '{{app.cluster}}' }
+        {{/each}}
   env:
     - name: GROUPS_DISABLED
       value: {{groups.disabled}}

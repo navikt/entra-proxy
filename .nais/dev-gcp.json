@@ -13,6 +13,11 @@
   },
   "inbound": [
     {
+      "name": "alloy",
+      "namespace": "nais-system",
+      "cluster": "dev-gcp"
+    },
+    {
       "name":  "genie",
       "namespace": "infotek",
       "cluster": "dev-gcp"

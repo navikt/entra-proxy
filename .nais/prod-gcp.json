@@ -12,6 +12,11 @@
   },
   "inbound": [
     {
+      "name": "alloy",
+      "namespace": "nais-system",
+      "cluster": "prod-gcp"
+    },
+    {
       "name":  "syk-dig-backend",
       "namespace": "teamsykmelding",
       "cluster": "prod-gcp"

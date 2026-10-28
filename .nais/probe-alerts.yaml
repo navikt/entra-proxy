@@ -23,7 +23,7 @@ spec:
             namespace: sikkerhetstjenesten
             severity: critical
         - alert: HelsesjekkEntraFeilet
-          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph", namespace="sikkerhetstjenesten"} == 0
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/entra", namespace="sikkerhetstjenesten"} == 0
           for: 2m
           annotations:
             consequence: Entra er nede

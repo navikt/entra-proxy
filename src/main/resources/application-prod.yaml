@@ -6,7 +6,7 @@ management:
     show-values: never
   health:
     show-details: when_authorized
-    show-components: when_authorized
+    show-components: always
  endpoints:
     web:
       exposure:

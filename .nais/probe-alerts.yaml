@@ -10,7 +10,7 @@ spec:
     - name: probe-errors
       rules:
         - alert: HelsesjekkValKeyFeilet
-          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/valkey", namespace="sikkerhetstjenesten"} == 0
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/valkey", namespace="sikkerhetstjenesten"} == 0
           for: 2m
           annotations:
             consequence: Valkey er nede
@@ -23,7 +23,7 @@ spec:
             namespace: sikkerhetstjenesten
             severity: critical
         - alert: HelsesjekkEntraFeilet
-          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph", namespace="tilgangsmaskin"} == 0
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph", namespace="sikkerhetstjenesten"} == 0
           for: 2m
           annotations:
             consequence: Entra er nede
@@ -35,8 +35,21 @@ spec:
           labels:
             namespace: sikkerhetstjenesten
             severity: critical
+        - alert: HelsesjekkNomFeilet
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/nom", namespace="sikkerhetstjenesten"} == 0
+          for: 2m
+          annotations:
+            consequence: Nom er nede
+            action: "Sjekk Grafana og Kibana"
+            summary: |-
+              Grafana: https://grafana.nav.cloud.nais.io/goto/Ejqy8DzDg?orgId=1
+              Loki securelogs: 
+              Kibana åpne logger: https://logs.adeo.no/s/nav-logs-legacy/app/r/s/vLl8e
+          labels:
+            namespace: sikkerhetstjenesten
+            severity: critical
         - alert: HelsesjekkNorgFeilet
-          expr: up{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/norg", namespace="tilgangsmaskin"} == 0
+          expr: probe_success{instance="http://entra-proxy.sikkerhetstjenesten/monitoring/health/norg", namespace="sikkerhetstjenesten"} == 0
           for: 2m
           annotations:
             consequence: Norg2 er nede

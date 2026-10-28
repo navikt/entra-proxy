@@ -13,6 +13,7 @@ spec:
     staticConfig:
       static:
       - http://entra-proxy.sikkerhetstjenesten/monitoring/health/graph
-      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/valKey
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/nom
+      - http://entra-proxy.sikkerhetstjenesten/monitoring/health/entra
       - http://entra-proxy.sikkerhetstjenesten/monitoring/health/norg
 

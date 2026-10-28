@@ -20,6 +20,6 @@ class EntraClientBeanConfig {
         EntraOidOppslag(oid, cache)
 
     @Bean
-    fun entraProxyHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =
+    fun entraHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =
         PingableHealthIndicator(cfg, client::ping)
 }

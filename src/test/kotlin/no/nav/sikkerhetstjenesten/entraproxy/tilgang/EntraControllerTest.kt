@@ -26,6 +26,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_EN
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.oboJwt
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.setProperties
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.hamcrest.Matchers.containsString
@@ -64,6 +65,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
 
     @MockkBean
     private lateinit var oidTjeneste: EntraOidTjeneste
+
+    @MockkBean
+    private lateinit var cache: CacheOperations
 
     @MockkBean
     private lateinit var norgTjeneste: NorgTjeneste

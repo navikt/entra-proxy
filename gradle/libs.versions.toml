@@ -14,7 +14,7 @@ logbook = "4.1.0"
 springMockk = "5.0.1"
 conditionals = "6.0.9"
 otelAlpha = "2.32.0-alpha"
-sikkerhetstjenestenLib = "0.0.76"
+sikkerhetstjenestenLib = "0.0.77"
 
 [libraries]
 sikkerhetstjenestenLib = { module = "no.nav.felles:sikkerhetstjenesten-lib", version.ref = "sikkerhetstjenestenLib" }

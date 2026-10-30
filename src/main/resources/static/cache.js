@@ -22,7 +22,8 @@
                 }
                 throw new Error(melding);
             }
-            status.textContent = 'Cache oppfrisket.';
+            const antallSlettet = await response.json();
+            status.textContent = `Cache oppfrisket. ${antallSlettet} nøkler slettet.`;
         } catch (error) {
             status.textContent = `Oppfrisking feilet: ${error.message}`;
             status.classList.add('error');

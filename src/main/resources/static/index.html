@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Utforsker</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <script src="/cache.js" defer></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -31,6 +32,7 @@
             gap: 1rem;
             margin-top: 1rem;
         }
+        .status.error { color: #ffb4b4; }
         img.professor {
             display: block;
             width: 80%;
@@ -48,7 +50,9 @@
         <button type="button" class="aksel-button" data-variant="primary" onclick="location.href='/ansatt.html'">Ansatt</button>
         <button type="button" class="aksel-button" data-variant="primary" onclick="location.href='/grupper.html'">Grupper</button>
         <button type="button" class="aksel-button" data-variant="primary" onclick="location.href='/gruppematrise.html'">Sammenlign grupper</button>
+        <button type="button" class="aksel-button" data-variant="primary" id="oppfrisk-caches">Oppfrisk cache</button>
     </nav>
+    <p class="aksel-body-short status" id="cache-status" role="status" aria-live="polite" hidden></p>
     <img class="professor" src="explorer.png" alt="Professor Drøvel">
 </main>
 </body>

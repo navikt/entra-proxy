@@ -4,15 +4,19 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
@@ -35,6 +39,7 @@ import java.util.UUID
 @RestController
 @RequestMapping(API_V1)
 class EntraController(
+    private val cache: CacheOperations,
     private val entra: EntraTjeneste,
     private val oid: EntraOidTjeneste,
     private val nom: NomTjeneste,
@@ -143,6 +148,14 @@ class EntraController(
     @Operation(summary = "Hent ansatte i en nom-enhet og underliggende enheter")
     fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =
         nom.ansatteForNomIdent(nomId)
+
+    @PostMapping("cache/flushAll")
+    @Operation(summary = "Tøm alle caches")
+    fun flushAll() = cache.clear()
+
+    @PostMapping("cache/flush")
+    @Operation(summary = "Tøm cache")
+    fun flush() = cache.clear(NOMGRAPH, GRAPH,MEDLEMMER)
 
     companion object {
         const val API_V1 = "/api/v1"

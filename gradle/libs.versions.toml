@@ -1,5 +1,5 @@
 [versions]
-conditionals = "6.0.9"
+conditionals = "6.0.11"
 cyclonedx = "3.4.1"
 grgit = "5.3.3"
 jacksonAnnotations = "2.22"

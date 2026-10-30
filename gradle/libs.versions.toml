@@ -51,7 +51,7 @@ springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMoc
 springSecurityTest = { module = "org.springframework.security:spring-security-test" }
 springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
 # Testcontainers support for Redis-based integration tests
-testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "2.2.4" }
+testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "3.0.0" }
 
 [bundles]
 kotest = ["kotestRunnerJunit5", "kotestAssertionsCore", "kotestExtensionsSpring"]

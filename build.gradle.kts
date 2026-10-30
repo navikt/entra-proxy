@@ -11,7 +11,7 @@ val git = grgit
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
-
+extra["jackson-2-bom.version"] = "2.22.1"
 
 plugins {
     id("jacoco")

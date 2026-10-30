@@ -48,4 +48,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: nais/deploy/actions/deploy@1064e26587ab2794266a35f477387e561899a7ef # v2
+      - uses: nais/setup@v1
+      - name : Deploy to Nais
+        run: |
+             nais apply .nais/naiserator.yaml \
+              --environment ${{matrix.cluster}} \
+              --set spec.image="${{ needs.build.outputs.image }}" \
+              --wait

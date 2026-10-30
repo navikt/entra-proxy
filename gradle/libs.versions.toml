@@ -1,67 +1,67 @@
 [versions]
-kotlin = "2.4.21"
-springBoot = "4.1.2"
-springDependencyManagement = "1.1.7"
-grgit = "5.3.3"
+conditionals = "6.0.9"
 cyclonedx = "3.4.1"
-kotest = "6.2.3"
-springdoc = "3.2.0"
+grgit = "5.3.3"
 jacksonAnnotations = "2.22"
+kotest = "6.2.3"
+kotlin = "2.4.21"
+logbook = "4.1.0"
+logstashEncoder = "9.0"
 mockk = "1.14.9"
 mockOauth2Server = "6.0.2"
-logstashEncoder = "9.0"
-logbook = "4.1.0"
-springMockk = "5.0.1"
-conditionals = "6.0.9"
 otelAlpha = "2.32.0-alpha"
 sikkerhetstjenestenLib = "0.0.77"
+springBoot = "4.1.2"
+springDependencyManagement = "1.1.7"
+springdoc = "3.2.0"
+springMockk = "5.0.1"
 
 [libraries]
-sikkerhetstjenestenLib = { module = "no.nav.felles:sikkerhetstjenesten-lib", version.ref = "sikkerhetstjenestenLib" }
-opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0" }
-micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
-logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
-logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
-springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
-springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
+httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
-httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
-kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
-springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
-springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
-springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
-springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
-springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
-springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
-springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
-springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
-springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
-springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
-springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
-mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-mockOauth2Server = { module = "no.nav.security:mock-oauth2-server", version.ref = "mockOauth2Server" }
-springSecurityTest = { module = "org.springframework.security:spring-security-test" }
-# Testcontainers support for Redis-based integration tests
-testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "2.2.4" }
-springBootTestcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
-springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
-springBootStarterRestclientTest = { module = "org.springframework.boot:spring-boot-starter-restclient-test" }
-kotestRunnerJunit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotestAssertionsCore = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestExtensionsSpring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }
+kotestRunnerJunit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotlinReflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+logbook = { module = "org.zalando:logbook-spring-boot-starter", version.ref = "logbook" }
+logstashLogbackEncoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstashEncoder" }
+micrometerRegistryPrometheus = { module = "io.micrometer:micrometer-registry-prometheus" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockOauth2Server = { module = "no.nav.security:mock-oauth2-server", version.ref = "mockOauth2Server" }
+opentelemetryLogbackMdc = { module = "io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0" }
+sikkerhetstjenestenLib = { module = "no.nav.felles:sikkerhetstjenesten-lib", version.ref = "sikkerhetstjenestenLib" }
+springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
+springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
+springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
+springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
+springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
+springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
+springBootStarterOauth2ResourceServer = { module = "org.springframework.boot:spring-boot-starter-oauth2-resource-server" }
+springBootStarterRestclient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
+springBootStarterRestclientTest = { module = "org.springframework.boot:spring-boot-starter-restclient-test" }
+springBootStarterWeb = { module = "org.springframework.boot:spring-boot-starter-web" }
+springBootStarterWebmvcTest = { module = "org.springframework.boot:spring-boot-starter-webmvc-test" }
+springBootTestcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
+springSecurityTest = { module = "org.springframework.security:spring-security-test" }
+springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
+# Testcontainers support for Redis-based integration tests
+testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "2.2.4" }
 
 [bundles]
-springBootTest = ["springBootStarterWebmvcTest", "springBootStarterRestclientTest"]
 kotest = ["kotestRunnerJunit5", "kotestAssertionsCore", "kotestExtensionsSpring"]
+springBootTest = ["springBootStarterWebmvcTest", "springBootStarterRestclientTest"]
 
 [plugins]
+cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
 grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }
+kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinSpring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 springDependencyManagement = { id = "io.spring.dependency-management", version.ref = "springDependencyManagement" }
-cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
-kotest = { id = "io.kotest", version.ref = "kotest" }

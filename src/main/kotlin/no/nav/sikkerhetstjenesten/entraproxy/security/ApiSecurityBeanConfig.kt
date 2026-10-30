@@ -28,6 +28,8 @@ import java.net.URI
 class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthenticationToken>) {
 
 
+
+
     @Bean
     @Order(2)
     fun apiSecurityFilterChain(http: HttpSecurity, entryPoint: AuthenticationEntryPoint, @Qualifier(API_HANDLER) handler: AccessDeniedHandler) =

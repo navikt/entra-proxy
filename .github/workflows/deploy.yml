@@ -52,6 +52,7 @@ jobs:
       - name : Deploy to Nais
         run: |
              nais apply .nais/naiserator.yaml \
+              --team sikkerhetstjenesten \
               --environment ${{matrix.cluster}} \
               --set spec.image="${{ needs.build.outputs.image }}" \
               --wait

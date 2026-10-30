@@ -3,11 +3,33 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
+import org.ajoberstar.grgit.Grgit
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
 
 val javaVersion = JavaLanguageVersion.of(27)
-val git = grgit
+
+abstract class GitBuildInfoValueSource : ValueSource<Map<String, String>, GitBuildInfoValueSource.Params> {
+    interface Params : ValueSourceParameters {
+        val projectDir: Property<String>
+    }
+
+    override fun obtain(): Map<String, String> =
+        Grgit.open(mapOf("currentDir" to parameters.projectDir.get())).use { git ->
+            mapOf(
+                "git.branch" to git.branch.current().name,
+                "git.commit.id" to git.head().abbreviatedId,
+                "git.commit.time" to git.head().dateTime.toString()
+            )
+        }
+}
+
+val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {
+    parameters.projectDir.set(layout.projectDirectory.asFile.absolutePath)
+}
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
@@ -43,14 +65,10 @@ springBoot {
     mainClass.set("no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplicationKt")
     buildInfo {
         properties {
-            additional = mapOf(
-                "kotlin.version" to libs.versions.kotlin.get(),
-                "jdk.version" to "$javaVersion",
-                "jdk.vendor" to getProperty("java.vendor"),
-                "git.branch" to git.branch.current().name,
-                "git.commit.id" to git.head().abbreviatedId,
-                "git.commit.time" to git.head().dateTime.toString()
-            )
+            additional.put("kotlin.version", libs.versions.kotlin.get())
+            additional.put("jdk.version", "$javaVersion")
+            additional.put("jdk.vendor", getProperty("java.vendor"))
+            additional.putAll(gitBuildInfo)
         }
     }
 }

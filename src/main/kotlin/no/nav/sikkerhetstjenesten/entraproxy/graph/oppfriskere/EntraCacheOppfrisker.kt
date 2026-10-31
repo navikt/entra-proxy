@@ -19,7 +19,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
             ?: return log.info("Oppfrisker ukjent nøkkel $nøkkelElementer")
         log.info("Oppfrisker cache for nøkkel $nøkkelElementer med metode ${metode.name} og argument $argument")
         metode(entra, argument).also {
-            log.info("Oppfrisket cache for entra ${metode.name} med argument ${argument.javaClass.simpleName}")
+            log.info("Oppfrisket cache for entra ${metode.name} med argument ${argument.javaClass.simpleName} med resultat $it")
         }
     }
 

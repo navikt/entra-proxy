@@ -18,7 +18,9 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
             ?: return log.info("Oppfrisker ukjent nøkkel $nøkkelElementer")
         log.info("Oppfrisker cache for nøkkel $nøkkelElementer med metode ${metode.name} og argument $argument")
-        metode(entra, argument)
+        metode(entra, argument).also {
+            log.info("Oppfrisket cache for entra ${metode.name} med argument ${argument.javaClass.simpleName}r")
+        }
     }
 
     private fun argumentFor(id: String)  =

@@ -22,7 +22,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
     }
 
     private fun argumentFor(id: String): Any? =
-        AnsattId.parse(id) ?: TIdent.parse(id) ?: UUID.fromString(id)
+        AnsattId.parse(id) ?: TIdent.parse(id) ?: id.parse()
 
     private fun finnMetode(navn: String?, argumentType: Class<*>) =
         navn?.let {
@@ -30,6 +30,11 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
                 entra.javaClass.getMethod(it, argumentType)
             }.getOrNull()
         }
+
+    private fun String.parse() =
+        runCatching {
+            UUID.fromString(this)
+        }.getOrNull()
 }
 
 

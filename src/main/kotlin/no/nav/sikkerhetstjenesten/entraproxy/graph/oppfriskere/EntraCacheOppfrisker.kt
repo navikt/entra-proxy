@@ -21,7 +21,7 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
         metode(entra, argument)
     }
 
-    private fun argumentFor(id: String): Any? =
+    private fun argumentFor(id: String)  =
         AnsattId.parse(id) ?: TIdent.parse(id) ?: id.parse()
 
     private fun finnMetode(navn: String?, argumentType: Class<*>) =

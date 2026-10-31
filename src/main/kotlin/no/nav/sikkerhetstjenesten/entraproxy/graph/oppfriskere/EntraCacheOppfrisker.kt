@@ -7,6 +7,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) : AbstractCacheOppfrisker(cfg) {
@@ -16,11 +17,12 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
             ?: return log.info("Ukjent id-format i nøkkel $nøkkelElementer")
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
             ?: return log.info("Ukjent nøkkel $nøkkelElementer")
+        log.info("Oppfrisker cache for nøkkel $nøkkelElementer med metode ${metode.name} og argument $argument")
         metode(entra, argument)
     }
 
     private fun argumentFor(id: String): Any? =
-        AnsattId.parse(id) ?: TIdent.parse(id)
+        AnsattId.parse(id) ?: TIdent.parse(id) ?: UUID.fromString(id)
 
     private fun finnMetode(navn: String?, argumentType: Class<*>) =
         navn?.let {
@@ -29,3 +31,5 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
             }.getOrNull()
         }
 }
+
+

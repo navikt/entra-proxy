@@ -14,9 +14,9 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val argument = argumentFor(nøkkelElementer.id)
-            ?: return log.info("Ukjent id-format i nøkkel $nøkkelElementer")
+            ?: return log.info("Oppfrisker ukjent id-format i nøkkel $nøkkelElementer")
         val metode = finnMetode(nøkkelElementer.metode, argument.javaClass)
-            ?: return log.info("Ukjent nøkkel $nøkkelElementer")
+            ?: return log.info("Oppfrisker ukjent nøkkel $nøkkelElementer")
         log.info("Oppfrisker cache for nøkkel $nøkkelElementer med metode ${metode.name} og argument $argument")
         metode(entra, argument)
     }

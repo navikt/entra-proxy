@@ -17,6 +17,8 @@ management:
     annotations:
       enabled: true
   health:
+    valkey:
+      enabled: false
     redis:
       enabled: false
     ssl:
@@ -53,17 +55,28 @@ spring:
   application:
     name: entra-proxy
   data:
-    redis:
+    valkey:
       host: ${valkey.host}
       port: ${valkey.port}
+      client-type: valkeyglide
       connect-timeout: 20s
+      valkey-glide:
+        connection-timeout: ${spring.data.valkey.connect-timeout}
       timeout: 5s
       username: ${valkey.username}
       password: ${valkey.password}
       ssl:
         enabled: true
-  cache:
-    type: redis
+    redis:
+      client-type: lettuce
+      host: ${spring.data.valkey.host}
+      port: ${spring.data.valkey.port}
+      connect-timeout: ${spring.data.valkey.connect-timeout}
+      timeout: ${spring.data.valkey.timeout}
+      username: ${spring.data.valkey.username}
+      password: ${spring.data.valkey.password}
+      ssl:
+        enabled: ${spring.data.valkey.ssl.enabled}
   mvc:
     problemdetails:
       enabled: true

@@ -1,6 +1,17 @@
 spring:
+  autoconfigure:
+    exclude:
+      - io.valkey.springframework.boot.actuate.autoconfigure.metrics.valkey.LettuceObservationAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration
   data:
+    valkey:
+      client-type: valkeyglide
+      timeout: 2s
+      connect-timeout: 2s
+      valkey-glide:
+        connection-timeout: ${spring.data.valkey.connect-timeout}
     redis:
+      client-type: lettuce
       timeout: 2s
       connect-timeout: 2s
   security:
@@ -30,5 +41,3 @@ spring:
             scope:
               - openid
               - profile
-
-

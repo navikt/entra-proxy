@@ -9,4 +9,4 @@ for i, pattern in ipairs(ARGV) do
     until cursor == "0"
     counts[i] = count
 end
-return counts
+return "[" .. table.concat(counts, ",") .. "]"

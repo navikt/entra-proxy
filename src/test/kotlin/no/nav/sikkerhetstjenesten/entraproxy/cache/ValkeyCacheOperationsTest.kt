@@ -3,7 +3,14 @@ package no.nav.sikkerhetstjenesten.entraproxy.cache
 
 import com.ninjasquad.springmockk.MockkBean
 import com.redis.testcontainers.RedisContainer
-import com.redis.testcontainers.RedisContainer.DEFAULT_IMAGE_NAME
+import io.valkey.springframework.data.valkey.cache.ValkeyCacheConfiguration.defaultCacheConfig
+import io.valkey.springframework.data.valkey.cache.ValkeyCacheManager.builder
+import io.valkey.springframework.data.valkey.config.ValkeyListenerConfigurer
+import io.valkey.springframework.data.valkey.connection.ValkeyConnectionFactory
+import io.valkey.springframework.data.valkey.connection.valkeyglide.ValkeyGlideConnectionFactory
+import io.valkey.springframework.data.valkey.core.StringValkeyTemplate
+import io.valkey.springframework.data.valkey.core.script.ValkeyScript
+import io.valkey.springframework.data.valkey.serializer.ValkeyMessageConverters.Builder
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.nondeterministic.eventually
 import io.kotest.assertions.nondeterministic.eventuallyConfig
@@ -12,6 +19,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.cache.ValkeyCacheOperationsTest.ValkeyCacheTestConfig
@@ -34,6 +42,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.Companion.NORG_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.security.ValkeySessionConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelMessageConverter
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
@@ -44,32 +53,35 @@ import no.nav.sikkerhetstjenesten.felles.cache.getMany
 import no.nav.sikkerhetstjenesten.felles.cache.getOne
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.data.redis.test.autoconfigure.DataRedisTest
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.context.annotation.Bean
-import org.springframework.data.redis.cache.RedisCacheConfiguration.defaultCacheConfig
-import org.springframework.data.redis.cache.RedisCacheManager.builder
-import org.springframework.data.redis.config.RedisListenerConfigurer
+import org.springframework.core.io.ClassPathResource
 import org.springframework.data.redis.connection.RedisConnectionFactory
-import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.data.redis.serializer.RedisMessageConverters.Builder
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.session.Session
+import org.springframework.session.SessionRepository
 import org.springframework.test.context.ContextConfiguration
+import org.testcontainers.utility.DockerImageName
 import java.net.URI
 import java.time.Duration.ofSeconds
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-@DataRedisTest
-@ContextConfiguration(classes = [ValkeyCacheTestConfig::class,ValkeyEventListeningCacheOppfrisker::class])
+@SpringBootTest(webEnvironment = NONE, properties = ["spring.data.redis.host=localhost"])
+@ContextConfiguration(classes = [ValkeyCacheTestConfig::class, ValkeyEventListeningCacheOppfrisker::class, ValkeySessionConfig::class])
 @EnableAutoConfiguration
 class ValkeyCacheOperationsTest(
     private val cache: CacheOperations,
-    private val valkey: StringRedisTemplate) : BehaviorSpec() {
+    private val sessions: SessionRepository<*>,
+    private val sessionConnectionFactory: RedisConnectionFactory,
+    private val valkey: StringValkeyTemplate) : BehaviorSpec() {
 
     @TestConfiguration
-    class ValkeyCacheTestConfig(private val cf: RedisConnectionFactory) : RedisListenerConfigurer{
+    class ValkeyCacheTestConfig(private val cf: ValkeyConnectionFactory) : ValkeyListenerConfigurer{
 
         override fun configureMessageConverters(builder: Builder) {
             builder.addCustomConverter(CacheNøkkelMessageConverter())
@@ -90,7 +102,7 @@ class ValkeyCacheOperationsTest(
                 .build()
 
         @Bean
-        fun valkeyCacheOperations(valkey: StringRedisTemplate) =
+        fun valkeyCacheOperations(valkey: StringValkeyTemplate) =
             ValkeyCacheOperations(valkey, *ALL_TEST_CACHES.toTypedArray())
     }
 
@@ -144,7 +156,59 @@ class ValkeyCacheOperationsTest(
         else -> cache.getOne<String>(cacheConfig, key) shouldBe expected as? String
     }
 
+    private fun <S : Session> assertSharedSession(repository: SessionRepository<S>) {
+        val session = repository.createSession().apply {
+            setAttribute("principal", "test-user")
+        }
+        repository.save(session)
+
+        try {
+            valkey.hasKey("spring:session:sessions:${session.id}") shouldBe true
+            repository.findById(session.id)?.getAttribute<String>("principal") shouldBe "test-user"
+        } finally {
+            repository.deleteById(session.id)
+        }
+
+        valkey.hasKey("spring:session:sessions:${session.id}") shouldBe false
+    }
+
     init {
+
+        Given("separate drivere for cache og sesjoner") {
+            Then("bruker cache GLIDE og sesjoner Lettuce") {
+                valkey.connectionFactory.shouldBeInstanceOf<ValkeyGlideConnectionFactory>()
+                sessionConnectionFactory.shouldBeInstanceOf<LettuceConnectionFactory>()
+            }
+        }
+
+        Given("count-all-keys med GLIDE") {
+            Then("returneres JSON med en teller per prefiks og en tom liste uten prefikser") {
+                val entries = mapOf(
+                    "script-count:first:1" to "one",
+                    "script-count:first:2" to "two",
+                    "script-count:second:1" to "three",
+                )
+                val script = ValkeyScript.of(ClassPathResource("scripts/count-all-keys.lua"), String::class.java)
+                valkey.opsForValue().multiSet(entries)
+
+                try {
+                    valkey.execute(
+                        script, emptyList(), "script-count:first:*", "script-count:second:*", "script-count:missing:*"
+                    ) shouldBe "[2,1,0]"
+                    valkey.execute(script, emptyList()) shouldBe "[]"
+                } finally {
+                    valkey.delete(entries.keys)
+                }
+            }
+        }
+
+        Given("delte innloggingssesjoner på samme Valkey-server som cachene") {
+            When("en sesjon lagres med Spring Session Redis") {
+                Then("sesjonen kan leses og slettes på Valkey-serveren") {
+                    assertSharedSession(sessions)
+                }
+            }
+        }
 
         beforeEach {
             every { authContext.system } returns "test"
@@ -510,7 +574,9 @@ class ValkeyCacheOperationsTest(
 
     private companion object {
         @ServiceConnection
-        private val redis = RedisContainer(DEFAULT_IMAGE_NAME)
+        private val redis = RedisContainer(
+            DockerImageName.parse("valkey/valkey:8.1.3").asCompatibleSubstituteFor("redis")
+        )
         private const val DEFAULT_TTL_SECONDS = 12L
         private val A1 = AnsattId("E123456")
         private val I1 = A1.verdi

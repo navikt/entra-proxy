@@ -23,6 +23,10 @@ https://confluence.adeo.no/spaces/TM/pages/758383588/entra-proxy
 
 
 ## Løsningen har flere cacher
+Cachene bruker Spring Data Valkey med GLIDE. Spring Session Redis med Lettuce brukes fortsatt
+for delte innloggingssesjoner på samme Valkey-server; `spring.data.redis` peker
+derfor på de samme tilkoblingsinnstillingene som `spring.data.valkey`.
+
 * Kobling mellom _navident_ og _entraOid_ caches i 365 dager. 
 * En ansatts enhetstilhørighet caches i 3 timer.
 * En ansatts tematilganger caches i 3 timer

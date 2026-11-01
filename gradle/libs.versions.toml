@@ -10,11 +10,12 @@ logstashEncoder = "9.0"
 mockk = "1.14.9"
 mockOauth2Server = "6.1.2"
 otelAlpha = "2.32.0-alpha"
-sikkerhetstjenestenLib = "0.0.91"
+sikkerhetstjenestenLib = "1.1.1-SNAPSHOT"
 springBoot = "4.1.2"
 springDependencyManagement = "1.1.7"
 springdoc = "3.2.0"
 springMockk = "5.0.1"
+springDataValkey = "2.0.1"
 
 [libraries]
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
@@ -36,7 +37,7 @@ sikkerhetstjenestenLib = { module = "no.nav.felles:sikkerhetstjenesten-lib", ver
 springBootStarterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springBootStarterCache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 springBootStarterDataRedis = { module = "org.springframework.boot:spring-boot-starter-data-redis" }
-springBootStarterDataRedisTest = { module = "org.springframework.boot:spring-boot-starter-data-redis-test" }
+springBootStarterDataValkey = { module = "io.valkey.springframework.boot:spring-boot-starter-data-valkey", version.ref = "springDataValkey" }
 springBootStarterGraphql = { module = "org.springframework.boot:spring-boot-starter-graphql" }
 springBootStarterJetty = { module = "org.springframework.boot:spring-boot-starter-jetty" }
 springBootStarterOauth2Client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }

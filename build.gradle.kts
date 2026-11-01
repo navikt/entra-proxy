@@ -75,6 +75,7 @@ springBoot {
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
@@ -91,7 +92,11 @@ repositories {
 
 configurations.configureEach {
     resolutionStrategy {
-        failOnNonReproducibleResolution()
+        if (libs.versions.sikkerhetstjenestenLib.get().endsWith("-SNAPSHOT")) {
+            failOnDynamicVersions()
+        } else {
+            failOnNonReproducibleResolution()
+        }
     }
     exclude("org.springframework.boot", "spring-boot-starter-tomcat")
 }
@@ -123,6 +128,7 @@ dependencies {
     implementation(libs.springBootStarterActuator)
     implementation(libs.springBootStarterCache)
     implementation(libs.springBootStarterDataRedis)
+    implementation(libs.springBootStarterDataValkey)
     implementation(libs.springSessionDataRedis)
     implementation(libs.springBootStarterGraphql)
     implementation(libs.springBootStarterJetty)
@@ -135,7 +141,6 @@ dependencies {
     testImplementation(libs.caffeine)
     testImplementation(libs.testcontainersRedis)
     testImplementation(libs.springBootTestcontainers)
-    testImplementation(libs.springBootStarterDataRedisTest)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
     testImplementation(libs.mockOauth2Server)
@@ -161,7 +166,7 @@ tasks.withType<Test>().configureEach {
 
 tasks.register<Test>("unitTest") {
     group = "verification"
-    description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
+    description = "Runs the unit test suite in parallel; skips the Valkey/Testcontainers cache tests"
     maxParallelForks = 2
     include("**/*Test.class")
     exclude("**/ValkeyCacheOperationsTest.class")

@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import com.fasterxml.jackson.annotation.JsonValue
 
-class Tema(tema: String) : Comparable<Tema> {
+data class Tema(val tema: String) : Comparable<Tema> {
 
     @JsonValue
     val verdi = tema.removePrefix(TEMA_PREFIX)

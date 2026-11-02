@@ -15,7 +15,7 @@ body {
     min-height: 100vh;
     padding-top: 3.5rem;
     background-color: var(--bakgrunn);
-    background-image: url("/wildlife.svg");
+    background-image: url("/images/wildlife.svg");
     background-position: center;
     background-size: 720px 600px;
     color: #fff;
@@ -70,7 +70,7 @@ nav[aria-label="Utforskersider"] .logg-ut {
 .status.error { color: var(--feil); }
 html.soker,
 html.soker * {
-    cursor: url("/kikkert.svg") 16 16, wait !important;
+    cursor: url("/images/kikkert.svg") 16 16, wait !important;
 }
 tbody tr:nth-child(even) { background: var(--flate-mork); }
 thead th { background: var(--flate-mork); }

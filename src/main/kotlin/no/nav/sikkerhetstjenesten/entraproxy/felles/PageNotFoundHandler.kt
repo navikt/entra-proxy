@@ -20,5 +20,5 @@ class PageNotFoundHandler {
     fun notFound(): ResponseEntity<ClassPathResource> =
         status(NOT_FOUND)
             .contentType(TEXT_HTML)
-            .body(ClassPathResource("error-pages/404.html"))
+            .body(ClassPathResource("static/404.html"))
 }

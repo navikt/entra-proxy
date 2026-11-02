@@ -264,7 +264,7 @@ for (const skjema of [nomForm, gruppeForm]) {
             byggBasisTabell(ansatte);
             try {
                 await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent));
-            } catch (feil) {
+            } catch {
                 enhetsnummerPerAnsatt = new Map();
             }
             const enhetsnavn = (erNomSok && erNomEnhet && !Array.isArray(data)) ? data?.navn?.trim() : undefined;

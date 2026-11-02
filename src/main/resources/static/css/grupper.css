@@ -1,0 +1,138 @@
+h1 {
+    text-align: center;
+}
+#sok {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr));
+    gap: 2rem;
+    padding-bottom: 1rem;
+}
+.sok-panel {
+    min-width: 0;
+}
+.sok-panel.utforsket {
+    grid-column: 1 / -1;
+}
+.sok-panel.utforsket > h2 {
+    text-align: center;
+}
+#sammenligningsoverskrift {
+    grid-column: 1 / -1;
+}
+.hovedsok {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 32rem;
+    gap: 1.5rem;
+}
+.hovedsok > p {
+    text-align: left;
+    margin: 0;
+}
+.eller {
+    font-weight: bold;
+    font-size: 1.25rem;
+}
+.sok-felt {
+    margin-top: 1rem;
+}
+@media (min-width: 60rem) {
+    .sok-panel.utforsket .hovedsok {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        max-width: none;
+    }
+    .hovedsok > p {
+        align-self: start;
+        margin-top: 3rem;
+    }
+}
+.inaktivt-sok {
+    filter: grayscale(1);
+    opacity: 0.65;
+}
+.sammenligningsknapp {
+    justify-content: center;
+    align-items: center;
+}
+.medlemmer-bryter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.medlemmer-bryter input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.medlemmer-bryter__spor {
+    position: relative;
+    flex: none;
+    width: 2.75rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+    background: #6b7a74;
+    transition: background 0.15s ease;
+}
+.medlemmer-bryter__spor::after {
+    content: "";
+    position: absolute;
+    top: 0.15rem;
+    left: 0.15rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+}
+.medlemmer-bryter input:checked + .medlemmer-bryter__spor {
+    background: #06893a;
+}
+.medlemmer-bryter input:checked + .medlemmer-bryter__spor::after {
+    transform: translateX(1.25rem);
+}
+.medlemmer-bryter input:focus-visible + .medlemmer-bryter__spor {
+    outline: 3px solid #99c4ff;
+    outline-offset: 2px;
+}
+.oppsummering {
+    width: 100%;
+    background: var(--flate);
+    border-collapse: collapse;
+    text-align: left;
+    color: var(--tekst-pa-flate);
+}
+.oppsummering th,
+.oppsummering td,
+.sammenligning-tabell th,
+.sammenligning-tabell td {
+    padding: 0.75rem;
+}
+.sammenligning-tabell {
+    background: var(--flate);
+    overflow-x: auto;
+    color: var(--tekst-pa-flate);
+}
+.sammenligning-tabell.med-rullefelt {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+.sammenligning-tabell.med-rullefelt thead {
+    position: sticky;
+    top: 0;
+    background: var(--flate-mork);
+}
+#sammenligning-detaljer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+}
+.sammenligning-tabell table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+.oppsummering td:last-child,
+.oppsummering th:last-child {
+    text-align: right;
+}

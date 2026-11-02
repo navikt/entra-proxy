@@ -49,14 +49,6 @@
         <a class="aksel-link" href="/oauth2/logout">Logg ut</a>
     </p>
 </main>
-<script>
-    (function () {
-        const navident = new URLSearchParams(window.location.search).get("navident");
-        if (navident) {
-            document.getElementById("navident-verdi").textContent = navident;
-            document.getElementById("navident").hidden = false;
-        }
-    })();
-</script>
+<script type="module" src="/mangler-tilgang.js"></script>
 </body>
 </html>

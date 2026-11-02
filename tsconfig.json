@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "strict": true,
+    "noEmitOnError": true,
+    "rootDir": "src/main/typescript",
+    "outDir": "build/generated/frontend/static"
+  },
+  "include": ["src/main/typescript/**/*.ts"]
+}

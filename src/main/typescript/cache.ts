@@ -1,6 +1,8 @@
+import {feilmelding, hentElement} from './dom.js';
+
 (() => {
-    const knapp = document.getElementById('oppfrisk-caches');
-    const status = document.getElementById('cache-status');
+    const knapp = hentElement('#oppfrisk-caches', HTMLButtonElement);
+    const status = hentElement('#cache-status', HTMLParagraphElement);
 
     knapp.addEventListener('click', async () => {
         knapp.disabled = true;
@@ -17,15 +19,15 @@
             if (!response.ok) {
                 let melding = `Kunne ikke oppfriske cache (HTTP ${response.status}).`;
                 if (response.headers.get('content-type')?.includes('json')) {
-                    const problem = await response.json();
+                    const problem: {detail?: string | null} = await response.json();
                     melding = problem.detail ?? melding;
                 }
                 throw new Error(melding);
             }
-            const antallSlettet = await response.json();
+            const antallSlettet: number = await response.json();
             status.textContent = `Cache oppfrisket. ${antallSlettet} nøkler slettet.`;
         } catch (error) {
-            status.textContent = `Oppfrisking feilet: ${error.message}`;
+            status.textContent = `Oppfrisking feilet: ${feilmelding(error)}`;
             status.classList.add('error');
         } finally {
             knapp.disabled = false;

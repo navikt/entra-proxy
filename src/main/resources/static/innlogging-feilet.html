@@ -48,14 +48,6 @@
         <a class="aksel-link" href="/oauth2/authorization/entra">Logg inn på nytt</a>
     </p>
 </main>
-<script>
-    (function () {
-        const arsak = new URLSearchParams(window.location.search).get("arsak");
-        if (arsak) {
-            document.getElementById("arsak-verdi").textContent = arsak;
-            document.getElementById("arsak").hidden = false;
-        }
-    })();
-</script>
+<script type="module" src="/innlogging-feilet.js"></script>
 </body>
 </html>

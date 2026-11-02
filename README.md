@@ -8,6 +8,25 @@ Tjeneste for å hente ut:
 6) Hente Ansattes grupper (bare SecEnabled)
 7) Hente enhetsnavn fra NORG via `GET /api/v1/navn/{enhetsnummer}` (krever innlogging eller gyldig token; returnerer `text/plain`)
 
+## Frontend-utvikling
+
+Skriptene til utforskersidene ligger i `src/main/typescript/`. HTML og CSS
+ligger fortsatt i `src/main/resources/static/`, og sider uten skript er uendret.
+Node.js 24 eller nyere og npm kreves ved bygging. Gradle installerer
+avhengigheter med `npm ci` og kompilerer skriptet ved `processResources`,
+slik at `bootRun` og `bootJar` inkluderer JavaScript-modulene. Genererte filer ligger
+under `build/` og skal ikke sjekkes inn.
+
+Kompiler separat med `npm ci && npm run build`. Installer nettleseren for
+frontend-testene med `npm run playwright:install` etter `npm ci`.
+På Linux kan systemavhengigheter installeres med
+`npm run playwright:install -- --with-deps`.
+
+Kjør testene med `npm test` eller `./gradlew frontendTest`. Testene bruker
+Playwright og Chromium med en lokal statisk server og simulerte API-svar;
+Spring Boot trenger ikke å kjøre. Testene kjøres også av `./gradlew check`.
+Feilspor lagres i `build/playwright-results/`.
+
 ## Swagger og dokumentasjon
 
 DEV: https://entraproxy.intern.dev.nav.no/swagger-ui/index.html#/

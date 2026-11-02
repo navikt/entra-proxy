@@ -47,6 +47,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -213,7 +214,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("omdirigerer til utloggingssiden") {
                     mockMvc.perform(get("/oauth2/logout").with(oidcLogin()))
                         .andExpect(status().is3xxRedirection())
-                        .andExpect(redirectedUrl("/logout.html"))
+                        .andExpect(redirectedUrl("/html/logout.html"))
                 }
             }
         }
@@ -336,7 +337,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
                 Then("den statiske siden laster gruppemodulen") {
-                    mockMvc.perform(get("/grupper.html").with(oidcLogin()))
+                    mockMvc.perform(get("/html/grupper.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
                         .andExpect(content().string(containsString("""<script type="module" src="/grupper.js"></script>""")))
@@ -350,7 +351,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(content().contentTypeCompatibleWith("text/javascript"))
                 }
                 Then("krever innlogget sesjon ved direkte tilgang") {
-                    mockMvc.perform(get("/grupper.html"))
+                    mockMvc.perform(get("/html/grupper.html"))
                         .andExpect(status().is3xxRedirection())
                 }
                 Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
@@ -499,11 +500,20 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("endepunkt ${API_V1}/enhet/{enhetsnummer}") {
             When("forespørselen har gyldig gruppe") {
                 Then("ansatt.html krever innlogging") {
+                    mockMvc.perform(get("/html/ansatt.html"))
+                        .andExpect(status().is3xxRedirection())
+                }
+                Then("ansatt.html på rot krever innlogging") {
                     mockMvc.perform(get("/ansatt.html"))
                         .andExpect(status().is3xxRedirection())
                 }
-                Then("ansatt.html er tilgjengelig i prod") {
+                Then("ansatt.html på rot er tilgjengelig etter innlogging") {
                     mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                        .andExpect(forwardedUrl("/html/ansatt.html"))
+                }
+                Then("ansatt.html er tilgjengelig i prod") {
+                    mockMvc.perform(get("/html/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                         .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
                         .andExpect(content().string(containsString("""<script type="module" src="/ansatt.js"></script>""")))
@@ -561,7 +571,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].rolle").value("test-rolle"))
                 }
                 Then("ansatt.html er tilgjengelig i prod") {
-                    mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
+                    mockMvc.perform(get("/html/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
                 }
             }

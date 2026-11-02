@@ -12,7 +12,8 @@ const nomAnsatte = ansatte.map(ansatt => ({
 }));
 
 test('all pages load compiled modules over HTTP and have no inline handlers', async ({app}) => {
-    for (const name of readdirSync('src/main/resources/static').filter(name => name.endsWith('.html'))) {
+    for (const name of ['src/main/resources/static', 'src/main/resources/static/html']
+        .flatMap(dir => readdirSync(dir)).filter(name => name.endsWith('.html'))) {
         await app.open(name.slice(0, -5));
         const scripts = app.page.locator('script');
         for (const script of await scripts.all()) {
@@ -35,7 +36,7 @@ test('start page navigation uses links and the cache button reports success', as
     await app.open('index', [json(17)]);
     const {page, calls} = app;
     expect(await page.locator('nav a').evaluateAll(links => links.map(link => link.getAttribute('href'))))
-        .toEqual(['/ansatt.html', '/grupper.html', '/gruppematrise.html']);
+        .toEqual(['/html/ansatt.html', '/html/grupper.html', '/html/gruppematrise.html']);
     await page.locator('#oppfrisk-caches').click();
     await expect(page.locator('#cache-status')).toBeVisible();
     await expect(page.locator('#cache-status')).toHaveText('Cache oppfrisket. 17 n\u00f8kler slettet.');
@@ -94,7 +95,7 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await memberSort.click();
     await memberSort.click();
     await expect(memberRows.first().locator('th')).toHaveText('B123456');
-    await expect(memberRows.first().locator('a')).toHaveAttribute('href', '/ansatt.html?ansattid=B123456');
+    await expect(memberRows.first().locator('a')).toHaveAttribute('href', '/html/ansatt.html?ansattid=B123456');
 
     await page.locator('.nytt-sok').click();
     await expect(page.locator('#vis-utforsket-medlemmer')).not.toBeChecked();
@@ -186,7 +187,7 @@ test('matrix keeps base employees, filters group names, sorts and copies members
     await expect(rows.first().locator('td').nth(1)).toHaveText('1234');
     await expect(rows.first().locator('td').nth(2)).toHaveAttribute('aria-label', 'Medlem');
     await expect(rows.nth(1).locator('td').nth(2)).toHaveClass('nei');
-    await expect(rows.first().locator('a')).toHaveAttribute('href', '/ansatt.html?ansattid=A123456');
+    await expect(rows.first().locator('a')).toHaveAttribute('href', '/html/ansatt.html?ansattid=A123456');
     const sort = headers.first().locator('button');
     await sort.click();
     await sort.click();

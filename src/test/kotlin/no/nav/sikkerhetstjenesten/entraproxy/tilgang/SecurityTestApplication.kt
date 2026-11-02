@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
 import no.nav.sikkerhetstjenesten.entraproxy.felles.PageNotFoundHandler
+import no.nav.sikkerhetstjenesten.entraproxy.felles.SiderPaaRotConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraExceptionHandler
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthenticationEntryPoint
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Import
     EntraController::class,
     EntraExceptionHandler::class,
     PageNotFoundHandler::class,
+    SiderPaaRotConfig::class,
     ApiAuthorityAndRoleAddingJwtAuthenticationConverter::class,
     ApiAuthenticationEntryPoint::class,
     ApiSecurityBeanConfig::class,

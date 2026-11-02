@@ -74,7 +74,7 @@ function nullstillMatrise() {
 function lagNavIdentLenke(navIdent: string): HTMLAnchorElement {
     const lenke = document.createElement('a');
     lenke.className = 'navident-lenke';
-    lenke.href = `/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
+    lenke.href = `/html/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
     lenke.textContent = navIdent;
     return lenke;
 }

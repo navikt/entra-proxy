@@ -40,7 +40,7 @@ export function lagMedlemRad(medlem: Ansatt, ...ekstraceller: HTMLTableCellEleme
     navIdentCelle.scope = 'row';
     const lenke = document.createElement('a');
     lenke.className = 'navident-lenke';
-    lenke.href = `/ansatt.html?ansattid=${encodeURIComponent(medlem.navIdent)}`;
+    lenke.href = `/html/ansatt.html?ansattid=${encodeURIComponent(medlem.navIdent)}`;
     lenke.textContent = medlem.navIdent;
     navIdentCelle.appendChild(lenke);
     const rad = document.createElement('tr');

@@ -81,7 +81,7 @@ class UtforskerSecurityBeanConfig {
             ?.getAttribute<String>(NAVIDENT)
         log.warn("Bruker {} mangler påkrevd gruppetilgang til utforsker: {}", navIdent, e.message)
         val query = navIdent?.let { "?navident=${encode(it, UTF_8)}" }.orEmpty()
-        response.sendRedirect("/mangler-tilgang.html$query")
+        response.sendRedirect("/html/mangler-tilgang.html$query")
     }
 
 
@@ -124,16 +124,17 @@ class UtforskerSecurityBeanConfig {
 
     companion object {
         private const val UTFORSKER_HANDLER = "utforskerHandler"
-        private const val LOGOUT_SIDE = "/logout.html"
+        private const val LOGOUT_SIDE = "/html/logout.html"
         private const val LOGOUT_ENDEPUNKT = "/oauth2/logout"
         private const val INNLOGGING = "/oauth2/authorization/entra"
-        private const val INNLOGGING_FEILET = "/innlogging-feilet.html"
+        private const val INNLOGGING_FEILET = "/html/innlogging-feilet.html"
         internal val API_ENDPOINTS: RequestMatcher = withDefaults().matcher("$API_V1/**")
         private const val BEARER_PREFIX = "Bearer "
         private val BROWSER_API_ENDPOINTS = AndRequestMatcher(API_ENDPOINTS,
             NegatedRequestMatcher { it.getHeader(AUTHORIZATION)?.startsWith(BEARER_PREFIX) == true })
         private val UTFORSKER_SIDER =
-            arrayOf("/", "/index.html", "/grupper.html", "/ansatt.html", "/gruppematrise.html")
+            arrayOf("/", "/index.html") +
+                listOf("grupper", "ansatt", "gruppematrise").flatMap { listOf("/$it.html", "/html/$it.html") }.toTypedArray()
         private val LOGIN_ENDEPUNKTER = arrayOf("/oauth2/authorization/**", "/login/oauth2/code/**", LOGOUT_ENDEPUNKT)
     }
 }

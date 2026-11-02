@@ -152,6 +152,36 @@ tasks.named<BootJar>("bootJar") {
     archiveFileName = "app.jar"
 }
 
+val npmInstall = tasks.register<Exec>("npmInstall") {
+    inputs.files("package.json", "package-lock.json")
+    outputs.dir("node_modules")
+    commandLine("npm", "ci", "--no-audit", "--no-fund")
+}
+
+val compileTypeScript = tasks.register<Exec>("compileTypeScript") {
+    dependsOn(npmInstall)
+    inputs.files("package.json", "package-lock.json", "tsconfig.json")
+    inputs.dir("src/main/typescript")
+    outputs.dir(layout.buildDirectory.dir("generated/frontend"))
+    commandLine("npm", "run", "build")
+}
+
+val frontendTest = tasks.register<Exec>("frontendTest") {
+    group = "verification"
+    description = "Runs the frontend tests"
+    dependsOn(compileTypeScript)
+    commandLine("npm", "run", "test:frontend")
+}
+
+tasks.processResources {
+    dependsOn(compileTypeScript)
+    from(layout.buildDirectory.dir("generated/frontend"))
+}
+
+tasks.named("check") {
+    dependsOn(frontendTest)
+}
+
 tasks.withType<Test>().configureEach {
     testClassesDirs = sourceSets.test.get().output.classesDirs
     classpath = sourceSets.test.get().runtimeClasspath

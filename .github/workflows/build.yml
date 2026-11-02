@@ -79,10 +79,21 @@ jobs:
           java-version: 27
           distribution: temurin
 
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Playwright Chromium
+        run: |
+          ./gradlew --console=plain npmInstall
+          npm run playwright:install -- --with-deps
+
       - name: Test og bygg
         env:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: ./gradlew --warning-mode all test jacocoTestReport cyclonedxBom bootJar
+        run: ./gradlew --warning-mode all test frontendTest jacocoTestReport cyclonedxBom bootJar
 
       - name: Bygg og push Docker-image
         id: docker-push

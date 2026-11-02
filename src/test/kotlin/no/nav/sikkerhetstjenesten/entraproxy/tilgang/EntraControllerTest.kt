@@ -335,17 +335,19 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
                 }
-                Then("den statiske siden bruker gruppe-endepunktet") {
+                Then("den statiske siden laster gruppemodulen") {
                     mockMvc.perform(get("/grupper.html").with(oidcLogin()))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/medlemmer?")))
+                        .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
+                        .andExpect(content().string(containsString("""<script type="module" src="/grupper.js"></script>""")))
                         .andExpect(content().string(containsString("Nom tilgangsenhet")))
-                        .andExpect(content().string(containsString("/api/v1/nom/enhet/bulk")))
-                        .andExpect(content().string(containsString("/api/v1/nom/ansatte/")))
-                        .andExpect(content().string(containsString("/api/v1/nom/ansatte/enhet/")))
-                        .andExpect(content().string(containsString("/api/v1/navn/")))
                         .andExpect(content().string(containsString("name=\"tilgangsenhetId\"")))
                         .andExpect(content().string(containsString("pattern=\"[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]\"")))
+                }
+                Then("gruppemodulen er tilgjengelig som JavaScript") {
+                    mockMvc.perform(get("/grupper.js").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/javascript"))
                 }
                 Then("krever innlogget sesjon ved direkte tilgang") {
                     mockMvc.perform(get("/grupper.html"))
@@ -503,10 +505,15 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("ansatt.html er tilgjengelig i prod") {
                     mockMvc.perform(get("/ansatt.html").with(oidcLogin()))
                         .andExpect(status().isOk())
-                        .andExpect(content().string(containsString("/api/v1/gruppe/antall/bulk")))
+                        .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
+                        .andExpect(content().string(containsString("""<script type="module" src="/ansatt.js"></script>""")))
                         .andExpect(content().string(containsString("Antall medlemmer")))
-                        .andExpect(content().string(containsString("/api/v1/ansatt/tilganger/")))
                         .andExpect(content().string(containsString("Gruppemedlemskap")))
+                }
+                Then("ansattmodulen er tilgjengelig som JavaScript") {
+                    mockMvc.perform(get("/ansatt.js").with(oidcLogin()))
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentTypeCompatibleWith("text/javascript"))
                 }
             }
         }

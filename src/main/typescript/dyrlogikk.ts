@@ -123,3 +123,13 @@ export const erPaaLove = (sideX: number, sideY: number, sidebredde: number, side
 
 export const erPaaElefant = (sideX: number, sideY: number, sidebredde: number, sidehoyde: number) =>
     elefantPosisjoner(sidebredde, sidehoyde).some(p => erPaaElefantPosisjon(sideX, sideY, p));
+
+// «Never gonna»: to tastetrykk utenfor skjemafelt
+export const RICKROLL_KODE = ['n', 'g'];
+
+/** Gir ny fremdrift i koden etter et tastetrykk; starter på nytt ved feil tast. */
+export function nesteRickrollSteg(steg: number, tast: string): number {
+    const tastNavn = tast.toLowerCase();
+    if (tastNavn === RICKROLL_KODE[steg]) return steg + 1;
+    return tastNavn === RICKROLL_KODE[0] ? 1 : 0;
+}

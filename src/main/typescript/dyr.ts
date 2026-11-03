@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, sebraPosisjoner, erPaaSebra, SEBRA_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
+import {nesteRickrollSteg, RICKROLL_KODE, erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, sebraPosisjoner, erPaaSebra, SEBRA_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -705,4 +705,17 @@ document.addEventListener('mousemove', hendelse => {
     const palmeTreff = !dekket ? palme : undefined;
     if (palmeTreff && palmeTreff !== sistePalme) fellKokosnotter(palmeTreff.kokosnotter);
     sistePalme = palmeTreff;
+});
+
+const erSkjemafelt = (element: EventTarget | null) =>
+    element instanceof HTMLElement && (element.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName));
+
+let rickrollSteg = 0;
+document.addEventListener('keydown', hendelse => {
+    if (hendelse.ctrlKey || hendelse.metaKey || hendelse.altKey || erSkjemafelt(hendelse.target)) return;
+    rickrollSteg = nesteRickrollSteg(rickrollSteg, hendelse.key);
+    if (rickrollSteg === RICKROLL_KODE.length) {
+        rickrollSteg = 0;
+        window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank', 'noopener,noreferrer');
+    }
 });

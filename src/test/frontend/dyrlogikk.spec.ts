@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {erPaaGorilla, erPaaLove, erPaaElefant, gorillaPosisjoner, apePosisjoner, erPaaApe} from '../../main/typescript/dyrlogikk';
+import {nesteRickrollSteg, RICKROLL_KODE, erPaaGorilla, erPaaLove, erPaaElefant, gorillaPosisjoner, apePosisjoner, erPaaApe} from '../../main/typescript/dyrlogikk';
 
 test('en side på størrelse med flisen har én gorilla på riktig sted', () => {
     const gorillaer = gorillaPosisjoner(720, 600).filter(g => g.x >= 0 && g.y >= 0);
@@ -47,4 +47,12 @@ test('apekatten gjentas og treffes i sentrerte fliser', () => {
     expect(erPaaApe(280, 281, ape)).toBe(false);
     expect(apePosisjoner(1440, 1200)).toContainEqual({x: 590, y: 470});
     expect(apePosisjoner(920, 600)).toContainEqual({x: 330, y: 170});
+});
+
+test('rickroll-koden gjenkjennes og nullstilles ved feil tast', () => {
+    const kjor = (taster: string[]) => taster.reduce(nesteRickrollSteg, 0);
+    expect(kjor(['n', 'g'])).toBe(RICKROLL_KODE.length);
+    expect(kjor(['N', 'G'])).toBe(RICKROLL_KODE.length);
+    expect(kjor(['n', 'x'])).toBe(0);
+    expect(kjor(['n', 'n'])).toBe(1);
 });

@@ -17,9 +17,9 @@ const ansatt = {
 test('loads the compiled employee module over HTTP', async ({app}) => {
     await app.open('ansatt');
     const scripts = app.page.locator('script');
-    await expect(scripts).toHaveCount(1);
-    await expect(scripts).toHaveAttribute('src', '/ansatt.js');
-    await expect(scripts).toHaveAttribute('type', 'module');
+    await expect(scripts).toHaveCount(2);
+    await expect(scripts.first()).toHaveAttribute('src', '/ansatt.js');
+    await expect(scripts.first()).toHaveAttribute('type', 'module');
     const response = await app.page.request.get('/ansatt.js');
     expect(response.ok()).toBe(true);
     expect(response.headers()['content-type']).toContain('text/javascript');

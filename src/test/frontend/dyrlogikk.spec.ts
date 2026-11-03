@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {erPaaGorilla, erPaaLove, erPaaElefant, gorillaPosisjoner} from '../../main/typescript/dyrlogikk';
+import {erPaaGorilla, erPaaLove, erPaaElefant, gorillaPosisjoner, apePosisjoner, erPaaApe} from '../../main/typescript/dyrlogikk';
 
 test('en side på størrelse med flisen har én gorilla på riktig sted', () => {
     const gorillaer = gorillaPosisjoner(720, 600).filter(g => g.x >= 0 && g.y >= 0);
@@ -36,4 +36,15 @@ test('elefanten treffes i sentrerte og gjentatte fliser', () => {
     expect(erPaaElefant(470, 90, 920, 600)).toBe(true);
     expect(erPaaElefant(131, 95, 720, 600)).toBe(false);
     expect(erPaaElefant(451, 90, 720, 600)).toBe(false);
+});
+
+test('apekatten gjentas og treffes i sentrerte fliser', () => {
+    const ape = apePosisjoner(720, 600).find(p => p.x === 230 && p.y === 170);
+    expect(ape).toBeDefined();
+    if (!ape) throw new Error('Fant ikke apekatten i flisen');
+    expect(erPaaApe(280, 220, ape)).toBe(true);
+    expect(erPaaApe(229, 220, ape)).toBe(false);
+    expect(erPaaApe(280, 281, ape)).toBe(false);
+    expect(apePosisjoner(1440, 1200)).toContainEqual({x: 590, y: 470});
+    expect(apePosisjoner(920, 600)).toContainEqual({x: 330, y: 170});
 });

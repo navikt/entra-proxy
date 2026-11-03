@@ -42,6 +42,13 @@ export const erPaaGorilla = (sideX: number, sideY: number, gorilla: Posisjon) =>
 const LOVE_BOKS: Boks = {x: 51, y: 37, bredde: 160, hoyde: 116};
 
 const ELEFANT_BOKS: Boks = {x: 290, y: 40, bredde: 160, hoyde: 120};
+const APE_BOKS: Boks = {x: 230, y: 170, bredde: 110, hoyde: 110};
+
+export const apePosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(APE_BOKS, sidebredde, sidehoyde);
+
+export const erPaaApe = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, APE_BOKS);
 
 export const elefantPosisjoner = (sidebredde: number, sidehoyde: number) =>
     boksPosisjoner(ELEFANT_BOKS, sidebredde, sidehoyde);

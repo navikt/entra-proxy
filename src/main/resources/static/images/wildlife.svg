@@ -1,5 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="600" viewBox="0 0 720 600" fill="none">
     <defs>
+        <g id="monkey">
+            <path d="M75 76Q111 96 103 58Q98 43 90 55" fill="none" stroke="#925e3e" stroke-width="8" stroke-linecap="round"/>
+            <ellipse cx="49" cy="73" rx="26" ry="29" fill="#925e3e"/>
+            <ellipse cx="49" cy="75" rx="17" ry="21" fill="#dbb58a"/>
+            <path d="M32 89 21 102H41M64 89 77 102H57" fill="none" stroke="#925e3e" stroke-width="11" stroke-linecap="round"/>
+            <circle cx="23" cy="29" r="12" fill="#925e3e"/>
+            <circle cx="76" cy="29" r="12" fill="#925e3e"/>
+            <circle cx="23" cy="29" r="7" fill="#dbb58a"/>
+            <circle cx="76" cy="29" r="7" fill="#dbb58a"/>
+            <circle cx="49" cy="30" r="28" fill="#925e3e"/>
+            <path d="M27 27Q28 9 49 23Q70 9 72 27L69 43Q49 63 29 43Z" fill="#dbb58a"/>
+            <circle cx="39" cy="29" r="3" fill="#302b24"/>
+            <circle cx="60" cy="29" r="3" fill="#302b24"/>
+            <path d="M45 37 49 40 53 37M42 45Q49 50 57 43" fill="none" stroke="#302b24" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M27 60Q13 78 28 82M70 64 77 52 66 44" fill="none" stroke="#925e3e" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="66" cy="44" r="6" fill="#dbb58a"/>
+        </g>
+        <g id="monkey-banana">
+            <path d="M62 36Q77 50 87 30Q88 54 72 55Q61 52 62 36Z" fill="#f3ce45" stroke="#b48b28" stroke-width="1.5"/>
+            <path d="M62 36 61 24 65 21 69 37Z" fill="#fff0bc"/>
+            <path d="M64 37 54 43 58 34M67 37 77 42 73 33" fill="#f3ce45" stroke="#b48b28" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="m85 31 2-4" stroke="#675032" stroke-width="3" stroke-linecap="round"/>
+        </g>
         <g id="lion">
             <path d="M-55 40Q-105 20-90-15" stroke="#d8a34e" stroke-width="10" stroke-linecap="round"/>
             <ellipse cx="-90" cy="-20" rx="10" ry="15" fill="#8b542e"/>

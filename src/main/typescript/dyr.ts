@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -121,6 +121,7 @@ document.body.append(lag);
 
 let gorillaer: { posisjon: Posisjon; bilde: HTMLImageElement }[] = [];
 let elefanter: { posisjon: Posisjon; snabel: SVGUseElement }[] = [];
+let aper: { posisjon: Posisjon; banan: SVGUseElement }[] = [];
 
 function plasserDyr() {
     const rot = document.documentElement;
@@ -156,6 +157,46 @@ function plasserDyr() {
         lag.append(svg);
         return {posisjon, snabel};
     });
+    aper = apePosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 110 110');
+        svg.setAttribute('width', '110');
+        svg.setAttribute('height', '110');
+        svg.style.cssText = `position:absolute;left:${posisjon.x}px;top:${posisjon.y}px;overflow:visible`;
+        const kropp = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        kropp.setAttribute('href', '/images/wildlife.svg#monkey');
+        const banan = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        banan.setAttribute('href', '/images/wildlife.svg#monkey-banana');
+        banan.style.cssText = 'transform-box:view-box;transform-origin:66px 44px';
+        svg.append(kropp, banan);
+        lag.append(svg);
+        spisBanan(banan);
+        return {posisjon, banan};
+    });
+}
+
+function spisBanan(banan: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    banan.animate([
+        {transform: 'translate(0, 0) rotate(0deg)'},
+        {transform: 'translate(-5px, -4px) rotate(-12deg)'},
+        {transform: 'translate(0, 0) rotate(0deg)'}
+    ], {duration: 1600, iterations: Infinity, easing: 'ease-in-out'});
+}
+
+function kastBanan(banan: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of banan.getAnimations()) animasjon.cancel();
+    const kast = banan.animate([
+        {transform: 'translate(0, 0) rotate(0deg)', opacity: 1, offset: 0},
+        {transform: 'translate(65px, -95px) rotate(150deg)', opacity: 1, offset: .4},
+        {transform: 'translate(160px, 30px) rotate(330deg)', opacity: 0, offset: .85},
+        {transform: 'translate(0, 0) rotate(0deg)', opacity: 0, offset: .86},
+        {transform: 'translate(0, 0) rotate(0deg)', opacity: 1, offset: 1}
+    ], {duration: 1200, easing: 'linear'});
+    kast.onfinish = () => {
+        if (banan.isConnected) spisBanan(banan);
+    };
 }
 
 function loftSnabel(snabel: SVGUseElement) {
@@ -194,6 +235,7 @@ function erDekket(element: Element | null) {
 let sistePaa: HTMLImageElement | undefined;
 let paaLove = false;
 let paaElefant = false;
+let sisteApe: SVGUseElement | undefined;
 
 document.addEventListener('mousemove', hendelse => {
     const {pageX, pageY} = hendelse;
@@ -201,7 +243,8 @@ document.addEventListener('mousemove', hendelse => {
     const gorilla = gorillaer.find(({posisjon}) => erPaaGorilla(pageX, pageY, posisjon));
     const love = erPaaLove(pageX, pageY, rot.clientWidth, rot.getBoundingClientRect().height);
     const elefant = elefanter.find(({posisjon}) => erPaaElefantPosisjon(pageX, pageY, posisjon));
-    const dekket = (gorilla || love || elefant) && erDekket(hendelse.target as Element | null);
+    const ape = aper.find(({posisjon}) => erPaaApe(pageX, pageY, posisjon));
+    const dekket = (gorilla || love || elefant || ape) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
@@ -220,4 +263,8 @@ document.addEventListener('mousemove', hendelse => {
         if (elefant) loftSnabel(elefant.snabel);
     }
     paaElefant = elefantTreff;
+
+    const apeTreff = !dekket ? ape?.banan : undefined;
+    if (apeTreff && apeTreff !== sisteApe) kastBanan(apeTreff);
+    sisteApe = apeTreff;
 });

@@ -24,8 +24,6 @@
             <path d="m85 31 2-4" stroke="#675032" stroke-width="3" stroke-linecap="round"/>
         </g>
         <g id="lion">
-            <path d="M-55 40Q-105 20-90-15" stroke="#d8a34e" stroke-width="10" stroke-linecap="round"/>
-            <ellipse cx="-90" cy="-20" rx="10" ry="15" fill="#8b542e"/>
             <g fill="#d8a34e">
                 <ellipse cx="-15" cy="30" rx="60" ry="32"/>
                 <rect x="-59" y="40" width="15" height="43" rx="7"/>
@@ -38,6 +36,10 @@
             <ellipse cx="32" cy="18" rx="21" ry="15" fill="#f4dbab"/>
             <path d="m24 10 8 9 8-9Z" fill="#332c28"/>
             <path d="M17-5v5M48-5v5M32 19v8" stroke="#332c28" stroke-width="4" stroke-linecap="round"/>
+        </g>
+        <g id="lion-tail">
+            <path d="M-55 40Q-105 20-90-15" stroke="#d8a34e" stroke-width="10" stroke-linecap="round"/>
+            <ellipse cx="-90" cy="-20" rx="10" ry="15" fill="#8b542e"/>
         </g>
         <g id="elephant-body">
             <g fill="#9aaeb1">

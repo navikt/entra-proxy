@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -122,7 +122,12 @@ document.body.append(lag);
 let gorillaer: { posisjon: Posisjon; bilde: HTMLImageElement }[] = [];
 let elefanter: { posisjon: Posisjon; snabel: SVGUseElement }[] = [];
 let aper: { posisjon: Posisjon; banan: SVGUseElement }[] = [];
+let lover: { posisjon: Posisjon; hale: SVGUseElement }[] = [];
 let palmer: { posisjon: Posisjon; kokosnotter: SVGUseElement[] }[] = [];
+
+// Løven står i 131,87 i flisen, rotert -8 grader og skalert 0,78; halen sitter fast i kroppen i 55,40 (lokale koordinater)
+const LOVE_ROT = {x: 131, y: 87};
+const LOVE_BROEL_VARIGHET = 1600;
 
 const KOKOSNOTTER = ['palm-coconut-1', 'palm-coconut-2', 'palm-coconut-3'];
 // Palmens rot i flisen og skalaen, brukt til å plassere kokosnøttene over bakgrunnen
@@ -179,6 +184,20 @@ function plasserDyr() {
         spisBanan(banan);
         return {posisjon, banan};
     });
+    lover = lovePosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -45 210 140');
+        svg.setAttribute('width', '210');
+        svg.setAttribute('height', '140');
+        const venstre = posisjon.x - LOVE_BOKS.x + LOVE_ROT.x - 100;
+        const topp = posisjon.y - LOVE_BOKS.y + LOVE_ROT.y - 45;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-8deg) scale(.78);transform-origin:100px 45px`;
+        const hale = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        hale.setAttribute('href', '/images/wildlife.svg#lion-tail');
+        svg.append(hale);
+        lag.append(svg);
+        return {posisjon, hale};
+    });
     palmer = palmePosisjoner(bredde, hoyde).map(posisjon => {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '-100 -220 200 220');
@@ -196,6 +215,17 @@ function plasserDyr() {
         lag.append(svg);
         return {posisjon, kokosnotter};
     });
+}
+
+function viftMedHalen(hale: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of hale.getAnimations()) animasjon.cancel();
+    const sving = (grader: number) => `translate(-55px, 40px) rotate(${grader}deg) translate(55px, -40px)`;
+    hale.animate([-22, 24, -22, 24, -22, 24, -22, 24, 0].map((grader, i, alle) => ({
+        transform: sving(grader),
+        offset: i / (alle.length - 1),
+        easing: 'ease-in-out'
+    })), {duration: LOVE_BROEL_VARIGHET});
 }
 
 function fellKokosnotter(kokosnotter: SVGUseElement[]) {
@@ -287,6 +317,7 @@ document.addEventListener('mousemove', hendelse => {
     const elefant = elefanter.find(({posisjon}) => erPaaElefantPosisjon(pageX, pageY, posisjon));
     const ape = aper.find(({posisjon}) => erPaaApe(pageX, pageY, posisjon));
     const palme = palmer.find(({posisjon}) => erPaaPalme(pageX, pageY, posisjon));
+    const lovePosisjon = lover.find(({posisjon}) => erPaaLovePosisjon(pageX, pageY, posisjon));
     const dekket = (gorilla || love || elefant || ape || palme) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
@@ -297,7 +328,10 @@ document.addEventListener('mousemove', hendelse => {
     sistePaa = gorillaTreff;
 
     const loveTreff = love && !dekket;
-    if (loveTreff && !paaLove) spillLovebroel();
+    if (loveTreff && !paaLove) {
+        spillLovebroel();
+        if (lovePosisjon) viftMedHalen(lovePosisjon.hale);
+    }
     paaLove = loveTreff;
 
     const elefantTreff = Boolean(elefant && !dekket);

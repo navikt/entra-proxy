@@ -126,12 +126,10 @@
                 <path d="M2-118Q60-130 96-96 44-116 4-110Z"/>
                 <path d="M2-118Q-56-130-92-96-40-116 0-110Z"/>
             </g>
-            <g fill="#a8702c">
-                <circle cx="-7" cy="-112" r="5"/>
-                <circle cx="9" cy="-110" r="5"/>
-                <circle cx="0" cy="-104" r="5"/>
-            </g>
         </g>
+        <circle id="palm-coconut-1" cx="-7" cy="-112" r="5" fill="#a8702c"/>
+        <circle id="palm-coconut-2" cx="9" cy="-110" r="5" fill="#a8702c"/>
+        <circle id="palm-coconut-3" cx="0" cy="-104" r="5" fill="#a8702c"/>
         <g id="hippo">
             <g fill="#8a7a93">
                 <ellipse cx="-20" cy="18" rx="66" ry="40"/>

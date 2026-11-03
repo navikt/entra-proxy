@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -122,6 +122,12 @@ document.body.append(lag);
 let gorillaer: { posisjon: Posisjon; bilde: HTMLImageElement }[] = [];
 let elefanter: { posisjon: Posisjon; snabel: SVGUseElement }[] = [];
 let aper: { posisjon: Posisjon; banan: SVGUseElement }[] = [];
+let palmer: { posisjon: Posisjon; kokosnotter: SVGUseElement[] }[] = [];
+
+const KOKOSNOTTER = ['palm-coconut-1', 'palm-coconut-2', 'palm-coconut-3'];
+// Palmens rot i flisen og skalaen, brukt til å plassere kokosnøttene over bakgrunnen
+const PALME_ROT = {x: 608, y: 584, skala: .9};
+const KOKOSNOTT_FALL = 105;
 
 function plasserDyr() {
     const rot = document.documentElement;
@@ -172,6 +178,41 @@ function plasserDyr() {
         lag.append(svg);
         spisBanan(banan);
         return {posisjon, banan};
+    });
+    palmer = palmePosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -220 200 220');
+        svg.setAttribute('width', `${200 * PALME_ROT.skala}`);
+        svg.setAttribute('height', `${220 * PALME_ROT.skala}`);
+        const venstre = posisjon.x - PALME_BOKS.x + PALME_ROT.x - 100 * PALME_ROT.skala;
+        const topp = posisjon.y - PALME_BOKS.y + PALME_ROT.y - 220 * PALME_ROT.skala;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible`;
+        const kokosnotter = KOKOSNOTTER.map(id => {
+            const kokosnott = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+            kokosnott.setAttribute('href', `/images/wildlife.svg#${id}`);
+            return kokosnott;
+        });
+        svg.append(...kokosnotter);
+        lag.append(svg);
+        return {posisjon, kokosnotter};
+    });
+}
+
+function fellKokosnotter(kokosnotter: SVGUseElement[]) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    kokosnotter.forEach((kokosnott, i) => {
+        if (kokosnott.getAnimations().length > 0) return;
+        const fall = KOKOSNOTT_FALL + i * 3;
+        kokosnott.animate([
+            {transform: 'translate(0, 0) rotate(0deg)', opacity: 1, offset: 0, easing: 'ease-in'},
+            {transform: `translate(${(i - 1) * 6}px, ${fall}px) rotate(${180 + i * 90}deg)`, opacity: 1, offset: .35, easing: 'ease-out'},
+            {transform: `translate(${(i - 1) * 9}px, ${fall - 14}px) rotate(${240 + i * 90}deg)`, opacity: 1, offset: .45, easing: 'ease-in'},
+            {transform: `translate(${(i - 1) * 11}px, ${fall}px) rotate(${300 + i * 90}deg)`, opacity: 1, offset: .55},
+            {transform: `translate(${(i - 1) * 11}px, ${fall}px) rotate(${300 + i * 90}deg)`, opacity: 1, offset: .8},
+            {transform: `translate(${(i - 1) * 11}px, ${fall}px) rotate(${300 + i * 90}deg)`, opacity: 0, offset: .81},
+            {transform: 'translate(0, 0) rotate(0deg)', opacity: 0, offset: .9},
+            {transform: 'translate(0, 0) rotate(0deg)', opacity: 1, offset: 1}
+        ], {duration: 2600, delay: i * 120, fill: 'backwards'});
     });
 }
 
@@ -236,6 +277,7 @@ let sistePaa: HTMLImageElement | undefined;
 let paaLove = false;
 let paaElefant = false;
 let sisteApe: SVGUseElement | undefined;
+let sistePalme: { posisjon: Posisjon } | undefined;
 
 document.addEventListener('mousemove', hendelse => {
     const {pageX, pageY} = hendelse;
@@ -244,7 +286,8 @@ document.addEventListener('mousemove', hendelse => {
     const love = erPaaLove(pageX, pageY, rot.clientWidth, rot.getBoundingClientRect().height);
     const elefant = elefanter.find(({posisjon}) => erPaaElefantPosisjon(pageX, pageY, posisjon));
     const ape = aper.find(({posisjon}) => erPaaApe(pageX, pageY, posisjon));
-    const dekket = (gorilla || love || elefant || ape) && erDekket(hendelse.target as Element | null);
+    const palme = palmer.find(({posisjon}) => erPaaPalme(pageX, pageY, posisjon));
+    const dekket = (gorilla || love || elefant || ape || palme) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
@@ -267,4 +310,8 @@ document.addEventListener('mousemove', hendelse => {
     const apeTreff = !dekket ? ape?.banan : undefined;
     if (apeTreff && apeTreff !== sisteApe) kastBanan(apeTreff);
     sisteApe = apeTreff;
+
+    const palmeTreff = !dekket ? palme : undefined;
+    if (palmeTreff && palmeTreff !== sistePalme) fellKokosnotter(palmeTreff.kokosnotter);
+    sistePalme = palmeTreff;
 });

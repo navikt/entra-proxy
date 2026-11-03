@@ -50,6 +50,15 @@ export const apePosisjoner = (sidebredde: number, sidehoyde: number) =>
 export const erPaaApe = (sideX: number, sideY: number, posisjon: Posisjon) =>
     erPaaBoks(sideX, sideY, posisjon, APE_BOKS);
 
+// Palmekronen i flisen (palmen står i 608,584 med skala 0,9); boksen dekker kokosnøttene
+export const PALME_BOKS: Boks = {x: 588, y: 468, bredde: 48, hoyde: 36};
+
+export const palmePosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(PALME_BOKS, sidebredde, sidehoyde);
+
+export const erPaaPalme = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, PALME_BOKS);
+
 export const elefantPosisjoner = (sidebredde: number, sidehoyde: number) =>
     boksPosisjoner(ELEFANT_BOKS, sidebredde, sidehoyde);
 

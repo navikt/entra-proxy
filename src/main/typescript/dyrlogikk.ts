@@ -59,6 +59,42 @@ export const palmePosisjoner = (sidebredde: number, sidehoyde: number) =>
 export const erPaaPalme = (sideX: number, sideY: number, posisjon: Posisjon) =>
     erPaaBoks(sideX, sideY, posisjon, PALME_BOKS);
 
+// Sjiraffen i flisen (står i 377,303 rotert -8 grader); boksen dekker kropp, hals og hode
+export const SJIRAFF_BOKS: Boks = {x: 312, y: 198, bredde: 115, hoyde: 205};
+
+export const sjiraffPosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(SJIRAFF_BOKS, sidebredde, sidehoyde);
+
+export const erPaaSjiraff = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, SJIRAFF_BOKS);
+
+// Flodhesten i flisen (står i 126,478, rotert -3 grader, skala 0,82); boksen dekker kropp og hode
+export const FLODHEST_BOKS: Boks = {x: 52, y: 454, bredde: 155, hoyde: 92};
+
+export const flodhestPosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(FLODHEST_BOKS, sidebredde, sidehoyde);
+
+export const erPaaFlodhest = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, FLODHEST_BOKS);
+
+// Kamelen i flisen (står i 594,88, rotert -5 grader, skala 0,74); boksen dekker kropp og hode
+export const KAMEL_BOKS: Boks = {x: 538, y: 38, bredde: 125, hoyde: 120};
+
+export const kamelPosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(KAMEL_BOKS, sidebredde, sidehoyde);
+
+export const erPaaKamel = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, KAMEL_BOKS);
+
+// Krokodillen i flisen (står i 363,505, rotert -4 grader, skala 0,82); boksen dekker hele dyret
+export const KROKODILLE_BOKS: Boks = {x: 285, y: 488, bredde: 175, hoyde: 62};
+
+export const krokodillePosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(KROKODILLE_BOKS, sidebredde, sidehoyde);
+
+export const erPaaKrokodille = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, KROKODILLE_BOKS);
+
 export const elefantPosisjoner = (sidebredde: number, sidehoyde: number) =>
     boksPosisjoner(ELEFANT_BOKS, sidebredde, sidehoyde);
 

@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -75,6 +75,112 @@ function spillLovebroel() {
     broel(lyd, lyd.currentTime);
 }
 
+function spillFlodhestgrynt() {
+    if (lyd?.state !== 'running') return;
+    const start = lyd.currentTime;
+    const varighet = GJESP_VARIGHET / 1000;
+    const oscillator = lyd.createOscillator();
+    const filter = lyd.createBiquadFilter();
+    const volum = lyd.createGain();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(70, start);
+    oscillator.frequency.linearRampToValueAtTime(45, start + varighet * 0.5);
+    oscillator.frequency.linearRampToValueAtTime(65, start + varighet);
+    filter.type = 'lowpass';
+    filter.frequency.value = 260;
+    volum.gain.setValueAtTime(0.0001, start);
+    volum.gain.linearRampToValueAtTime(0.8, start + 0.3);
+    volum.gain.setValueAtTime(0.8, start + varighet * 0.6);
+    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
+    oscillator.connect(filter).connect(volum).connect(lyd.destination);
+    oscillator.start(start);
+    oscillator.stop(start + varighet + 0.05);
+}
+
+function spillKamelspytt() {
+    if (lyd?.state !== 'running') return;
+    const ctx = lyd;
+    const start = ctx.currentTime;
+    const gurgling = ctx.createOscillator();
+    const skjelving = ctx.createOscillator();
+    const skjelvingStyrke = ctx.createGain();
+    const gurglingVolum = ctx.createGain();
+    gurgling.type = 'sawtooth';
+    gurgling.frequency.setValueAtTime(110, start);
+    gurgling.frequency.linearRampToValueAtTime(160, start + 0.6);
+    skjelving.frequency.value = 22;
+    skjelvingStyrke.gain.value = 0.4;
+    gurglingVolum.gain.setValueAtTime(0.4, start);
+    gurglingVolum.gain.linearRampToValueAtTime(0.4, start + 0.6);
+    gurglingVolum.gain.exponentialRampToValueAtTime(0.001, start + 0.75);
+    skjelving.connect(skjelvingStyrke).connect(gurglingVolum.gain);
+    gurgling.connect(gurglingVolum).connect(ctx.destination);
+    for (const kilde of [gurgling, skjelving]) {
+        kilde.start(start);
+        kilde.stop(start + 0.8);
+    }
+
+    // Selve spyttet er et kort støystøt
+    const spyttStart = start + SPYTT_VARIGHET * 0.4 / 1000;
+    const stoy = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.15), ctx.sampleRate);
+    stoy.getChannelData(0).forEach((_, i, data) => { data[i] = Math.random() * 2 - 1; });
+    const kilde = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const volum = ctx.createGain();
+    kilde.buffer = stoy;
+    filter.type = 'highpass';
+    filter.frequency.value = 2500;
+    volum.gain.setValueAtTime(0.5, spyttStart);
+    volum.gain.exponentialRampToValueAtTime(0.001, spyttStart + 0.15);
+    kilde.connect(filter).connect(volum).connect(ctx.destination);
+    kilde.start(spyttStart);
+}
+
+function stoyBuffer(ctx: AudioContext, sekunder: number) {
+    const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * sekunder), ctx.sampleRate);
+    buffer.getChannelData(0).forEach((_, i, data) => { data[i] = Math.random() * 2 - 1; });
+    return buffer;
+}
+
+function spillKrokodillesnapp() {
+    if (lyd?.state !== 'running') return;
+    const ctx = lyd;
+    const start = ctx.currentTime;
+    const smellStart = start + SNAPP_VARIGHET * 0.45 / 1000;
+
+    const hvesing = ctx.createBufferSource();
+    const hvesFilter = ctx.createBiquadFilter();
+    const hvesVolum = ctx.createGain();
+    hvesing.buffer = stoyBuffer(ctx, 0.6);
+    hvesFilter.type = 'bandpass';
+    hvesFilter.frequency.value = 4000;
+    hvesVolum.gain.setValueAtTime(0.0001, start);
+    hvesVolum.gain.linearRampToValueAtTime(0.25, start + 0.3);
+    hvesVolum.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
+    hvesing.connect(hvesFilter).connect(hvesVolum).connect(ctx.destination);
+    hvesing.start(start);
+
+    const knekk = ctx.createBufferSource();
+    const knekkFilter = ctx.createBiquadFilter();
+    const knekkVolum = ctx.createGain();
+    const dunk = ctx.createOscillator();
+    const dunkVolum = ctx.createGain();
+    knekk.buffer = stoyBuffer(ctx, 0.1);
+    knekkFilter.type = 'lowpass';
+    knekkFilter.frequency.value = 1800;
+    knekkVolum.gain.setValueAtTime(0.9, smellStart);
+    knekkVolum.gain.exponentialRampToValueAtTime(0.001, smellStart + 0.1);
+    knekk.connect(knekkFilter).connect(knekkVolum).connect(ctx.destination);
+    knekk.start(smellStart);
+    dunk.frequency.setValueAtTime(140, smellStart);
+    dunk.frequency.exponentialRampToValueAtTime(50, smellStart + 0.15);
+    dunkVolum.gain.setValueAtTime(0.8, smellStart);
+    dunkVolum.gain.exponentialRampToValueAtTime(0.001, smellStart + 0.18);
+    dunk.connect(dunkVolum).connect(ctx.destination);
+    dunk.start(smellStart);
+    dunk.stop(smellStart + 0.2);
+}
+
 function spillElefantlyd() {
     if (lyd?.state !== 'running') return;
     const start = lyd.currentTime;
@@ -123,11 +229,30 @@ let gorillaer: { posisjon: Posisjon; bilde: HTMLImageElement }[] = [];
 let elefanter: { posisjon: Posisjon; snabel: SVGUseElement }[] = [];
 let aper: { posisjon: Posisjon; banan: SVGUseElement }[] = [];
 let lover: { posisjon: Posisjon; hale: SVGUseElement }[] = [];
+let sjiraffer: { posisjon: Posisjon; hals: SVGUseElement }[] = [];
+let flodhester: { posisjon: Posisjon; munn: SVGUseElement; kjeve: SVGUseElement }[] = [];
+let kamler: { posisjon: Posisjon; hode: SVGUseElement; spytt: SVGCircleElement }[] = [];
+let krokodiller: { posisjon: Posisjon; kjeve: SVGUseElement }[] = [];
 let palmer: { posisjon: Posisjon; kokosnotter: SVGUseElement[] }[] = [];
 
 // Løven står i 131,87 i flisen, rotert -8 grader og skalert 0,78; halen sitter fast i kroppen i 55,40 (lokale koordinater)
 const LOVE_ROT = {x: 131, y: 87};
 const LOVE_BROEL_VARIGHET = 1600;
+
+// Sjiraffen står i 377,303 i flisen, rotert -8 grader; halsen er festet i 30,10 (lokale koordinater)
+const SJIRAFF_ROT = {x: 377, y: 303};
+
+// Flodhesten står i 126,478 i flisen, rotert -3 grader og skalert 0,82; kjeven henger i 45,38 (lokale koordinater)
+const FLODHEST_ROT = {x: 126, y: 478};
+const GJESP_VARIGHET = 2000;
+
+// Kamelen står i 594,88 i flisen, rotert -5 grader og skalert 0,74; halsen er festet i 45,15 (lokale koordinater)
+const KAMEL_ROT = {x: 594, y: 88};
+const SPYTT_VARIGHET = 1800;
+
+// Krokodillen står i 363,505 i flisen, rotert -4 grader og skalert 0,82; overkjeven henger i 58,8 (lokale koordinater)
+const KROKODILLE_ROT = {x: 363, y: 505};
+const SNAPP_VARIGHET = 1500;
 
 const KOKOSNOTTER = ['palm-coconut-1', 'palm-coconut-2', 'palm-coconut-3'];
 // Palmens rot i flisen og skalaen, brukt til å plassere kokosnøttene over bakgrunnen
@@ -198,6 +323,71 @@ function plasserDyr() {
         lag.append(svg);
         return {posisjon, hale};
     });
+    sjiraffer = sjiraffPosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -120 200 240');
+        svg.setAttribute('width', '200');
+        svg.setAttribute('height', '240');
+        const venstre = posisjon.x - SJIRAFF_BOKS.x + SJIRAFF_ROT.x - 100;
+        const topp = posisjon.y - SJIRAFF_BOKS.y + SJIRAFF_ROT.y - 120;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-8deg);transform-origin:100px 120px`;
+        const hals = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        hals.setAttribute('href', '/images/wildlife.svg#giraffe-neck');
+        svg.append(hals);
+        lag.append(svg);
+        return {posisjon, hals};
+    });
+    flodhester = flodhestPosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -40 210 130');
+        svg.setAttribute('width', '210');
+        svg.setAttribute('height', '130');
+        const venstre = posisjon.x - FLODHEST_BOKS.x + FLODHEST_ROT.x - 100;
+        const topp = posisjon.y - FLODHEST_BOKS.y + FLODHEST_ROT.y - 40;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-3deg) scale(.82);transform-origin:100px 40px`;
+        const munn = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        munn.setAttribute('href', '/images/wildlife.svg#hippo-mouth');
+        munn.style.opacity = '0';
+        const kjeve = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        kjeve.setAttribute('href', '/images/wildlife.svg#hippo-jaw');
+        svg.append(munn, kjeve);
+        lag.append(svg);
+        return {posisjon, munn, kjeve};
+    });
+    kamler = kamelPosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -80 200 190');
+        svg.setAttribute('width', '200');
+        svg.setAttribute('height', '190');
+        const venstre = posisjon.x - KAMEL_BOKS.x + KAMEL_ROT.x - 100;
+        const topp = posisjon.y - KAMEL_BOKS.y + KAMEL_ROT.y - 80;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-5deg) scale(.74);transform-origin:100px 80px`;
+        const hode = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        hode.setAttribute('href', '/images/wildlife.svg#camel-head');
+        const spytt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        spytt.setAttribute('cx', '88');
+        spytt.setAttribute('cy', '-50');
+        spytt.setAttribute('r', '4');
+        spytt.setAttribute('fill', '#d9efe3');
+        spytt.style.opacity = '0';
+        svg.append(hode, spytt);
+        lag.append(svg);
+        return {posisjon, hode, spytt};
+    });
+    krokodiller = krokodillePosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -30 220 90');
+        svg.setAttribute('width', '220');
+        svg.setAttribute('height', '90');
+        const venstre = posisjon.x - KROKODILLE_BOKS.x + KROKODILLE_ROT.x - 100;
+        const topp = posisjon.y - KROKODILLE_BOKS.y + KROKODILLE_ROT.y - 30;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-4deg) scale(.82);transform-origin:100px 30px`;
+        const kjeve = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        kjeve.setAttribute('href', '/images/wildlife.svg#crocodile-jaw');
+        svg.append(kjeve);
+        lag.append(svg);
+        return {posisjon, kjeve};
+    });
     palmer = palmePosisjoner(bredde, hoyde).map(posisjon => {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '-100 -220 200 220');
@@ -226,6 +416,72 @@ function viftMedHalen(hale: SVGUseElement) {
         offset: i / (alle.length - 1),
         easing: 'ease-in-out'
     })), {duration: LOVE_BROEL_VARIGHET});
+}
+
+function bukk(hals: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of hals.getAnimations()) animasjon.cancel();
+    const boy = (grader: number) => `translate(30px, 10px) rotate(${grader}deg) translate(-30px, -10px)`;
+    hals.animate([
+        {transform: boy(0), offset: 0},
+        {transform: boy(70), offset: .35},
+        {transform: boy(70), offset: .65},
+        {transform: boy(0), offset: 1}
+    ], {duration: 2200, easing: 'ease-in-out'});
+}
+
+function gjesp(munn: SVGUseElement, kjeve: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of [...munn.getAnimations(), ...kjeve.getAnimations()]) animasjon.cancel();
+    const apning = (grader: number) => `translate(45px, 38px) rotate(${grader}deg) translate(-45px, -38px)`;
+    const tidsfordeling = {duration: GJESP_VARIGHET, easing: 'ease-in-out'};
+    kjeve.animate([
+        {transform: apning(0), offset: 0},
+        {transform: apning(38), offset: .3},
+        {transform: apning(38), offset: .7},
+        {transform: apning(0), offset: 1}
+    ], tidsfordeling);
+    munn.animate([
+        {opacity: 0, offset: 0},
+        {opacity: 1, offset: .1},
+        {opacity: 1, offset: .9},
+        {opacity: 0, offset: 1}
+    ], tidsfordeling);
+}
+
+function spytt(hode: SVGUseElement, spytt: SVGCircleElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of [...hode.getAnimations(), ...spytt.getAnimations()]) animasjon.cancel();
+    const vipp = (grader: number) => `translate(45px, 15px) rotate(${grader}deg) translate(-45px, -15px)`;
+    hode.animate([
+        {transform: vipp(0), offset: 0, easing: 'ease-out'},
+        {transform: vipp(-22), offset: .3, easing: 'ease-in'},
+        {transform: vipp(12), offset: .4, easing: 'ease-out'},
+        {transform: vipp(12), offset: .55, easing: 'ease-in-out'},
+        {transform: vipp(0), offset: 1}
+    ], {duration: SPYTT_VARIGHET});
+    spytt.animate([
+        {transform: 'translate(0, 0) scale(.6)', opacity: 0, offset: 0},
+        {transform: 'translate(0, 0) scale(.6)', opacity: 0, offset: .4},
+        {transform: 'translate(0, 0) scale(1)', opacity: 1, offset: .41},
+        {transform: 'translate(70px, -12px) scale(1.3)', opacity: 1, offset: .6, easing: 'ease-in'},
+        {transform: 'translate(130px, 55px) scale(1)', opacity: 0, offset: .85},
+        {transform: 'translate(130px, 55px) scale(1)', opacity: 0, offset: 1}
+    ], {duration: SPYTT_VARIGHET, easing: 'linear'});
+}
+
+function snapp(kjeve: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of kjeve.getAnimations()) animasjon.cancel();
+    const hengsel = (grader: number) => `translate(58px, 8px) rotate(${grader}deg) translate(-58px, -8px)`;
+    kjeve.animate([
+        {transform: hengsel(0), offset: 0, easing: 'ease-out'},
+        {transform: hengsel(-34), offset: .25},
+        {transform: hengsel(-34), offset: .42, easing: 'ease-in'},
+        {transform: hengsel(2), offset: .47, easing: 'ease-out'},
+        {transform: hengsel(0), offset: .52},
+        {transform: hengsel(0), offset: 1}
+    ], {duration: SNAPP_VARIGHET});
 }
 
 function fellKokosnotter(kokosnotter: SVGUseElement[]) {
@@ -307,6 +563,10 @@ let sistePaa: HTMLImageElement | undefined;
 let paaLove = false;
 let paaElefant = false;
 let sisteApe: SVGUseElement | undefined;
+let sisteSjiraff: typeof sjiraffer[number] | undefined;
+let sisteFlodhest: typeof flodhester[number] | undefined;
+let sisteKamel: typeof kamler[number] | undefined;
+let sisteKrokodille: typeof krokodiller[number] | undefined;
 let sistePalme: { posisjon: Posisjon } | undefined;
 
 document.addEventListener('mousemove', hendelse => {
@@ -318,7 +578,11 @@ document.addEventListener('mousemove', hendelse => {
     const ape = aper.find(({posisjon}) => erPaaApe(pageX, pageY, posisjon));
     const palme = palmer.find(({posisjon}) => erPaaPalme(pageX, pageY, posisjon));
     const lovePosisjon = lover.find(({posisjon}) => erPaaLovePosisjon(pageX, pageY, posisjon));
-    const dekket = (gorilla || love || elefant || ape || palme) && erDekket(hendelse.target as Element | null);
+    const sjiraff = sjiraffer.find(({posisjon}) => erPaaSjiraff(pageX, pageY, posisjon));
+    const flodhest = flodhester.find(({posisjon}) => erPaaFlodhest(pageX, pageY, posisjon));
+    const kamel = kamler.find(({posisjon}) => erPaaKamel(pageX, pageY, posisjon));
+    const krokodille = krokodiller.find(({posisjon}) => erPaaKrokodille(pageX, pageY, posisjon));
+    const dekket = (gorilla || love || elefant || ape || palme || sjiraff || flodhest || kamel || krokodille) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
@@ -344,6 +608,31 @@ document.addEventListener('mousemove', hendelse => {
     const apeTreff = !dekket ? ape?.banan : undefined;
     if (apeTreff && apeTreff !== sisteApe) kastBanan(apeTreff);
     sisteApe = apeTreff;
+
+    const sjiraffTreff = !dekket ? sjiraff : undefined;
+    if (sjiraffTreff && sjiraffTreff !== sisteSjiraff) bukk(sjiraffTreff.hals);
+    sisteSjiraff = sjiraffTreff;
+
+    const flodhestTreff = !dekket ? flodhest : undefined;
+    if (flodhestTreff && flodhestTreff !== sisteFlodhest) {
+        spillFlodhestgrynt();
+        gjesp(flodhestTreff.munn, flodhestTreff.kjeve);
+    }
+    sisteFlodhest = flodhestTreff;
+
+    const kamelTreff = !dekket ? kamel : undefined;
+    if (kamelTreff && kamelTreff !== sisteKamel) {
+        spillKamelspytt();
+        spytt(kamelTreff.hode, kamelTreff.spytt);
+    }
+    sisteKamel = kamelTreff;
+
+    const krokodilleTreff = !dekket ? krokodille : undefined;
+    if (krokodilleTreff && krokodilleTreff !== sisteKrokodille) {
+        spillKrokodillesnapp();
+        snapp(krokodilleTreff.kjeve);
+    }
+    sisteKrokodille = krokodilleTreff;
 
     const palmeTreff = !dekket ? palme : undefined;
     if (palmeTreff && palmeTreff !== sistePalme) fellKokosnotter(palmeTreff.kokosnotter);

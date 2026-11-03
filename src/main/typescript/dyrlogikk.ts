@@ -41,7 +41,18 @@ export const erPaaGorilla = (sideX: number, sideY: number, gorilla: Posisjon) =>
 // Løven ligger fast i bakgrunnsflisen (sentrum omtrent 131,95); boksen dekker kropp, man og hale
 const LOVE_BOKS: Boks = {x: 51, y: 37, bredde: 160, hoyde: 116};
 
+const ELEFANT_BOKS: Boks = {x: 290, y: 40, bredde: 160, hoyde: 120};
+
+export const elefantPosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(ELEFANT_BOKS, sidebredde, sidehoyde);
+
+export const erPaaElefantPosisjon = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, ELEFANT_BOKS);
+
 const gorillaBoks: Boks = {x: GORILLA_X_I_FLISE, y: GORILLA_Y_I_FLISE, bredde: GORILLA_BREDDE, hoyde: GORILLA_HOYDE};
 
 export const erPaaLove = (sideX: number, sideY: number, sidebredde: number, sidehoyde: number) =>
     boksPosisjoner(LOVE_BOKS, sidebredde, sidehoyde).some(p => erPaaBoks(sideX, sideY, p, LOVE_BOKS));
+
+export const erPaaElefant = (sideX: number, sideY: number, sidebredde: number, sidehoyde: number) =>
+    elefantPosisjoner(sidebredde, sidehoyde).some(p => erPaaElefantPosisjon(sideX, sideY, p));

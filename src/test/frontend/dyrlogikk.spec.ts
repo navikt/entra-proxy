@@ -1,5 +1,5 @@
 import {expect, test} from '@playwright/test';
-import {erPaaGorilla, erPaaLove, gorillaPosisjoner} from '../../main/typescript/dyrlogikk';
+import {erPaaGorilla, erPaaLove, erPaaElefant, gorillaPosisjoner} from '../../main/typescript/dyrlogikk';
 
 test('en side på størrelse med flisen har én gorilla på riktig sted', () => {
     const gorillaer = gorillaPosisjoner(720, 600).filter(g => g.x >= 0 && g.y >= 0);
@@ -27,4 +27,13 @@ test('løven treffes i alle fliser', () => {
     // Bredere og høyere side forskyver og gjentar flisen
     expect(erPaaLove(491, 395, 1440, 1200)).toBe(true);
     expect(erPaaLove(400, 300, 720, 600)).toBe(false);
+});
+
+test('elefanten treffes i sentrerte og gjentatte fliser', () => {
+    expect(erPaaElefant(370, 90, 720, 600)).toBe(true);
+    expect(erPaaElefant(730, 390, 1440, 1200)).toBe(true);
+    expect(erPaaElefant(10, 390, 1440, 1200)).toBe(true);
+    expect(erPaaElefant(470, 90, 920, 600)).toBe(true);
+    expect(erPaaElefant(131, 95, 720, 600)).toBe(false);
+    expect(erPaaElefant(451, 90, 720, 600)).toBe(false);
 });

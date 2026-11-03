@@ -16,18 +16,22 @@
             <path d="m24 10 8 9 8-9Z" fill="#332c28"/>
             <path d="M17-5v5M48-5v5M32 19v8" stroke="#332c28" stroke-width="4" stroke-linecap="round"/>
         </g>
-        <g id="elephant">
+        <g id="elephant-body">
             <g fill="#9aaeb1">
                 <ellipse cx="-15" cy="15" rx="69" ry="47"/>
                 <rect x="-65" y="35" width="23" height="54" rx="9"/>
                 <rect x="0" y="35" width="23" height="54" rx="9"/>
                 <circle cx="47" cy="-3" r="37"/>
             </g>
-            <path d="M72 8Q102 86 65 81" stroke="#9aaeb1" stroke-width="22" stroke-linecap="round"/>
+        </g>
+        <g id="elephant-details">
             <ellipse cx="20" cy="3" rx="28" ry="38" fill="#788f96"/>
             <path d="M66 28 84 45Q63 45 60 32" fill="#f6e7c9"/>
             <circle cx="60" cy="-8" r="4" fill="#253336"/>
             <path d="M-78 7-94 34" stroke="#9aaeb1" stroke-width="6" stroke-linecap="round"/>
+        </g>
+        <g id="elephant-trunk">
+            <path d="M72 8Q102 86 65 81" stroke="#9aaeb1" stroke-width="22" stroke-linecap="round"/>
         </g>
         <g id="giraffe">
             <path d="M-40 20Q-65 1-65-15" stroke="#dbb267" stroke-width="5" stroke-linecap="round"/>
@@ -135,7 +139,6 @@
         <circle cx="440" cy="340" r="4"/>
     </g>
     <use href="#lion" transform="translate(131 87) rotate(-8) scale(.78)"/>
-    <use href="#elephant" transform="translate(370 76) rotate(8) scale(.78)"/>
     <use href="#giraffe" transform="translate(377 303) rotate(-8)"/>
     <use href="#zebra" transform="translate(140 287) rotate(-10) scale(.8)"/>
     <use href="#camel" transform="translate(594 88) rotate(-5) scale(.74)"/>

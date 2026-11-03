@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -75,6 +75,37 @@ function spillLovebroel() {
     broel(lyd, lyd.currentTime);
 }
 
+function spillElefantlyd() {
+    if (lyd?.state !== 'running') return;
+    const start = lyd.currentTime;
+    const varighet = 1.3;
+    const oscillator = lyd.createOscillator();
+    const filter = lyd.createBiquadFilter();
+    const volum = lyd.createGain();
+    const vibrato = lyd.createOscillator();
+    const vibratoStyrke = lyd.createGain();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(220, start);
+    oscillator.frequency.exponentialRampToValueAtTime(620, start + 0.18);
+    oscillator.frequency.linearRampToValueAtTime(480, start + 0.8);
+    oscillator.frequency.exponentialRampToValueAtTime(180, start + varighet);
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(900, start);
+    filter.frequency.linearRampToValueAtTime(2400, start + 0.18);
+    filter.frequency.linearRampToValueAtTime(600, start + varighet);
+    vibrato.frequency.value = 9;
+    vibratoStyrke.gain.value = 25;
+    volum.gain.setValueAtTime(0.0001, start);
+    volum.gain.linearRampToValueAtTime(0.35, start + 0.12);
+    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
+    vibrato.connect(vibratoStyrke).connect(oscillator.frequency);
+    oscillator.connect(filter).connect(volum).connect(lyd.destination);
+    for (const kilde of [oscillator, vibrato]) {
+        kilde.start(start);
+        kilde.stop(start + varighet + 0.05);
+    }
+}
+
 function spillGorillalyd() {
     if (lyd?.state !== 'running') return;
     const na = lyd.currentTime;
@@ -89,8 +120,9 @@ lag.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow
 document.body.append(lag);
 
 let gorillaer: { posisjon: Posisjon; bilde: HTMLImageElement }[] = [];
+let elefanter: { posisjon: Posisjon; snabel: SVGUseElement }[] = [];
 
-function plasserGorillaer() {
+function plasserDyr() {
     const rot = document.documentElement;
     const bredde = rot.clientWidth;
     const hoyde = rot.getBoundingClientRect().height;
@@ -107,6 +139,34 @@ function plasserGorillaer() {
         lag.append(bilde);
         return {posisjon, bilde};
     });
+    elefanter = elefantPosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -45 210 140');
+        svg.setAttribute('width', '210');
+        svg.setAttribute('height', '140');
+        svg.style.cssText = `position:absolute;left:${posisjon.x - 20}px;top:${posisjon.y - 9}px;overflow:visible;transform:rotate(8deg) scale(.78);transform-origin:100px 45px`;
+        const kropp = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        kropp.setAttribute('href', '/images/wildlife.svg#elephant-body');
+        const snabel = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        snabel.setAttribute('href', '/images/wildlife.svg#elephant-trunk');
+        snabel.style.cssText = 'transform-box:view-box;transform-origin:72px 8px';
+        const detaljer = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        detaljer.setAttribute('href', '/images/wildlife.svg#elephant-details');
+        svg.append(kropp, snabel, detaljer);
+        lag.append(svg);
+        return {posisjon, snabel};
+    });
+}
+
+function loftSnabel(snabel: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of snabel.getAnimations()) animasjon.cancel();
+    snabel.animate([
+        {transform: 'rotate(0deg)', offset: 0},
+        {transform: 'rotate(-130deg)', offset: .3},
+        {transform: 'rotate(-130deg)', offset: .65},
+        {transform: 'rotate(0deg)', offset: 1}
+    ], {duration: 1300, easing: 'ease-in-out'});
 }
 
 function hopp(bilde: HTMLElement) {
@@ -119,8 +179,8 @@ function hopp(bilde: HTMLElement) {
     ], {duration: 800, easing: 'ease-out'});
 }
 
-new ResizeObserver(plasserGorillaer).observe(document.documentElement);
-plasserGorillaer();
+new ResizeObserver(plasserDyr).observe(document.documentElement);
+plasserDyr();
 
 // Gorillaen er bak innholdet og skal bare reagere når pekeren er over selve bakgrunnen
 function erDekket(element: Element | null) {
@@ -133,13 +193,15 @@ function erDekket(element: Element | null) {
 
 let sistePaa: HTMLImageElement | undefined;
 let paaLove = false;
+let paaElefant = false;
 
 document.addEventListener('mousemove', hendelse => {
     const {pageX, pageY} = hendelse;
     const rot = document.documentElement;
     const gorilla = gorillaer.find(({posisjon}) => erPaaGorilla(pageX, pageY, posisjon));
     const love = erPaaLove(pageX, pageY, rot.clientWidth, rot.getBoundingClientRect().height);
-    const dekket = (gorilla || love) && erDekket(hendelse.target as Element | null);
+    const elefant = elefanter.find(({posisjon}) => erPaaElefantPosisjon(pageX, pageY, posisjon));
+    const dekket = (gorilla || love || elefant) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
@@ -151,4 +213,11 @@ document.addEventListener('mousemove', hendelse => {
     const loveTreff = love && !dekket;
     if (loveTreff && !paaLove) spillLovebroel();
     paaLove = loveTreff;
+
+    const elefantTreff = Boolean(elefant && !dekket);
+    if (elefantTreff && !paaElefant) {
+        spillElefantlyd();
+        if (elefant) loftSnabel(elefant.snabel);
+    }
+    paaElefant = elefantTreff;
 });

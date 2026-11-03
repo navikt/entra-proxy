@@ -125,32 +125,6 @@
             <circle cx="70" cy="2" r="4" fill="#2f2835"/>
             <path d="M48 44h8v6h-8Z" fill="#f4ead2"/>
         </g>
-        <g id="gorilla">
-            <g fill="#3a3942">
-                <path d="M-44-16Q-78 14-60 52" stroke="#3a3942" stroke-width="28" stroke-linecap="round"/>
-                <path d="M44-16Q78 14 60 52" stroke="#3a3942" stroke-width="28" stroke-linecap="round"/>
-                <ellipse cx="0" cy="20" rx="54" ry="46"/>
-                <ellipse cx="0" cy="-16" rx="56" ry="30"/>
-                <path d="M-20-60Q0-82 20-60Z"/>
-                <circle cx="0" cy="-46" r="27"/>
-            </g>
-            <ellipse cx="0" cy="20" rx="30" ry="34" fill="#55525c"/>
-            <g fill="#3a3942">
-                <ellipse cx="-24" cy="62" rx="18" ry="12"/>
-                <ellipse cx="24" cy="62" rx="18" ry="12"/>
-            </g>
-            <g fill="#2f2e36">
-                <circle cx="-60" cy="50" r="12"/>
-                <circle cx="60" cy="50" r="12"/>
-            </g>
-            <path d="M-19-50Q0-66 19-50 23-28 0-22-23-28-19-50Z" fill="#7a6a60"/>
-            <ellipse cx="0" cy="-32" rx="15" ry="11" fill="#8a7a70"/>
-            <path d="M-19-52Q0-44 19-52" stroke="#2c2b32" stroke-width="5" fill="none"/>
-            <circle cx="-9" cy="-46" r="4" fill="#201f24"/>
-            <circle cx="9" cy="-46" r="4" fill="#201f24"/>
-            <path d="M-5-33v4M5-33v4" stroke="#3a3942" stroke-width="3" stroke-linecap="round"/>
-            <path d="M-9-24Q0-19 9-24" stroke="#3a3942" stroke-width="3" fill="none"/>
-        </g>
     </defs>
     <path fill="#283b38" d="M0 0h720v600H0z"/>
     <g fill="#52604c" opacity=".5">
@@ -168,5 +142,4 @@
     <use href="#palm" transform="translate(608 584) scale(.9)"/>
     <use href="#crocodile" transform="translate(363 505) rotate(-4) scale(.82)"/>
     <use href="#hippo" transform="translate(126 478) rotate(-3) scale(.82)"/>
-    <use href="#gorilla" transform="translate(600 300) scale(.85)"/>
 </svg>

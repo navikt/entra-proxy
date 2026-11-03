@@ -3,28 +3,31 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Innlogging feilet</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <title>Siden finnes ikke | Entra-proxy</title>
     <style>
         * { box-sizing: border-box; }
         body {
             margin: 0;
             min-height: 100vh;
             background-color: #283b38;
-            background-image: url("/wildlife.svg");
+            background-image: url("/images/wildlife.svg");
             background-position: center;
             background-size: 720px 600px;
             color: #1f1f1f;
             font-family: Arial, sans-serif;
+            line-height: 1.6;
         }
         main {
             max-width: 40rem;
-            margin: 2rem auto;
+            margin: 4rem auto;
             padding: 2rem;
             background: #d3dfd7;
             border: 1px solid #c5d4cb;
             border-radius: 8px;
         }
+        h1 { line-height: 1.2; }
+        a { color: #005b82; }
+        a:focus-visible { outline: 3px solid #005b82; outline-offset: 4px; }
         img.confused {
             display: block;
             max-width: 100%;
@@ -36,18 +39,10 @@
 </head>
 <body>
 <main>
-    <h1 class="aksel-heading aksel-heading--large">Innlogging feilet</h1>
-    <img class="confused" src="/error/confused.gif" alt="Forvirret reaksjon">
-    <p class="aksel-body-long">
-        Noe gikk galt under innloggingen. Prøv å logge inn på nytt.
-    </p>
-    <p class="aksel-body-short" id="arsak" hidden>
-        Årsak: <strong id="arsak-verdi"></strong>
-    </p>
-    <p>
-        <a class="aksel-link" href="/oauth2/authorization/entra">Logg inn på nytt</a>
-    </p>
+    <p>404 &ndash; Digital gjemsel</p>
+    <h1>Siden finnes ikke</h1>
+    <img class="confused" src="/images/confused.gif" alt="Forvirret reaksjon">
+    <a href="/">Tilbake til start</a>
 </main>
-<script type="module" src="/innlogging-feilet.js"></script>
 </body>
 </html>

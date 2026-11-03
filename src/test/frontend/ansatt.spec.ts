@@ -48,7 +48,7 @@ test('renders employee, leader, units and group counts; filters and sorts groups
     await expect(page.locator('#ansatt-felter .navident-lenke'))
         .toHaveAttribute('href', 'https://nom.nav.no/ressurs/L123456');
     await expect(page.locator('.enhetsnummer-lenke'))
-        .toHaveAttribute('href', '/grupper.html?tilgangsenhetId=1234');
+        .toHaveAttribute('href', '/html/grupper.html?tilgangsenhetId=1234');
     await expect(page.locator('#enheter-ledere-kolonne')).toBeHidden();
     const rows = page.locator('#grupper-rader tr');
     await expect(rows.nth(0).locator('td').nth(3)).toHaveText('12');

@@ -165,7 +165,7 @@ form.addEventListener('submit', async event => {
             const nummerCelle = document.createElement('td');
             const nummerLenke = document.createElement('a');
             nummerLenke.className = 'enhetsnummer-lenke';
-            nummerLenke.href = `/grupper.html?tilgangsenhetId=${encodeURIComponent(String(enhet.enhetnummer))}`;
+            nummerLenke.href = `/html/grupper.html?tilgangsenhetId=${encodeURIComponent(String(enhet.enhetnummer))}`;
             nummerLenke.textContent = enhet.enhetnummer;
             nummerCelle.appendChild(nummerLenke);
             const navnCelle = document.createElement('td');

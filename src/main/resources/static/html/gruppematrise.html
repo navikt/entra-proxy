@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sammenlign grupper</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@navikt/ds-css@8.16.2/dist/index.css">
+    <link rel="stylesheet" href="/css/utforsker.css">
+    <link rel="stylesheet" href="/css/gruppematrise.css">
+</head>
+<body>
+<main>
+    <h1 class="aksel-heading aksel-heading--large">Sammenlign grupper</h1>
+    <nav aria-label="Utforskersider">
+        <a class="aksel-button" data-variant="primary" href="/html/ansatt.html">Ansatt</a>
+        <a class="aksel-button" data-variant="primary" href="/html/grupper.html">Grupper</a>
+        <a class="aksel-button logg-ut" data-variant="primary" data-color="danger" href="/oauth2/logout">Logg ut</a>
+    </nav>
+
+    <section class="sok-panel" aria-label="Velg gruppe som skal utforskes">
+        <h2 class="aksel-heading aksel-heading--medium">Velg gruppe som skal utforskes</h2>
+        <div class="hovedsok">
+            <form id="nom-form" class="nom-form">
+                <div class="aksel-form-field">
+                    <label class="aksel-label" for="tilgangsenhetId">Nom tilgangsenhet / enhet</label>
+                    <input class="aksel-text-field__input" id="tilgangsenhetId" name="tilgangsenhetId" type="text"
+                           pattern="[0-9]{4}|[a-z]{2}[0-9]{3}[a-z]" minlength="4" maxlength="6" required
+                           autocomplete="off" placeholder="4 siffer (tilgangsenhet) eller 6 tegn (enhet)">
+                </div>
+                <div class="sok-knapper">
+                    <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
+                </div>
+                <p class="aksel-body-short status" id="nom-status" role="status" aria-live="polite"></p>
+            </form>
+            <p class="aksel-body-short" aria-hidden="true">eller</p>
+            <form id="gruppe-form">
+                <div class="aksel-form-field">
+                    <label class="aksel-label" for="basisGruppeNavn">Entra gruppenavn</label>
+                    <input class="aksel-text-field__input" id="basisGruppeNavn" name="basisGruppeNavn" type="text" required
+                           autocomplete="off" placeholder="Gruppenavn">
+                </div>
+                <div class="sok-knapper">
+                    <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Hent medlemmer</button>
+                </div>
+                <p class="aksel-body-short status" id="basis-status" role="status" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
+
+    <section id="basis-resultat" aria-labelledby="basis-overskrift" hidden>
+        <h2 class="aksel-visually-hidden" id="basis-overskrift">Ansatte som skal utforskes</h2>
+        <table aria-label="Ansatte som skal utforskes">
+            <thead>
+                <tr><th scope="col">Nav-ident</th><th scope="col">Navn</th></tr>
+            </thead>
+            <tbody id="basis-rader"></tbody>
+        </table>
+    </section>
+
+    <hr class="steg-skille">
+
+    <section class="sok-panel" aria-label="Matrisesøk">
+        <h2 class="aksel-heading aksel-heading--medium">Bygg matrise fra gruppenavn</h2>
+        <form id="sok-form">
+            <div class="aksel-form-field">
+                <label class="aksel-label" for="gruppeNavn">Del av gruppenavn</label>
+                <input class="aksel-text-field__input" id="gruppeNavn" name="gruppeNavn" type="text" required
+                       autocomplete="off" placeholder="F.eks. TEMA">
+            </div>
+            <div class="sok-knapper">
+                <button class="aksel-button" data-variant="primary" data-color="brand-blue" type="submit">Bygg matrise</button>
+            </div>
+            <p class="aksel-body-short status" id="status" role="status" aria-live="polite"></p>
+        </form>
+    </section>
+
+    <section id="resultat" aria-labelledby="resultat-overskrift" hidden>
+        <h2 class="aksel-heading aksel-heading--medium aksel-visually-hidden" id="resultat-overskrift">Medlemskap per ansatt</h2>
+        <div class="kopi-rad">
+            <button class="aksel-button" data-variant="primary" data-color="brand-blue" id="kopier-matrise" type="button">Kopier til utklippstavlen</button>
+            <p class="aksel-body-short status" id="kopier-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="tabell-ramme" tabindex="0" role="region" aria-labelledby="resultat-overskrift">
+            <table aria-label="Medlemskap per ansatt og gruppe">
+                <thead id="tabell-overskrift"></thead>
+                <tbody id="tabell-rader"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script type="module" src="/gruppematrise.js"></script>
+</body>
+</html>

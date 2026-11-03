@@ -74,7 +74,7 @@ function nullstillMatrise() {
 function lagNavIdentLenke(navIdent: string): HTMLAnchorElement {
     const lenke = document.createElement('a');
     lenke.className = 'navident-lenke';
-    lenke.href = `/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
+    lenke.href = `/html/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
     lenke.textContent = navIdent;
     return lenke;
 }
@@ -264,7 +264,7 @@ for (const skjema of [nomForm, gruppeForm]) {
             byggBasisTabell(ansatte);
             try {
                 await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent));
-            } catch (feil) {
+            } catch {
                 enhetsnummerPerAnsatt = new Map();
             }
             const enhetsnavn = (erNomSok && erNomEnhet && !Array.isArray(data)) ? data?.navn?.trim() : undefined;

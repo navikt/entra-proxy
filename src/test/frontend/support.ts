@@ -52,7 +52,7 @@ export const test = base.extend<{app: App}>({
                 expect(responses, 'Unconsumed mock responses before navigation').toHaveLength(0);
                 responses = [...nextResponses];
                 calls.length = 0;
-                await page.goto(`/${name}.html${query}`);
+                await page.goto(`${name === 'index' ? '' : '/html'}/${name}.html${query}`);
             }
         });
         expect(errors, 'Browser errors and unexpected API requests').toEqual([]);

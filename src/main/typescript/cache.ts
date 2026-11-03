@@ -1,4 +1,5 @@
 import {feilmelding, hentElement} from './dom.js';
+import {feilFraRespons} from './http.js';
 
 (() => {
     const knapp = hentElement('#oppfrisk-caches', HTMLButtonElement);
@@ -17,12 +18,7 @@ import {feilmelding, hentElement} from './dom.js';
                 redirect: 'error'
             });
             if (!response.ok) {
-                let melding = `Kunne ikke oppfriske cache (HTTP ${response.status}).`;
-                if (response.headers.get('content-type')?.includes('json')) {
-                    const problem: {detail?: string | null} = await response.json();
-                    melding = problem.detail ?? melding;
-                }
-                throw new Error(melding);
+                throw await feilFraRespons(response, `Kunne ikke oppfriske cache (HTTP ${response.status}).`);
             }
             const antallSlettet: number = await response.json();
             status.textContent = `Cache oppfrisket. ${antallSlettet} nøkler slettet.`;

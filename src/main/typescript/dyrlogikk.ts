@@ -95,6 +95,15 @@ export const krokodillePosisjoner = (sidebredde: number, sidehoyde: number) =>
 export const erPaaKrokodille = (sideX: number, sideY: number, posisjon: Posisjon) =>
     erPaaBoks(sideX, sideY, posisjon, KROKODILLE_BOKS);
 
+// Sebraen i flisen (står i 140,287, rotert -10 grader, skala 0,8); boksen dekker kropp og hode
+export const SEBRA_BOKS: Boks = {x: 70, y: 215, bredde: 128, hoyde: 150};
+
+export const sebraPosisjoner = (sidebredde: number, sidehoyde: number) =>
+    boksPosisjoner(SEBRA_BOKS, sidebredde, sidehoyde);
+
+export const erPaaSebra = (sideX: number, sideY: number, posisjon: Posisjon) =>
+    erPaaBoks(sideX, sideY, posisjon, SEBRA_BOKS);
+
 export const elefantPosisjoner = (sidebredde: number, sidehoyde: number) =>
     boksPosisjoner(ELEFANT_BOKS, sidebredde, sidehoyde);
 

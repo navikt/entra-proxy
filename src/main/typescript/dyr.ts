@@ -1,4 +1,4 @@
-import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
+import {erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, sebraPosisjoner, erPaaSebra, SEBRA_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
 let lyd: AudioContext | undefined;
 
@@ -181,6 +181,35 @@ function spillKrokodillesnapp() {
     dunk.stop(smellStart + 0.2);
 }
 
+function spillSebraeg() {
+    if (lyd?.state !== 'running') return;
+    const start = lyd.currentTime;
+    const varighet = SEBRA_VARIGHET / 1000 * 0.7;
+    const oscillator = lyd.createOscillator();
+    const vibrato = lyd.createOscillator();
+    const vibratoStyrke = lyd.createGain();
+    const filter = lyd.createBiquadFilter();
+    const volum = lyd.createGain();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(500, start);
+    oscillator.frequency.linearRampToValueAtTime(950, start + 0.2);
+    oscillator.frequency.linearRampToValueAtTime(700, start + varighet * 0.5);
+    oscillator.frequency.exponentialRampToValueAtTime(350, start + varighet);
+    vibrato.frequency.value = 14;
+    vibratoStyrke.gain.value = 40;
+    filter.type = 'bandpass';
+    filter.frequency.value = 1400;
+    volum.gain.setValueAtTime(0.0001, start);
+    volum.gain.linearRampToValueAtTime(0.35, start + 0.1);
+    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
+    vibrato.connect(vibratoStyrke).connect(oscillator.frequency);
+    oscillator.connect(filter).connect(volum).connect(lyd.destination);
+    for (const kilde of [oscillator, vibrato]) {
+        kilde.start(start);
+        kilde.stop(start + varighet + 0.05);
+    }
+}
+
 function spillElefantlyd() {
     if (lyd?.state !== 'running') return;
     const start = lyd.currentTime;
@@ -233,6 +262,7 @@ let sjiraffer: { posisjon: Posisjon; hals: SVGUseElement }[] = [];
 let flodhester: { posisjon: Posisjon; munn: SVGUseElement; kjeve: SVGUseElement }[] = [];
 let kamler: { posisjon: Posisjon; hode: SVGUseElement; spytt: SVGCircleElement }[] = [];
 let krokodiller: { posisjon: Posisjon; kjeve: SVGUseElement }[] = [];
+let sebraer: { posisjon: Posisjon; hode: SVGUseElement }[] = [];
 let palmer: { posisjon: Posisjon; kokosnotter: SVGUseElement[] }[] = [];
 
 // Løven står i 131,87 i flisen, rotert -8 grader og skalert 0,78; halen sitter fast i kroppen i 55,40 (lokale koordinater)
@@ -253,6 +283,10 @@ const SPYTT_VARIGHET = 1800;
 // Krokodillen står i 363,505 i flisen, rotert -4 grader og skalert 0,82; overkjeven henger i 58,8 (lokale koordinater)
 const KROKODILLE_ROT = {x: 363, y: 505};
 const SNAPP_VARIGHET = 1500;
+
+// Sebraen står i 140,287 i flisen, rotert -10 grader og skalert 0,8; halsen er festet i 20,15 (lokale koordinater)
+const SEBRA_ROT = {x: 140, y: 287};
+const SEBRA_VARIGHET = 1400;
 
 const KOKOSNOTTER = ['palm-coconut-1', 'palm-coconut-2', 'palm-coconut-3'];
 // Palmens rot i flisen og skalaen, brukt til å plassere kokosnøttene over bakgrunnen
@@ -388,6 +422,20 @@ function plasserDyr() {
         lag.append(svg);
         return {posisjon, kjeve};
     });
+    sebraer = sebraPosisjoner(bredde, hoyde).map(posisjon => {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '-100 -100 200 200');
+        svg.setAttribute('width', '200');
+        svg.setAttribute('height', '200');
+        const venstre = posisjon.x - SEBRA_BOKS.x + SEBRA_ROT.x - 100;
+        const topp = posisjon.y - SEBRA_BOKS.y + SEBRA_ROT.y - 100;
+        svg.style.cssText = `position:absolute;left:${venstre}px;top:${topp}px;overflow:visible;transform:rotate(-10deg) scale(.8);transform-origin:100px 100px`;
+        const hode = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+        hode.setAttribute('href', '/images/wildlife.svg#zebra-head');
+        svg.append(hode);
+        lag.append(svg);
+        return {posisjon, hode};
+    });
     palmer = palmePosisjoner(bredde, hoyde).map(posisjon => {
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('viewBox', '-100 -220 200 220');
@@ -484,6 +532,17 @@ function snapp(kjeve: SVGUseElement) {
     ], {duration: SNAPP_VARIGHET});
 }
 
+function kastMedHodet(hode: SVGUseElement) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const animasjon of hode.getAnimations()) animasjon.cancel();
+    const vipp = (grader: number) => `translate(20px, 15px) rotate(${grader}deg) translate(-20px, -15px)`;
+    hode.animate([0, -26, 4, -22, 2, -14, 0].map((grader, i, alle) => ({
+        transform: vipp(grader),
+        offset: i / (alle.length - 1),
+        easing: 'ease-in-out'
+    })), {duration: SEBRA_VARIGHET});
+}
+
 function fellKokosnotter(kokosnotter: SVGUseElement[]) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     kokosnotter.forEach((kokosnott, i) => {
@@ -567,6 +626,7 @@ let sisteSjiraff: typeof sjiraffer[number] | undefined;
 let sisteFlodhest: typeof flodhester[number] | undefined;
 let sisteKamel: typeof kamler[number] | undefined;
 let sisteKrokodille: typeof krokodiller[number] | undefined;
+let sisteSebra: typeof sebraer[number] | undefined;
 let sistePalme: { posisjon: Posisjon } | undefined;
 
 document.addEventListener('mousemove', hendelse => {
@@ -582,7 +642,8 @@ document.addEventListener('mousemove', hendelse => {
     const flodhest = flodhester.find(({posisjon}) => erPaaFlodhest(pageX, pageY, posisjon));
     const kamel = kamler.find(({posisjon}) => erPaaKamel(pageX, pageY, posisjon));
     const krokodille = krokodiller.find(({posisjon}) => erPaaKrokodille(pageX, pageY, posisjon));
-    const dekket = (gorilla || love || elefant || ape || palme || sjiraff || flodhest || kamel || krokodille) && erDekket(hendelse.target as Element | null);
+    const sebra = sebraer.find(({posisjon}) => erPaaSebra(pageX, pageY, posisjon));
+    const dekket = (gorilla || love || elefant || ape || palme || sjiraff || flodhest || kamel || krokodille || sebra) && erDekket(hendelse.target as Element | null);
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
@@ -633,6 +694,13 @@ document.addEventListener('mousemove', hendelse => {
         snapp(krokodilleTreff.kjeve);
     }
     sisteKrokodille = krokodilleTreff;
+
+    const sebraTreff = !dekket ? sebra : undefined;
+    if (sebraTreff && sebraTreff !== sisteSebra) {
+        spillSebraeg();
+        kastMedHodet(sebraTreff.hode);
+    }
+    sisteSebra = sebraTreff;
 
     const palmeTreff = !dekket ? palme : undefined;
     if (palmeTreff && palmeTreff !== sistePalme) fellKokosnotter(palmeTreff.kokosnotter);

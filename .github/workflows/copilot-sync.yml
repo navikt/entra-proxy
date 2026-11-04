@@ -1,0 +1,16 @@
+name: Copilot Customization Sync
+
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    uses: navikt/copilot/.github/workflows/copilot-customization-sync.yml@4f47eb69042cbebfd9283a93d9f1d6a6747946be
+    permissions:
+      contents: write
+      pull-requests: write

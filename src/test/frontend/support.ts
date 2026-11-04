@@ -1,6 +1,7 @@
 import {test as base, expect, type Page, type Request} from '@playwright/test';
 
 export interface MockResponse {
+    url?: string;
     json?: unknown;
     body?: string;
     status?: number;
@@ -29,7 +30,10 @@ export const test = base.extend<{app: App}>({
         );
         await page.route('**/api/**', async route => {
             calls.push(route.request());
-            const response = responses.shift();
+            const url = new URL(route.request().url());
+            const matchingIndex = responses.findIndex(response => response.url === url.pathname + url.search);
+            const index = matchingIndex >= 0 ? matchingIndex : responses.findIndex(response => !response.url);
+            const response = index >= 0 ? responses.splice(index, 1)[0] : undefined;
             if (!response) {
                 errors.push(`Unexpected API request: ${route.request().url()}`);
                 await route.abort();

@@ -77,8 +77,8 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await app.open('grupper', [
         json(ansatte),
         json([ansatte[0]]),
-        json([{navIdent: 'B123456'}]),
-        json(nomAnsatte),
+        {url: '/api/v1/gruppe/medlemmer?gruppeNavn=Alle+disablede+brukere', ...json([{navIdent: 'B123456'}])},
+        {url: '/api/v1/nom/enhet/bulk', ...json(nomAnsatte)},
         {body: 'Testenhet'}
     ]);
     const {page, calls} = app;
@@ -103,9 +103,9 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     const panel = page.locator('.sok-panel').nth(1);
     await expect(panel.locator('label')).toHaveAttribute('for', await panel.locator('input').getAttribute('id') ?? '');
     await submit(page, '#gruppe-form-2', 'Sammenligning');
-    expect(new URL(calls[2].url()).search).toBe('?gruppeNavn=Alle+disablede+brukere');
-    expect(new URL(calls[3].url()).pathname).toBe('/api/v1/nom/enhet/bulk');
-    expect(calls[3].postDataJSON()).toEqual(['A123456', 'B123456']);
+    expect(calls.some(call => new URL(call.url()).search === '?gruppeNavn=Alle+disablede+brukere')).toBe(true);
+    const nomCall = calls.find(call => new URL(call.url()).pathname === '/api/v1/nom/enhet/bulk');
+    expect(nomCall?.postDataJSON()).toEqual(['A123456', 'B123456']);
     expect(new URL(calls[4].url()).pathname).toBe('/api/v1/navn/1234');
     await expect(page.locator('#felles-resultat')).toBeVisible();
     await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
@@ -142,16 +142,21 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await expect(page.locator('#felles-resultat')).toBeHidden();
 });
 
-for (const [name, response, error] of [
+for (const [name, response, error, reverseLookups] of [
     ['empty group', json([]), undefined],
+    ['empty group with reversed lookup responses', json([]), undefined, true],
     ['HTTP error', json({detail: 'Ingen tilgang'}, 403), 'Ingen tilgang'],
     ['network error', {abort: true}, 'Failed to fetch'],
     ['invalid list', json({}), 'Uventet respons: forventet en liste med nav-identer.'],
     ['invalid member', json([{navIdent: 42}]), 'Uventet respons: forventet en liste med nav-identer.']
-] satisfies [string, MockResponse, string | undefined][]) {
+] satisfies [string, MockResponse, string | undefined, boolean?][]) {
     test(`group details keep the permission column for ${name}`, async ({app}) => {
+        const lookups = [
+            {url: '/api/v1/gruppe/medlemmer?gruppeNavn=Alle+disablede+brukere', ...response},
+            {url: '/api/v1/nom/enhet/bulk', ...json(nomAnsatte)}
+        ];
         await app.open('grupper', [
-            json(ansatte), json([ansatte[0]]), response, json(nomAnsatte), {body: 'Testenhet'}
+            json(ansatte), json([ansatte[0]]), ...(reverseLookups ? lookups.reverse() : lookups), {body: 'Testenhet'}
         ]);
         const {page} = app;
         await submit(page, '#gruppe-form', 'Basis');

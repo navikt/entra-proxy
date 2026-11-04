@@ -15,7 +15,7 @@ const kopierKnapp = hentElement('#kopier-matrise', HTMLButtonElement);
 const kopierStatus = hentElement('#kopier-status', HTMLParagraphElement);
 
 const DISABLEDE_BRUKERE = 'Alle disablede brukere';
-const PERMISJON_OVERSKRIFT = 'ansatt er i permisjon';
+const PERMISJON_OVERSKRIFT = 'Ansatt er i permisjon';
 
 let basisAnsatte: Ansatt[] | null = null;
 let enhetsnummerPerAnsatt = new Map<string, string>();

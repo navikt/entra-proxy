@@ -183,7 +183,7 @@ test('matrix keeps base employees, filters group names, sorts and copies members
     await expect(page.locator('#status')).toHaveText('2 ansatte og 3 grupper');
     await expect(page.locator('#resultat')).toBeVisible();
     const headers = page.locator('#tabell-overskrift th');
-    await expect(headers).toHaveText(['Nav-ident', 'Navn', 'Nom-enhet', 'ansatt er i permisjon', 'TEMA 10', 'TEMA 2']);
+    await expect(headers).toHaveText(['Nav-ident', 'Navn', 'Nom-enhet', 'Ansatt er i permisjon', 'TEMA 10', 'TEMA 2']);
     const rows = page.locator('#tabell-rader tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.first().locator('td').nth(1)).toHaveText('1234');

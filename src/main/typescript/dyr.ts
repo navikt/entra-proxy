@@ -1,253 +1,5 @@
 import {nesteRickrollSteg, RICKROLL_KODE, erPaaGorilla, GORILLA_BREDDE, GORILLA_HOYDE, gorillaPosisjoner, erPaaLove, erPaaElefantPosisjon, elefantPosisjoner, apePosisjoner, erPaaApe, lovePosisjoner, erPaaLovePosisjon, LOVE_BOKS, sebraPosisjoner, erPaaSebra, SEBRA_BOKS, krokodillePosisjoner, erPaaKrokodille, KROKODILLE_BOKS, kamelPosisjoner, erPaaKamel, KAMEL_BOKS, flodhestPosisjoner, erPaaFlodhest, FLODHEST_BOKS, sjiraffPosisjoner, erPaaSjiraff, SJIRAFF_BOKS, palmePosisjoner, erPaaPalme, PALME_BOKS, type Posisjon} from './dyrlogikk.js';
 
-let lyd: AudioContext | undefined;
-
-function bankPaaBrystet(ctx: AudioContext, start: number) {
-    const oscillator = ctx.createOscillator();
-    const volum = ctx.createGain();
-    oscillator.frequency.setValueAtTime(110, start);
-    oscillator.frequency.exponentialRampToValueAtTime(40, start + 0.12);
-    volum.gain.setValueAtTime(0.9, start);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + 0.15);
-    oscillator.connect(volum).connect(ctx.destination);
-    oscillator.start(start);
-    oscillator.stop(start + 0.16);
-}
-
-function grynt(ctx: AudioContext, start: number) {
-    const oscillator = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    const volum = ctx.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(90, start);
-    oscillator.frequency.linearRampToValueAtTime(140, start + 0.15);
-    oscillator.frequency.linearRampToValueAtTime(60, start + 0.5);
-    filter.type = 'lowpass';
-    filter.frequency.value = 500;
-    volum.gain.setValueAtTime(0.0001, start);
-    volum.gain.linearRampToValueAtTime(0.7, start + 0.08);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + 0.55);
-    oscillator.connect(filter).connect(volum).connect(ctx.destination);
-    oscillator.start(start);
-    oscillator.stop(start + 0.6);
-}
-
-// Nettlesere tillater ikke lyd før brukeren har klikket eller trykket på siden
-function laasOppLyd() {
-    lyd ??= new AudioContext();
-    if (lyd.state === 'suspended') void lyd.resume();
-}
-
-for (const type of ['pointerdown', 'keydown'])
-    document.addEventListener(type, laasOppLyd, {once: true});
-
-function broel(ctx: AudioContext, start: number) {
-    const varighet = 1.6;
-    const oscillator = ctx.createOscillator();
-    const filter = ctx.createBiquadFilter();
-    const volum = ctx.createGain();
-    const skjelving = ctx.createOscillator();
-    const skjelvingStyrke = ctx.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(70, start);
-    oscillator.frequency.linearRampToValueAtTime(130, start + 0.35);
-    oscillator.frequency.exponentialRampToValueAtTime(45, start + varighet);
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(300, start);
-    filter.frequency.linearRampToValueAtTime(1100, start + 0.35);
-    filter.frequency.linearRampToValueAtTime(250, start + varighet);
-    // Rask amplitudemodulering gir det rullende, hese brølet
-    skjelving.frequency.value = 28;
-    skjelvingStyrke.gain.value = 0.35;
-    volum.gain.setValueAtTime(0.0001, start);
-    volum.gain.linearRampToValueAtTime(0.7, start + 0.2);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
-    skjelving.connect(skjelvingStyrke).connect(volum.gain);
-    oscillator.connect(filter).connect(volum).connect(ctx.destination);
-    for (const kilde of [oscillator, skjelving]) {
-        kilde.start(start);
-        kilde.stop(start + varighet + 0.05);
-    }
-}
-
-function spillLovebroel() {
-    if (lyd?.state !== 'running') return;
-    broel(lyd, lyd.currentTime);
-}
-
-function spillFlodhestgrynt() {
-    if (lyd?.state !== 'running') return;
-    const start = lyd.currentTime;
-    const varighet = GJESP_VARIGHET / 1000;
-    const oscillator = lyd.createOscillator();
-    const filter = lyd.createBiquadFilter();
-    const volum = lyd.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(70, start);
-    oscillator.frequency.linearRampToValueAtTime(45, start + varighet * 0.5);
-    oscillator.frequency.linearRampToValueAtTime(65, start + varighet);
-    filter.type = 'lowpass';
-    filter.frequency.value = 260;
-    volum.gain.setValueAtTime(0.0001, start);
-    volum.gain.linearRampToValueAtTime(0.8, start + 0.3);
-    volum.gain.setValueAtTime(0.8, start + varighet * 0.6);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
-    oscillator.connect(filter).connect(volum).connect(lyd.destination);
-    oscillator.start(start);
-    oscillator.stop(start + varighet + 0.05);
-}
-
-function spillKamelspytt() {
-    if (lyd?.state !== 'running') return;
-    const ctx = lyd;
-    const start = ctx.currentTime;
-    const gurgling = ctx.createOscillator();
-    const skjelving = ctx.createOscillator();
-    const skjelvingStyrke = ctx.createGain();
-    const gurglingVolum = ctx.createGain();
-    gurgling.type = 'sawtooth';
-    gurgling.frequency.setValueAtTime(110, start);
-    gurgling.frequency.linearRampToValueAtTime(160, start + 0.6);
-    skjelving.frequency.value = 22;
-    skjelvingStyrke.gain.value = 0.4;
-    gurglingVolum.gain.setValueAtTime(0.4, start);
-    gurglingVolum.gain.linearRampToValueAtTime(0.4, start + 0.6);
-    gurglingVolum.gain.exponentialRampToValueAtTime(0.001, start + 0.75);
-    skjelving.connect(skjelvingStyrke).connect(gurglingVolum.gain);
-    gurgling.connect(gurglingVolum).connect(ctx.destination);
-    for (const kilde of [gurgling, skjelving]) {
-        kilde.start(start);
-        kilde.stop(start + 0.8);
-    }
-
-    // Selve spyttet er et kort støystøt
-    const spyttStart = start + SPYTT_VARIGHET * 0.4 / 1000;
-    const stoy = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.15), ctx.sampleRate);
-    stoy.getChannelData(0).forEach((_, i, data) => { data[i] = Math.random() * 2 - 1; });
-    const kilde = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const volum = ctx.createGain();
-    kilde.buffer = stoy;
-    filter.type = 'highpass';
-    filter.frequency.value = 2500;
-    volum.gain.setValueAtTime(0.5, spyttStart);
-    volum.gain.exponentialRampToValueAtTime(0.001, spyttStart + 0.15);
-    kilde.connect(filter).connect(volum).connect(ctx.destination);
-    kilde.start(spyttStart);
-}
-
-function stoyBuffer(ctx: AudioContext, sekunder: number) {
-    const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * sekunder), ctx.sampleRate);
-    buffer.getChannelData(0).forEach((_, i, data) => { data[i] = Math.random() * 2 - 1; });
-    return buffer;
-}
-
-function spillKrokodillesnapp() {
-    if (lyd?.state !== 'running') return;
-    const ctx = lyd;
-    const start = ctx.currentTime;
-    const smellStart = start + SNAPP_VARIGHET * 0.45 / 1000;
-
-    const hvesing = ctx.createBufferSource();
-    const hvesFilter = ctx.createBiquadFilter();
-    const hvesVolum = ctx.createGain();
-    hvesing.buffer = stoyBuffer(ctx, 0.6);
-    hvesFilter.type = 'bandpass';
-    hvesFilter.frequency.value = 4000;
-    hvesVolum.gain.setValueAtTime(0.0001, start);
-    hvesVolum.gain.linearRampToValueAtTime(0.25, start + 0.3);
-    hvesVolum.gain.exponentialRampToValueAtTime(0.001, start + 0.6);
-    hvesing.connect(hvesFilter).connect(hvesVolum).connect(ctx.destination);
-    hvesing.start(start);
-
-    const knekk = ctx.createBufferSource();
-    const knekkFilter = ctx.createBiquadFilter();
-    const knekkVolum = ctx.createGain();
-    const dunk = ctx.createOscillator();
-    const dunkVolum = ctx.createGain();
-    knekk.buffer = stoyBuffer(ctx, 0.1);
-    knekkFilter.type = 'lowpass';
-    knekkFilter.frequency.value = 1800;
-    knekkVolum.gain.setValueAtTime(0.9, smellStart);
-    knekkVolum.gain.exponentialRampToValueAtTime(0.001, smellStart + 0.1);
-    knekk.connect(knekkFilter).connect(knekkVolum).connect(ctx.destination);
-    knekk.start(smellStart);
-    dunk.frequency.setValueAtTime(140, smellStart);
-    dunk.frequency.exponentialRampToValueAtTime(50, smellStart + 0.15);
-    dunkVolum.gain.setValueAtTime(0.8, smellStart);
-    dunkVolum.gain.exponentialRampToValueAtTime(0.001, smellStart + 0.18);
-    dunk.connect(dunkVolum).connect(ctx.destination);
-    dunk.start(smellStart);
-    dunk.stop(smellStart + 0.2);
-}
-
-function spillSebraeg() {
-    if (lyd?.state !== 'running') return;
-    const start = lyd.currentTime;
-    const varighet = SEBRA_VARIGHET / 1000 * 0.7;
-    const oscillator = lyd.createOscillator();
-    const vibrato = lyd.createOscillator();
-    const vibratoStyrke = lyd.createGain();
-    const filter = lyd.createBiquadFilter();
-    const volum = lyd.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(500, start);
-    oscillator.frequency.linearRampToValueAtTime(950, start + 0.2);
-    oscillator.frequency.linearRampToValueAtTime(700, start + varighet * 0.5);
-    oscillator.frequency.exponentialRampToValueAtTime(350, start + varighet);
-    vibrato.frequency.value = 14;
-    vibratoStyrke.gain.value = 40;
-    filter.type = 'bandpass';
-    filter.frequency.value = 1400;
-    volum.gain.setValueAtTime(0.0001, start);
-    volum.gain.linearRampToValueAtTime(0.35, start + 0.1);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
-    vibrato.connect(vibratoStyrke).connect(oscillator.frequency);
-    oscillator.connect(filter).connect(volum).connect(lyd.destination);
-    for (const kilde of [oscillator, vibrato]) {
-        kilde.start(start);
-        kilde.stop(start + varighet + 0.05);
-    }
-}
-
-function spillElefantlyd() {
-    if (lyd?.state !== 'running') return;
-    const start = lyd.currentTime;
-    const varighet = 1.3;
-    const oscillator = lyd.createOscillator();
-    const filter = lyd.createBiquadFilter();
-    const volum = lyd.createGain();
-    const vibrato = lyd.createOscillator();
-    const vibratoStyrke = lyd.createGain();
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(220, start);
-    oscillator.frequency.exponentialRampToValueAtTime(620, start + 0.18);
-    oscillator.frequency.linearRampToValueAtTime(480, start + 0.8);
-    oscillator.frequency.exponentialRampToValueAtTime(180, start + varighet);
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(900, start);
-    filter.frequency.linearRampToValueAtTime(2400, start + 0.18);
-    filter.frequency.linearRampToValueAtTime(600, start + varighet);
-    vibrato.frequency.value = 9;
-    vibratoStyrke.gain.value = 25;
-    volum.gain.setValueAtTime(0.0001, start);
-    volum.gain.linearRampToValueAtTime(0.35, start + 0.12);
-    volum.gain.exponentialRampToValueAtTime(0.001, start + varighet);
-    vibrato.connect(vibratoStyrke).connect(oscillator.frequency);
-    oscillator.connect(filter).connect(volum).connect(lyd.destination);
-    for (const kilde of [oscillator, vibrato]) {
-        kilde.start(start);
-        kilde.stop(start + varighet + 0.05);
-    }
-}
-
-function spillGorillalyd() {
-    if (lyd?.state !== 'running') return;
-    const na = lyd.currentTime;
-    grynt(lyd, na);
-    for (let i = 0; i < 4; i++) bankPaaBrystet(lyd, na + 0.6 + i * 0.14);
-}
-
 const lag = document.createElement('div');
 lag.setAttribute('aria-hidden', 'true');
 // z-index -1 legger gorillaene over bakgrunnen, men bak sidens innhold
@@ -647,21 +399,18 @@ document.addEventListener('mousemove', hendelse => {
 
     const gorillaTreff = !dekket ? gorilla?.bilde : undefined;
     if (gorillaTreff && gorillaTreff !== sistePaa) {
-        spillGorillalyd();
         hopp(gorillaTreff);
     }
     sistePaa = gorillaTreff;
 
     const loveTreff = love && !dekket;
     if (loveTreff && !paaLove) {
-        spillLovebroel();
         if (lovePosisjon) viftMedHalen(lovePosisjon.hale);
     }
     paaLove = loveTreff;
 
     const elefantTreff = Boolean(elefant && !dekket);
     if (elefantTreff && !paaElefant) {
-        spillElefantlyd();
         if (elefant) loftSnabel(elefant.snabel);
     }
     paaElefant = elefantTreff;
@@ -676,28 +425,24 @@ document.addEventListener('mousemove', hendelse => {
 
     const flodhestTreff = !dekket ? flodhest : undefined;
     if (flodhestTreff && flodhestTreff !== sisteFlodhest) {
-        spillFlodhestgrynt();
         gjesp(flodhestTreff.munn, flodhestTreff.kjeve);
     }
     sisteFlodhest = flodhestTreff;
 
     const kamelTreff = !dekket ? kamel : undefined;
     if (kamelTreff && kamelTreff !== sisteKamel) {
-        spillKamelspytt();
         spytt(kamelTreff.hode, kamelTreff.spytt);
     }
     sisteKamel = kamelTreff;
 
     const krokodilleTreff = !dekket ? krokodille : undefined;
     if (krokodilleTreff && krokodilleTreff !== sisteKrokodille) {
-        spillKrokodillesnapp();
         snapp(krokodilleTreff.kjeve);
     }
     sisteKrokodille = krokodilleTreff;
 
     const sebraTreff = !dekket ? sebra : undefined;
     if (sebraTreff && sebraTreff !== sisteSebra) {
-        spillSebraeg();
         kastMedHodet(sebraTreff.hode);
     }
     sisteSebra = sebraTreff;

@@ -14,6 +14,9 @@ const tabellRader = hentElement('#tabell-rader', HTMLTableSectionElement);
 const kopierKnapp = hentElement('#kopier-matrise', HTMLButtonElement);
 const kopierStatus = hentElement('#kopier-status', HTMLParagraphElement);
 
+const DISABLEDE_BRUKERE = 'Alle disablede brukere';
+const PERMISJON_OVERSKRIFT = 'ansatt er i permisjon';
+
 let basisAnsatte: Ansatt[] | null = null;
 let enhetsnummerPerAnsatt = new Map<string, string>();
 
@@ -93,7 +96,22 @@ function byggBasisTabell(ansatte: Ansatt[]): void {
     basisRader.replaceChildren(...rader);
 }
 
-function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansatt[]) {
+async function hentDisablede(): Promise<Set<string>> {
+    try {
+        const url = `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: DISABLEDE_BRUKERE})}`;
+        const response = await fetch(url, {headers: {'Accept': 'application/json'}});
+        if (!response.ok) {
+            return new Set();
+        }
+        const medlemmer: MedlemRespons[] = await response.json();
+        const identer = Array.isArray(medlemmer) ? medlemmer.map(medlem => medlem?.navIdent) : [];
+        return new Set(identer.filter((ident): ident is string => typeof ident === 'string'));
+    } catch {
+        return new Set();
+    }
+}
+
+function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansatt[], disablede: Set<string>) {
     const sok = substring.toLowerCase();
     const medlemskapPerAnsatt = new Map(
         data.map(({ansatt, grupper}) => [
@@ -101,6 +119,13 @@ function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansat
             new Set(grupper.filter(gruppe => gruppe.toLowerCase().includes(sok))),
         ])
     );
+    for (const {navIdent} of ansatte) {
+        if (disablede.has(navIdent)) {
+            const medlemskap = medlemskapPerAnsatt.get(navIdent) ?? new Set<string>();
+            medlemskap.add(PERMISJON_OVERSKRIFT);
+            medlemskapPerAnsatt.set(navIdent, medlemskap);
+        }
+    }
 
     const gruppeSett = new Set<string>();
     for (const ansatt of ansatte) {
@@ -308,7 +333,8 @@ form.addEventListener('submit', async (event) => {
         }
 
         const data: AnsattMedGrupper[] = await response.json();
-        const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn, basisAnsatte);
+        const disablede = await hentDisablede();
+        const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn, basisAnsatte, disablede);
         if (antallGrupper === 0) {
             settStatus(`Ingen av de ${antallAnsatte} ansatte er medlem av grupper som inneholder «${gruppeNavn}».`);
             return;

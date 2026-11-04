@@ -166,7 +166,8 @@ test('matrix keeps base employees, filters group names, sorts and copies members
             {ansatt: ansatte[0], grupper: ['TEMA 10', 'TEMA 2', 'OTHER']},
             {ansatt: ansatte[1], grupper: ['TEMA 2']},
             {ansatt: {navIdent: 'C123456'}, grupper: ['TEMA 3']}
-        ])
+        ]),
+        json([{navIdent: 'B123456'}])
     ]);
     const {page, calls} = app;
     await submit(page, '#sok-form', 'TEMA');
@@ -178,15 +179,16 @@ test('matrix keeps base employees, filters group names, sorts and copies members
     await submit(page, '#sok-form', 'TEMA');
     expect(new URL(calls[2].url()).pathname + new URL(calls[2].url()).search)
         .toBe('/api/v1/gruppe/medlemmer/sok/per-ansatt?gruppeNavn=TEMA');
-    await expect(page.locator('#status')).toHaveText('2 ansatte og 2 grupper');
+    expect(new URL(calls[3].url()).search).toBe('?gruppeNavn=Alle+disablede+brukere');
+    await expect(page.locator('#status')).toHaveText('2 ansatte og 3 grupper');
     await expect(page.locator('#resultat')).toBeVisible();
     const headers = page.locator('#tabell-overskrift th');
-    await expect(headers).toHaveText(['Nav-ident', 'Navn', 'Nom-enhet', 'TEMA 10', 'TEMA 2']);
+    await expect(headers).toHaveText(['Nav-ident', 'Navn', 'Nom-enhet', 'ansatt er i permisjon', 'TEMA 10', 'TEMA 2']);
     const rows = page.locator('#tabell-rader tr');
     await expect(rows).toHaveCount(2);
     await expect(rows.first().locator('td').nth(1)).toHaveText('1234');
-    await expect(rows.first().locator('td').nth(2)).toHaveAttribute('aria-label', 'Medlem');
-    await expect(rows.nth(1).locator('td').nth(2)).toHaveClass('nei');
+    await expect(rows.first().locator('td').nth(3)).toHaveAttribute('aria-label', 'Medlem');
+    await expect(rows.nth(1).locator('td').nth(3)).toHaveClass('nei');
     await expect(rows.first().locator('a')).toHaveAttribute('href', '/html/ansatt.html?ansattid=A123456');
     const sort = headers.first().locator('button');
     await sort.click();
@@ -195,8 +197,8 @@ test('matrix keeps base employees, filters group names, sorts and copies members
     await page.locator('#kopier-matrise').click();
     await expect(page.locator('#kopier-status')).toHaveText('Matrisen er kopiert til utklippstavlen.');
     const copied = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copied).toContain('A123456;Testansatt A;1234;true;true');
-    expect(copied).toContain('B123456;Testansatt B;1234;false;true');
+    expect(copied).toContain('A123456;Testansatt A;1234;false;true;true');
+    expect(copied).toContain('B123456;Testansatt B;1234;true;false;true');
 });
 
 for (const [id, response, url] of [
@@ -204,7 +206,7 @@ for (const [id, response, url] of [
     ['ab123c', {ansatte: nomAnsatte, navn: 'Testenhet'}, '/api/v1/nom/ansatte/enhet/ab123c']
 ] satisfies [string, unknown, string][]) {
     test(`matrix supports Nom lookup for ${id} and empty results`, async ({app}) => {
-        await app.open('gruppematrise', [json(response), json(nomAnsatte), json([])]);
+        await app.open('gruppematrise', [json(response), json(nomAnsatte), json([]), json([])]);
         const {page} = app;
         await submit(page, '#nom-form', id);
         expect(new URL(app.calls[0].url()).pathname).toBe(url);
@@ -234,7 +236,8 @@ test('matrix displays clipboard errors through the visible copy button', async (
     await app.page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', {value: undefined}));
     await app.open('gruppematrise', [
         json(ansatte), json(nomAnsatte),
-        json([{ansatt: ansatte[0], grupper: ['TEMA']}])
+        json([{ansatt: ansatte[0], grupper: ['TEMA']}]),
+        json([])
     ]);
     const {page} = app;
     await submit(page, '#gruppe-form', 'Basis');

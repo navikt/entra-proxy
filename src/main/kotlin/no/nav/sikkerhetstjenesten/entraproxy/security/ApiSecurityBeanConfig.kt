@@ -21,7 +21,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.access.AccessDeniedHandler
 import tools.jackson.databind.json.JsonMapper
-import java.net.URI
+import java.net.URI.create
 
 
 @Configuration
@@ -84,6 +84,6 @@ class ApiSecurityBeanConfig(private val converter: Converter<Jwt, AbstractAuthen
             "/actuator/env/**",
             "/actuator/loggers",
             "/actuator/loggers/**")
-        private val TYPE_URI = URI.create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
+        private val TYPE_URI = create("https://nav.no/sikkerhetstjenesten/entraproxy/problem")
     }
 }

@@ -2,7 +2,6 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
-import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.service.registry.ImportHttpServices
@@ -18,8 +17,4 @@ class EntraClientBeanConfig {
     @Bean
     fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): EntraOidOperations =
         EntraOidOppslag(oid, cache)
-
-    @Bean
-    fun entraHealthIndicator(cfg: EntraConfig, client: EntraGraphClient) =
-        PingableHealthIndicator(cfg, client::ping)
 }

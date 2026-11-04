@@ -123,8 +123,9 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     ]);
     await expect(rows.first().locator('td').nth(4)).toBeEmpty();
     await expect(rows.nth(1).locator('td').nth(4)).toHaveText('\u2713');
-    await page.getByRole('button', {name: 'Ansatt er i permisjon', exact: true}).click();
-    await page.getByRole('button', {name: 'Ansatt er i permisjon', exact: true}).click();
+    const permisjonSort = page.locator('#sammenligning-tabell-overskrift .sorter-knapp').last();
+    await permisjonSort.click();
+    await permisjonSort.click();
     await expect(rows.first().locator('th')).toHaveText('B123456');
     const sort = page.locator('#sammenligning-tabell-overskrift .sorter-knapp').first();
     await sort.click();

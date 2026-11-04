@@ -17,6 +17,8 @@ import {
 import {lagCelle, lagMedlemRad, lagSorterbarOverskrift, nullstillSortering} from './tabell.js';
 
 const FASTE_KOLONNER = ['Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn'];
+const DISABLEDE_BRUKERE = 'Alle disablede brukere';
+const PERMISJON_OVERSKRIFT = 'Ansatt er i permisjon';
 
 const sok = hentElement('#sok', HTMLDivElement);
 const forstePanel = hentElement('.sok-panel', HTMLElement, sok);
@@ -45,6 +47,7 @@ const utforsketMedlemmerOverskrift = hentElement('#utforsket-medlemmer-overskrif
 interface TilgangsenhetCeller {
     enhet: HTMLTableCellElement;
     navn: HTMLTableCellElement;
+    permisjon: HTMLTableCellElement;
 }
 
 // Paneler med et vellykket søk. Panel uten oppføring er enten tomt, under søk eller har feilet.
@@ -77,6 +80,9 @@ function detaljtabellSomTekst(): string {
     const rader = [...sammenligningTabellRader.rows].map(rad =>
         [...rad.cells].map((celle, kolonneIndeks) => {
             const verdi = celle.textContent.trim();
+            if (kolonneIndeks >= FASTE_KOLONNER.length && verdi !== '' && verdi !== '✓') {
+                throw new Error('Medlemskap er ikke ferdig hentet eller oppslaget feilet.');
+            }
             return kolonneIndeks >= FASTE_KOLONNER.length ? String(verdi === '✓') : verdi;
         })
     );
@@ -145,7 +151,9 @@ function visSammenligning(): void {
     }
 
     visOppsummering(utforsket, sammenligninger);
-    void hentNomTilgangsenheter(visDetaljer(utforsket, sammenligninger));
+    const celler = visDetaljer(utforsket, sammenligninger);
+    void hentPermisjonsstatus(celler);
+    void hentNomTilgangsenheter(celler);
 }
 
 function visOppsummering(utforsket: Gruppe, sammenligninger: Gruppe[]): void {
@@ -158,7 +166,7 @@ function visOppsummering(utforsket: Gruppe, sammenligninger: Gruppe[]): void {
 }
 
 function visDetaljer(utforsket: Gruppe, sammenligninger: Gruppe[]): Map<string, TilgangsenhetCeller> {
-    const overskrifter = [...FASTE_KOLONNER, ...sammenligninger.map(gruppe => gruppe.navn)];
+    const overskrifter = [...FASTE_KOLONNER, ...sammenligninger.map(gruppe => gruppe.navn), PERMISJON_OVERSKRIFT];
     const overskriftRad = document.createElement('tr');
     overskriftRad.append(...overskrifter.map((tekst, indeks) =>
         lagSorterbarOverskrift(tekst, indeks, sammenligningTabellOverskrift, sammenligningTabellRader)
@@ -168,16 +176,45 @@ function visDetaljer(utforsket: Gruppe, sammenligninger: Gruppe[]): Map<string, 
     const medlemssett = sammenligninger.map(gruppe => new Set(gruppe.medlemmer.map(medlem => medlem.navIdent)));
     const celler = new Map<string, TilgangsenhetCeller>();
     for (const medlem of utforsket.medlemmer) {
-        const enhetsceller = {enhet: lagCelle(), navn: lagCelle()};
+        const enhetsceller = {enhet: lagCelle(), navn: lagCelle(), permisjon: lagCelle()};
         celler.set(medlem.navIdent, enhetsceller);
         sammenligningTabellRader.appendChild(lagMedlemRad(
             medlem,
             enhetsceller.enhet,
             enhetsceller.navn,
-            ...medlemssett.map(sett => lagCelle(sett.has(medlem.navIdent) ? '✓' : ''))
+            ...medlemssett.map(sett => lagCelle(sett.has(medlem.navIdent) ? '✓' : '')),
+            enhetsceller.permisjon
         ));
     }
     return celler;
+}
+
+async function hentPermisjonsstatus(celler: Map<string, TilgangsenhetCeller>): Promise<void> {
+    for (const {permisjon} of celler.values()) {
+        permisjon.textContent = 'Henter...';
+    }
+    oppdaterSokemarkering(1);
+    try {
+        const medlemmer = await hentJson<MedlemRespons[]>(
+            sokeUrl({type: 'gruppe', verdi: DISABLEDE_BRUKERE}),
+            'Kunne ikke hente disablede brukere'
+        );
+        if (!Array.isArray(medlemmer) || !medlemmer.every(medlem => typeof medlem?.navIdent === 'string')) {
+            throw new Error('Uventet respons: forventet en liste med nav-identer.');
+        }
+        const disablede = new Set(medlemmer.map(medlem => medlem.navIdent));
+        for (const [navIdent, {permisjon}] of celler) {
+            permisjon.textContent = disablede.has(navIdent) ? '✓' : '';
+        }
+    } catch (error) {
+        for (const {permisjon} of celler.values()) {
+            permisjon.textContent = 'Oppslag feilet';
+            permisjon.title = feilmelding(error);
+            permisjon.classList.add('error');
+        }
+    } finally {
+        oppdaterSokemarkering(-1);
+    }
 }
 
 async function hentNomTilgangsenheter(celler: Map<string, TilgangsenhetCeller>): Promise<void> {

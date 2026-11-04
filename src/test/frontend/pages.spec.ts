@@ -77,6 +77,7 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await app.open('grupper', [
         json(ansatte),
         json([ansatte[0]]),
+        json([{navIdent: 'B123456'}]),
         json(nomAnsatte),
         {body: 'Testenhet'}
     ]);
@@ -102,9 +103,10 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     const panel = page.locator('.sok-panel').nth(1);
     await expect(panel.locator('label')).toHaveAttribute('for', await panel.locator('input').getAttribute('id') ?? '');
     await submit(page, '#gruppe-form-2', 'Sammenligning');
-    expect(new URL(calls[2].url()).pathname).toBe('/api/v1/nom/enhet/bulk');
-    expect(calls[2].postDataJSON()).toEqual(['A123456', 'B123456']);
-    expect(new URL(calls[3].url()).pathname).toBe('/api/v1/navn/1234');
+    expect(new URL(calls[2].url()).search).toBe('?gruppeNavn=Alle+disablede+brukere');
+    expect(new URL(calls[3].url()).pathname).toBe('/api/v1/nom/enhet/bulk');
+    expect(calls[3].postDataJSON()).toEqual(['A123456', 'B123456']);
+    expect(new URL(calls[4].url()).pathname).toBe('/api/v1/navn/1234');
     await expect(page.locator('#felles-resultat')).toBeVisible();
     await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
     const summary = page.locator('#felles-medlemmer tr');
@@ -115,6 +117,15 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await expect(rows.first().locator('td').nth(2)).toHaveText('Testenhet');
     await expect(rows.first().locator('td').nth(3)).toHaveText('\u2713');
     await expect(rows.nth(1).locator('td').nth(3)).toBeEmpty();
+    await expect(page.locator('#sammenligning-tabell-overskrift th')).toHaveText([
+        'Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn',
+        'Sammenligning', 'Ansatt er i permisjon'
+    ]);
+    await expect(rows.first().locator('td').nth(4)).toBeEmpty();
+    await expect(rows.nth(1).locator('td').nth(4)).toHaveText('\u2713');
+    await page.getByRole('button', {name: 'Ansatt er i permisjon', exact: true}).click();
+    await page.getByRole('button', {name: 'Ansatt er i permisjon', exact: true}).click();
+    await expect(rows.first().locator('th')).toHaveText('B123456');
     const sort = page.locator('#sammenligning-tabell-overskrift .sorter-knapp').first();
     await sort.click();
     await sort.click();
@@ -122,12 +133,47 @@ test('group explorer lists members, adds comparisons, enriches units, sorts and 
     await page.locator('#kopier-detaljvisning').click();
     await expect(page.locator('#kopier-status')).toHaveText('Tabellen er kopiert til utklippstavlen.');
     const copied = await page.evaluate(() => navigator.clipboard.readText());
-    expect(copied).toContain('A123456;Testansatt A;1234;Testenhet;true');
-    expect(copied).toContain('B123456;Testansatt B;1234;Testenhet;false');
+    expect(copied).toContain('Sammenligning;Ansatt er i permisjon');
+    expect(copied).toContain('A123456;Testansatt A;1234;Testenhet;true;false');
+    expect(copied).toContain('B123456;Testansatt B;1234;Testenhet;false;true');
     await panel.locator('.fjern-gruppe').click();
     await expect(page.locator('.sok-panel')).toHaveCount(1);
     await expect(page.locator('#felles-resultat')).toBeHidden();
 });
+
+for (const [name, response, error] of [
+    ['empty group', json([]), undefined],
+    ['HTTP error', json({detail: 'Ingen tilgang'}, 403), 'Ingen tilgang'],
+    ['network error', {abort: true}, 'Failed to fetch'],
+    ['invalid list', json({}), 'Uventet respons: forventet en liste med nav-identer.'],
+    ['invalid member', json([{navIdent: 42}]), 'Uventet respons: forventet en liste med nav-identer.']
+] satisfies [string, MockResponse, string | undefined][]) {
+    test(`group details keep the permission column for ${name}`, async ({app}) => {
+        await app.open('grupper', [
+            json(ansatte), json([ansatte[0]]), response, json(nomAnsatte), {body: 'Testenhet'}
+        ]);
+        const {page} = app;
+        await submit(page, '#gruppe-form', 'Basis');
+        await page.locator('.nytt-sok').click();
+        await submit(page, '#gruppe-form-2', 'Sammenligning');
+        await expect(page.locator('#sammenligning-tabell-overskrift th').last())
+            .toHaveText('Ansatt er i permisjon');
+        const cells = page.locator('#sammenligning-tabell-rader tr td:last-child');
+        await expect(cells).toHaveText(error ? ['Oppslag feilet', 'Oppslag feilet'] : ['', '']);
+        if (error) {
+            await expect(cells.first()).toHaveClass(/error/);
+            await expect(cells.first()).toHaveAttribute('title', error);
+        }
+        await page.locator('#kopier-detaljvisning').click();
+        await expect(page.locator('#kopier-status')).toHaveText(error
+            ? 'Kopiering feilet: Medlemskap er ikke ferdig hentet eller oppslaget feilet.'
+            : 'Tabellen er kopiert til utklippstavlen.');
+        if (!error) {
+            expect(await page.evaluate(() => navigator.clipboard.readText()))
+                .toContain('A123456;Testansatt A;1234;Testenhet;true;false');
+        }
+    });
+}
 
 for (const [id, response, extra, url] of [
     ['1234', nomAnsatte, [{body: 'Testenhet'}], '/api/v1/nom/ansatte/1234'],

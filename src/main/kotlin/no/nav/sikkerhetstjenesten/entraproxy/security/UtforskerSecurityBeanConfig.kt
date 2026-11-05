@@ -81,7 +81,7 @@ class UtforskerSecurityBeanConfig {
             ?.getAttribute<String>(NAVIDENT)
         log.warn("Bruker {} mangler påkrevd gruppetilgang til utforsker: {}", navIdent, e.message)
         val query = navIdent?.let { "?navident=${encode(it, UTF_8)}" }.orEmpty()
-        response.sendRedirect("/html/mangler-tilgang.html$query")
+        response.sendRedirect("/html/401.html$query")
     }
 
 
@@ -117,18 +117,17 @@ class UtforskerSecurityBeanConfig {
 
     private fun utforskerInnloggingFeiletHandler(): AuthenticationFailureHandler =
         AuthenticationFailureHandler { _, response, e ->
-            val årsak = (e as? OAuth2AuthenticationException)?.error?.errorCode ?: "ukjent"
-            log.warn("Innlogging feilet [{}]: {}", årsak, e.message, e)
+            val årsak = (e as? OAuth2AuthenticationException)?.error?.errorCode ?: "ukjent årsak"
             response.sendRedirect("$INNLOGGING_FEILET?arsak=${encode(årsak, UTF_8)}")
         }
 
-    companion object {
+     companion object {
         private const val UTFORSKER_HANDLER = "utforskerHandler"
         private const val LOGOUT_SIDE = "/html/logout.html"
         private const val LOGOUT_ENDEPUNKT = "/oauth2/logout"
         private const val INNLOGGING = "/oauth2/authorization/entra"
-        private const val INNLOGGING_FEILET = "/html/innlogging-feilet.html"
-        internal val API_ENDPOINTS: RequestMatcher = withDefaults().matcher("$API_V1/**")
+        private const val INNLOGGING_FEILET = "/html/403.html"
+        val API_ENDPOINTS = withDefaults().matcher("$API_V1/**")
         private const val BEARER_PREFIX = "Bearer "
         private val BROWSER_API_ENDPOINTS = AndRequestMatcher(API_ENDPOINTS,
             NegatedRequestMatcher { it.getHeader(AUTHORIZATION)?.startsWith(BEARER_PREFIX) == true })

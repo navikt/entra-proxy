@@ -7,32 +7,8 @@
     <ID>MagicNumber:NomGraphQLConfig.kt:NomGraphQLConfig$30</ID>
     <ID>MagicNumber:RestClientBeanConfig.kt:RestClientBeanConfig$300</ID>
     <ID>MagicNumber:RestClientBeanConfig.kt:RestClientBeanConfig$50</ID>
-    <ID>MagicNumber:Tema.kt:Tema$3</ID>
     <ID>MaxLineLength:ApiSecurityBeanConfig.kt:ApiSecurityBeanConfig$fun</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
     <ID>MaxLineLength:NomBeanConfig.kt:NomBeanConfig$factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer&lt;HttpComponentsClientHttpRequestFactoryBuilder></ID>
-    <ID>NewLineAtEndOfFile:ApiAuthenticationEntryPoint.kt:no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthenticationEntryPoint.kt</ID>
-    <ID>NewLineAtEndOfFile:CacheTestConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:EntraClientBeanConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.EntraClientBeanConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:EntraConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.EntraConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:EntraController.kt:no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.kt</ID>
-    <ID>NewLineAtEndOfFile:EntraGruppe.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe.kt</ID>
-    <ID>NewLineAtEndOfFile:EntraOidConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:MedlemmerConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:NomOrgTilknytning.kt:no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.kt</ID>
-    <ID>NewLineAtEndOfFile:NomTjeneste.kt:no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste.kt</ID>
-    <ID>NewLineAtEndOfFile:NorgConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.norg.NorgConfig.kt</ID>
-    <ID>NewLineAtEndOfFile:NorgEnhetRespons.kt:no.nav.sikkerhetstjenesten.entraproxy.norg.NorgEnhetRespons.kt</ID>
-    <ID>NewLineAtEndOfFile:NorgProxyClient.kt:no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.kt</ID>
-    <ID>NewLineAtEndOfFile:NorgTjeneste.kt:no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste.kt</ID>
-    <ID>NewLineAtEndOfFile:SecurityTestApplication.kt:no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestApplication.kt</ID>
-    <ID>NewLineAtEndOfFile:SecurityTestSupport.kt:no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.kt</ID>
-    <ID>NewLineAtEndOfFile:TIdent.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent.kt</ID>
-    <ID>NewLineAtEndOfFile:Tema.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.kt</ID>
-    <ID>NewLineAtEndOfFile:TestApp.kt:no.nav.sikkerhetstjenesten.TestApp.kt</ID>
-    <ID>ObjectPropertyNaming:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest.Companion$private const val baseUrl = "http://localhost"</ID>
     <ID>ReturnCount:CaffeineCacheOperations.kt:CaffeineCacheOperations$@Suppress("UNCHECKED_CAST") override fun &lt;T : Any> getMany: Map&lt;String, T?></ID>
     <ID>TooManyFunctions:DevEntraController.kt:DevEntraController</ID>
     <ID>TooManyFunctions:EntraController.kt:EntraController</ID>

@@ -64,11 +64,11 @@ class EntraTjenesteRestClientTest(
                     val gruppeIder = (1..25).map { randomUUID() }
                     server.expect { request ->
                         request.method shouldBe POST
-                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        request.uri.toString() shouldBe $$"$$BASE_URL/$batch"
                     }.andRespond(withSuccess(batchRespons(gruppeIder.take(20)), APPLICATION_JSON))
                     server.expect { request ->
                         request.method shouldBe POST
-                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        request.uri.toString() shouldBe $$"$$BASE_URL/$batch"
                     }.andRespond(withSuccess(batchRespons(gruppeIder.drop(20)), APPLICATION_JSON))
 
                     val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
@@ -82,7 +82,7 @@ class EntraTjenesteRestClientTest(
                     val gruppeIder = (1..1).map { randomUUID() }
                     server.expect { request ->
                         request.method shouldBe POST
-                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        request.uri.toString() shouldBe $$"$$BASE_URL/$batch"
                         (request as MockClientHttpRequest).bodyAsString shouldContain
                             """"headers":{"ConsistencyLevel":"eventual"}"""
                     }.andRespond(withSuccess(batchRespons(gruppeIder), APPLICATION_JSON))
@@ -95,7 +95,7 @@ class EntraTjenesteRestClientTest(
                     val gruppeIder = (1..2).map { randomUUID() }
                     server.expect { request ->
                         request.method shouldBe POST
-                        request.uri.toString() shouldBe $$"$$baseUrl/$batch"
+                        request.uri.toString() shouldBe $$"$$BASE_URL/$batch"
                     }.andRespond(
                         withSuccess(
                             """
@@ -120,7 +120,7 @@ class EntraTjenesteRestClientTest(
         Given("medlemmer-endepunkt") {
             When("det finnes medlemmer") {
                 Then("skal responsen inneholde forventede medlemmer") {
-                    expectGet("$baseUrl/groups/$GROUP_ID/members", gruppeMedlemmerContract)
+                    expectGet("$BASE_URL/groups/$GROUP_ID/members", gruppeMedlemmerContract)
 
                     entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
                 }
@@ -131,10 +131,10 @@ class EntraTjenesteRestClientTest(
             When("Graph svarer med flere sider via @odata.nextLink") {
                 Then("skal alle sidene hentes og medlemmene fra alle sidene returneres") {
                     val gruppeId = randomUUID()
-                    val nesteSideUri = $$"$$baseUrl/groups/$$gruppeId/members?$skiptoken=abc"
+                    val nesteSideUri = $$"$$BASE_URL/groups/$$gruppeId/members?$skiptoken=abc"
 
                     expectGet(
-                        "$baseUrl/groups/$gruppeId/members",
+                        "$BASE_URL/groups/$gruppeId/members",
                         """
                         {
                           "@odata.nextLink": "$nesteSideUri",
@@ -171,7 +171,7 @@ class EntraTjenesteRestClientTest(
                     val nøstetGruppeId = "${randomUUID()}"
 
                     expectGet(
-                        "$baseUrl/groups/$gruppeId/members",
+                        "$BASE_URL/groups/$gruppeId/members",
                         """
                         {
                           "value": [
@@ -190,7 +190,7 @@ class EntraTjenesteRestClientTest(
         Given("users-endepunkt for oppslag av oid") {
             When("det finnes nøyaktig én bruker for navident") {
                 Then("skal oid returneres") {
-                    expectGet("$baseUrl/users", oidRespons(OID))
+                    expectGet("$BASE_URL/users", oidRespons(OID))
                     repeat(2) {
                         oid.ansattOid(AnsattId("A123456")) shouldBe OID
                     }
@@ -203,7 +203,7 @@ class EntraTjenesteRestClientTest(
                     val nyOid = randomUUID()
                     cache.putOne(OID_CACHE, ident.verdi, gammelOid)
                     oidOppslag.ansattOid(ident) shouldBe gammelOid
-                    expectGet("$baseUrl/users", oidRespons(nyOid))
+                    expectGet("$BASE_URL/users", oidRespons(nyOid))
 
                     val oppfrisket = oidOppslag.oppfriskOid(ident)
                     val cachet = oidOppslag.ansattOid(ident)
@@ -255,7 +255,7 @@ class EntraTjenesteRestClientTest(
             When("Graph ikke finner noen bruker") {
                 Then("kastes EntraIkkeFunnetException med riktig navident") {
                     val ident = AnsattId("G123456")
-                    expectGet("$baseUrl/users", """{"value":[]}""")
+                    expectGet("$BASE_URL/users", """{"value":[]}""")
 
                     val feil = shouldThrow<EntraIkkeFunnetException> { oid.ansattOid(ident) }
 
@@ -268,7 +268,7 @@ class EntraTjenesteRestClientTest(
                     val ident = AnsattId("H123456")
                     val id1 = randomUUID()
                     val id2 = randomUUID()
-                    expectGet("$baseUrl/users", """{"value":[{"id":"$id1"},{"id":"$id2"}]}""")
+                    expectGet("$BASE_URL/users", """{"value":[{"id":"$id1"},{"id":"$id2"}]}""")
 
                     val feil = shouldThrow<EntraOidException> { oid.ansattOid(ident) }
 
@@ -285,7 +285,7 @@ class EntraTjenesteRestClientTest(
         Given("groups-endepunkt for oppslag av gruppe-oid") {
             When("det finnes en gruppe med gitt navn") {
                 Then("skal gruppens oid returneres") {
-                    expectGet("$baseUrl/groups", gruppeContract)
+                    expectGet("$BASE_URL/groups", gruppeContract)
 
                     repeat(2) {
                         oid.gruppeOid("En gruppe") shouldBe GRUPPE_OID
@@ -297,7 +297,7 @@ class EntraTjenesteRestClientTest(
         Given("oppslag av en ukjent gruppe") {
             When("Graph ikke finner noen gruppe") {
                 Then("returneres null") {
-                    expectGet("$baseUrl/groups", """{"value":[]}""")
+                    expectGet("$BASE_URL/groups", """{"value":[]}""")
 
                     oid.gruppeOid("UKJENT_GRUPPE") shouldBe null
                 }
@@ -309,7 +309,7 @@ class EntraTjenesteRestClientTest(
                 Then("skal medlemmene i alle matchende grupper returneres med gruppenavn") {
                     val gruppe1Id = randomUUID()
                     val gruppe2Id = randomUUID()
-                    val nesteGruppeSideUri = $$"$$baseUrl/groups?$skiptoken=grp"
+                    val nesteGruppeSideUri = $$"$$BASE_URL/groups?$skiptoken=grp"
 
                     server.expect { request ->
                         request.method shouldBe GET
@@ -336,9 +336,9 @@ class EntraTjenesteRestClientTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    expectGet("$baseUrl/groups/$gruppe1Id/members", gruppeMedlemmerContract)
+                    expectGet("$BASE_URL/groups/$gruppe1Id/members", gruppeMedlemmerContract)
                     expectGet(
-                        "$baseUrl/groups/$gruppe2Id/members",
+                        "$BASE_URL/groups/$gruppe2Id/members",
                         """
                         {
                           "value": [
@@ -359,7 +359,7 @@ class EntraTjenesteRestClientTest(
                 Then("skal resultatet per ansatt samle alle gruppene vedkommende er medlem i") {
                     val gruppe1Id = randomUUID()
                     val gruppe2Id = randomUUID()
-                    val nesteGruppeSideUri = "$baseUrl/groups?\$skiptoken=grp"
+                    val nesteGruppeSideUri = "$BASE_URL/groups?\$skiptoken=grp"
 
                     server.expect { request ->
                         request.method shouldBe GET
@@ -384,8 +384,8 @@ class EntraTjenesteRestClientTest(
                         }
                         """.trimIndent(), APPLICATION_JSON))
 
-                    expectGet("$baseUrl/groups/$gruppe1Id/members", gruppeMedlemmerContract)
-                    expectGet("$baseUrl/groups/$gruppe2Id/members", gruppeMedlemmerContract)
+                    expectGet("$BASE_URL/groups/$gruppe1Id/members", gruppeMedlemmerContract)
+                    expectGet("$BASE_URL/groups/$gruppe2Id/members", gruppeMedlemmerContract)
 
                     entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
                         AnsattMedGrupper(ANSATT, setOf("0000-GA-MIN_ROLLE_A", "0000-GA-MIN_ROLLE_B"))
@@ -397,8 +397,8 @@ class EntraTjenesteRestClientTest(
         Given("memberOf-endepunkt for temaer") {
             When("ansatt er medlem av en tema-gruppe") {
                 Then("skal temaet returneres") {
-                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
-                    expectGet("$baseUrl/users/$ANSATT_OID/memberOf", temaContract)
+                    expectGet("$BASE_URL/users?", oidRespons(ANSATT_OID))
+                    expectGet("$BASE_URL/users/$ANSATT_OID/memberOf", temaContract)
 
                     repeat(2) {
                         entra.tema(AnsattId("B123456")) shouldBe setOf(Tema("AAP"))
@@ -410,8 +410,8 @@ class EntraTjenesteRestClientTest(
         Given("memberOf-endepunkt for enheter") {
             When("ansatt er medlem av en enhet-gruppe") {
                 Then("skal enhetsnummeret returneres") {
-                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
-                    expectGet("$baseUrl/users/$ANSATT_OID/memberOf", enhetContract)
+                    expectGet("$BASE_URL/users?", oidRespons(ANSATT_OID))
+                    expectGet("$BASE_URL/users/$ANSATT_OID/memberOf", enhetContract)
 
                     repeat(2) {
                         entra.enheter(AnsattId("C123456")).map { it.enhetnummer.verdi } shouldBe listOf("1234")
@@ -423,7 +423,7 @@ class EntraTjenesteRestClientTest(
         Given("memberOf-endepunkt for grupper") {
             When("ansatt er medlem av en gruppe") {
                 Then("skal gruppen returneres") {
-                    expectGet("$baseUrl/users?", oidRespons(ANSATT_OID))
+                    expectGet("$BASE_URL/users?", oidRespons(ANSATT_OID))
                     server.expect { request ->
                         request.method shouldBe GET
                         request.uri.path shouldBe "/users/$ANSATT_OID/memberOf/microsoft.graph.group"
@@ -471,7 +471,7 @@ class EntraTjenesteRestClientTest(
 
             When("Graph ikke finner noen bruker") {
                 Then("returneres null") {
-                    expectGet("$baseUrl/users", """{"value":[]}""")
+                    expectGet("$BASE_URL/users", """{"value":[]}""")
 
                     entra.utvidetAnsatt(AnsattId("I123456")) shouldBe null
                 }
@@ -479,7 +479,7 @@ class EntraTjenesteRestClientTest(
 
             When("brukeren mangler navident") {
                 Then("returneres null i stedet for en ufullstendig ansatt") {
-                    expectGet("$baseUrl/users", """{"value":[{"id":"${randomUUID()}","displayName":"Test Ansatt"}]}""")
+                    expectGet("$BASE_URL/users", """{"value":[{"id":"${randomUUID()}","displayName":"Test Ansatt"}]}""")
 
                     entra.utvidetAnsatt(AnsattId("J123456")) shouldBe null
                 }
@@ -489,7 +489,7 @@ class EntraTjenesteRestClientTest(
                 Then("brukes standardverdier for enhetsnummer og TIdent") {
                     val ident = AnsattId("K123456")
                     expectGet(
-                        "$baseUrl/users",
+                        "$BASE_URL/users",
                         """{"value":[{"id":"${randomUUID()}","onPremisesSamAccountName":"${ident.verdi}"}]}"""
                     )
 
@@ -507,7 +507,7 @@ class EntraTjenesteRestClientTest(
         Given("users-endepunkt for utvidet ansatt") {
             When("det finnes en bruker for navident") {
                 Then("skal utvidet ansatt-informasjon returneres") {
-                    expectGet("$baseUrl/users", utvidetAnsattContract)
+                    expectGet("$BASE_URL/users", utvidetAnsattContract)
 
                     repeat(2) {
                         val respons = entra.utvidetAnsatt(AnsattId("A123456"))
@@ -539,7 +539,7 @@ class EntraTjenesteRestClientTest(
         @Bean
         fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
             builderFor(create(builder
-                .baseUrl(baseUrl)
+                .baseUrl(BASE_URL)
                 .defaultStatusHandler(HttpStatusCode::isError, DefaultRestErrorHandler()::handle)
                 .build())).build().createClient()
 
@@ -562,7 +562,7 @@ class EntraTjenesteRestClientTest(
     }
 
     private companion object {
-        private const val baseUrl = "http://localhost"
+        private const val BASE_URL = "http://localhost"
         private val GROUP_ID = randomUUID()
         private val OID = randomUUID()
         private val GRUPPE_OID = randomUUID()

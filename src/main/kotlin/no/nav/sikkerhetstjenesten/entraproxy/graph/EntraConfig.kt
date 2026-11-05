@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.SERVICECLIENT
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.ENTRA_PING_PATH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
@@ -12,7 +13,7 @@ import java.time.Duration
 
 @Component
 class EntraConfig(
-    @Value($$"${spring.http.serviceclient.graph.base-url}") baseUri: URI,
+    @Value($$"${$$SERVICECLIENT.graph.base-url}") baseUri: URI,
     @param:Value($$"${graph.varighet:3h}") override val varighet: Duration,
 ) : CachableRestConfig, RestConfig(baseUri, ENTRA_PING_PATH, GRAPH) {
     override val navn = GRAPH

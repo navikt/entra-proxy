@@ -8,7 +8,7 @@ data class Tema(val tema: String) : Comparable<Tema> {
     val verdi = tema.removePrefix(TEMA_PREFIX)
 
     init {
-        require(verdi.length == 3) { "Tema må være på 3 bokstaver" }
+        require(verdi.length == TEMA_SUFFIX_LENGTH) { "Tema må være på $TEMA_SUFFIX_LENGTH bokstaver" }
         require(verdi.all { it.isLetter() }) { "Tema kan kun bestå av bokstaver" }
     }
 
@@ -25,6 +25,7 @@ data class Tema(val tema: String) : Comparable<Tema> {
     override fun hashCode() = verdi.hashCode()
 
     companion object {
+        const val TEMA_SUFFIX_LENGTH = 3
         const val TEMA_PREFIX = "0000-GA-TEMA_"
     }
 }

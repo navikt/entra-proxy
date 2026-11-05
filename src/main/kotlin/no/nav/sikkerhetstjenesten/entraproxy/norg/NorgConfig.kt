@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.norg
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.SERVICECLIENT
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgProxyClient.Companion.PING_PATH
 import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
@@ -11,7 +12,7 @@ import java.time.Duration
 
 @Component
 class NorgConfig(
-    @Value($$"${spring.http.serviceclient.norg.base-url}") baseUrl: URI,
+    @Value($$"${$$SERVICECLIENT.norg.base-url}") baseUrl: URI,
     @param:Value($$"${norg.varighet:3h}") override val varighet: Duration,
 ) : CachableRestConfig, RestConfig(baseUrl, PING_PATH, NORG) {
     override val navn = name

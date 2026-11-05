@@ -331,7 +331,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         Given("medlemsoppslag i utforskeren") {
             When("forespørselen har innlogget sesjon") {
                 Then("returnerer medlemmer som JSON") {
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe")
+                        .header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
@@ -355,7 +356,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                         .andExpect(status().is3xxRedirection())
                 }
                 Then("gruppe-endepunktet returnerer medlemmer med gyldig token") {
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe")
+                        .header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navIdent").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningNavn").value("Test Ansatt"))
@@ -370,7 +372,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("gruppen ikke finnes") {
                 Then("returnerer en tom liste") {
                     every { oidTjeneste.gruppeOid("ukjent-gruppe") } returns null
-                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe")
+                        .header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(content().json("[]"))
                 }
@@ -489,7 +492,8 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                             gjeldendeSektor = "STAT"
                         )
                     )
-                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))
+                    mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}")
+                        .header(AUTHORIZATION, "Bearer ${oboJwt()}"))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].navident").value(TEST_ANSATT_ID.verdi))
                         .andExpect(jsonPath("$[0].visningsnavn").value("Test Ansatt"))

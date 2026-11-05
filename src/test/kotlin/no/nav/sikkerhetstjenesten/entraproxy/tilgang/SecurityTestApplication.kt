@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Import
 @SpringBootApplication(exclude = [CacheAutoConfiguration::class])
 @Import(
     EntraController::class,
+    NomController::class,
+    CacheController::class,
     EntraExceptionHandler::class,
     PageNotFoundHandler::class,
     SiderPaaRotConfig::class,

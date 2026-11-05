@@ -4,19 +4,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
-import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
-import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireCCF
@@ -33,16 +27,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-//@SecurityScheme(bearerFormat = "JWT", name = "bearerAuth", scheme = "bearer", type = HTTP)
-//@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "EntraController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class EntraController(
-    private val cache: CacheOperations,
     private val entra: EntraTjeneste,
     private val oid: EntraOidTjeneste,
-    private val nom: NomTjeneste,
     private val norg: NorgTjeneste,
     private val mail: EntraMailTjeneste) {
     @GetMapping("navn/{enhetsnummer}", produces = [TEXT_PLAIN_VALUE])
@@ -98,7 +88,6 @@ class EntraController(
     fun grupperForAnsatt(@PathVariable navIdent: AnsattId) =
         entra.grupper(navIdent)
 
-
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
@@ -129,38 +118,9 @@ class EntraController(
     fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>) =
         entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
-    @GetMapping("nom/enhet/{navIdent}")
-    @Operation(summary = "Hent ansatt og org-tilknytninger fra NOM")
-    fun ansatt(@PathVariable navIdent: AnsattId) =
-        nom.ansatt(navIdent)
-
-    @PostMapping("nom/enhet/bulk")
-    @Operation(summary = "Hent ansatte og org-tilknytninger fra NOM")
-    fun ansatte(@RequestBody identer: Set<AnsattId>) =
-        nom.ansatte(identer)
-
-    @GetMapping("nom/ansatte/{tilgangsenhetId}")
-    @Operation(summary = "Hent ansatte i en tilgangsenhet fra NOM")
-    fun ansatteForEnhet(@PathVariable tilgangsenhetId: Enhetnummer) =
-        nom.ansatteForEnhet(tilgangsenhetId)
-
-    @GetMapping("nom/ansatte/enhet/{nomId}")
-    @Operation(summary = "Hent ansatte i en nom-enhet og underliggende enheter")
-    fun ansatteForNomIdent(@PathVariable nomId: NomIdent) =
-        nom.ansatteForNomIdent(nomId)
-
-    @PostMapping("cache/flushAll")
-    @Operation(summary = "Tøm alle caches")
-    fun flushAll() = cache.clear()
-
-    @PostMapping("cache/flush")
-    @Operation(summary = "Tøm cache")
-    fun flush() = cache.clear(NOMGRAPH, GRAPH,MEDLEMMER)
-
     companion object {
         const val API_V1 = "/api/v1"
     }
-
 }
 
 private fun <R> OAuth2AuthenticatedPrincipal.requiredAttribute(attributeName: String, mapper: (String) -> R): R =

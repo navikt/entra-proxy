@@ -9,8 +9,8 @@ data class AnsattId(@JsonValue val verdi: String) : Comparable<AnsattId> {
     init {
         with(verdi) {
             require(length == ANSATTID_LENGTH) { "Ugyldig lengde $length for $this, forventet $ANSATTID_LENGTH" }
-            require(first().isLetter()) { "Ugyldig første tegn ${first()} i $this, må være stor bokstav" }
-            requireDigits(substring(1), 6)
+            require(first().isLetter()) { "Ugyldig første tegn ${first()} i $this, må være en bokstav" }
+            requireDigits(substring(1), ANSATTID_LENGTH - 1)
         }
     }
 

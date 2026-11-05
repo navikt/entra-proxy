@@ -8,17 +8,18 @@ data class TIdent(@JsonValue val verdi: String) {
         with(verdi) {
             require(length == TIDENT_LENGTH) { "Ugyldig lengde $length for $this, forventet $TIDENT_LENGTH" }
             require(first().isLetter()) { "Ugyldig første tegn ${first()} i $this, må være stor bokstav" }
-            requireDigits(substring(3), 4)
+            requireDigits(substring(TIDENT_PREFIX_LENGTH), TIDENT_LENGTH - TIDENT_PREFIX_LENGTH)
         }
     }
 
     companion object {
+
+        private const val TIDENT_PREFIX_LENGTH = 3
+        private const val TIDENT_LENGTH = 7
         fun parse(verdi: String)  =
             runCatching {
                 TIdent(verdi)
         }.getOrNull()
-
-        private const val TIDENT_LENGTH = 7
     }
 
     override fun toString() = verdi

@@ -14,7 +14,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comp
         val verdi = nummer.removePrefix(ENHET_PREFIX)
 
         init {
-            requireDigits(verdi, 4)
+            requireDigits(verdi, ENHET_SUFFIX_LENGTH)
         }
 
         val gruppeNavn = "${ENHET_PREFIX}$verdi"
@@ -22,8 +22,7 @@ data class Enhet(val enhetnummer: Enhetnummer, val navn: String = UKJENT) : Comp
         override fun compareTo(other: Enhetnummer) = verdi.compareTo(other.verdi)
 
         companion object {
-            private const val ENHETNUMMER_LENGTH = 4
-
+            private const val ENHET_SUFFIX_LENGTH = 4
             fun parse(nummer: String) =
                 runCatching {
                     Enhetnummer(nummer)

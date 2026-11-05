@@ -94,7 +94,7 @@ jobs:
       - name: Test og bygg
         env:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar 
+        run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar -PdetektUtenBaseline
 
       - name: Last opp detekt-funn
         if: ${{ !cancelled() }}

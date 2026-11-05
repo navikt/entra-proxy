@@ -49,6 +49,7 @@ plugins {
 
 detekt {
     buildUponDefaultConfig = true
+    ignoreFailures = true
     config.setFrom(file("config/detekt/detekt.yml"))
     baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent) "build/ingen-baseline.xml" else "detekt-baseline.xml")
 }

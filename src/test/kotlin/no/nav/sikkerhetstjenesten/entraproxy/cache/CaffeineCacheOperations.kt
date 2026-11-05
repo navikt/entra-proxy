@@ -14,7 +14,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     override fun getSet(nøkkel: String): Set<String> = emptySet()
 
-    override fun putSet(nøkkel: String, verdier: Set<String>) {}
+    override fun putSet(nøkkel: String, verdier: Set<String>) = Unit
 
     override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
         val key = caffeineNøkkel(cache, id)

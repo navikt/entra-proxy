@@ -59,7 +59,7 @@ Det gjør det også mulig å tilby enklere og mer stabile kontrakter enn de ekst
 Eksempler fra dagens løsning:
 
 - `EntraController` skiller mellom produksjons-API og tokenkrav
-- `DevEntraController` gir et separat testvennlig dev-endepunkt
+- Dev-kontrollerne (`DevNomController`, `DevAnsattController` og `DevGruppeController`) gir et separat testvennlig dev-endepunkt
 - `EntraTjeneste` kombinerer Entra-data med navn fra NORG
 - `EntraConfig` eier Graph-spesifikke URI-byggere og filteruttrykk
 

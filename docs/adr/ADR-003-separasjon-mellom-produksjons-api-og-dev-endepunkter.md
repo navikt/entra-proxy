@@ -14,7 +14,7 @@
 Disse behovene er tydelige i dagens kode:
 
 - `EntraController` eksponerer produksjonsendepunkter under `/api/v1`
-- `DevEntraController` eksponerer egne dev-endepunkter under `/dev`
+- Dev-kontrollerne (`DevNomController`, `DevAnsattController` og `DevGruppeController`) eksponerer egne dev-endepunkter under `/dev`
 - produksjonsendepunktene er beskyttet med `ProtectedRestController` og Azure AD-validering
 - dev-endepunktene er mer åpne, men bare tilgjengelige utenfor prod via `@ConditionalOnNotProd`
 
@@ -91,7 +91,7 @@ Den reduserer også risikoen for at testendepunkter eller svakere beskyttede fly
 
 ## Aksjonspunkter
 
-- [x] Behold separat `EntraController` for produksjon og `DevEntraController` for dev
+- [x] Behold separat `EntraController` for produksjon og dev-kontrollerne (`DevNomController`, `DevAnsattController` og `DevGruppeController`) for dev
 - [x] Behold `@ConditionalOnNotProd` for dev-controlleren
 - [x] Behold eksplisitt tokenkontroll for OBO og CC i produksjons-API-et
 - [ ] Vurder å dokumentere hvilke endepunkter som er del av støttet produksjonskontrakt versus rene dev-verktøy

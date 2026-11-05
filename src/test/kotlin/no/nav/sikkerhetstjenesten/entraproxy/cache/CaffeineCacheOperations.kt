@@ -5,6 +5,7 @@ import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.CacheManager
+import org.springframework.cache.Cache as SpringCache
 import java.time.Duration
 import kotlin.reflect.KClass
 
@@ -16,7 +17,7 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     override fun putSet(nøkkel: String, verdier: Set<String>) = Unit
 
-    override fun delete(cache: CacheNøkkelConfig, id: String) : Boolean {
+    override fun delete(cache: CacheNøkkelConfig, id: String): Boolean {
         val key = caffeineNøkkel(cache, id)
         val springCache = cacheManager.getCache(cache.name) ?: return false
         val existed = springCache.get(key) != null
@@ -34,11 +35,10 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getMany(cache: CacheNøkkelConfig, ids: Set<String>, clazz: KClass<T>): Map<String, T?> {
-        if (ids.isEmpty()) return emptyMap()
         val springCache = cacheManager.getCache(cache.name) ?: return emptyMap()
-        return ids.associateWith { id ->
-            springCache.get(caffeineNøkkel(cache, id))?.get() as T?
-        }.filterValues { it != null }
+        return ids.mapNotNull { id ->
+            (springCache.get(caffeineNøkkel(cache, id))?.get() as T?)?.let { id to it }
+        }.toMap()
     }
 
     override fun putMany(cache: CacheNøkkelConfig, innslag: Map<String, Any>, ttl: Duration?) {
@@ -47,39 +47,37 @@ class CaffeineCacheOperations(private val cacheManager: CacheManager) : CacheOpe
         innslag.forEach { (id, value) -> springCache.put(caffeineNøkkel(cache, id), value) }
     }
 
-    private fun caffeineNøkkel(cache: CacheNøkkelConfig, id: String) =
-        "${cache.extraPrefix?.let { "$it:" } ?: ""}$id"
-
     override fun clear(cache: CacheNøkkelConfig): Long {
         val springCache = cacheManager.getCache(cache.name) ?: return 0L
-        val nativeCache = springCache.nativeCache as Cache<*, *>
-        return if (cache.extraPrefix == null) {
-            val deleted = nativeCache.estimatedSize()
+        val antall = antall(springCache, cache)
+        if (cache.extraPrefix == null) {
             springCache.clear()
-            deleted
         } else {
-            val prefix = caffeineNøkkel(cache, "")
-            val deleted = nativeCache.asMap().keys
-                .filterIsInstance<String>()
-                .filter { it.startsWith(prefix) }
-                .toList()
-            deleted.forEach { springCache.evict(it) }
-            deleted.size.toLong()
+            nøkler(springCache, cache).forEach(springCache::evict)
         }
+        return antall
     }
 
     override fun sizes(vararg caches: CacheNøkkelConfig): Map<String, Long> =
         caches.associate { cache ->
             val springCache = cacheManager.getCache(cache.name) ?: error("Cache $cache ikke funnet")
-            val count = run {
-                val nativeCache = springCache.nativeCache as Cache<*, *>
-                if (cache.extraPrefix == null) {
-                    nativeCache.estimatedSize()
-                } else {
-                    val prefix = caffeineNøkkel(cache, "")
-                    nativeCache.asMap().keys.count { it is String && it.startsWith(prefix) }.toLong()
-                }
-            }
-            cache.fullName to count
+            cache.fullName to antall(springCache, cache)
+        }
+
+    private fun caffeineNøkkel(cache: CacheNøkkelConfig, id: String) =
+        "${cache.extraPrefix?.let { "$it:" } ?: ""}$id"
+
+    private fun nøkler(springCache: SpringCache, cache: CacheNøkkelConfig): List<String> {
+        val prefix = caffeineNøkkel(cache, "")
+        return (springCache.nativeCache as Cache<*, *>).asMap().keys
+            .filterIsInstance<String>()
+            .filter { it.startsWith(prefix) }
+    }
+
+    private fun antall(springCache: SpringCache, cache: CacheNøkkelConfig): Long =
+        if (cache.extraPrefix == null) {
+            (springCache.nativeCache as Cache<*, *>).estimatedSize()
+        } else {
+            nøkler(springCache, cache).size.toLong()
         }
 }

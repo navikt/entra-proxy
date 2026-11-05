@@ -116,6 +116,14 @@ jobs:
           path: build/reports/detekt/
           retention-days: 14
 
+      - name: Last opp detekt-rapport (HTML)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: build/reports/detekt/detekt.html
+          archive: false
+          retention-days: 14
+
       - name: Bygg og push Docker-image
         id: docker-push
         uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7

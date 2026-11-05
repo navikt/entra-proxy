@@ -62,7 +62,7 @@ jobs:
       digest: ${{ steps.docker-push.outputs.digest }}
     steps:
       - name: Sjekker ut kode
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ inputs.checkout-ref || github.ref }}
           repository: ${{ inputs.checkout-repository || github.repository }}
@@ -70,18 +70,18 @@ jobs:
           persist-credentials: false
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.0-rc.1
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c 
         with:
           cache-read-only: ${{ inputs.cache-read-only }}
 
       - name: Install Java 27
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
         with:
           java-version: 27
           distribution: temurin
 
       - name: Setup Node
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 24
           cache: npm
@@ -99,13 +99,13 @@ jobs:
       - name: Last opp detekt-funn
         if: ${{ !cancelled() }}
         continue-on-error: true # mangler skrivetilgang for PR-er fra forks
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066
         with:
           sarif_file: build/reports/detekt/detekt.sarif
           category: detekt
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7 # v0
+        uses: nais/docker-build-push@d3a1f7e259ecc381a50435e1d4add9059429ebd7
         with:
           team: sikkerhetstjenesten

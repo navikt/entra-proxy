@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-/** Gjør sidene under /html også tilgjengelige direkte på rot, f.eks. /ansatt.html. */
 @Configuration
 class SiderPaaRotConfig : WebMvcConfigurer {
 
@@ -15,6 +14,6 @@ class SiderPaaRotConfig : WebMvcConfigurer {
     }
 
     companion object {
-        val SIDER = listOf("ansatt", "grupper", "gruppematrise", "logout", "innlogging-feilet", "mangler-tilgang")
+        val SIDER = listOf("ansatt", "grupper", "gruppematrise", "logout", "401", "403")
     }
 }

@@ -1,5 +1,8 @@
-import type {Ansatt, AnsattMedGrupper, MedlemRespons, NomAnsatt, NomEnhetAnsatteRespons} from './api-types.js';
-import {feilmelding, hentElement} from './dom.js';
+import {z} from 'zod';
+import {type Ansatt, type AnsattMedGrupper, type MedlemRespons, nomBulkAnsattSchema, type NomEnhetAnsatteRespons} from './api-types.js';
+import {feilmelding, hentElement, trygg} from './dom.js';
+import {hentResponse, lesJson, lesValidert} from './http.js';
+import {celletekst} from './tabell.js';
 
 const nomForm = hentElement('#nom-form', HTMLFormElement);
 const gruppeForm = hentElement('#gruppe-form', HTMLFormElement);
@@ -38,10 +41,7 @@ async function hentEnhetsnummer(navidenter: string[]): Promise<void> {
     if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
     }
-    const ressurser: NomAnsatt[] = await response.json();
-    if (!Array.isArray(ressurser)) {
-        throw new Error('Uventet respons fra Nom.');
-    }
+    const ressurser = await lesValidert(response, z.array(nomBulkAnsattSchema), 'Uventet respons fra Nom.');
     for (const ressurs of ressurser) {
         const enheter = (ressurs?.orgTilknytninger ?? [])
             .map(tilknytning => tilknytning?.orgEnhet?.tilgangsenhetId)
@@ -103,7 +103,7 @@ async function hentDisablede(): Promise<Set<string>> {
         if (!response.ok) {
             return new Set();
         }
-        const medlemmer: MedlemRespons[] = await response.json();
+        const medlemmer = await lesJson<MedlemRespons[]>(response);
         const identer = Array.isArray(medlemmer) ? medlemmer.map(medlem => medlem?.navIdent) : [];
         return new Set(identer.filter((ident): ident is string => typeof ident === 'string'));
     } catch {
@@ -197,15 +197,15 @@ tabellOverskrift.addEventListener('click', (event) => {
     const kolonne = Number(knapp.dataset.kolonne);
     const rader = [...tabellRader.rows];
     rader.sort((radA, radB) => {
-        const verdiA = radA.cells[kolonne].textContent.trim();
-        const verdiB = radB.cells[kolonne].textContent.trim();
+        const verdiA = celletekst(radA, kolonne);
+        const verdiB = celletekst(radB, kolonne);
         const sammenligning = verdiA.localeCompare(verdiB, 'nb', {numeric: true, sensitivity: 'base'});
         return retning === 'ascending' ? sammenligning : -sammenligning;
     });
     tabellRader.replaceChildren(...rader);
 });
 
-kopierKnapp.addEventListener('click', async () => {
+kopierKnapp.addEventListener('click', trygg(async () => {
     kopierKnapp.disabled = true;
     kopierStatus.classList.remove('error');
     kopierStatus.textContent = 'Kopierer...';
@@ -213,7 +213,7 @@ kopierKnapp.addEventListener('click', async () => {
         if (!navigator.clipboard?.writeText) {
             throw new Error('Utklippstavlen er ikke tilgjengelig. Bruk HTTPS og en nettleser som støtter kopiering.');
         }
-        const overskrifter = [...tabellOverskrift.rows[0].cells].map(celle =>
+        const overskrifter = [...tabellOverskrift.rows[0]?.cells ?? []].map(celle =>
             celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
         );
         const rader = [...tabellRader.rows].map(rad =>
@@ -230,10 +230,10 @@ kopierKnapp.addEventListener('click', async () => {
     } finally {
         kopierKnapp.disabled = false;
     }
-});
+}));
 
 for (const skjema of [nomForm, gruppeForm]) {
-    skjema.addEventListener('submit', async (event) => {
+    skjema.addEventListener('submit', trygg(async (event) => {
         event.preventDefault();
         const erNomSok = skjema.classList.contains('nom-form');
         const verdi = hentElement('input', HTMLInputElement, skjema).value.trim();
@@ -261,17 +261,9 @@ for (const skjema of [nomForm, gruppeForm]) {
             const url = erNomSok
                 ? (erNomEnhet ? `/api/v1/nom/ansatte/enhet/${verdi}` : `/api/v1/nom/ansatte/${verdi}`)
                 : `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: verdi})}`;
-            const response = await fetch(url, {headers: {'Accept': 'application/json'}});
-            if (!response.ok) {
-                let melding = `Kunne ikke hente medlemmer (HTTP ${response.status}).`;
-                if (response.headers.get('content-type')?.includes('json')) {
-                    const problem: {detail?: string | null} = await response.json();
-                    melding = problem.detail ?? melding;
-                }
-                throw new Error(melding);
-            }
+            const response = await hentResponse(url, 'Kunne ikke hente medlemmer');
 
-            const data: MedlemRespons[] | NomEnhetAnsatteRespons = await response.json();
+            const data = await lesJson<MedlemRespons[] | NomEnhetAnsatteRespons>(response);
             const ansatteListe = (erNomSok && erNomEnhet)
                 ? (Array.isArray(data) ? undefined : data?.ansatte)
                 : data;
@@ -302,10 +294,10 @@ for (const skjema of [nomForm, gruppeForm]) {
         } finally {
             document.documentElement.classList.remove('soker');
         }
-    });
+    }));
 }
 
-form.addEventListener('submit', async (event) => {
+form.addEventListener('submit', trygg(async (event) => {
     event.preventDefault();
     const gruppeNavn = input.value.trim();
     if (!gruppeNavn) {
@@ -322,17 +314,9 @@ form.addEventListener('submit', async (event) => {
 
     try {
         const url = `/api/v1/gruppe/medlemmer/sok/per-ansatt?${new URLSearchParams({gruppeNavn})}`;
-        const response = await fetch(url, {headers: {'Accept': 'application/json'}});
-        if (!response.ok) {
-            let melding = `Søket feilet (HTTP ${response.status}).`;
-            if (response.headers.get('content-type')?.includes('json')) {
-                const problem: {detail?: string | null} = await response.json();
-                melding = problem.detail ?? melding;
-            }
-            throw new Error(melding);
-        }
+        const response = await hentResponse(url, 'Søket feilet');
 
-        const data: AnsattMedGrupper[] = await response.json();
+        const data = await lesJson<AnsattMedGrupper[]>(response);
         const disablede = await hentDisablede();
         const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn, basisAnsatte, disablede);
         if (antallGrupper === 0) {
@@ -346,4 +330,4 @@ form.addEventListener('submit', async (event) => {
     } finally {
         document.documentElement.classList.remove('soker');
     }
-});
+}));

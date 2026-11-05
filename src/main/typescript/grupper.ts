@@ -1,19 +1,17 @@
-import type {MedlemRespons, NomAnsatt, NomEnhetAnsatteRespons} from './api-types.js';
-import {feilmelding, hentElement} from './dom.js';
-import {hentJson, hentTekst} from './http.js';
+import type {MedlemRespons} from './api-types.js';
+import {feilmelding, hentElement, trygg} from './dom.js';
+import {hentJson} from './http.js';
 import {
     beregnOppsummering,
     type Gruppe,
     MAKS_RADER_UTEN_RULLEFELT,
     medlemstekst,
-    resultatnavn,
     type Sok,
     sokenavn,
     sokeUrl,
-    tolkMedlemmer,
-    tolkNomSok,
-    visningsnavn
+    tolkNomSok
 } from './gruppelogikk.js';
+import {hentGruppe, type HentetGruppe, hentNomAnsatte, hentTilgangsenhetsnavn} from './gruppeapi.js';
 import {lagCelle, lagMedlemRad, lagSorterbarOverskrift, nullstillSortering} from './tabell.js';
 
 const FASTE_KOLONNER = ['Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn'];
@@ -74,7 +72,7 @@ function settStatus(element: HTMLElement, tekst: string, erFeil = false): void {
 }
 
 function detaljtabellSomTekst(): string {
-    const overskrifter = [...sammenligningTabellOverskrift.rows[0].cells].map(celle =>
+    const overskrifter = [...sammenligningTabellOverskrift.rows[0]?.cells ?? []].map(celle =>
         celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
     );
     const rader = [...sammenligningTabellRader.rows].map(rad =>
@@ -89,7 +87,7 @@ function detaljtabellSomTekst(): string {
     return [overskrifter, ...rader].map(rad => rad.join(';')).join('\r\n');
 }
 
-kopierDetaljvisning.addEventListener('click', async () => {
+kopierDetaljvisning.addEventListener('click', trygg(async () => {
     kopierDetaljvisning.disabled = true;
     settStatus(kopierStatus, 'Kopierer...');
     try {
@@ -103,7 +101,7 @@ kopierDetaljvisning.addEventListener('click', async () => {
     } finally {
         kopierDetaljvisning.disabled = false;
     }
-});
+}));
 
 function visUtforsketGruppe(): void {
     const utforsket = grupper.get(forstePanel);
@@ -231,7 +229,7 @@ async function hentNomTilgangsenheter(celler: Map<string, TilgangsenhetCeller>):
         const enheterPerNavIdent = new Map(ressurser.map(ressurs => {
             const enheter = ressurs.orgTilknytninger
                 .map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId)
-                .filter(id => id !== null);
+                .filter((id): id is string => Boolean(id));
             return [ressurs.navident, [...new Set(enheter)]] as const;
         }));
         for (const [navIdent, {enhet}] of celler) {
@@ -251,34 +249,6 @@ async function hentNomTilgangsenheter(celler: Map<string, TilgangsenhetCeller>):
     } finally {
         oppdaterSokemarkering(-1);
     }
-}
-
-async function hentNomAnsatte(navIdenter: string[]): Promise<NomAnsatt[]> {
-    const response = await fetch('/api/v1/nom/enhet/bulk', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-        body: JSON.stringify(navIdenter)
-    });
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    const ressurser: NomAnsatt[] = await response.json();
-    if (!Array.isArray(ressurser)) {
-        throw new Error('Uventet respons fra Nom: forventet en liste med ansatte.');
-    }
-    if (!ressurser.every(ressurs => typeof ressurs?.navident === 'string' && Array.isArray(ressurs.orgTilknytninger))) {
-        throw new Error('Uventet respons fra Nom: mangler navident eller orgTilknytninger.');
-    }
-    return ressurser;
-}
-
-async function hentTilgangsenhetsnavn(tilgangsenheter: string[]): Promise<Map<string, string>> {
-    const oppslag = await Promise.all(tilgangsenheter.map(async id => {
-        const navn = await hentTekst(`/api/v1/navn/${encodeURIComponent(id)}`, 'Kunne ikke hente enhetsnavn')
-            .catch(() => '');
-        return [id, navn || id] as const;
-    }));
-    return new Map(oppslag);
 }
 
 function oppdaterVisning(): void {
@@ -337,36 +307,6 @@ function validerSok(panel: HTMLElement, valgtSok: Sok | undefined, erNomSok: boo
     return alleredeValgt ? `Gruppen "${navn}" er allerede valgt i et annet søk.` : undefined;
 }
 
-interface HentetGruppe {
-    gruppe: Gruppe;
-    resultatnavn: string;
-}
-
-async function hentGruppe(valgtSok: Sok, erGjeldende: () => boolean): Promise<HentetGruppe | undefined> {
-    const resultat = await hentJson<MedlemRespons[] | NomEnhetAnsatteRespons>(
-        sokeUrl(valgtSok),
-        'Kunne ikke hente medlemmer'
-    );
-    if (!erGjeldende()) {
-        return undefined;
-    }
-    const {medlemmer, enhetsnavn: enhetsnavnFraRespons} = tolkMedlemmer(valgtSok, resultat);
-    let enhetsnavn = enhetsnavnFraRespons;
-    if (valgtSok.type === 'tilgangsenhet') {
-        enhetsnavn = await hentTekst(`/api/v1/navn/${valgtSok.verdi}`, 'Kunne ikke hente enhetsnavn');
-        if (!enhetsnavn) {
-            throw new Error('Uventet respons: mangler enhetsnavn.');
-        }
-        if (!erGjeldende()) {
-            return undefined;
-        }
-    }
-    return {
-        gruppe: {navn: visningsnavn(valgtSok, enhetsnavn), sokenavn: sokenavn(valgtSok), medlemmer},
-        resultatnavn: resultatnavn(valgtSok, enhetsnavn)
-    };
-}
-
 function sokestatus({gruppe, resultatnavn}: HentetGruppe, erNomSok: boolean): string {
     if (gruppe.medlemmer.length) {
         return `${medlemstekst(gruppe.medlemmer.length)} i ${resultatnavn}`;
@@ -387,7 +327,7 @@ function klargjorSok(panel: HTMLElement): void {
         const status = hentElement('.status', HTMLParagraphElement, form);
         const erNomSok = form.classList.contains('nom-form');
 
-        form.addEventListener('submit', async event => {
+        form.addEventListener('submit', trygg(async event => {
             event.preventDefault();
             if (knapp.disabled) {
                 return;
@@ -433,7 +373,7 @@ function klargjorSok(panel: HTMLElement): void {
                 }
                 oppdaterSokemarkering(-1);
             }
-        });
+        }));
     }
 }
 

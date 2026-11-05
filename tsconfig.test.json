@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    "noUncheckedIndexedAccess": false,
     "rootDir": ".",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",

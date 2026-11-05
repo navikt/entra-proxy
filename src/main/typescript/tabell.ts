@@ -26,8 +26,8 @@ export function lagSorterbarOverskrift(
         celle.setAttribute('aria-sort', retning);
         const faktor = retning === 'ascending' ? 1 : -1;
         const sorterte = [...rader.rows].sort((radA, radB) =>
-            faktor * radA.cells[kolonneIndeks].textContent.trim()
-                .localeCompare(radB.cells[kolonneIndeks].textContent.trim(), undefined, {numeric: true, sensitivity: 'base'})
+            faktor * celletekst(radA, kolonneIndeks)
+                .localeCompare(celletekst(radB, kolonneIndeks), undefined, {numeric: true, sensitivity: 'base'})
         );
         rader.append(...sorterte);
     });
@@ -52,4 +52,8 @@ export function lagCelle(tekst = ''): HTMLTableCellElement {
     const celle = document.createElement('td');
     celle.textContent = tekst;
     return celle;
+}
+
+export function celletekst(rad: HTMLTableRowElement, indeks: number): string {
+    return rad.cells[indeks]?.textContent.trim() ?? '';
 }

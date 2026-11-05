@@ -85,7 +85,7 @@ export function beregnOppsummering(utforsket: Gruppe, sammenligninger: Gruppe[])
         {grupper: `Kun i ${utforsket.navn}`, antall: kunUtforsket.length},
         ...sammenligninger.map((gruppe, indeks) => ({
             grupper: `${utforsket.navn} og ${gruppe.navn}`,
-            antall: [...navIdenter].filter(navIdent => sett[indeks].has(navIdent)).length
+            antall: [...navIdenter].filter(navIdent => sett[indeks]?.has(navIdent)).length
         }))
     ];
 }

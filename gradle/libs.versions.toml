@@ -1,5 +1,6 @@
 [versions]
 conditionals = "6.0.11"
+detekt = "2.0.0-alpha.6"
 cyclonedx = "3.5.1"
 grgit = "5.3.3"
 jacksonAnnotations = "2.22"
@@ -59,6 +60,7 @@ springBootTest = ["springBootStarterWebmvcTest", "springBootStarterRestclientTes
 
 [plugins]
 cyclonedx = { id = "org.cyclonedx.bom", version.ref = "cyclonedx" }
+detekt = { id = "dev.detekt", version.ref = "detekt" }
 grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

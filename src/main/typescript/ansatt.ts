@@ -1,11 +1,14 @@
-import type {NomAnsatt, NomLeder} from './api-types.js';
-import {hentElement} from './dom.js';
+import {z} from 'zod';
+import {type NomLeder, nomAnsattSchema} from './api-types.js';
+import {hentElement, trygg} from './dom.js';
+import {hentResponse, lesValidert} from './http.js';
+import {celletekst} from './tabell.js';
 
-interface Gruppe {
-    rolle: string;
-    gruppeId?: string | null;
-    beskrivelse?: string | null;
-}
+const gruppeSkjema = z.object({
+    rolle: z.string(),
+    gruppeId: z.string().nullish(),
+    beskrivelse: z.string().nullish()
+});
 
 const form = hentElement('#ansatt-form', HTMLFormElement);
 const input = hentElement('#ansattid', HTMLInputElement);
@@ -27,7 +30,7 @@ function oppdaterGruppeFilter(): void {
     const sokeTekst = gruppeFilter.value.trim().toLocaleLowerCase('nb');
     let synlige = 0;
     for (const rad of grupperRader.rows) {
-        const gruppenavn = rad.cells[0].textContent.trim().toLocaleLowerCase('nb');
+        const gruppenavn = celletekst(rad, 0).toLocaleLowerCase('nb');
         rad.hidden = !gruppenavn.includes(sokeTekst);
         if (!rad.hidden) synlige++;
     }
@@ -54,28 +57,13 @@ for (const sorterKnapp of sorterKnapper) {
         const kolonne = Number(sorterKnapp.dataset.kolonne);
         const rader = [...grupperRader.rows];
         rader.sort((radA, radB) => {
-            const verdiA = radA.cells[kolonne].textContent.trim();
-            const verdiB = radB.cells[kolonne].textContent.trim();
+            const verdiA = celletekst(radA, kolonne);
+            const verdiB = celletekst(radB, kolonne);
             const sammenligning = verdiA.localeCompare(verdiB, 'nb', {numeric: true, sensitivity: 'base'});
             return retning === 'ascending' ? sammenligning : -sammenligning;
         });
         grupperRader.replaceChildren(...rader);
     });
-}
-
-async function hentResponse(url: string, beskrivelse: string, innstillinger: RequestInit = {}): Promise<Response> {
-    const headers = new Headers(innstillinger.headers);
-    if (!headers.has('Accept')) headers.set('Accept', 'application/json');
-    const response = await fetch(url, {...innstillinger, headers});
-    if (!response.ok) {
-        let melding = `Kunne ikke hente ${beskrivelse} (HTTP ${response.status}).`;
-        if (response.headers.get('content-type')?.includes('json')) {
-            const problem: {detail?: string | null} = await response.json();
-            melding = problem.detail ?? melding;
-        }
-        throw new Error(melding);
-    }
-    return response;
 }
 
 function byggLedere(celle: HTMLTableCellElement, ledere: NomLeder[] | null | undefined): void {
@@ -93,7 +81,7 @@ function byggLedere(celle: HTMLTableCellElement, ledere: NomLeder[] | null | und
     });
 }
 
-form.addEventListener('submit', async event => {
+form.addEventListener('submit', trygg(async event => {
     event.preventDefault();
     const ansattid = input.value.trim().toUpperCase();
     resultat.hidden = true;
@@ -113,9 +101,9 @@ form.addEventListener('submit', async event => {
     status.textContent = 'Henter ansatt...';
 
     try {
-        const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'nom-data');
+        const nomResponse = await hentResponse(`/api/v1/nom/enhet/${encodeURIComponent(ansattid)}`, 'Kunne ikke hente nom-data');
         const nomTekst = await nomResponse.text();
-        const nomData: NomAnsatt | null = nomTekst.trim() ? JSON.parse(nomTekst) : null;
+        const nomData = nomTekst.trim() ? nomAnsattSchema.nullable().parse(JSON.parse(nomTekst)) : null;
         if (nomData === null) {
             status.textContent = 'Ingen ansatt funnet.';
             return;
@@ -128,15 +116,15 @@ form.addEventListener('submit', async event => {
             ledere: tilknytning.orgEnhet.ledere ?? []
         }));
         enheterLedereKolonne.hidden = !flereTilknytninger;
-        const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'gruppemedlemskap');
-        const grupper: Gruppe[] = await grupperResponse.json();
+        const grupperResponse = await hentResponse(`/api/v1/ansatt/tilganger/${encodeURIComponent(ansattid)}`, 'Kunne ikke hente gruppemedlemskap');
+        const grupper = await lesValidert(grupperResponse, z.array(gruppeSkjema), 'Uventet respons: forventet en liste med grupper.');
         const gruppeIder = grupper.map(gruppe => gruppe.gruppeId).filter((id): id is string => Boolean(id));
-        const antallMedlemmer: Record<string, number> = gruppeIder.length
-            ? await (await hentResponse('/api/v1/gruppe/antall/bulk', 'antall medlemmer i grupper', {
+        const antallMedlemmer = gruppeIder.length
+            ? await lesValidert(await hentResponse('/api/v1/gruppe/antall/bulk', 'Kunne ikke hente antall medlemmer i grupper', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(gruppeIder)
-            })).json()
+            }), z.record(z.string(), z.number()), 'Uventet respons: forventet antall medlemmer per gruppe.')
             : {};
         const verdier: [string, string | null][] = [
             ['Nav-ident', nomData.navident],
@@ -153,7 +141,7 @@ form.addEventListener('submit', async event => {
             feltCelle.textContent = felt;
             const verdiCelle = document.createElement('td');
             if (felt === 'N\u00e6rmeste leder') {
-                byggLedere(verdiCelle, enheter[0].ledere);
+                byggLedere(verdiCelle, enheter[0]?.ledere);
             } else {
                 verdiCelle.textContent = verdi ?? '';
             }
@@ -213,7 +201,7 @@ form.addEventListener('submit', async event => {
         knapp.disabled = false;
         document.documentElement.classList.remove('soker');
     }
-});
+}));
 
 const ansattidFraUrl = new URLSearchParams(window.location.search).get('ansattid');
 if (ansattidFraUrl) {

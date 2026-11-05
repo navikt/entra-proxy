@@ -61,7 +61,7 @@ for (const [name, response, message] of [
     });
 }
 
-for (const [name, parameter] of [['innlogging-feilet', 'arsak'], ['mangler-tilgang', 'navident']]) {
+for (const [name, parameter] of [['403', 'arsak'], ['401', 'navident']]) {
     test(`${name} displays query values as text only`, async ({app}) => {
         await app.open(name);
         await expect(app.page.locator(`#${parameter}`)).toBeHidden();

@@ -7,6 +7,7 @@ export default tseslint.config(
     ...tseslint.configs.recommended,
     {
         files: ['src/main/typescript/**/*.ts'],
+        extends: [tseslint.configs.recommendedTypeChecked],
         languageOptions: {
             parserOptions: {project: './tsconfig.json'}
         },

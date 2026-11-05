@@ -56,6 +56,7 @@ jobs:
       checks: write    # publisere test-resultater til Checks API
       contents: read   # checkout kode
       id-token: write  # nais/docker-build-push (OIDC mot GAR)
+      security-events: write  # laste opp detekt-funn (SARIF) til code scanning
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
       digest: ${{ steps.docker-push.outputs.digest }}
@@ -93,7 +94,15 @@ jobs:
       - name: Test og bygg
         env:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: ./gradlew --warning-mode all test frontendTest jacocoTestReport cyclonedxBom bootJar
+        run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar
+
+      - name: Last opp detekt-funn
+        if: ${{ !cancelled() }}
+        continue-on-error: true # mangler skrivetilgang for PR-er fra forks
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: build/reports/detekt/detekt.sarif
+          category: detekt
 
       - name: Bygg og push Docker-image
         id: docker-push

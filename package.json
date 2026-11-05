@@ -2,7 +2,7 @@
   "name": "entra-proxy-frontend",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --noEmit && esbuild src/main/typescript/*.ts --bundle --splitting --format=esm --target=es2022 --outdir=build/generated/frontend/static",
     "lint": "eslint .",
     "test": "npm run lint && npm run build && npm run test:frontend",
     "test:frontend": "tsc -p tsconfig.test.json && playwright test",
@@ -18,5 +18,9 @@
   },
   "overrides": {
     "minimatch": "^11.0.1"
+  },
+  "dependencies": {
+    "esbuild": "0.28.2",
+    "zod": "4.6.7"
   }
 }

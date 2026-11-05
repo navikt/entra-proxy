@@ -37,6 +37,7 @@ extra["jackson-2-bom.version"] = "2.22.4"
 
 plugins {
     id("jacoco")
+    alias(libs.plugins.detekt)
     alias(libs.plugins.grgit)
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.kotlinSpring)
@@ -44,6 +45,23 @@ plugins {
     alias(libs.plugins.springDependencyManagement)
     alias(libs.plugins.cyclonedx)
     alias(libs.plugins.kotest)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    baseline = file("detekt-baseline.xml")
+}
+
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
+    reports {
+        sarif.required = true
+    }
+}
+
+configurations.matching { it.name.startsWith("detekt") }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") useVersion("2.4.10")
+    }
 }
 
 tasks.named<JacocoReport>("jacocoTestReport") {

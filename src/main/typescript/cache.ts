@@ -1,26 +1,23 @@
-import {feilmelding, hentElement} from './dom.js';
-import {feilFraRespons} from './http.js';
+import {z} from 'zod';
+import {feilmelding, hentElement, trygg} from './dom.js';
+import {hentResponse, lesValidert} from './http.js';
 
 (() => {
     const knapp = hentElement('#oppfrisk-caches', HTMLButtonElement);
     const status = hentElement('#cache-status', HTMLParagraphElement);
 
-    knapp.addEventListener('click', async () => {
+    knapp.addEventListener('click', trygg(async () => {
         knapp.disabled = true;
         status.hidden = false;
         status.classList.remove('error');
         status.textContent = 'Oppfrisker cache...';
 
         try {
-            const response = await fetch('/api/v1/cache/flush', {
+            const response = await hentResponse('/api/v1/cache/flush', 'Kunne ikke oppfriske cache', {
                 method: 'POST',
-                headers: {'Accept': 'application/json'},
                 redirect: 'error'
             });
-            if (!response.ok) {
-                throw await feilFraRespons(response, `Kunne ikke oppfriske cache (HTTP ${response.status}).`);
-            }
-            const antallSlettet: number = await response.json();
+            const antallSlettet: number = await lesValidert(response, z.number(), 'Uventet respons: forventet et antall.');
             status.textContent = `Cache oppfrisket. ${antallSlettet} nøkler slettet.`;
         } catch (error) {
             status.textContent = `Oppfrisking feilet: ${feilmelding(error)}`;
@@ -28,5 +25,5 @@ import {feilFraRespons} from './http.js';
         } finally {
             knapp.disabled = false;
         }
-    });
+    }));
 })();

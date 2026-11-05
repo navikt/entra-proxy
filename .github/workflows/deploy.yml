@@ -8,7 +8,7 @@ on:
 # cancel-in-progress: false fordi en pågående deploy ikke skal avbrytes midt i.
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 # Deny-by-default på workflow-nivå; jobs åpner kun det de trenger.
 permissions:

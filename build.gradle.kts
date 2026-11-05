@@ -49,7 +49,7 @@ plugins {
 
 detekt {
     buildUponDefaultConfig = true
-    baseline = file("detekt-baseline.xml")
+    baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent) "build/ingen-baseline.xml" else "detekt-baseline.xml")
 }
 
 tasks.withType<dev.detekt.gradle.Detekt>().configureEach {

@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>EmptyFunctionBlock:CaffeineCacheOperations.kt:CaffeineCacheOperations${}</ID>
-    <ID>FunctionParameterNaming:EntraGraphAdapter.kt:EntraGraphAdapter$førsteSide: T</ID>
     <ID>MagicNumber:AnsattId.kt:AnsattId$6</ID>
     <ID>MagicNumber:Enhet.kt:Enhet.Enhetnummer$4</ID>
     <ID>MagicNumber:NomGraphQLConfig.kt:NomGraphQLConfig$3</ID>
@@ -63,16 +62,12 @@
     <ID>NewLineAtEndOfFile:TIdent.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent.kt</ID>
     <ID>NewLineAtEndOfFile:Tema.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.kt</ID>
     <ID>NewLineAtEndOfFile:TestApp.kt:no.nav.sikkerhetstjenesten.TestApp.kt</ID>
-    <ID>ObjectPropertyNaming:EntraGraphAdapter.kt:EntraGraphAdapter.Companion$private const val BATCH_STØRRELSE = 20</ID>
+    <ID>ObjectPropertyNaming:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest.Companion$private const val baseUrl = "http://localhost"</ID>
     <ID>ReturnCount:CaffeineCacheOperations.kt:CaffeineCacheOperations$@Suppress("UNCHECKED_CAST") override fun &lt;T : Any> getMany: Map&lt;String, T?></ID>
     <ID>TooManyFunctions:DevEntraController.kt:DevEntraController</ID>
     <ID>TooManyFunctions:EntraController.kt:EntraController</ID>
     <ID>TooManyFunctions:EntraGraphAdapter.kt:EntraGraphAdapter : EntraGraphOperations</ID>
     <ID>TooManyFunctions:EntraGraphClient.kt:EntraGraphClient</ID>
     <ID>TooManyFunctions:EntraTjeneste.kt:EntraTjeneste</ID>
-    <ID>VariableNaming:CacheInaktiveNavIdenter.kt:CacheInaktiveNavIdenter$val måling = measureTimedValue { runCatching { cache.putSet(INAKTIVE, graf.gruppeMedlemmer("$uuid").mapTo(mutableSetOf()) { it.navIdent.verdi }) cache.getSet(INAKTIVE) } }</ID>
-    <ID>VariableNaming:EntraGraphAdapter.kt:EntraGraphAdapter$val forespørsler = idTilGruppe.map { (id, gruppeId) -> BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count") }</ID>
-    <ID>VariableNaming:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest$val nøstetGruppeId = "${randomUUID()}"</ID>
-    <ID>VariableNaming:UtforskerSecurityBeanConfig.kt:UtforskerSecurityBeanConfig$val årsak = (e as? OAuth2AuthenticationException)?.error?.errorCode ?: "ukjent årsak"</ID>
   </CurrentIssues>
 </SmellBaseline>

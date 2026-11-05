@@ -86,10 +86,23 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Install npm dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright Chromium
-        run: |
-          ./gradlew --console=plain npmInstall
-          npm run playwright:install -- --with-deps
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npm run playwright:install -- --with-deps
+
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Test og bygg
         env:

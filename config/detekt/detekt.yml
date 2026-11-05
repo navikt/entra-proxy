@@ -1,3 +1,6 @@
+style:
+  MaxLineLength:
+    maxLineLength: 140
 naming:
   VariableNaming:
     variablePattern: '[a-zæøå][A-Za-zæøåÆØÅ0-9]*'

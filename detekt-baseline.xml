@@ -3,46 +3,16 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>EmptyFunctionBlock:CaffeineCacheOperations.kt:CaffeineCacheOperations${}</ID>
-    <ID>MagicNumber:AnsattId.kt:AnsattId$6</ID>
-    <ID>MagicNumber:Enhet.kt:Enhet.Enhetnummer$4</ID>
     <ID>MagicNumber:NomGraphQLConfig.kt:NomGraphQLConfig$3</ID>
     <ID>MagicNumber:NomGraphQLConfig.kt:NomGraphQLConfig$30</ID>
     <ID>MagicNumber:RestClientBeanConfig.kt:RestClientBeanConfig$300</ID>
     <ID>MagicNumber:RestClientBeanConfig.kt:RestClientBeanConfig$50</ID>
-    <ID>MagicNumber:TIdent.kt:TIdent$3</ID>
-    <ID>MagicNumber:TIdent.kt:TIdent$4</ID>
     <ID>MagicNumber:Tema.kt:Tema$3</ID>
     <ID>MaxLineLength:ApiSecurityBeanConfig.kt:ApiSecurityBeanConfig$fun</ID>
-    <ID>MaxLineLength:CacheInaktiveNavIdenterTest.kt:CacheInaktiveNavIdenterTest$every { graph.gruppeMedlemmer(gruppeId.toString()) } throws IllegalStateException("Graph er utilgjengelig")</ID>
-    <ID>MaxLineLength:EntraController.kt:EntraController$@Operation(summary = "Hent hvilke matchende grupper hver ansatt er medlem i, for grupper som matcher en substring av gruppenavnet")</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$.</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$every { entraTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$every { entraTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))</ID>
     <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "test-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
     <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("$API_V1/gruppe/medlemmer").param("gruppeNavn", "ukjent-gruppe").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("$API_V1/navn/${TEST_ENHET.enhetnummer.verdi}").accept(TEXT_PLAIN).with(oidcLogin()))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/ansatt/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/ansatt/tilganger/$TEST_ANSATT_ID").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${ccJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/ansatt/tilganger/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
     <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/nom/ansatte/${TEST_ENHET.enhetnummer.verdi}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraControllerTest.kt:EntraControllerTest$mockMvc.perform(get("${API_V1}/nom/enhet/${TEST_ANSATT_ID}").header(AUTHORIZATION, "Bearer ${oboJwt()}"))</ID>
-    <ID>MaxLineLength:EntraMailTjeneste.kt:EntraMailTjeneste$class</ID>
-    <ID>MaxLineLength:EntraOidTjeneste.kt:EntraOidTjeneste$"Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})"</ID>
-    <ID>MaxLineLength:EntraRestClientAdapterDTOs.kt:Grupper$data</ID>
-    <ID>MaxLineLength:EntraRestClientAdapterDTOs.kt:Tilganger$data</ID>
-    <ID>MaxLineLength:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest$request.uri.query shouldContain $$"$select=id,displayName,securityEnabled,mailEnabled,description"</ID>
-    <ID>MaxLineLength:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest$}</ID>
-    <ID>MaxLineLength:EntraTjenesteRestClientTest.kt:EntraTjenesteRestClientTest.EntraTestConfig$fun</ID>
     <ID>MaxLineLength:NomBeanConfig.kt:NomBeanConfig$factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer&lt;HttpComponentsClientHttpRequestFactoryBuilder></ID>
-    <ID>MaxLineLength:NomOrgTilknytning.kt:NomOrgTilknytning.NomEnhet$val id: NomIdent</ID>
-    <ID>MaxLineLength:NomOrgTilknytning.kt:NomOrgTilknytning.NomEnhet.NomIdent$"Ugyldig NomIdent '$verdi', forventet $NOM_IDENT_LENGTH tegn: 2 små bokstaver, 3 siffer og en liten bokstav"</ID>
-    <ID>MaxLineLength:NorgTjenesteTest.kt:NorgTjenesteTest$class</ID>
-    <ID>MaxLineLength:SecurityTestSupport.kt:SecurityTestSupport$fun</ID>
-    <ID>MaxLineLength:UtforskerSecurityBeanConfig.kt:UtforskerSecurityBeanConfig.Companion$listOf("grupper", "ansatt", "gruppematrise").flatMap { listOf("/$it.html", "/html/$it.html") }.toTypedArray()</ID>
-    <ID>MaxLineLength:ValkeyCacheOperationsTest.kt:ValkeyCacheOperationsTest$GRUPPER_FOR_ANSATT_GRAPH_CACHE -> cache.getOne&lt;EntraGruppe>(cacheConfig, key) shouldBe (expected as? EntraGruppe)</ID>
-    <ID>MaxLineLength:ValkeyCacheOperationsTest.kt:ValkeyCacheOperationsTest$UTVIDET_ANSATT_GRAPH_CACHE -> cache.getOne&lt;UtvidetAnsatt>(cacheConfig, key) shouldBe (expected as? UtvidetAnsatt)</ID>
-    <ID>MaxLineLength:ValkeyCacheOperationsTest.kt:ValkeyCacheOperationsTest$cache.putMany(GRUPPER_FOR_ANSATT_GRAPH_CACHE, mapOf(I1 to TEST_VALUE_1, I2 to TEST_VALUE_2), ofSeconds(5))</ID>
     <ID>NewLineAtEndOfFile:ApiAuthenticationEntryPoint.kt:no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthenticationEntryPoint.kt</ID>
     <ID>NewLineAtEndOfFile:CacheTestConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.cache.CacheTestConfig.kt</ID>
     <ID>NewLineAtEndOfFile:EntraClientBeanConfig.kt:no.nav.sikkerhetstjenesten.entraproxy.graph.EntraClientBeanConfig.kt</ID>

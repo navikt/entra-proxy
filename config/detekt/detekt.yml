@@ -1,0 +1,7 @@
+naming:
+  VariableNaming:
+    variablePattern: '[a-zæøå][A-Za-zæøåÆØÅ0-9]*'
+  FunctionParameterNaming:
+    parameterPattern: '[a-zæøå][A-Za-zæøåÆØÅ0-9]*'
+  ObjectPropertyNaming:
+    constantPattern: '[A-ZÆØÅ][_A-ZÆØÅ0-9]*'

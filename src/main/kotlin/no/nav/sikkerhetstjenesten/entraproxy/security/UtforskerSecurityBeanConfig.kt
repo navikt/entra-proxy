@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.security
 
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GROUPS_CLAIM
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GRUPPE_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.EntraController.Companion.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.tilgang.API_V1
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Qualifier

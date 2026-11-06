@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
+import no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplication.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
@@ -21,7 +22,6 @@ import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ANSATT_ID
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.TEST_ENHET
 import no.nav.sikkerhetstjenesten.entraproxy.tilgang.SecurityTestSupport.ccJwt

@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.tilgang
+package no.nav.sikkerhetstjenesten.entraproxy.tilgang.dev
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd

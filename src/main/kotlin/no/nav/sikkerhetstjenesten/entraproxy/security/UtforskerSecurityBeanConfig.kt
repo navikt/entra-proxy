@@ -1,8 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
+import no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplication.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GROUPS_CLAIM
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GRUPPE_PREFIX
-import no.nav.sikkerhetstjenesten.entraproxy.tilgang.API_V1
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Qualifier
@@ -29,7 +29,6 @@ import org.springframework.security.web.servlet.util.matcher.PathPatternRequestM
 import org.springframework.security.web.util.matcher.AndRequestMatcher
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
-import org.springframework.security.web.util.matcher.RequestMatcher
 import java.net.URLEncoder.encode
 import kotlin.text.Charsets.UTF_8
 

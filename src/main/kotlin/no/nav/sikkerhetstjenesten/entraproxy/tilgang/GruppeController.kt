@@ -2,6 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplication.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +21,9 @@ class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid:
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
-        medlemmerIGruppe(oid, gruppe, gruppeNavn)
+        oid.gruppeOid(gruppeNavn)?.let {
+            gruppe.medlemmerIGruppe(it)
+        } ?: emptySet()
 
     @GetMapping("gruppe/medlemmer/sok")
     @Operation(summary = "Hent ansatte i alle grupper som matcher en substring av gruppenavnet fra Entra")

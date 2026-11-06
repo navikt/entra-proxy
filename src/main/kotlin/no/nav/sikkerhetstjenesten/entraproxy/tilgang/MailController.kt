@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.API_V1
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "MailController", description = "Disse endepunktene skal brukes i produksjon, men normalt ikke kalles direkte")
+@Hidden
 @RestController
 @RequestMapping(API_V1)
 class MailController(private val mail: EntraMailTjeneste) {

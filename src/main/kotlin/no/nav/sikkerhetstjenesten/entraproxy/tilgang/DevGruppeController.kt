@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
 @Tag(name = "DevGruppeController",
-    description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
+    description = "Disse endepunktene er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
 class DevGruppeController(
     private val gruppeTjeneste: EntraGruppeTjeneste,
     private val oidTjeneste: EntraOidTjeneste,

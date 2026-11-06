@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "AnsattController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "AnsattController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class AnsattController(private val entra: EntraTjeneste) {

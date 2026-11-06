@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "TemaController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "TemaController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class TemaController(

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "NomController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "NomController", description = "Disse endepunktene skal brukes i produksjon, men normalt ikke kalles dirkte")
 @RestController
 @RequestMapping(API_V1)
 class NomController(private val nom: NomTjeneste) {

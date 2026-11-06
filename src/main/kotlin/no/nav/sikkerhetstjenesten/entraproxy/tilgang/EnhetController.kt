@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "EnhetController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "EnhetController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class EnhetController(

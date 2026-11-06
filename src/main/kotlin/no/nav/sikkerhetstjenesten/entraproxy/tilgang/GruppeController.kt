@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Tag(name = "GruppeController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "GruppeController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {

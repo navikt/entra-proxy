@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
 @Tag(name = "DevAnsattController",
-    description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
+    description = "Disse endepunktene er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
 class DevAnsattController(private val entraTjeneste: EntraTjeneste) {
 
     @GetMapping("enhet/ansatt/{navIdent}")

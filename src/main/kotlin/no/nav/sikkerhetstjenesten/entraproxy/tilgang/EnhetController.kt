@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
+import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.API_V1
@@ -31,6 +32,7 @@ class EnhetController(
 
     @GetMapping("navn/{enhetsnummer}", produces = [TEXT_PLAIN_VALUE])
     @Operation(summary = "Hent enhetsnavn fra NORG")
+    @Hidden
     fun enhetsnavn(@PathVariable enhetsnummer: Enhetnummer) =
         norg.navn(enhetsnummer)
 

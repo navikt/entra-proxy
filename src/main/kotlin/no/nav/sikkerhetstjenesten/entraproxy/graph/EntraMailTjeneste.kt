@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 
 @Service
-class EntraMailTjeneste(private val client: EntraGraphClient, @param:Value($$"${graph.mail.avsender}") private val avsender: String) {
+class EntraMailTjeneste(private val client: EntraMailClient, @param:Value($$"${graph.mail.avsender}") private val avsender: String) {
 
     private val log = getLogger(javaClass)
 

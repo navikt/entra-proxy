@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.service.registry.ImportHttpServices
 
 @Configuration
-@ImportHttpServices(types = [EntraGraphClient::class], group = GRAPH)
+@ImportHttpServices(types = [EntraGraphClient::class, EntraMailClient::class], group = GRAPH)
 class EntraClientBeanConfig {
 
     @Bean

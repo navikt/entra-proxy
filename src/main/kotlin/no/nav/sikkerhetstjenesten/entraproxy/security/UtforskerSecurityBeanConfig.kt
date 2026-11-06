@@ -1,6 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
-import no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplication.Companion.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GROUPS_CLAIM
 import no.nav.sikkerhetstjenesten.entraproxy.security.ApiAuthorityAndRoleAddingJwtAuthenticationConverter.Companion.GRUPPE_PREFIX
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT

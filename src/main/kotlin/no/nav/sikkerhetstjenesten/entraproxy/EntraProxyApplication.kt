@@ -17,16 +17,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @EnableAspectJAutoProxy
 @EnableScheduling
 @EnableMethodSecurity
-class EntraProxyApplication  {
+class EntraProxyApplication
 
     fun main(args: Array<String>) {
         runApplication<EntraProxyApplication>(*args) {
             setAdditionalProfiles(*profiler)
         }
     }
-    companion object {
-        const val API_V1 = "/api/v1"
-    }
-}
+
+
+const val API_V1 = "/api/v1"
 
 

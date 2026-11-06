@@ -13,9 +13,9 @@ class MedlemmerCacheOppfrisker(private val entra: EntraGruppeTjeneste, cfg: Medl
         val gruppeId = runCatching {
             UUID.fromString(nøkkelElementer.id)
         }.getOrNull()
-            ?: return log.warn("Ugyldig gruppe-id i nøkkel $nøkkelElementer")
+            ?: return log.warn("Ugyldig gruppe-id i nøkkel {}", nøkkelElementer)
         entra.medlemmerIGruppe(gruppeId).also {
-            log.info("Oppfrisket cache for medlemmer i gruppe $gruppeId, fant ${it.size} medlemmer")
+            log.info("Oppfrisket cache for medlemmer i gruppe {}, fant {} medlemmer", gruppeId, it.size)
         }
     }
 }

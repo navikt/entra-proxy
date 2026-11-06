@@ -14,7 +14,7 @@ class EntraOidOppslag(private val oid: EntraOidTjeneste, private val cache: Cach
 
     override fun oppfriskOid(ansattId: AnsattId): UUID {
         cache.delete(OID_CACHE, ansattId.verdi).also {
-            log.info("Slettet cache innslag før henting av ny oid $ansattId")
+            log.info("Slettet cache innslag før henting av ny oid {}", ansattId)
         }
         return oid.ansattOid(ansattId) ?: throw EntraIkkeFunnetException(ansattId,
             "Fant ikke ny oid for $ansattId i Entra, selv etter cache-opprydding og nytt oppslag")

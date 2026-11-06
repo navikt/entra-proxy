@@ -14,10 +14,11 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
 
     override fun doOppfrisk(nøkkelElementer: CacheNøkkel) {
         val argument = argumentFor(nøkkelElementer.id)
-            ?: return log.info("Oppfrisker ukjent id-format i nøkkel $nøkkelElementer")
-        val metode = finnMetode(nøkkelElementer.metode!!, argument.javaClass)
-            ?: return log.info("Oppfrisker ukjent nøkkel $nøkkelElementer")
-        log.info("Oppfrisker cache for nøkkel $nøkkelElementer med metode ${metode.name} og argument $argument")
+            ?: return log.info("Oppfrisker ukjent id-format i nøkkel {}", nøkkelElementer)
+        val metodeNavn = nøkkelElementer.metode
+            ?: return log.warn("Mangler metode i nøkkel {}", nøkkelElementer)
+        val metode = finnMetode(metodeNavn, argument.javaClass)
+        log.info("Oppfrisker cache for nøkkel {} med metode {} og argument {}", nøkkelElementer, metode.name, argument)
         metode(entra, argument)
     }
 
@@ -28,9 +29,9 @@ class EntraCacheOppfrisker(private val entra: EntraTjeneste, cfg: EntraConfig) :
         runCatching {
             entra.javaClass.getMethod(metodeNavn, argumentType)
         }.onSuccess {
-            log.info("Fant metode $metodeNavn med argumenttype ${argumentType.simpleName} for oppfrisking")
+            log.info("Fant metode {} med argumenttype {} for oppfrisking", metodeNavn, argumentType.simpleName)
         }.onFailure {
-            log.warn("Fant ikke metode $metodeNavn med argumenttype ${argumentType.simpleName} for oppfrisking", it)
+            log.warn("Fant ikke metode {} med argumenttype {} for oppfrisking", metodeNavn, argumentType.simpleName, it)
         }.getOrThrow()
 
     private fun String.parse() =

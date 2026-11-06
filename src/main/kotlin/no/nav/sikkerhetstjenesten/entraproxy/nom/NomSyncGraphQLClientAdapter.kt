@@ -27,11 +27,11 @@ class NomSyncGraphQLClientAdapter(
     override fun ansatte(identer: Set<AnsattId>): Set<NomAnsatt> {
         val fraCache = fraCache(identer)
         if (fraCache.size == identer.size) {
-            log.trace("Hentet alle ${identer.size} ansatte fra CACHE")
+            log.trace("Hentet alle {} ansatte fra CACHE", identer.size)
             return fraCache.values.toSet()
         }
         val mangler = identer.filterNotTo(mutableSetOf()) { it.verdi in fraCache }.map { it.verdi }.toSet()
-        log.trace("Henter ${mangler.size} ansatt(e) som ikke finnes i CACHE fra NOM")
+        log.trace("Henter {} ansatt(e) som ikke finnes i CACHE fra NOM", mangler.size)
         val fraNom = ressurser(BULK_TILKNYTNINGER_QUERY, identer(mangler))
             .mapTo(mutableSetOf()) { it.kunDagligOppfolging() }
         oppdaterCache(fraNom)
@@ -69,14 +69,14 @@ class NomSyncGraphQLClientAdapter(
 
     private fun fraCache(identer: Set<AnsattId>) =
         cache.getMany<NomAnsatt>(NOM_CACHE, identer.mapTo(mutableSetOf()) { it.verdi })
-            .filterValues { it != null }
-            .mapValues { it.value!! }
-            .also { log.trace("Hentet ${it.size} ansatte(er) av ${identer.size} mulige fra CACHE") }
+            .mapNotNull { (ident, ansatt) -> ansatt?.let { ident to it } }
+            .toMap()
+            .also { log.trace("Hentet {} ansatte(er) av {} mulige fra CACHE", it.size, identer.size) }
 
     private fun oppdaterCache(ansatte: Set<NomAnsatt>) {
         if (ansatte.isEmpty()) return
         cache.putMany(NOM_CACHE, ansatte.associateBy { it.navident.verdi })
-        log.trace("Oppdaterte CACHE med ${ansatte.size} ansatt(e) fra NOM")
+        log.trace("Oppdaterte CACHE med {} ansatt(e) fra NOM", ansatte.size)
     }
 
     private fun NomGraphQLRespons.toAnsatt() =

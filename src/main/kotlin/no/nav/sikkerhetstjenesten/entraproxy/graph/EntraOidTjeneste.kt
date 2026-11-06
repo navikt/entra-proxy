@@ -21,7 +21,7 @@ class EntraOidTjeneste(private val client: EntraGraphClient) {
                 0 -> throw EntraIkkeFunnetException(ansattId,
                     "Fant ingen oid for ${ansattId.verdi}, er den fremdeles gyldig?")
                 1 -> singleOrNull()?.id.also {
-                    log.info("Fant oid $it i Entra for ${ansattId.verdi}")
+                    log.info("Fant oid {} i Entra for {}", it, ansattId.verdi)
                 }
                 else -> throw EntraOidException(ansattId.verdi,
                     "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})")

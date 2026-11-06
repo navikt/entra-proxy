@@ -25,7 +25,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
-            .also { log.info("Hentet ${it.size} tema for $ansattOid") }
+            .also { log.info("Hentet {} tema for {}", it.size, ansattOid) }
 
     override fun grupper(ansattOid: UUID) =
         allSider("grupper for $ansattOid",
@@ -34,7 +34,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
-            .also { log.info("Hentet ${it.size} gruppe(r) for $ansattOid") }
+            .also { log.info("Hentet {} gruppe(r) for {}", it.size, ansattOid) }
 
     override fun grupperSomMatcher(subString: String) =
         allSider("grupper som matcher '$subString'",
@@ -43,7 +43,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             client::grupperSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
-            .also { log.info("Hentet ${it.size} gruppe(r) som matcher '$subString'") }
+            .also { log.info("Hentet {} gruppe(r) som matcher '{}'", it.size, subString) }
 
     override fun enheter(ansattOid: UUID) =
         allSider("enheter for $ansattOid",
@@ -51,7 +51,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
-            .also { log.info("Hentet ${it.size} enhet(er) for $ansattOid") }
+            .also { log.info("Hentet {} enhet(er) for {}", it.size, ansattOid) }
 
     override fun gruppeMedlemmer(oid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid",
@@ -62,16 +62,14 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             it.onPremisesSamAccountName?.erAnsattId() == true
         }
         if (ugyldigeMedlemmer.isNotEmpty()) {
-            log.info("Ignorerte {} ugyldige medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName (\n${
-                ugyldigeMedlemmer.joinToString("\n")
-            })",
+            log.info("Ignorerte {} ugyldige medlem(mer) fra gruppe {} uten gyldig onPremisesSamAccountName",
                 ugyldigeMedlemmer.size, oid)
         }
-        return gyldigeMedlemmer.mapTo(sortedSetOf()) {
+        return gyldigeMedlemmer.mapNotNullTo(sortedSetOf<Ansatt>()) {
             with(it) {
-                Ansatt(AnsattId(onPremisesSamAccountName!!), displayName, givenName, surname)
+                onPremisesSamAccountName?.let { id -> Ansatt(AnsattId(id), displayName, givenName, surname) }
             }
-        }.also { log.info("Hentet ${it.size} medlem(mer) for gruppe $oid") }
+        }.also { log.info("Hentet {} medlem(mer) for gruppe {}", it.size, oid) }
     }
 
     override fun antallMedlemmer(vararg gruppeIder: UUID): Map<UUID, Long> =
@@ -114,7 +112,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
                 if (respons.status == OK.value() && antall != null) {
                     gruppeId to antall
                 } else {
-                    log.warn("Kunne ikke hente antall medlemmer for gruppe $gruppeId (status ${respons.status})")
+                    log.warn("Kunne ikke hente antall medlemmer for gruppe {} (status {})", gruppeId, respons.status)
                     null
                 }
             }.toMap()

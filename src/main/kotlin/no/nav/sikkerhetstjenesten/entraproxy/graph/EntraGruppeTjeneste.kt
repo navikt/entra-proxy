@@ -24,7 +24,7 @@ class EntraGruppeTjeneste(private val graph: EntraGraphOperations) {
 
     fun medlemmerIGrupperSomMatcher(substring: String): List<GruppeMedMedlemmer> =
         graph.grupperSomMatcher(substring).also {
-            log.info("Fant ${it.size} grupper som matcher '$substring'")
+            log.info("Fant {} grupper som matcher '{}'", it.size, substring)
             if (it.size > MAKS_MATCHENDE_GRUPPER) {
                 throw ForMangeMatchendeGrupperException(substring, it.size, MAKS_MATCHENDE_GRUPPER)
             }
@@ -36,11 +36,11 @@ class EntraGruppeTjeneste(private val graph: EntraGraphOperations) {
             }
             .let { grupper ->
                 hentParallelt(grupper) { (gruppeId, rolle) ->
-                    log.info("Henter parallelt medlemmer for gruppe $rolle med id $gruppeId")
+                    log.info("Henter parallelt medlemmer for gruppe {} med id {}", rolle, gruppeId)
                     GruppeMedMedlemmer(gruppeId, rolle, graph.gruppeMedlemmer("$gruppeId"))
                 }
             }.also {
-                log.info("Hentet ${it.size} grupper med medlemmer som matcher '$substring'")
+                log.info("Hentet {} grupper med medlemmer som matcher '{}'", it.size, substring)
             }
 
     fun grupperPerAnsattSomMatcher(substring: String) =

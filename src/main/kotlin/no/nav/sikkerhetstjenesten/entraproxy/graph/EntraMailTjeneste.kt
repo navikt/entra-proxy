@@ -12,7 +12,7 @@ class EntraMailTjeneste(private val client: EntraGraphClient, @param:Value($$"${
 
     fun send(request: MailRequest) =
         client.sendMail(avsender, request).also {
-            log.info("Sendt mail til ${request.message.toRecipients}")
+            log.info("Sendt mail til {} mottaker(e)", request.message.toRecipients.size)
         }
 
 }

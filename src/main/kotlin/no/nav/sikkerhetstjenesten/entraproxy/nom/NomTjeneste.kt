@@ -16,24 +16,24 @@ class NomTjeneste(private val nom: NomOperations) {
     @Cacheable(cacheNames = [NOMGRAPH], key = "#ident.verdi")
     fun ansatt(ident: AnsattId): NomAnsatt? =
         nom.ansatt(ident).also {
-            log.info("Hentet ansatt $it for navIdent $ident")
+            log.info("Hentet ansatt for navIdent {}", ident)
         }
 
     fun ansatte(identer: Set<AnsattId>) =
         nom.ansatte(identer).also {
-            log.info("Hentet ansatte $it tema for $identer")
+            log.info("Hentet ansatte for {} navIdent(er)", identer.size)
         }
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#enhet.verdi")
     fun ansatteForEnhet(enhet: Enhetnummer) =
         nom.ansatteForEnhet(enhet).also {
-            log.info("Hentet ${it.size} ansatte for ${enhet.verdi}")
+            log.info("Hentet {} ansatte for {}", it.size, enhet.verdi)
         }
 
     @Cacheable(cacheNames = [NOMGRAPH], key = "#ident.verdi")
     fun ansatteForNomIdent(ident: NomIdent) =
         nom.ansatteForNomIdent(ident).also {
-            log.info("Hentet ${it.ansatte.size} ansatt(e) i ${it.navn ?: ident} for nomIdent $ident")
+            log.info("Hentet {} ansatt(e) i {} for nomIdent {}", it.ansatte.size, it.navn ?: ident, ident)
         }
 
 }

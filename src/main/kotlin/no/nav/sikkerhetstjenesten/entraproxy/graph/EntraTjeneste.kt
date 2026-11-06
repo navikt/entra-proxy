@@ -59,7 +59,7 @@ class EntraTjeneste(
     private fun erInaktiv(ansattId: AnsattId) =
         inaktive.erInaktiv(ansattId).also {
             if (it) {
-                log.info("$ansattId er inaktiv")
+                log.info("{} er inaktiv", ansattId)
             }
         }
 

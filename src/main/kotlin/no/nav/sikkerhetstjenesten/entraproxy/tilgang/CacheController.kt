@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "CacheController", description = "Disse endepunktene skal brukes i produksjon, men normalt ikke kalles dirkte")
+@Tag(name = "CacheController", description = "Disse endepunktene skal brukes i produksjon, men normalt ikke kalles direkte")
 @RestController
 @RequestMapping(API_V1)
 class CacheController(private val cache: CacheOperations) {

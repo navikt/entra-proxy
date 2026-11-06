@@ -6,6 +6,7 @@ import no.nav.sikkerhetstjenesten.felles.rest.RestConfig
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.net.URI
+import java.net.URI.create
 import java.time.Duration
 import java.time.Duration.ofHours
 import java.time.Duration.ofSeconds
@@ -13,9 +14,9 @@ import java.time.Duration.ofSeconds
 @Component
 class NomGraphQLConfig(
     @Value($$"${nomgraph}") nomHost: String,
-    @param:Value($$"${nom.varighet:3h}") override val varighet: Duration = ofHours(3),
-    @param:Value($$"${nom.lesetimeout:30s}") val lesetimeout: Duration = ofSeconds(30)) :
-    CachableRestConfig, RestConfig(URI.create("http://$nomHost$DEFAULT_GRAPHQL_PATH"), "", NOMGRAPH) {
+    @param:Value($$"${nom.varighet:3h}") override val varighet: Duration,
+    @param:Value($$"${nom.lesetimeout:30s}") val lesetimeout: Duration) :
+    CachableRestConfig, RestConfig(create("http://$nomHost$DEFAULT_GRAPHQL_PATH"), "", NOMGRAPH) {
 
     override val navn = name
     override val caches = NOM_CACHES

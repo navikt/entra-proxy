@@ -24,8 +24,3 @@ class EntraProxyApplication
             setAdditionalProfiles(*profiler)
         }
     }
-
-
-const val API_V1 = "/api/v1"
-
-

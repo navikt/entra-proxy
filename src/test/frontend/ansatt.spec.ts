@@ -27,19 +27,18 @@ test('loads the compiled employee module over HTTP', async ({app}) => {
 
 test('renders employee, leader, units and group counts; filters and sorts groups', async ({app}) => {
     await app.open('ansatt', [
-        json(ansatt),
-        json([{rolle: 'Gruppe 10', gruppeId: 'g10'}, {rolle: 'Gruppe 2', gruppeId: 'g2'}]),
-        json({g10: 12, g2: 0})
+        json('/api/v1/nom/enhet/A123456', ansatt),
+        json('/api/v1/ansatt/tilganger/A123456', [{rolle: 'Gruppe 10', gruppeId: 'g10'}, {rolle: 'Gruppe 2', gruppeId: 'g2'}]),
+        json('/api/v1/gruppe/antall/bulk', {g10: 12, g2: 0})
     ]);
     const {page, calls} = app;
     await submit(page, '#ansatt-form', 'a123456');
-    expect(new URL(calls[0].url()).pathname).toBe('/api/v1/nom/enhet/A123456');
-    expect(new URL(calls[1].url()).pathname).toBe('/api/v1/ansatt/tilganger/A123456');
-    expect(new URL(calls[2].url()).pathname).toBe('/api/v1/gruppe/antall/bulk');
-    expect(calls[2].method()).toBe('POST');
-    expect(calls[2].postDataJSON()).toEqual(['g10', 'g2']);
-    expect(calls[2].headers()['accept']).toBe('application/json');
-    expect(calls[2].headers()['content-type']).toBe('application/json');
+    expect(calls).toHaveLength(3);
+    const countCall = calls.find(call => new URL(call.url()).pathname === '/api/v1/gruppe/antall/bulk');
+    expect(countCall?.method()).toBe('POST');
+    expect(countCall?.postDataJSON()).toEqual(['g10', 'g2']);
+    expect(countCall?.headers()['accept']).toBe('application/json');
+    expect(countCall?.headers()['content-type']).toBe('application/json');
     await expect(page.locator('#status')).toHaveText('Ansatt hentet.');
     await expect(page.locator('#ansatt-resultat')).toBeVisible();
     await expect(page.locator('#enheter-resultat')).toBeVisible();
@@ -71,8 +70,10 @@ test('renders employee, leader, units and group counts; filters and sorts groups
 
 test('URL lookup displays leaders per unit for multiple affiliations', async ({app}) => {
     await app.open('ansatt', [
-        json({...ansatt, orgTilknytninger: [{orgEnhet: enhet}, {orgEnhet: {...enhet, ledere: null}}]}),
-        json([])
+        json('/api/v1/nom/enhet/A123456', {
+            ...ansatt, orgTilknytninger: [{orgEnhet: enhet}, {orgEnhet: {...enhet, ledere: null}}]
+        }),
+        json('/api/v1/ansatt/tilganger/A123456', [])
     ], '?ansattid=A123456');
     const {page} = app;
     await expect(page.locator('#status')).toHaveText('Ansatt hentet.');
@@ -85,8 +86,8 @@ test('URL lookup displays leaders per unit for multiple affiliations', async ({a
 });
 
 for (const [name, response] of [
-    ['empty', {body: ''}],
-    ['null', json(null)]
+    ['empty', {url: '/api/v1/nom/enhet/A123456', body: ''}],
+    ['null', json('/api/v1/nom/enhet/A123456', null)]
 ] satisfies [string, MockResponse][]) {
     test(`${name} employee responses leave results hidden and restore controls`, async ({app}) => {
         await app.open('ansatt', [response]);
@@ -101,9 +102,9 @@ for (const [name, response] of [
 }
 
 for (const [name, response, message] of [
-    ['problem detail', json({detail: 'Ingen tilgang'}, 403), 'Henting feilet: Ingen tilgang'],
-    ['HTTP error', {status: 500, body: ''}, 'Henting feilet: Kunne ikke hente nom-data (HTTP 500).'],
-    ['network error', {abort: true}, 'Henting feilet: Failed to fetch']
+    ['problem detail', json('/api/v1/nom/enhet/A123456', {detail: 'Ingen tilgang'}, 403), 'Henting feilet: Ingen tilgang'],
+    ['HTTP error', {url: '/api/v1/nom/enhet/A123456', status: 500, body: ''}, 'Henting feilet: Kunne ikke hente nom-data (HTTP 500).'],
+    ['network error', {url: '/api/v1/nom/enhet/A123456', abort: true}, 'Henting feilet: Failed to fetch']
 ] satisfies [string, MockResponse, string][]) {
     test(`employee ${name} is visible and restores controls`, async ({app}) => {
         await app.open('ansatt', [response]);
@@ -118,9 +119,12 @@ for (const [name, response, message] of [
 
 test('scrolling starts above 50 groups and a new lookup clears prior results', async ({app}) => {
     await app.open('ansatt', [
-        json(ansatt), json(Array.from({length: 50}, (_, i) => ({rolle: `Gruppe ${i}`}))),
-        json(ansatt), json(Array.from({length: 51}, (_, i) => ({rolle: `Gruppe ${i}`}))),
-        json({...ansatt, orgTilknytninger: []}), json([])
+        json('/api/v1/nom/enhet/A123456', ansatt),
+        json('/api/v1/ansatt/tilganger/A123456', Array.from({length: 50}, (_, i) => ({rolle: `Gruppe ${i}`}))),
+        json('/api/v1/nom/enhet/A123456', ansatt),
+        json('/api/v1/ansatt/tilganger/A123456', Array.from({length: 51}, (_, i) => ({rolle: `Gruppe ${i}`}))),
+        json('/api/v1/nom/enhet/A123456', {...ansatt, orgTilknytninger: []}),
+        json('/api/v1/ansatt/tilganger/A123456', [])
     ]);
     const {page} = app;
     const table = page.locator('.grupper-tabell');

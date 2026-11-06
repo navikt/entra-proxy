@@ -1,7 +1,7 @@
 import {test as base, expect, type Page, type Request} from '@playwright/test';
 
 export interface MockResponse {
-    url?: string;
+    url: string;
     json?: unknown;
     body?: string;
     status?: number;
@@ -15,8 +15,8 @@ interface App {
     open(name: string, responses?: MockResponse[], query?: string): Promise<void>;
 }
 
-export function json(value: unknown, status = 200): MockResponse {
-    return {json: value, status};
+export function json(url: string, value: unknown, status = 200): MockResponse {
+    return {url, json: value, status};
 }
 
 export const test = base.extend<{app: App}>({
@@ -31,8 +31,7 @@ export const test = base.extend<{app: App}>({
         await page.route('**/api/**', async route => {
             calls.push(route.request());
             const url = new URL(route.request().url());
-            const matchingIndex = responses.findIndex(response => response.url === url.pathname + url.search);
-            const index = matchingIndex >= 0 ? matchingIndex : responses.findIndex(response => !response.url);
+            const index = responses.findIndex(response => response.url === url.pathname + url.search);
             const response = index >= 0 ? responses.splice(index, 1)[0] : undefined;
             if (!response) {
                 errors.push(`Unexpected API request: ${route.request().url()}`);

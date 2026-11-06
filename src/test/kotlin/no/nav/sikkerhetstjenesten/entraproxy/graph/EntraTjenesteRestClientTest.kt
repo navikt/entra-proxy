@@ -41,6 +41,7 @@ import java.util.UUID.randomUUID
 class EntraTjenesteRestClientTest(
     private val server: MockRestServiceServer,
     private val entra: EntraTjeneste,
+    private val gruppe: EntraGruppeTjeneste,
     private val adapter: EntraGraphAdapter,
     private val oid: EntraOidTjeneste,
     private val oidOppslag: EntraOidOperations,
@@ -71,7 +72,7 @@ class EntraTjenesteRestClientTest(
                         request.uri.toString() shouldBe $$"$$BASE_URL/$batch"
                     }.andRespond(withSuccess(batchRespons(gruppeIder.drop(20)), APPLICATION_JSON))
 
-                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+                    val resultat = gruppe.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
                     assertSoftly {
                         resultat.size shouldBe 25
@@ -87,7 +88,7 @@ class EntraTjenesteRestClientTest(
                             """"headers":{"ConsistencyLevel":"eventual"}"""
                     }.andRespond(withSuccess(batchRespons(gruppeIder), APPLICATION_JSON))
 
-                    entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+                    gruppe.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
                 }
             }
             When("én delforespørsel feiler med et feilobjekt som body") {
@@ -110,7 +111,7 @@ class EntraTjenesteRestClientTest(
                         )
                     )
 
-                    val resultat = entra.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
+                    val resultat = gruppe.antallMedlemmerIGrupper(*gruppeIder.toTypedArray())
 
                     resultat shouldBe mapOf(gruppeIder[0] to 3L)
                 }
@@ -122,7 +123,7 @@ class EntraTjenesteRestClientTest(
                 Then("skal responsen inneholde forventede medlemmer") {
                     expectGet("$BASE_URL/groups/$GROUP_ID/members", gruppeMedlemmerContract)
 
-                    entra.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
+                    gruppe.medlemmerIGruppe( GROUP_ID) shouldBe setOf(ANSATT)
                 }
             }
         }
@@ -348,7 +349,7 @@ class EntraTjenesteRestClientTest(
                         """.trimIndent()
                     )
 
-                    entra.medlemmerIGrupperSomMatcher("MIN_ROLLE") shouldBe listOf(
+                    gruppe.medlemmerIGrupperSomMatcher("MIN_ROLLE") shouldBe listOf(
                         GruppeMedMedlemmer(gruppe1Id, "0000-GA-MIN_ROLLE_A", setOf(ANSATT)),
                         GruppeMedMedlemmer(gruppe2Id, "0000-GA-MIN_ROLLE_B",
                             setOf(Ansatt(AnsattId("E654321"), "Kari Nordmann", "Kari", "Nordmann")))
@@ -387,7 +388,7 @@ class EntraTjenesteRestClientTest(
                     expectGet("$BASE_URL/groups/$gruppe1Id/members", gruppeMedlemmerContract)
                     expectGet("$BASE_URL/groups/$gruppe2Id/members", gruppeMedlemmerContract)
 
-                    entra.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
+                    gruppe.grupperPerAnsattSomMatcher("MIN_ROLLE") shouldBe listOf(
                         AnsattMedGrupper(ANSATT, setOf("0000-GA-MIN_ROLLE_A", "0000-GA-MIN_ROLLE_B"))
                     )
                 }
@@ -554,6 +555,9 @@ class EntraTjenesteRestClientTest(
 
         @Bean
         fun inaktiveAnsatte(cache: CaffeineCacheOperations): InaktivOperations = CacheInaktiveAnsatte(cache)
+
+        @Bean
+        fun entraGruppeTjeneste(adapter: EntraGraphAdapter) = EntraGruppeTjeneste(adapter)
 
         @Bean
         @Primary

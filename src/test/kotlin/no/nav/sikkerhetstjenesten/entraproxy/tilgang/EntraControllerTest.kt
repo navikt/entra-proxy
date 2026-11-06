@@ -9,6 +9,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
@@ -62,6 +63,9 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
     private lateinit var entraTjeneste: EntraTjeneste
 
     @MockkBean
+    private lateinit var gruppeTjeneste: EntraGruppeTjeneste
+
+    @MockkBean
     private lateinit var mail: EntraMailTjeneste
 
     @MockkBean
@@ -82,7 +86,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             every { oidTjeneste.gruppeOid(any()) } returns UUID.randomUUID()
             every { entraTjeneste.enheter(any()) } returns sortedSetOf(TEST_ENHET)
             every { entraTjeneste.tema(any()) } returns sortedSetOf(Tema("AAP"))
-            every { entraTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
+            every { gruppeTjeneste.medlemmerIGruppe(any()) } returns sortedSetOf(Ansatt(TEST_ANSATT_ID, "Test Ansatt", "Test", "Ansatt"))
             every { entraTjeneste.grupper(any<AnsattId>()) } returns sortedSetOf(EntraGruppe("test-rolle"))
             every { entraTjeneste.utvidetAnsatt(TEST_ANSATT_ID) } returns UtvidetAnsatt(
                 TEST_ANSATT_ID,
@@ -150,7 +154,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
             When("gruppesøket matcher for mange grupper") {
                 Then("returneres 422 med søket og den overskredne grensen") {
                     val feil = ForMangeMatchendeGrupperException("ROLLE", 101, 100)
-                    every { entraTjeneste.medlemmerIGrupperSomMatcher("ROLLE") } throws feil
+                    every { gruppeTjeneste.medlemmerIGrupperSomMatcher("ROLLE") } throws feil
 
                     mockMvc.perform(get("$API_V1/gruppe/medlemmer/sok").param("gruppeNavn", "ROLLE").with(jwt()))
                         .andExpect(status().isUnprocessableContent())
@@ -385,7 +389,7 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
                 Then("returnerer antall per gruppe som JSON") {
                     val oid1 = UUID.randomUUID()
                     val oid2 = UUID.randomUUID()
-                    every { entraTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)
+                    every { gruppeTjeneste.antallMedlemmerIGrupper(*anyVararg()) } returns mapOf(oid1 to 10L, oid2 to 20L)
                     mockMvc.perform(
                         post("$API_V1/gruppe/antall/bulk")
                             .contentType(APPLICATION_JSON)

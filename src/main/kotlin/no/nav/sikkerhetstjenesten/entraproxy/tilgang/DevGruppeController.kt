@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "DevGruppeController",
     description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
 class DevGruppeController(
-    private val entraTjeneste: EntraTjeneste,
+    private val gruppeTjeneste: EntraGruppeTjeneste,
     private val oidTjeneste: EntraOidTjeneste,
     private val norgTjeneste: NorgTjeneste) {
 
@@ -39,14 +39,14 @@ class DevGruppeController(
     @GetMapping("gruppe/medlemmer")
     fun medlemmer(@RequestParam gruppeNavn: String) =
         oidTjeneste.gruppeOid(gruppeNavn)?.let {
-            entraTjeneste.medlemmerIGruppe(it)
+            gruppeTjeneste.medlemmerIGruppe(it)
         }
 
     @GetMapping("gruppe/medlemmer/sok")
     fun medlemmerIGrupperSomMatcher(@RequestParam gruppeNavn: String) =
-        entraTjeneste.medlemmerIGrupperSomMatcher(gruppeNavn)
+        gruppeTjeneste.medlemmerIGrupperSomMatcher(gruppeNavn)
 
     @GetMapping("gruppe/medlemmer/sok/per-ansatt")
     fun grupperPerAnsattSomMatcher(@RequestParam gruppeNavn: String) =
-        entraTjeneste.grupperPerAnsattSomMatcher(gruppeNavn)
+        gruppeTjeneste.grupperPerAnsattSomMatcher(gruppeNavn)
 }

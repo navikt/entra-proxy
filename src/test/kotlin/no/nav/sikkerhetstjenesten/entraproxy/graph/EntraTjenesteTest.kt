@@ -22,6 +22,7 @@ class EntraTjenesteTest : BehaviorSpec({
     val cache = mockk<CacheOperations>()
     val enheter = mockk<EnhetOperations>()
     val tjeneste = EntraTjeneste(graph, CacheInaktiveAnsatte(cache), EntraOidOppslag(oid, cache), enheter)
+    val gruppeTjeneste = EntraGruppeTjeneste(graph)
     val ident = AnsattId("A123456")
     val gammelOid = randomUUID()
     val nyOid = randomUUID()
@@ -163,7 +164,7 @@ class EntraTjenesteTest : BehaviorSpec({
                 every { graph.grupperSomMatcher("ROLLE") } returns grupper
                 every { graph.gruppeMedlemmer(any()) } returns medlemmer
 
-                val resultat = tjeneste.medlemmerIGrupperSomMatcher("ROLLE")
+                val resultat = gruppeTjeneste.medlemmerIGrupperSomMatcher("ROLLE")
 
                 assertSoftly {
                     resultat shouldBe grupper.map { GruppeMedMedlemmer(it.gruppeId!!, it.rolle, medlemmer) }
@@ -180,7 +181,7 @@ class EntraTjenesteTest : BehaviorSpec({
                     (1..101).map { EntraGruppe("ROLLE_$it", randomUUID()) }.toSet()
 
                 val feil = shouldThrow<ForMangeMatchendeGrupperException> {
-                    tjeneste.medlemmerIGrupperSomMatcher("ROLLE")
+                    gruppeTjeneste.medlemmerIGrupperSomMatcher("ROLLE")
                 }
 
                 assertSoftly {
@@ -203,7 +204,7 @@ class EntraTjenesteTest : BehaviorSpec({
                 every { graph.gruppeMedlemmer(gruppe2.gruppeId.toString()) } throws forventetFeil
 
                 val feil = shouldThrow<IllegalStateException> {
-                    tjeneste.medlemmerIGrupperSomMatcher("ROLLE")
+                    gruppeTjeneste.medlemmerIGrupperSomMatcher("ROLLE")
                 }
 
                 assertSoftly {
@@ -218,7 +219,7 @@ class EntraTjenesteTest : BehaviorSpec({
             Then("returneres en tom liste uten medlemsoppslag") {
                 every { graph.grupperSomMatcher("ROLLE") } returns emptySet()
 
-                val resultat = tjeneste.medlemmerIGrupperSomMatcher("ROLLE")
+                val resultat = gruppeTjeneste.medlemmerIGrupperSomMatcher("ROLLE")
 
                 assertSoftly {
                     resultat shouldBe emptyList()

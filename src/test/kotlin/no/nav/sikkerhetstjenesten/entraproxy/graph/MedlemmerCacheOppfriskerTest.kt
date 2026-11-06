@@ -12,7 +12,7 @@ import java.util.UUID
 
 class MedlemmerCacheOppfriskerTest : BehaviorSpec({
 
-    val entra = mockk<EntraTjeneste>(relaxed = true)
+    val entra = mockk<EntraGruppeTjeneste>(relaxed = true)
     val oppfrisker = MedlemmerCacheOppfrisker(entra, MedlemmerConfig(ofHours(3)))
 
     beforeEach {

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "TemaController", description = "Denne kontrolleren skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class TemaController(private val entra: EntraTjeneste, private val oid: EntraOidTjeneste) {
+class TemaController(
+    private val entra: EntraTjeneste,
+    private val gruppe: EntraGruppeTjeneste,
+    private val oid: EntraOidTjeneste) {
 
     @GetMapping("tema/ansatt/{navIdent}")
     @Operation(summary = "Hent alle tilgjengelige tema for ansatt fra Entra, forutsetter CC-flow")
@@ -36,5 +40,5 @@ class TemaController(private val entra: EntraTjeneste, private val oid: EntraOid
     @GetMapping("tema/{tema}")
     @Operation(summary = "Hent alle medlemmer fra Entra for et gitt tema")
     fun medlemmerForTema(@PathVariable tema: Tema) =
-        medlemmerIGruppe(oid, entra, tema.gruppeNavn)
+        medlemmerIGruppe(oid, gruppe, tema.gruppeNavn)
 }

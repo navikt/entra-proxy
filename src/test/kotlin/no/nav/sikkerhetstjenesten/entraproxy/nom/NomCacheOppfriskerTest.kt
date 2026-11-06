@@ -9,10 +9,12 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomOrgTilknytning.NomEnhet.NomIdent
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
+import java.time.Duration
+import java.time.Duration.ofMinutes
 
 class NomCacheOppfriskerTest : BehaviorSpec({
 
-    val cfg = NomGraphQLConfig("localhost")
+    val cfg = NomGraphQLConfig("localhost", ofMinutes(1), ofMinutes(1))
     val nom = mockk<NomTjeneste>(relaxed = true)
     val oppfrisker = NomCacheOppfrisker(nom, cfg)
 

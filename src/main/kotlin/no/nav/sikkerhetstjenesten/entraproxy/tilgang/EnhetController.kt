@@ -2,13 +2,16 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplication.Companion.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import no.nav.sikkerhetstjenesten.felles.security.OAuth2RequireOBO
+import no.nav.sikkerhetstjenesten.felles.security.SecurityExtensions.requiredAttribute
 import org.springframework.http.MediaType.TEXT_PLAIN_VALUE
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal
@@ -17,11 +20,12 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "EnhetController", description = "Denne kontrolleren skal brukes i produksjon")
+@Tag(name = "EnhetController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
 class EnhetController(
     private val entra: EntraTjeneste,
+    private val gruppe: EntraGruppeTjeneste,
     private val oid: EntraOidTjeneste,
     private val norg: NorgTjeneste) {
 
@@ -44,5 +48,7 @@ class EnhetController(
     @GetMapping("enhet/{enhetsnummer}")
     @Operation(summary = "Hent alle medlemmer fra Entra for en gitt enhet")
     fun medlemmerForEnhet(@PathVariable enhetsnummer: Enhetnummer) =
-        medlemmerIGruppe(oid, entra, enhetsnummer.gruppeNavn)
+        oid.gruppeOid(enhetsnummer.gruppeNavn)?.let {
+            gruppe.medlemmerIGruppe(it)
+        } ?: emptySet()
 }

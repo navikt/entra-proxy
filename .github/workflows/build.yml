@@ -96,6 +96,15 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
+      - name: Configure apt network timeouts
+        run: |
+          sudo tee /etc/apt/apt.conf.d/99-playwright-network > /dev/null <<'EOF'
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          Acquire::Retries "1";
+          APT::Update::Error-Mode "any";
+          EOF
+
       - name: Install Playwright Chromium
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npm run playwright:install -- --with-deps

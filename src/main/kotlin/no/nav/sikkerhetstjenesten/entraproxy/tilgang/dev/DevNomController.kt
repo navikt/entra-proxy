@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.tilgang
+package no.nav.sikkerhetstjenesten.entraproxy.tilgang.dev
 
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/${DEV}")
 @ConditionalOnNotProd
 @Tag(name = "DevNomController",
-    description = "Denne kontrolleren er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
+    description = "Disse endepunktene er bare tilgjengelig i dev og skal kun brukes til interaktiv testing")
 class DevNomController(private val nom: NomTjeneste) {
 
     @GetMapping("/nom/{ansattId}")

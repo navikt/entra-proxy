@@ -23,6 +23,8 @@ import org.springframework.graphql.client.GraphQlClient.RequestSpec
 import org.springframework.graphql.client.GraphQlClient.RetrieveSyncSpec
 import org.springframework.graphql.client.toEntity
 import org.springframework.graphql.client.toEntityList
+import java.time.Duration
+import java.time.Duration.ofMinutes
 
 class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val client = mockk<GraphQlClient>()
@@ -32,7 +34,7 @@ class NomSyncGraphQLClientAdapterTest : BehaviorSpec({
     val field = mockk<ClientResponseField>()
     val retrieveField = mockk<ClientResponseField>()
     val cache = mockk<CacheOperations>(relaxed = true)
-    val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost"), client, cache)
+    val adapter = NomSyncGraphQLClientAdapter(NomGraphQLConfig("localhost", ofMinutes(1), ofMinutes(1)), client, cache)
     val first = NomGraphQLRespons(AnsattId("A123456"), "Første ansatt", NAV_STATLIG)
     val second = NomGraphQLRespons(AnsattId("B123456"), "Andre ansatt", NAV_STATLIG)
     val firstAnsatt = NomAnsatt(AnsattId("A123456"), "Første ansatt", "Statlig")

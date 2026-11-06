@@ -13,6 +13,5 @@
     <ID>TooManyFunctions:DevEntraController.kt:DevEntraController</ID>
     <ID>TooManyFunctions:EntraGraphAdapter.kt:EntraGraphAdapter : EntraGraphOperations</ID>
     <ID>TooManyFunctions:EntraGraphClient.kt:EntraGraphClient</ID>
-    <ID>TooManyFunctions:EntraTjeneste.kt:EntraTjeneste</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
-import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.health.contributor.HealthIndicator

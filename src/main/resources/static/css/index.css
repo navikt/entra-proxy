@@ -20,6 +20,7 @@ h1 {
 nav {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem;
     margin-top: 1rem;
 }
@@ -29,6 +30,6 @@ img.professor {
     width: 80%;
     max-width: 32rem;
     height: auto;
-    margin: 1.5rem 0;
+    margin: 1.5rem auto;
     border-radius: 8px;
 }

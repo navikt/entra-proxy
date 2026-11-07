@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
-import no.nav.sikkerhetstjenesten.entraproxy.felles.RestClientBeanConfig.Companion.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
@@ -20,6 +19,7 @@ import org.springframework.web.client.support.RestClientHttpServiceGroupConfigur
 import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import org.zalando.logbook.core.HeaderFilters.eachHeader
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler.Companion.IDENTIFIKATOR
+import no.nav.sikkerhetstjenesten.felles.rest.headerAddingRequestInterceptor
 import no.nav.sikkerhetstjenesten.felles.utils.extensions.DomainExtensions.maskFnr
 import org.zalando.logbook.HeaderFilter.merge
 import org.zalando.logbook.core.HeaderFilters.defaultValue

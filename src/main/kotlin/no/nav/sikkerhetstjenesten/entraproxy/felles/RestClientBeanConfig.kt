@@ -40,8 +40,8 @@ class RestClientBeanConfig(
         ClientHttpRequestFactoryBuilderCustomizer { builder ->
             builder
                 .withConnectionManagerCustomizer { cm ->
-                    cm.setMaxConnTotal(300)
-                    cm.setMaxConnPerRoute(50)
+                    cm.setMaxConnTotal(MAX_CONNECTIONS_TOTAL)
+                    cm.setMaxConnPerRoute(MAX_CONNECTIONS_PER_ROUTE)
                 }
                 .withConnectionConfigCustomizer { cfg ->
                     cfg.setValidateAfterInactivity(TimeValue.ofSeconds(2))
@@ -61,17 +61,13 @@ class RestClientBeanConfig(
     }
 
     companion object {
-        fun headerAddingRequestInterceptor(vararg verdier: Pair<String, String>) =
-            ClientHttpRequestInterceptor { request, body, next ->
-                verdier.forEach { (key, value) -> request.headers.add(key, value) }
-                next.execute(request, body)
-            }
+        private const val MAX_CONNECTIONS_TOTAL = 300
+        private const val MAX_CONNECTIONS_PER_ROUTE = 50
     }
 
     private class StringToEnhetnummerConverter : Converter<String, Enhetnummer> {
         override fun convert(source: String) = Enhetnummer(source)
     }
 }
-
 
 

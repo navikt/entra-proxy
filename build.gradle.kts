@@ -147,14 +147,13 @@ dependencies {
     implementation(libs.springBootStarterGraphql)
     implementation(libs.springBootStarterJetty)
     implementation(libs.springBootStarterRestclient)
-    implementation(libs.springBootStarterWeb)
+    implementation(libs.springBootStarterWebmvc)
 
     // Testing
     testImplementation(libs.springMockk)
     testImplementation(libs.mockk)
     testImplementation(libs.caffeine)
-    testImplementation(libs.testcontainersRedis)
-    testImplementation(libs.springBootTestcontainers)
+    testImplementation(libs.bundles.testcontainers)
     testImplementation(libs.springBootStarterDataRedisTest)
     testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)

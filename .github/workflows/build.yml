@@ -127,6 +127,7 @@ jobs:
         with:
           path: build/reports/detekt/detekt.html
           archive: false
+          if-no-files-found: error
           retention-days: 14
 
       - name: Bygg og push Docker-image

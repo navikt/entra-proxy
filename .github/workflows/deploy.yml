@@ -25,6 +25,55 @@ jobs:
     with:
       cache-read-only: true
 
+  pages:
+    name: Publiser Detekt-rapport på GitHub Pages
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}detekt/
+    steps:
+      - name: Sjekker ut kode
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Konfigurer GitHub Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Bygg eksisterende nettsted
+        uses: actions/jekyll-build-pages@44a6e6beabd48582f863aeeb6cb2151cc1716697 # v1.0.13
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Last ned Detekt-rapport
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: detekt.html
+          path: _site/detekt
+
+      - name: Gjør rapporten til startside
+        run: mv _site/detekt/detekt.html _site/detekt/index.html
+
+      - name: Last opp nettsted
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+      - name: Publiser nettsted
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
   deploy:
     permissions:
       contents: read

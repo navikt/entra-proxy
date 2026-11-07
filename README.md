@@ -24,6 +24,8 @@ cd entra-proxy
 ```
 
 Kjør kodeanalyse med `./gradlew detekt`.
+Detekt-rapporten fra siste vellykkede main-build publiseres på
+[GitHub Pages](https://navikt.github.io/entra-proxy/detekt/).
 
 ### Frontend
 

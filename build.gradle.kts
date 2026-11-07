@@ -40,7 +40,7 @@ detekt {
 
 configurations.matching { it.name.startsWith("detekt") }.configureEach {
     resolutionStrategy.eachDependency {
-        if (requested.group == "org.jetbrains.kotlin") useVersion("2.4.10")
+        if (requested.group == "org.jetbrains.kotlin") useVersion(libs.versions.kotlin.get())
     }
 }
 

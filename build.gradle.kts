@@ -1,12 +1,14 @@
 
 import org.gradle.api.tasks.testing.Test
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
+import org.springframework.boot.gradle.plugin.SpringBootPlugin.BOOT_JAR_TASK_NAME
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
 
@@ -98,14 +100,16 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
+    /*
     maven {
         name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/navikt/sikkerhetstjenesten-felles")
         credentials {
             username = "x-access-token"
-            password = providers.environmentVariable("READER_TOKEN").orElse(providers.gradleProperty("gpr.token")).orNull
+            password = providers.environmentVariable("READER_TOKEN")
+                .orElse(providers.gradleProperty("gpr.token")).orNull
         }
-    }
+    }*/
 }
 
 
@@ -163,21 +167,24 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${libs.versions.otelAlpha.get()}")
+        mavenBom(
+            "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${libs.versions.otelAlpha.get()}")
     }
 }
 
-tasks.named<BootJar>("bootJar") {
+tasks.named<BootJar>(BOOT_JAR_TASK_NAME) {
     archiveFileName = "app.jar"
 }
 
 val npmInstall = tasks.register<Exec>("npmInstall") {
+    description = "Installs the frontend dependencies using npm"
     inputs.files("package.json", "package-lock.json")
     outputs.dir("node_modules")
     commandLine("npm", "ci", "--no-audit", "--no-fund")
 }
 
 val compileTypeScript = tasks.register<Exec>("compileTypeScript") {
+    description = "Compiles the TypeScript frontend code"
     dependsOn(npmInstall)
     inputs.files("package.json", "package-lock.json", "tsconfig.json")
     inputs.dir("src/main/typescript")
@@ -197,7 +204,7 @@ tasks.processResources {
     from(layout.buildDirectory.dir("generated/frontend"))
 }
 
-tasks.named("check") {
+tasks.named(CHECK_TASK_NAME) {
     dependsOn(frontendTest)
 }
 
@@ -222,7 +229,6 @@ java {
     }
 }
 
-// Kotlin 2.4.x supports JVM target up to 26, so Java bytecode must match.
 tasks.withType<JavaCompile>().configureEach {
     options.release.set(26)
 }

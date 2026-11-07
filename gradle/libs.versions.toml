@@ -20,6 +20,7 @@ springMockk = "5.0.1"
 [libraries]
 bootConditionals = { module = "no.nav.boot:boot-conditionals", version.ref = "conditionals" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
+grgitCore = { module = "org.ajoberstar.grgit:grgit-core", version.ref = "grgit" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }

@@ -3,31 +3,12 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
-import org.ajoberstar.grgit.Grgit
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.ValueSource
-import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
 import org.springframework.boot.gradle.plugin.SpringBootPlugin.BOOT_JAR_TASK_NAME
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import java.lang.System.getProperty
 
 val javaVersion = JavaLanguageVersion.of(27)
-
-abstract class GitBuildInfoValueSource : ValueSource<Map<String, String>, GitBuildInfoValueSource.Params> {
-    interface Params : ValueSourceParameters {
-        val projectDir: Property<String>
-    }
-
-    override fun obtain(): Map<String, String> =
-        Grgit.open(mapOf("currentDir" to parameters.projectDir.get())).use { git ->
-            mapOf(
-                "git.branch" to git.branch.current().name,
-                "git.commit.id" to git.head().abbreviatedId,
-                "git.commit.time" to git.head().dateTime.toString()
-            )
-        }
-}
 
 val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {
     parameters.projectDir.set(layout.projectDirectory.asFile.absolutePath)
@@ -53,13 +34,8 @@ detekt {
     buildUponDefaultConfig = true
     ignoreFailures = true
     config.setFrom(file("config/detekt/detekt.yml"))
-    baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent) "build/ingen-baseline.xml" else "detekt-baseline.xml")
-}
-
-tasks.withType<dev.detekt.gradle.Detekt>().configureEach {
-    reports {
-        sarif.required = true
-    }
+    baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent)
+        "build/ingen-baseline.xml" else "detekt-baseline.xml")
 }
 
 configurations.matching { it.name.startsWith("detekt") }.configureEach {

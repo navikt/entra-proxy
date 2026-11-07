@@ -56,7 +56,6 @@ jobs:
       checks: write    # publisere test-resultater til Checks API
       contents: read   # checkout kode
       id-token: write  # nais/docker-build-push (OIDC mot GAR)
-      security-events: write  # laste opp detekt-funn (SARIF) til code scanning
     outputs:
       image: ${{ steps.docker-push.outputs.image }}
       digest: ${{ steps.docker-push.outputs.digest }}
@@ -118,25 +117,9 @@ jobs:
           READER_TOKEN: ${{ secrets.READER_TOKEN }}
         run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar -PdetektUtenBaseline
 
-      - name: Last opp detekt-funn
-        if: ${{ !cancelled() }}
-        continue-on-error: true # mangler skrivetilgang for PR-er fra forks
-        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066
-        with:
-          sarif_file: build/reports/detekt/detekt.sarif
-          category: detekt
-
       - name: Vis detekt-rapport i jobbsammendrag
         if: ${{ !cancelled() }}
         run: cat build/reports/detekt/detekt.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Last opp detekt-rapport
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: detekt-rapport
-          path: build/reports/detekt/
-          retention-days: 14
 
       - name: Last opp detekt-rapport (HTML)
         if: ${{ !cancelled() }}

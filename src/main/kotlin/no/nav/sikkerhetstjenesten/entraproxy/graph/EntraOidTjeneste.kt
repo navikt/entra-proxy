@@ -10,13 +10,13 @@ import org.springframework.web.ErrorResponseException
 
 
 @RestRetryingWhenRecoverableService
-class EntraOidTjeneste(private val client: EntraGraphClient) {
+class EntraOidTjeneste(private val userClient: EntraUserClient, private val groupClient: EntraGroupClient) {
 
     private val log = getLogger(javaClass)
 
     @Cacheable(ENTRA_OID, key = "#ansattId.verdi")
     fun ansattOid(ansattId: AnsattId) =
-        with(client.users("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
+        with(userClient.users("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
             when (size) {
                 0 -> throw EntraIkkeFunnetException(ansattId,
                     "Fant ingen oid for ${ansattId.verdi}, er den fremdeles gyldig?")
@@ -30,7 +30,7 @@ class EntraOidTjeneste(private val client: EntraGraphClient) {
 
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
-        client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
+        groupClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 }
 
 class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {

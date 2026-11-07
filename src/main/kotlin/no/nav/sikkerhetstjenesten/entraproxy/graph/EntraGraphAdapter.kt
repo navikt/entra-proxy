@@ -8,7 +8,10 @@ import org.springframework.http.HttpStatus.OK
 import java.net.URI
 import java.util.UUID
 
-class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperations {
+class EntraGraphAdapter(
+    private val userClient: EntraUserClient,
+    private val groupClient: EntraGroupClient,
+    private val graphClient: EntraGraphClient) : EntraGraphOperations {
 
     private val log = getLogger(javaClass)
 
@@ -20,43 +23,43 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
     override fun temaer(ansattOid: UUID) =
         allSider("temaer for $ansattOid",
-            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"),
+            userClient.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"),
             Tilganger::next,
-            client::tilgangerSide)
+            userClient::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { Tema(it.displayName) }
             .also { log.info("Hentet {} tema for {}", it.size, ansattOid) }
 
     override fun grupper(ansattOid: UUID) =
         allSider("grupper for $ansattOid",
-            client.memberOfGrupper("$ansattOid", MINIMUM_FELTER_FILTRERT, FILTER_STRING),
+            userClient.memberOfGrupper("$ansattOid", MINIMUM_FELTER_FILTRERT, FILTER_STRING),
             Tilganger::next,
-            client::tilgangerSide)
+            userClient::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet {} gruppe(r) for {}", it.size, ansattOid) }
 
     override fun grupperSomMatcher(subString: String) =
         allSider("grupper som matcher '$subString'",
-            client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)),
+            groupClient.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)),
             Grupper::next,
-            client::grupperSide)
+            groupClient::grupperSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(sortedSetOf()) { EntraGruppe(it.displayName, it.id, it.description) }
             .also { log.info("Hentet {} gruppe(r) som matcher '{}'", it.size, subString) }
 
     override fun enheter(ansattOid: UUID) =
         allSider("enheter for $ansattOid",
-            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
-            Tilganger::next, client::tilgangerSide)
+            userClient.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
+            Tilganger::next, userClient::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }
             .also { log.info("Hentet {} enhet(er) for {}", it.size, ansattOid) }
 
     override fun gruppeMedlemmer(oid: String): Set<Ansatt> {
         val alleMedlemmer = allSider("medlemmer av gruppe $oid",
-            client.members(oid, ANSATTE_FELTER),
-            GruppeMedlemmer::next, client::gruppeMedlemmerSide)
+            groupClient.members(oid, ANSATTE_FELTER),
+            GruppeMedlemmer::next, groupClient::gruppeMedlemmerSide)
             .flatMapTo(mutableSetOf()) { it.value }
         val (gyldigeMedlemmer, ugyldigeMedlemmer) = alleMedlemmer.partition {
             it.onPremisesSamAccountName?.erAnsattId() == true
@@ -72,7 +75,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         }.also { log.info("Hentet {} medlem(mer) for gruppe {}", it.size, oid) }
     }
 
-    override fun antallMedlemmer(vararg gruppeIder: UUID): Map<UUID, Long> =
+    override fun antallMedlemmer(vararg gruppeIder: UUID) =
         gruppeIder.asList()
             .chunked(BATCH_STØRRELSE)
             .flatMap { antallForBatch(it).toList() }
@@ -81,7 +84,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
 
     private fun utvidetAnsatt(filter: String, verdi: String)  =
-        client.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->
+        userClient.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->
             with(respons) {
                 onPremisesSamAccountName?.let { navIdent ->
                     val enhetsNummer = Enhetnummer(streetAddress ?: UKJENT_ENHET)
@@ -105,7 +108,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         val forespørsler = idTilGruppe.map { (id, gruppeId) ->
             BatchSubRequest(id, $$"/groups/$$gruppeId/members/$count")
         }
-        return client.batch(BatchRequest(forespørsler)).responses
+        return graphClient.batch(BatchRequest(forespørsler)).responses
             .mapNotNull { respons ->
                 val gruppeId = idTilGruppe[respons.id] ?: return@mapNotNull null
                 val antall = (respons.body as? Number)?.toLong()
@@ -130,7 +133,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
     }
 
     override fun toString() =
-        "${javaClass.simpleName} [client=$client]"
+        "${javaClass.simpleName} [userClient=$userClient, groupClient=$groupClient, graphClient=$graphClient]"
 
     companion object {
         const val BRUKER = "onPremisesSamAccountName"

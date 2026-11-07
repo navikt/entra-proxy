@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Import
     TemaController::class,
     AnsattController::class,
     GruppeController::class,
-    MailController::class,
+    EntraMailController::class,
     NomController::class,
     CacheController::class,
     EntraExceptionHandler::class,

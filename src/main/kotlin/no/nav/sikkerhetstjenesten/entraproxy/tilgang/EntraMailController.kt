@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "MailController", description = "Disse endepunktene skal brukes i produksjon, men normalt ikke kalles direkte")
+@Tag(name = "MailController", description = "Disse endepunktene brukes normalt ikke direkte")
 @Hidden
 @RestController
 @RequestMapping(API_V1)
-class MailController(private val mail: EntraMailTjeneste) {
+class EntraMailController(private val mail: EntraMailTjeneste) {
 
     @PostMapping("mail")
     @Operation(summary = "Send e-post")

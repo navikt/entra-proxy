@@ -10,6 +10,12 @@ import java.lang.System.getProperty
 
 val javaVersion = JavaLanguageVersion.of(27)
 
+buildscript {
+    dependencies {
+        classpath(libs.kotlinGradlePlugin)
+    }
+}
+
 val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {
     parameters.projectDir.set(layout.projectDirectory.asFile.absolutePath)
 }

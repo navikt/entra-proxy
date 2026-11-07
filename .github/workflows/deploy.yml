@@ -56,6 +56,9 @@ jobs:
           source: ./
           destination: ./_site
 
+      - name: Gi runner eierskap til nettstedet
+        run: sudo chown -R "$(id -u):$(id -g)" _site
+
       - name: Last ned Detekt-rapport
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:

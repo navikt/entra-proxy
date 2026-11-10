@@ -3,6 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.graph
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpStatus.NOT_FOUND
@@ -24,8 +25,9 @@ class EntraOidTjeneste(private val userClient: EntraUserClient, private val grou
                     log.info("Fant oid {} i Entra for {}", it, ansattId.verdi)
                 }
                 else -> throw EntraOidException(ansattId.verdi,
-                    "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { it.id.toString() }})")
-            }
+                    "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { 
+                        it.id.toString() }})")
+                }
         }
 
     @Cacheable(ENTRA_OID)
@@ -37,6 +39,6 @@ class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(
     init {
         body.title = "Uventet respons fra Entra"
         body.detail = msg
-        body.properties = mapOf("navIdent" to ansattId, "traceId" to Span.current().spanContext.traceId)
+        body.properties = mapOf(NAVIDENT to ansattId, "traceId" to Span.current().spanContext.traceId)
     }
 }

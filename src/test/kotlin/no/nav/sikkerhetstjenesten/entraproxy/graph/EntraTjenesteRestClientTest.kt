@@ -16,6 +16,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_
 import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig.Companion.MEDLEMMER
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
+import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.springframework.boot.restclient.test.MockServerRestClientCustomizer
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest
 import org.springframework.boot.test.context.TestConfiguration
@@ -277,7 +278,7 @@ class EntraTjenesteRestClientTest(
                     assertSoftly {
                         feil.statusCode.value() shouldBe 404
                         feil.body.title shouldBe "Uventet respons fra Entra"
-                        feil.body.properties?.get("navIdent") shouldBe ident.verdi
+                        feil.body.properties?.get(NAVIDENT) shouldBe ident.verdi
                         feil.body.detail.orEmpty() shouldContain "fant 2"
                     }
                 }

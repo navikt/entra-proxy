@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.felles.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "EnhetController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class EnhetController(
+class NorgEnhetController(
     private val entra: EntraTjeneste,
     private val gruppe: EntraGruppeTjeneste,
     private val oid: EntraOidTjeneste,

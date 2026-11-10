@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Import
 
 @SpringBootApplication(exclude = [CacheAutoConfiguration::class])
 @Import(
-    EnhetController::class,
+    NorgEnhetController::class,
     TemaController::class,
-    AnsattController::class,
-    GruppeController::class,
+    EntraAnsattController::class,
+    EntraGruppeController::class,
     EntraMailController::class,
     NomController::class,
     CacheController::class,

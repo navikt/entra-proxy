@@ -1,13 +1,9 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
-import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.web.ErrorResponseException
 
 
 @RestRetryingWhenRecoverableService
@@ -24,7 +20,7 @@ class EntraOidTjeneste(private val userClient: EntraUserClient, private val grou
                 1 -> singleOrNull()?.id.also {
                     log.info("Fant oid {} i Entra for {}", it, ansattId.verdi)
                 }
-                else -> throw EntraOidException(ansattId.verdi,
+                else -> throw EntraOidException(ansattId, size,
                     "Forventet nøyaktig én oid for navident ${ansattId.verdi}, fant $size (${joinToString(", ") { 
                         it.id.toString() }})")
                 }
@@ -35,10 +31,4 @@ class EntraOidTjeneste(private val userClient: EntraUserClient, private val grou
         groupClient.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 }
 
-class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {
-    init {
-        body.title = "Uventet respons fra Entra"
-        body.detail = msg
-        body.properties = mapOf(NAVIDENT to ansattId, "traceId" to Span.current().spanContext.traceId)
-    }
-}
+class EntraOidException(val ansattId: AnsattId, val antallTreff: Int, msg: String) : RuntimeException(msg)

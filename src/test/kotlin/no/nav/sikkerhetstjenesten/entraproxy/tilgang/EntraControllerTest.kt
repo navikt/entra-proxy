@@ -9,6 +9,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -135,6 +136,23 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
 
         Given("feilsvar fra Entra-tjenesten") {
+            When("OID-oppslaget finner flere brukere") {
+                Then("returneres 404 med navident og feildetaljer") {
+                    val melding = "Forventet nøyaktig én oid for navident ${TEST_ANSATT_ID.verdi}, fant 2"
+                    every { entraTjeneste.grupper(TEST_ANSATT_ID) } throws
+                        EntraOidException(TEST_ANSATT_ID, 2, melding)
+
+                    mockMvc.perform(get("$API_V1/ansatt/tilganger/$TEST_ANSATT_ID").with(jwt()))
+                        .andExpect(status().isNotFound())
+                        .andExpect(content().contentTypeCompatibleWith(APPLICATION_PROBLEM_JSON))
+                        .andExpect(jsonPath("$.status").value(404))
+                        .andExpect(jsonPath("$.title").value("Uventet respons fra Entra"))
+                        .andExpect(jsonPath("$.detail").value(melding))
+                        .andExpect(jsonPath("$.$NAVIDENT").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$.traceId").value(matchesPattern("[0-9a-f]{32}")))
+                }
+            }
+
             When("den ansatte ikke finnes") {
                 Then("returneres 404 med navident og feildetaljer") {
                     every { entraTjeneste.grupper(TEST_ANSATT_ID) } throws

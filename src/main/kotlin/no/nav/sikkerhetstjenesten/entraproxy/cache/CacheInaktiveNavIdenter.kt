@@ -17,8 +17,7 @@ import kotlin.time.measureTimedValue
 class CacheInaktiveNavIdenter(
     private val graf: EntraGraphOperations,
     private val cache: CacheOperations,
-    @Value($$"${groups.disabled}") private val uuid: UUID,
-) : LeaderAware(true) {
+    @Value($$"${groups.disabled}") private val uuid: UUID) : LeaderAware(true) {
 
     private val log = getLogger(javaClass)
 

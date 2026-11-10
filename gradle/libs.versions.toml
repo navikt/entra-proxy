@@ -23,6 +23,7 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine" }
 grgitCore = { module = "org.ajoberstar.grgit:grgit-core", version.ref = "grgit" }
 httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5" }
 jackson-module-kotlin = { module = "tools.jackson.module:jackson-module-kotlin" }
+kotlinGradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 jacksonAnnotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jacksonAnnotations" }
 kotestAssertionsCore = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotestExtensionsSpring = { module = "io.kotest:kotest-extensions-spring", version.ref = "kotest" }

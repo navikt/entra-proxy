@@ -132,6 +132,6 @@ jobs:
 
       - name: Bygg og push Docker-image
         id: docker-push
-        uses: nais/docker-build-push@ceabe305c64640175f133b7e59af6666b0a3c46c
+        uses: nais/docker-build-push@588f76a6f45aeb1e75d5e8417ec6ef6d79b2b39f
         with:
           team: sikkerhetstjenesten

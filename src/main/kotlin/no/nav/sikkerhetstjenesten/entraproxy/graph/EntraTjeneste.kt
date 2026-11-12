@@ -1,5 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import no.nav.sikkerhetstjenesten.entraproxy.felles.hentParallelt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.felles.rest.NotFoundRestException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
@@ -28,9 +29,12 @@ class EntraTjeneste(
     fun enheter(ansattId: AnsattId): Set<Enhet> =
         if (erInaktiv(ansattId)) emptySet()
         else medOidOppfrisking(ansattId) {
-            graph.enheter(it) }.mapTo(mutableSetOf()) {
+            graph.enheter(it)
+        }.let { enhetnumre ->
+            hentParallelt(enhetnumre.toList(), MAKS_SAMTIDIGE_ENHETSNAVNOPPSLAG) {
                 Enhet(it, enheter.navn(it))
-            }
+            }.toSet()
+        }
 
     @Cacheable(GRAPH, key = "#root.methodName + ':' + #ansattId.verdi")
     fun utvidetAnsatt(ansattId: AnsattId) =
@@ -65,5 +69,9 @@ class EntraTjeneste(
 
     override fun toString() =
         "${javaClass.simpleName} [graph=$graph]"
+
+    companion object {
+        private const val MAKS_SAMTIDIGE_ENHETSNAVNOPPSLAG = 15
+    }
 
 }

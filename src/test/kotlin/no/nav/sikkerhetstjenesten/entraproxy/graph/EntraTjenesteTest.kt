@@ -1,5 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
+import io.opentelemetry.context.Context
+import io.opentelemetry.context.ContextKey
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.BehaviorSpec
@@ -12,9 +14,16 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import java.util.UUID.randomUUID
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.atomic.AtomicInteger
 
 class EntraTjenesteTest : BehaviorSpec({
     val graph = mockk<EntraGraphOperations>()
@@ -121,6 +130,95 @@ class EntraTjenesteTest : BehaviorSpec({
                     resultat shouldBe emptySet()
                     verify { graph wasNot Called }
                     verify(exactly = 0) { cache.delete(any(), any()) }
+                }
+            }
+        }
+    }
+
+    Given("enhetsoppslag for en aktiv ansatt") {
+        beforeEach {
+            every { oid.ansattOid(ident) } returns gammelOid
+        }
+
+        When("flere enheter trenger navn") {
+            Then("hentes navn parallelt med maksimalt fem samtidige oppslag og bevart rekkefølge") {
+                val numre = (1..12).map { Enhetnummer(it.toString().padStart(4, '0')) }
+                val femStartet = CountDownLatch(5)
+                val seksStartet = CountDownLatch(6)
+                val frigi = CountDownLatch(1)
+                val aktive = AtomicInteger()
+                val maksAktive = AtomicInteger()
+                every { graph.enheter(gammelOid) } returns numre.toSet()
+                every { enheter.navn(any()) } answers {
+                    val antall = aktive.incrementAndGet()
+                    maksAktive.accumulateAndGet(antall, ::maxOf)
+                    femStartet.countDown()
+                    seksStartet.countDown()
+                    try {
+                        check(frigi.await(10, SECONDS)) { "Navneoppslag ble ikke frigitt" }
+                        "Enhet ${firstArg<Enhetnummer>().verdi}"
+                    } finally {
+                        aktive.decrementAndGet()
+                    }
+                }
+
+                newVirtualThreadPerTaskExecutor().use { executor ->
+                    val resultat = executor.submit(Callable { tjeneste.enheter(ident) })
+                    try {
+                        femStartet.await(10, SECONDS) shouldBe true
+                        seksStartet.await(200, MILLISECONDS) shouldBe false
+                        frigi.countDown()
+
+                        resultat.get(10, SECONDS).toList() shouldBe
+                            numre.map { Enhet(it, "Enhet ${it.verdi}") }
+                        maksAktive.get() shouldBe 5
+                        numre.forEach { nummer ->
+                            verify(exactly = 1) { enheter.navn(nummer) }
+                        }
+                    } finally {
+                        frigi.countDown()
+                    }
+                }
+            }
+        }
+
+        When("et navneoppslag feiler") {
+            Then("propageres den opprinnelige feilen uten et delvis resultat") {
+                val nummer1 = Enhetnummer("0315")
+                val nummer2 = Enhetnummer("0301")
+                val forventetFeil = IllegalStateException("Norg er utilgjengelig")
+                every { graph.enheter(gammelOid) } returns setOf(nummer1, nummer2)
+                every { enheter.navn(nummer1) } returns "Enhet 0315"
+                every { enheter.navn(nummer2) } throws forventetFeil
+
+                shouldThrow<IllegalStateException> {
+                    tjeneste.enheter(ident)
+                } shouldBe forventetFeil
+            }
+        }
+
+        When("Graph ikke returnerer noen enheter") {
+            Then("returneres et tomt sett uten navneoppslag") {
+                every { graph.enheter(gammelOid) } returns emptySet()
+
+                tjeneste.enheter(ident) shouldBe emptySet()
+
+                verify { enheter wasNot Called }
+            }
+        }
+
+        When("navneoppslaget flyttes til en virtuell tråd") {
+            Then("beholdes OpenTelemetry-konteksten fra den kallende tråden") {
+                val nummer = Enhetnummer("0315")
+                val contextKey = ContextKey.named<String>("test-enhetsoppslag")
+                every { graph.enheter(gammelOid) } returns setOf(nummer)
+                every { enheter.navn(nummer) } answers {
+                    Context.current().get(contextKey) shouldBe "opprinnelig kontekst"
+                    "Enhet 0315"
+                }
+
+                Context.current().with(contextKey, "opprinnelig kontekst").makeCurrent().use {
+                    tjeneste.enheter(ident) shouldBe setOf(Enhet(nummer, "Enhet 0315"))
                 }
             }
         }

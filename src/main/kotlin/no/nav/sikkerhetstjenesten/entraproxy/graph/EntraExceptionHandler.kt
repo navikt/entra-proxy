@@ -12,6 +12,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class EntraExceptionHandler {
 
+    @ExceptionHandler(EntraOidException::class)
+    fun oidIkkeEntydig(e: EntraOidException): ProblemDetail =
+        forStatusAndDetail(NOT_FOUND, e.message).apply {
+            title = "Uventet respons fra Entra"
+            setProperty(NAVIDENT, e.ansattId.verdi)
+            setProperty("traceId", Span.current().spanContext.traceId)
+        }
+
     @ExceptionHandler(EntraIkkeFunnetException::class)
     fun oidIkkeFunnet(e: EntraIkkeFunnetException): ProblemDetail =
         forStatusAndDetail(NOT_FOUND, e.message ?: "Fant ikke oid for ${e.ansattId.verdi} i Entra")

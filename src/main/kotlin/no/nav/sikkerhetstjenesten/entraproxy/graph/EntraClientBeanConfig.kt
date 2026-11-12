@@ -7,12 +7,14 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.web.service.registry.ImportHttpServices
 
 @Configuration
-@ImportHttpServices(types = [EntraGraphClient::class, EntraMailClient::class], group = GRAPH)
+@ImportHttpServices(
+    types = [EntraGraphClient::class, EntraUserClient::class, EntraGroupClient::class, EntraMailClient::class],
+    group = GRAPH)
 class EntraClientBeanConfig {
 
     @Bean
-    fun entraGraphAdapter(client: EntraGraphClient) =
-        EntraGraphAdapter(client)
+    fun entraGraphAdapter(userClient: EntraUserClient, groupClient: EntraGroupClient, graphClient: EntraGraphClient) =
+        EntraGraphAdapter(userClient, groupClient, graphClient)
 
     @Bean
     fun oidOppslag(oid: EntraOidTjeneste, cache: CacheOperations): EntraOidOperations =

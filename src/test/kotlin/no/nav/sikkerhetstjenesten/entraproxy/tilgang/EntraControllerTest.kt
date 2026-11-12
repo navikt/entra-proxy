@@ -3,12 +3,13 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import com.ninjasquad.springmockk.MockkBean
 import io.kotest.core.spec.style.BehaviorSpec
 import io.mockk.every
-import no.nav.sikkerhetstjenesten.entraproxy.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.felles.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
@@ -32,7 +33,6 @@ import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.PROD_GCP
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT
 import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.matchesPattern
-import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.http.HttpHeaders.AUTHORIZATION
@@ -135,6 +135,23 @@ class EntraControllerTest(private val mockMvc: MockMvc) : BehaviorSpec() {
         }
 
         Given("feilsvar fra Entra-tjenesten") {
+            When("OID-oppslaget finner flere brukere") {
+                Then("returneres 404 med navident og feildetaljer") {
+                    val melding = "Forventet nøyaktig én oid for navident ${TEST_ANSATT_ID.verdi}, fant 2"
+                    every { entraTjeneste.grupper(TEST_ANSATT_ID) } throws
+                        EntraOidException(TEST_ANSATT_ID, 2, melding)
+
+                    mockMvc.perform(get("$API_V1/ansatt/tilganger/$TEST_ANSATT_ID").with(jwt()))
+                        .andExpect(status().isNotFound())
+                        .andExpect(content().contentTypeCompatibleWith(APPLICATION_PROBLEM_JSON))
+                        .andExpect(jsonPath("$.status").value(404))
+                        .andExpect(jsonPath("$.title").value("Uventet respons fra Entra"))
+                        .andExpect(jsonPath("$.detail").value(melding))
+                        .andExpect(jsonPath("$.$NAVIDENT").value(TEST_ANSATT_ID.verdi))
+                        .andExpect(jsonPath("$.traceId").value(matchesPattern("[0-9a-f]{32}")))
+                }
+            }
+
             When("den ansatte ikke finnes") {
                 Then("returneres 404 med navident og feildetaljer") {
                     every { entraTjeneste.grupper(TEST_ANSATT_ID) } throws

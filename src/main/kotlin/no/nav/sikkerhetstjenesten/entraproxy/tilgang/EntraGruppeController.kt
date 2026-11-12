@@ -3,7 +3,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.felles.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +17,7 @@ import java.util.UUID
 @Tag(name = "GruppeController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {
+class EntraGruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {
 
     @GetMapping("gruppe/medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")

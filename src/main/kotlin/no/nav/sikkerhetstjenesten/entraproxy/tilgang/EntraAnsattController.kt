@@ -2,7 +2,7 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
-import no.nav.sikkerhetstjenesten.entraproxy.API_V1
+import no.nav.sikkerhetstjenesten.entraproxy.felles.API_V1
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 @Tag(name = "AnsattController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping(API_V1)
-class AnsattController(private val entra: EntraTjeneste) {
+class EntraAnsattController(private val entra: EntraTjeneste) {
 
     @GetMapping("ansatt/{navIdent}")
     @Operation(summary = "Hent informasjon om ansatt fra Entra")

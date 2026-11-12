@@ -33,6 +33,7 @@ import org.springframework.test.web.client.response.MockRestResponseCreators.wit
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.support.RestClientAdapter.create
 import org.springframework.web.service.invoker.HttpServiceProxyFactory.builderFor
+import org.springframework.web.service.invoker.HttpServiceProxyFactory
 import org.springframework.web.service.invoker.createClient
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -274,10 +275,10 @@ class EntraTjenesteRestClientTest(
                     val feil = shouldThrow<EntraOidException> { oid.ansattOid(ident) }
 
                     assertSoftly {
-                        feil.statusCode.value() shouldBe 404
-                        feil.body.title shouldBe "Uventet respons fra Entra"
-                        feil.body.properties?.get("navIdent") shouldBe ident.verdi
-                        feil.body.detail.orEmpty() shouldContain "fant 2"
+                        feil.ansattId shouldBe ident
+                        feil.antallTreff shouldBe 2
+                        feil.message shouldBe
+                            "Forventet nøyaktig én oid for navident ${ident.verdi}, fant 2 ($id1, $id2)"
                     }
                 }
             }
@@ -538,17 +539,28 @@ class EntraTjenesteRestClientTest(
             MockServerRestClientCustomizer(UnorderedRequestExpectationManager::class.java)
 
         @Bean
-        fun entraGraphClient(builder: RestClient.Builder): EntraGraphClient =
+        fun entraHttpServiceProxyFactory(builder: RestClient.Builder): HttpServiceProxyFactory =
             builderFor(create(builder
                 .baseUrl(BASE_URL)
                 .defaultStatusHandler(HttpStatusCode::isError, DefaultRestErrorHandler()::handle)
-                .build())).build().createClient()
+                .build())).build()
 
         @Bean
-        fun entraOidTjeneste(client: EntraGraphClient) = EntraOidTjeneste(client)
+        fun entraGraphClient(factory: HttpServiceProxyFactory): EntraGraphClient = factory.createClient()
 
         @Bean
-        fun entraGraphAdapter(client: EntraGraphClient) = EntraGraphAdapter(client)
+        fun entraUserClient(factory: HttpServiceProxyFactory): EntraUserClient = factory.createClient()
+
+        @Bean
+        fun entraGroupClient(factory: HttpServiceProxyFactory): EntraGroupClient = factory.createClient()
+
+        @Bean
+        fun entraOidTjeneste(userClient: EntraUserClient, groupClient: EntraGroupClient) =
+            EntraOidTjeneste(userClient, groupClient)
+
+        @Bean
+        fun entraGraphAdapter(userClient: EntraUserClient, groupClient: EntraGroupClient, graphClient: EntraGraphClient) =
+            EntraGraphAdapter(userClient, groupClient, graphClient)
 
         @Bean
         fun oidOppslag(oid: EntraOidTjeneste, cache: CaffeineCacheOperations): EntraOidOperations = EntraOidOppslag(oid, cache)

@@ -44,12 +44,6 @@ detekt {
         "build/ingen-baseline.xml" else "detekt-baseline.xml")
 }
 
-configurations.matching { it.name.startsWith("detekt") }.configureEach {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.jetbrains.kotlin") useVersion(libs.versions.kotlin.get())
-    }
-}
-
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn(tasks.test)
     classDirectories.setFrom(

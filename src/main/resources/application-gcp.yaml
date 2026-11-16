@@ -3,8 +3,6 @@ management:
   info:
     process:
       enabled: true
-    build:
-      enabled: true
     os:
       enabled: true
     git:

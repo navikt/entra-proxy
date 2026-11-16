@@ -1,0 +1,150 @@
+name: Gradle build with coverage XML (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      team:
+        required: true
+        type: string
+      gradle-tasks:
+        required: false
+        type: string
+        default: "detekt test jacocoTestReport cyclonedxBom bootJar"
+      gradle-args:
+        required: false
+        type: string
+        default: "--warning-mode all -PdetektUtenBaseline"
+      node:
+        required: false
+        type: boolean
+        default: false
+      playwright:
+        required: false
+        type: boolean
+        default: false
+      upload-test-reports:
+        required: false
+        type: boolean
+        default: false
+      cache-read-only:
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      image:
+        value: ${{ jobs.build.outputs.image }}
+      digest:
+        value: ${{ jobs.build.outputs.digest }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      checks: write
+      contents: read
+      id-token: write
+    outputs:
+      image: ${{ steps.docker-push.outputs.image }}
+      digest: ${{ steps.docker-push.outputs.digest }}
+    steps:
+      - name: Sjekker ut kode
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+        with:
+          cache-read-only: ${{ inputs.cache-read-only }}
+
+      - name: Install Java
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+        with:
+          java-version: "27"
+          distribution: temurin
+
+      - name: Setup Node
+        if: ${{ inputs.node }}
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install npm dependencies
+        if: ${{ inputs.node }}
+        run: npm ci --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        if: ${{ inputs.playwright }}
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Configure apt network timeouts
+        if: ${{ inputs.playwright }}
+        run: |
+          sudo tee /etc/apt/apt.conf.d/99-playwright-network > /dev/null <<'EOF'
+          Acquire::http::Timeout "30";
+          Acquire::https::Timeout "30";
+          Acquire::Retries "1";
+          APT::Update::Error-Mode "any";
+          EOF
+
+      - name: Install Playwright Chromium
+        if: ${{ inputs.playwright && steps.playwright-cache.outputs.cache-hit != 'true' }}
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: ${{ inputs.playwright && steps.playwright-cache.outputs.cache-hit == 'true' }}
+        run: npx playwright install-deps chromium
+
+      - name: Test og bygg
+        env:
+          GRADLE_TASKS: ${{ inputs.gradle-tasks }}
+          GRADLE_ARGS: ${{ inputs.gradle-args }}
+        run: ./gradlew $GRADLE_ARGS $GRADLE_TASKS
+
+      - name: Vis detekt-rapport i jobbsammendrag
+        if: ${{ !cancelled() && hashFiles('build/reports/detekt/detekt.md') != '' }}
+        run: cat build/reports/detekt/detekt.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Last opp detekt-rapport
+        if: ${{ !cancelled() && hashFiles('build/reports/detekt/**') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: detekt-rapport
+          path: build/reports/detekt/
+          retention-days: 14
+
+      - name: Last opp detekt-rapport (HTML)
+        if: ${{ !cancelled() && hashFiles('build/reports/detekt/detekt.html') != '' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: build/reports/detekt/detekt.html
+          archive: false
+          retention-days: 14
+
+      - name: Last opp JaCoCo- og testrapport
+        if: ${{ inputs.upload-test-reports }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-reports
+          path: |
+            build/reports/jacoco/test/html/
+            build/reports/jacoco/test/jacocoTestReport.xml
+            build/reports/tests/test/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Bygg og push Docker-image
+        id: docker-push
+        uses: nais/docker-build-push@588f76a6f45aeb1e75d5e8417ec6ef6d79b2b39f # v0
+        with:
+          team: ${{ inputs.team }}

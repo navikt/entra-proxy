@@ -11,8 +11,6 @@ on:
     paths:
       - '.github/workflows/**'
       - '.github/actions/**'
-  schedule:
-    - cron: '0 0 * * 0'
 
 permissions:
   contents: read

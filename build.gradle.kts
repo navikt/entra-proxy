@@ -1,57 +1,38 @@
 import dev.detekt.gradle.Detekt
 import dev.detekt.gradle.plugin.getSupportedKotlinVersion
-import org.ajoberstar.grgit.Grgit
-import org.gradle.api.tasks.testing.Test
-import org.gradle.testing.jacoco.tasks.JacocoReport
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
+import org.gradle.api.JavaVersion.toVersion
 import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
+import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget.Companion.fromTarget
 import org.springframework.boot.gradle.plugin.SpringBootPlugin.BOOT_JAR_TASK_NAME
 import org.springframework.boot.gradle.tasks.bundling.BootJar
-import java.lang.System.getProperty
 
 val javaVersion = JavaLanguageVersion.of(27)
-
-buildscript {
-    dependencies {
-        classpath(libs.grgitCore)
-        classpath(libs.kotlinGradlePlugin)
-    }
-}
-
-abstract class GitBuildInfoValueSource : ValueSource<Map<String, String>, GitBuildInfoValueSource.Params> {
-    interface Params : ValueSourceParameters {
-        val projectDir: Property<String>
-    }
-
-    override fun obtain(): Map<String, String> =
-        Grgit.open(mapOf("currentDir" to parameters.projectDir.get())).use { git ->
-            mapOf(
-                "git.branch" to git.branch.current().name,
-                "git.commit.id" to git.head().abbreviatedId,
-                "git.commit.time" to git.head().dateTime.toString()
-            )
-        }
-}
-
-val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {
-    parameters.projectDir.set(layout.projectDirectory.asFile.absolutePath)
-}
+val jvmTargetVersion = 26
 
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
-extra["jackson-2-bom.version"] = "2.22.4"
+extra["jackson-2-bom.version"] = providers.gradleProperty("jackson2Version").get()
 extra["logback.version"] = "1.6.7"
 
 plugins {
-    id("jacoco")
+    jacoco
     alias(libs.plugins.detekt)
-    alias(libs.plugins.grgit)
-    alias(libs.plugins.kotlinJvm)
-    alias(libs.plugins.kotlinSpring)
-    alias(libs.plugins.springBoot)
-    alias(libs.plugins.springDependencyManagement)
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.spring)
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.cyclonedx)
+    alias(libs.plugins.git.properties)
     alias(libs.plugins.kotest)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    ignoreFailures = true
+    config.setFrom(file("config/detekt/detekt.yml"))
+    baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent)
+        "build/ingen-baseline.xml" else "detekt-baseline.xml")
 }
 
 configurations.named("detekt") {
@@ -67,12 +48,14 @@ tasks.withType<Detekt>().configureEach {
         sarif.required = true
     }
 }
-detekt {
-    buildUponDefaultConfig = true
-    ignoreFailures = true
-    config.setFrom(file("config/detekt/detekt.yml"))
-    baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent)
-        "build/ingen-baseline.xml" else "detekt-baseline.xml")
+
+java {
+    sourceCompatibility = toVersion(jvmTargetVersion)
+    targetCompatibility = toVersion(jvmTargetVersion)
+
+    toolchain {
+        languageVersion.set(javaVersion)
+    }
 }
 
 tasks.named<JacocoReport>("jacocoTestReport") {
@@ -90,16 +73,32 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         csv.required = false
     }
 }
+
 springBoot {
     mainClass.set("no.nav.sikkerhetstjenesten.entraproxy.EntraProxyApplicationKt")
     buildInfo {
         properties {
-            additional.put("kotlin.version", libs.versions.kotlin.get())
-            additional.put("jdk.version", "$javaVersion")
-            additional.put("jdk.vendor", getProperty("java.vendor"))
-            additional.putAll(gitBuildInfo)
+            val javaMetadata = javaToolchains.launcherFor(java.toolchain).get().metadata
+            additional = mapOf(
+                "kotlin.version" to libs.versions.kotlin.get(),
+                "jdk.version" to javaMetadata.languageVersion.asInt().toString(),
+                "jdk.vendor" to javaMetadata.vendor,
+                "spring-boot.version" to libs.versions.spring.boot.get(),
+            )
         }
     }
+}
+
+gitProperties {
+    keys = listOf(
+        "git.branch",
+        "git.commit.id",
+        "git.commit.id.abbrev",
+        "git.commit.time",
+        "git.dirty",
+        "git.build.version",
+    )
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
 }
 
 repositories {
@@ -107,16 +106,6 @@ repositories {
     maven {
         url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
-    /*
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/navikt/sikkerhetstjenesten-felles")
-        credentials {
-            username = "x-access-token"
-            password = providers.environmentVariable("READER_TOKEN")
-                .orElse(providers.gradleProperty("gpr.token")).orNull
-        }
-    }*/
 }
 
 
@@ -128,54 +117,45 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation(libs.jacksonAnnotations)
-
-    // Kotlin
-    implementation(libs.sikkerhetstjenestenLib)
-    implementation(libs.kotlinReflect)
-    implementation(libs.jackson.module.kotlin)
-
-    // Observability and logging
-    implementation(libs.opentelemetryLogbackMdc)
-    implementation(libs.micrometerRegistryPrometheus)
-    implementation(libs.logstashLogbackEncoder)
-    implementation(libs.logbook)
-
-    // NAV and security
-    implementation(libs.bootConditionals)
-    implementation(libs.springBootStarterOauth2Client)
-    implementation(libs.springBootStarterOauth2ResourceServer)
-
-    // HTTP and API documentation
+    implementation(libs.boot.conditionals)
+    implementation(libs.bundles.observability)
     implementation(libs.httpclient5)
-    implementation(libs.springdocOpenapiStarterWebmvcUi)
+    implementation(libs.jackson.annotations)
+    implementation(libs.jackson.module.kotlin)
+    implementation(libs.kotlin.reflect)
+    implementation(libs.logbook.spring.boot.starter)
+    implementation(libs.logstash.logback.encoder)
+    implementation(libs.sikkerhetstjenesten.lib)
+    implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.spring.boot.starter.cache)
+    implementation(libs.spring.boot.starter.data.redis)
+    implementation(libs.spring.boot.starter.graphql)
+    implementation(libs.spring.boot.starter.jetty)
+    implementation(libs.spring.boot.starter.oauth2.client)
+    implementation(libs.spring.boot.starter.oauth2.resource.server)
+    implementation(libs.spring.boot.starter.restclient)
+    implementation(libs.spring.boot.starter.webmvc)
+    implementation(libs.spring.session.data.redis)
+    implementation(libs.springdoc.openapi.webmvc.ui)
 
-    // Spring Boot starters
-    implementation(libs.springBootStarterActuator)
-    implementation(libs.springBootStarterCache)
-    implementation(libs.springBootStarterDataRedis)
-    implementation(libs.springSessionDataRedis)
-    implementation(libs.springBootStarterGraphql)
-    implementation(libs.springBootStarterJetty)
-    implementation(libs.springBootStarterRestclient)
-    implementation(libs.springBootStarterWebmvc)
-
-    // Testing
-    testImplementation(libs.springMockk)
-    testImplementation(libs.mockk)
-    testImplementation(libs.caffeine)
-    testImplementation(libs.bundles.testcontainers)
-    testImplementation(libs.springBootStarterDataRedisTest)
-    testImplementation(libs.bundles.springBootTest)
     testImplementation(libs.bundles.kotest)
-    testImplementation(libs.mockOauth2Server)
-    testImplementation(libs.springSecurityTest)
+    testImplementation(libs.bundles.spring.boot.test)
+    testImplementation(libs.bundles.testcontainers)
+    testImplementation(libs.caffeine)
+    testImplementation(libs.mock.oauth2.server)
+    testImplementation(libs.mockk)
+    testImplementation(libs.spring.boot.starter.data.redis.test)
+    testImplementation(libs.spring.security.test)
+    testImplementation(libs.springmockk)
 }
 
 dependencyManagement {
     imports {
         mavenBom(
-            "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:${libs.versions.otelAlpha.get()}")
+            "io.opentelemetry.instrumentation:" +
+                "opentelemetry-instrumentation-bom-alpha:" +
+                "${libs.versions.opentelemetry.get()}-alpha"
+        )
     }
 }
 
@@ -216,33 +196,27 @@ tasks.named(CHECK_TASK_NAME) {
 }
 
 tasks.withType<Test>().configureEach {
-    testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = sourceSets.test.get().runtimeClasspath
-    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
+    jvmArgs(
+        "--add-opens", "java.base/java.util=ALL-UNNAMED",
+        "--enable-native-access=ALL-UNNAMED",
+        "-Xshare:off",
+    )
     useJUnitPlatform()
 }
 
 tasks.register<Test>("unitTest") {
     group = "verification"
     description = "Runs the unit test suite in parallel; skips the Redis/Testcontainers cache tests"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
     maxParallelForks = 2
     include("**/*Test.class")
     exclude("**/ValkeyCacheOperationsTest.class")
 }
 
-java {
-    toolchain {
-        languageVersion.set(javaVersion)
-    }
-}
-
-tasks.withType<JavaCompile>().configureEach {
-    options.release.set(26)
-}
-
 kotlin {
     compilerOptions {
-        jvmTarget.set(JVM_26)
+        jvmTarget.set(fromTarget(jvmTargetVersion.toString()))
         freeCompilerArgs.add("-Xjsr305=strict")
     }
 }

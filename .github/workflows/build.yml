@@ -30,10 +30,6 @@ on:
         required: false
         type: string
         default: ""
-    secrets:
-      READER_TOKEN:
-        description: "Token for lesetilgang til GitHub Packages (navikt/sikkerhetstjenesten-felles)"
-        required: false
     outputs:
       image:
         description: "Fullt image-ref med tag"
@@ -113,9 +109,7 @@ jobs:
         run: npx playwright install-deps chromium
 
       - name: Test og bygg
-        env:
-          READER_TOKEN: ${{ secrets.READER_TOKEN }}
-        run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar -PdetektUtenBaseline
+        run: ./gradlew --warning-mode all detekt test frontendTest jacocoTestReport cyclonedxBom bootJar -PdetektUtenBaseline -x npmInstall
 
       - name: Vis detekt-rapport i jobbsammendrag
         if: ${{ !cancelled() }}

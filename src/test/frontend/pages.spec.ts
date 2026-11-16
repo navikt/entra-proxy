@@ -345,6 +345,118 @@ test('matrix displays lookup errors', async ({app}) => {
     await expect(page.locator('#status')).toHaveClass(/error/);
 });
 
+for (const [name, response, error] of [
+    ['HTTP error', json(permisjonUrl, {detail: 'Ingen tilgang'}, 403), 'Ingen tilgang'],
+    ['empty HTTP error', {url: permisjonUrl, status: 503, body: ''}, 'Kunne ikke hente disablede brukere (HTTP 503).'],
+    ['network error', {url: permisjonUrl, abort: true}, 'Failed to fetch'],
+    ['invalid list', json(permisjonUrl, {}), 'Uventet respons: forventet en liste med nav-identer.'],
+    ['invalid member', json(permisjonUrl, [{navIdent: 42}]), 'Uventet respons: forventet en liste med nav-identer.']
+] satisfies [string, MockResponse, string][]) {
+    test(`matrix preserves partial results for permission ${name}`, async ({app}) => {
+        await app.open('gruppematrise', [
+            json(basisUrl, ansatte), json(nomBulkUrl, nomAnsatte),
+            json(matriseUrl, [{ansatt: ansatte[0], grupper: ['TEMA']}]),
+            response
+        ]);
+        const {page} = app;
+        await submit(page, '#gruppe-form', 'Basis');
+        await submit(page, '#sok-form', 'TEMA');
+        await expect(page.locator('#resultat')).toBeVisible();
+        await expect(page.locator('#status')).toHaveClass(/error/);
+        await expect(page.locator('#status')).toContainText('Kunne ikke hente permisjonsstatus.');
+        await expect(page.locator('#tabell-overskrift th')).toHaveText([
+            'Nav-ident', 'Navn', 'Nom-enhet', 'Ansatt er i permisjon', 'TEMA'
+        ]);
+        const rows = page.locator('#tabell-rader tr');
+        const permissionCells = rows.locator('td:nth-child(4)');
+        await expect(permissionCells).toHaveText(['Oppslag feilet', 'Oppslag feilet']);
+        await expect(permissionCells.first()).toHaveClass(/error/);
+        await expect(permissionCells.first()).toHaveAttribute('title', error);
+        await expect(rows.first().locator('td').nth(1)).toHaveText('1234');
+        await expect(rows.first().locator('td').last()).toHaveText('\u2713');
+        await page.evaluate(() => navigator.clipboard.writeText('unchanged'));
+        await page.locator('#kopier-matrise').click();
+        await expect(page.locator('#kopier-status')).toHaveText(
+            'Kopiering feilet: Kan ikke kopiere matrisen fordi ett eller flere oppslag feilet.'
+        );
+        expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('unchanged');
+    });
+}
+
+for (const [name, response, error] of [
+    ['HTTP error', json(nomBulkUrl, {detail: 'Utilgjengelig'}, 503), 'HTTP 503'],
+    ['network error', {url: nomBulkUrl, abort: true}, 'Failed to fetch'],
+    ['invalid list', json(nomBulkUrl, {}), 'Uventet respons fra Nom: forventet en liste med ansatte med navident og orgTilknytninger.'],
+    ['invalid employee', json(nomBulkUrl, [{navident: 42}]), 'Uventet respons fra Nom: forventet en liste med ansatte med navident og orgTilknytninger.']
+] satisfies [string, MockResponse, string][]) {
+    test(`matrix preserves partial results for Nom ${name}`, async ({app}) => {
+        await app.open('gruppematrise', [
+            json(basisUrl, ansatte), response,
+            json(matriseUrl, [{ansatt: ansatte[0], grupper: ['TEMA']}]),
+            json(permisjonUrl, [{navIdent: 'B123456'}])
+        ]);
+        const {page} = app;
+        await submit(page, '#gruppe-form', 'Basis');
+        await expect(page.locator('#basis-status')).toHaveClass(/error/);
+        await expect(page.locator('#basis-status')).toContainText(`Kunne ikke hente Nom-enheter: ${error}`);
+        await submit(page, '#sok-form', 'TEMA');
+        await expect(page.locator('#resultat')).toBeVisible();
+        await expect(page.locator('#status')).toHaveClass(/error/);
+        await expect(page.locator('#status')).toContainText('Kunne ikke hente Nom-enheter.');
+        const rows = page.locator('#tabell-rader tr');
+        const unitCells = rows.locator('td:nth-child(3)');
+        await expect(unitCells).toHaveText(['Oppslag feilet', 'Oppslag feilet']);
+        await expect(unitCells.first()).toHaveClass(/error/);
+        await expect(unitCells.first()).toHaveAttribute('title', error);
+        await expect(rows.nth(1).locator('td').nth(2)).toHaveText('\u2713');
+        await expect(rows.first().locator('td').last()).toHaveText('\u2713');
+        await page.locator('#kopier-matrise').click();
+        await expect(page.locator('#kopier-status')).toHaveText(
+            'Kopiering feilet: Kan ikke kopiere matrisen fordi ett eller flere oppslag feilet.'
+        );
+    });
+}
+
+test('matrix keeps unknown permission status visible when no matching memberships are returned', async ({app}) => {
+    await app.open('gruppematrise', [
+        json(basisUrl, ansatte), json(nomBulkUrl, nomAnsatte),
+        json(matriseUrl, []), json(permisjonUrl, {detail: 'Utilgjengelig'}, 503)
+    ]);
+    const {page} = app;
+    await submit(page, '#gruppe-form', 'Basis');
+    await submit(page, '#sok-form', 'TEMA');
+    await expect(page.locator('#resultat')).toBeVisible();
+    await expect(page.locator('#tabell-rader tr td.error')).toHaveText(['Oppslag feilet', 'Oppslag feilet']);
+    await expect(page.locator('#status')).toContainText('Kunne ikke hente permisjonsstatus.');
+});
+
+test('matrix clears unavailable indicators and allows copying after successful lookups', async ({app}) => {
+    await app.open('gruppematrise', [
+        json(basisUrl, ansatte), json(nomBulkUrl, {}, 503),
+        json(matriseUrl, [{ansatt: ansatte[0], grupper: ['TEMA']}]), json(permisjonUrl, {}, 503),
+        json(basisUrl, ansatte), json(nomBulkUrl, nomAnsatte),
+        json(matriseUrl, [{ansatt: ansatte[0], grupper: ['TEMA']}]), json(permisjonUrl, [])
+    ]);
+    const {page} = app;
+    await submit(page, '#gruppe-form', 'Basis');
+    await submit(page, '#sok-form', 'TEMA');
+    await expect(page.locator('#status')).toContainText('Kunne ikke hente Nom-enheter og permisjonsstatus.');
+    await expect(page.locator('#tabell-rader td.error')).toHaveCount(4);
+    await page.locator('#kopier-matrise').click();
+    await expect(page.locator('#kopier-status')).toHaveClass(/error/);
+
+    await submit(page, '#gruppe-form', 'Basis');
+    await submit(page, '#sok-form', 'TEMA');
+    await expect(page.locator('#resultat')).toBeVisible();
+    await expect(page.locator('#basis-status')).not.toHaveClass(/error/);
+    await expect(page.locator('#status')).toHaveText('2 ansatte og 1 grupper');
+    await expect(page.locator('#status')).not.toHaveClass(/error/);
+    await expect(page.locator('#tabell-rader td.error')).toHaveCount(0);
+    await page.locator('#kopier-matrise').click();
+    await expect(page.locator('#kopier-status')).toHaveText('Matrisen er kopiert til utklippstavlen.');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('A123456;Testansatt A;1234;true');
+});
+
 test('matrix displays clipboard errors through the visible copy button', async ({app}) => {
     await app.page.addInitScript(() => Object.defineProperty(navigator, 'clipboard', {value: undefined}));
     await app.open('gruppematrise', [

@@ -1,6 +1,4 @@
-import type {MedlemRespons} from './api-types.js';
 import {feilmelding, hentElement, trygg} from './dom.js';
-import {hentJson} from './http.js';
 import {
     beregnOppsummering,
     type Gruppe,
@@ -8,14 +6,12 @@ import {
     medlemstekst,
     type Sok,
     sokenavn,
-    sokeUrl,
     tolkNomSok
 } from './gruppelogikk.js';
-import {hentGruppe, type HentetGruppe, hentNomAnsatte, hentTilgangsenhetsnavn} from './gruppeapi.js';
+import {hentDisablede, hentGruppe, type HentetGruppe, hentNomAnsatte, hentTilgangsenhetsnavn} from './gruppeapi.js';
 import {lagCelle, lagMedlemRad, lagSorterbarOverskrift, nullstillSortering} from './tabell.js';
 
 const FASTE_KOLONNER = ['Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn'];
-const DISABLEDE_BRUKERE = 'Alle disablede brukere';
 const PERMISJON_OVERSKRIFT = 'Ansatt er i permisjon';
 
 const sok = hentElement('#sok', HTMLDivElement);
@@ -193,14 +189,7 @@ async function hentPermisjonsstatus(celler: Map<string, TilgangsenhetCeller>): P
     }
     oppdaterSokemarkering(1);
     try {
-        const medlemmer = await hentJson<MedlemRespons[]>(
-            sokeUrl({type: 'gruppe', verdi: DISABLEDE_BRUKERE}),
-            'Kunne ikke hente disablede brukere'
-        );
-        if (!Array.isArray(medlemmer) || !medlemmer.every(medlem => typeof medlem?.navIdent === 'string')) {
-            throw new Error('Uventet respons: forventet en liste med nav-identer.');
-        }
-        const disablede = new Set(medlemmer.map(medlem => medlem.navIdent));
+        const disablede = await hentDisablede();
         for (const [navIdent, {permisjon}] of celler) {
             permisjon.textContent = disablede.has(navIdent) ? '✓' : '';
         }

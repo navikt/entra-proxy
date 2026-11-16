@@ -1,8 +1,8 @@
-import {z} from 'zod';
-import {type Ansatt, type AnsattMedGrupper, type MedlemRespons, nomBulkAnsattSchema, type NomEnhetAnsatteRespons} from './api-types.js';
+import {type Ansatt, type AnsattMedGrupper, type MedlemRespons, type NomEnhetAnsatteRespons} from './api-types.js';
 import {feilmelding, hentElement, trygg} from './dom.js';
-import {hentResponse, lesJson, lesValidert} from './http.js';
-import {celletekst} from './tabell.js';
+import {hentDisablede, hentNomAnsatte} from './gruppeapi.js';
+import {hentResponse, lesJson} from './http.js';
+import {celletekst, lagCelle} from './tabell.js';
 
 const nomForm = hentElement('#nom-form', HTMLFormElement);
 const gruppeForm = hentElement('#gruppe-form', HTMLFormElement);
@@ -17,37 +17,31 @@ const tabellRader = hentElement('#tabell-rader', HTMLTableSectionElement);
 const kopierKnapp = hentElement('#kopier-matrise', HTMLButtonElement);
 const kopierStatus = hentElement('#kopier-status', HTMLParagraphElement);
 
-const DISABLEDE_BRUKERE = 'Alle disablede brukere';
 const PERMISJON_OVERSKRIFT = 'Ansatt er i permisjon';
 
+type Oppslag<T> = {data: T} | {feil: string};
+
 let basisAnsatte: Ansatt[] | null = null;
-let enhetsnummerPerAnsatt = new Map<string, string>();
+let enhetsnummerPerAnsatt: Oppslag<Map<string, string>> = {data: new Map()};
 
 function settStatus(melding: string, erFeil = false): void {
     status.textContent = melding;
     status.classList.toggle('error', erFeil);
 }
 
-async function hentEnhetsnummer(navidenter: string[]): Promise<void> {
-    enhetsnummerPerAnsatt = new Map();
+async function hentEnhetsnummer(navidenter: string[]): Promise<Map<string, string>> {
+    const enhetsnummer = new Map<string, string>();
     if (navidenter.length === 0) {
-        return;
+        return enhetsnummer;
     }
-    const response = await fetch('/api/v1/nom/enhet/bulk', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
-        body: JSON.stringify(navidenter),
-    });
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    const ressurser = await lesValidert(response, z.array(nomBulkAnsattSchema), 'Uventet respons fra Nom.');
+    const ressurser = await hentNomAnsatte(navidenter);
     for (const ressurs of ressurser) {
-        const enheter = (ressurs?.orgTilknytninger ?? [])
-            .map(tilknytning => tilknytning?.orgEnhet?.tilgangsenhetId)
+        const enheter = ressurs.orgTilknytninger
+            .map(tilknytning => tilknytning.orgEnhet.tilgangsenhetId)
             .filter(Boolean);
-        enhetsnummerPerAnsatt.set(ressurs?.navident, [...new Set(enheter)].join(', '));
+        enhetsnummer.set(ressurs.navident, [...new Set(enheter)].join(', '));
     }
+    return enhetsnummer;
 }
 
 function settBasisStatus(skjema: HTMLFormElement, melding: string, erFeil = false): void {
@@ -96,22 +90,14 @@ function byggBasisTabell(ansatte: Ansatt[]): void {
     basisRader.replaceChildren(...rader);
 }
 
-async function hentDisablede(): Promise<Set<string>> {
-    try {
-        const url = `/api/v1/gruppe/medlemmer?${new URLSearchParams({gruppeNavn: DISABLEDE_BRUKERE})}`;
-        const response = await fetch(url, {headers: {'Accept': 'application/json'}});
-        if (!response.ok) {
-            return new Set();
-        }
-        const medlemmer = await lesJson<MedlemRespons[]>(response);
-        const identer = Array.isArray(medlemmer) ? medlemmer.map(medlem => medlem?.navIdent) : [];
-        return new Set(identer.filter((ident): ident is string => typeof ident === 'string'));
-    } catch {
-        return new Set();
-    }
+function lagFeilCelle(feil: string): HTMLTableCellElement {
+    const celle = lagCelle('Oppslag feilet');
+    celle.title = feil;
+    celle.classList.add('error');
+    return celle;
 }
 
-function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansatt[], disablede: Set<string>) {
+function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansatt[], permisjonsstatus: Oppslag<Set<string>>) {
     const sok = substring.toLowerCase();
     const medlemskapPerAnsatt = new Map(
         data.map(({ansatt, grupper}) => [
@@ -119,11 +105,13 @@ function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansat
             new Set(grupper.filter(gruppe => gruppe.toLowerCase().includes(sok))),
         ])
     );
-    for (const {navIdent} of ansatte) {
-        if (disablede.has(navIdent)) {
-            const medlemskap = medlemskapPerAnsatt.get(navIdent) ?? new Set<string>();
-            medlemskap.add(PERMISJON_OVERSKRIFT);
-            medlemskapPerAnsatt.set(navIdent, medlemskap);
+    if ('data' in permisjonsstatus) {
+        for (const {navIdent} of ansatte) {
+            if (permisjonsstatus.data.has(navIdent)) {
+                const medlemskap = medlemskapPerAnsatt.get(navIdent) ?? new Set<string>();
+                medlemskap.add(PERMISJON_OVERSKRIFT);
+                medlemskapPerAnsatt.set(navIdent, medlemskap);
+            }
         }
     }
 
@@ -132,6 +120,9 @@ function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansat
         for (const gruppe of medlemskapPerAnsatt.get(ansatt.navIdent) ?? []) {
             gruppeSett.add(gruppe);
         }
+    }
+    if ('feil' in permisjonsstatus) {
+        gruppeSett.add(PERMISJON_OVERSKRIFT);
     }
     const grupper = [...gruppeSett].sort((a, b) => a.localeCompare(b, 'nb', {sensitivity: 'base'}));
 
@@ -162,10 +153,15 @@ function byggMatrise(data: AnsattMedGrupper[], substring: string, ansatte: Ansat
         identCelle.appendChild(lagNavIdentLenke(ansatt.navIdent));
         const navnCelle = document.createElement('td');
         navnCelle.textContent = ansatt.visningNavn ?? '';
-        const enhetCelle = document.createElement('td');
-        enhetCelle.textContent = enhetsnummerPerAnsatt.get(ansatt.navIdent) ?? '';
+        const enhetCelle = 'feil' in enhetsnummerPerAnsatt
+            ? lagFeilCelle(enhetsnummerPerAnsatt.feil)
+            : lagCelle(enhetsnummerPerAnsatt.data.get(ansatt.navIdent) ?? '');
         rad.append(identCelle, navnCelle, enhetCelle);
         for (const gruppe of grupper) {
+            if (gruppe === PERMISJON_OVERSKRIFT && 'feil' in permisjonsstatus) {
+                rad.append(lagFeilCelle(permisjonsstatus.feil));
+                continue;
+            }
             const erMedlem = medlemskap.has(gruppe);
             const celle = document.createElement('td');
             celle.textContent = erMedlem ? '✓' : '';
@@ -217,9 +213,12 @@ kopierKnapp.addEventListener('click', trygg(async () => {
             celle.querySelector('.sorter-knapp')?.textContent.trim() ?? celle.textContent.trim()
         );
         const rader = [...tabellRader.rows].map(rad =>
-            [...rad.cells].map((celle, kolonne) =>
-                kolonne >= 3 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim()
-            )
+            [...rad.cells].map((celle, kolonne) => {
+                if (celle.classList.contains('error')) {
+                    throw new Error('Kan ikke kopiere matrisen fordi ett eller flere oppslag feilet.');
+                }
+                return kolonne >= 3 ? String(celle.textContent.trim() === '✓') : celle.textContent.trim();
+            })
         );
         const tekst = [overskrifter, ...rader].map(rad => rad.join(';')).join('\r\n');
         await navigator.clipboard.writeText(tekst);
@@ -248,7 +247,7 @@ for (const skjema of [nomForm, gruppeForm]) {
         }
 
         basisAnsatte = null;
-        enhetsnummerPerAnsatt = new Map();
+        enhetsnummerPerAnsatt = {data: new Map()};
         basisResultat.hidden = true;
         basisRader.replaceChildren();
         nullstillMatrise();
@@ -280,15 +279,18 @@ for (const skjema of [nomForm, gruppeForm]) {
             basisAnsatte = ansatte;
             byggBasisTabell(ansatte);
             try {
-                await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent));
-            } catch {
-                enhetsnummerPerAnsatt = new Map();
+                enhetsnummerPerAnsatt = {data: await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent))};
+            } catch (error) {
+                enhetsnummerPerAnsatt = {feil: feilmelding(error)};
             }
             const enhetsnavn = (erNomSok && erNomEnhet && !Array.isArray(data)) ? data?.navn?.trim() : undefined;
             const kilde = enhetsnavn ? `${verdi} (${enhetsnavn})` : verdi;
-            settBasisStatus(skjema, ansatte.length
+            const melding = ansatte.length
                 ? `${ansatte.length} ansatt(e) valgt fra ${kilde}. Bygg matrisen under.`
-                : `Ingen medlemmer funnet i ${kilde}.`);
+                : `Ingen medlemmer funnet i ${kilde}.`;
+            settBasisStatus(skjema, 'feil' in enhetsnummerPerAnsatt
+                ? `${melding} Kunne ikke hente Nom-enheter: ${enhetsnummerPerAnsatt.feil}`
+                : melding, 'feil' in enhetsnummerPerAnsatt);
         } catch (error) {
             settBasisStatus(skjema, `Henting feilet: ${feilmelding(error)}`, true);
         } finally {
@@ -317,14 +319,24 @@ form.addEventListener('submit', trygg(async (event) => {
         const response = await hentResponse(url, 'Søket feilet');
 
         const data = await lesJson<AnsattMedGrupper[]>(response);
-        const disablede = await hentDisablede();
-        const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn, basisAnsatte, disablede);
+        let permisjonsstatus: Oppslag<Set<string>>;
+        try {
+            permisjonsstatus = {data: await hentDisablede()};
+        } catch (error) {
+            permisjonsstatus = {feil: feilmelding(error)};
+        }
+        const {antallGrupper, antallAnsatte} = byggMatrise(Array.isArray(data) ? data : [], gruppeNavn, basisAnsatte, permisjonsstatus);
+        const mangler = [
+            ...('feil' in enhetsnummerPerAnsatt ? ['Nom-enheter'] : []),
+            ...('feil' in permisjonsstatus ? ['permisjonsstatus'] : [])
+        ];
+        const advarsel = mangler.length ? ` Kunne ikke hente ${mangler.join(' og ')}.` : '';
         if (antallGrupper === 0) {
-            settStatus(`Ingen av de ${antallAnsatte} ansatte er medlem av grupper som inneholder «${gruppeNavn}».`);
+            settStatus(`Ingen av de ${antallAnsatte} ansatte er medlem av grupper som inneholder «${gruppeNavn}».${advarsel}`, mangler.length > 0);
             return;
         }
         resultat.hidden = false;
-        settStatus(`${antallAnsatte} ansatte og ${antallGrupper} grupper`);
+        settStatus(`${antallAnsatte} ansatte og ${antallGrupper} grupper${advarsel}`, mangler.length > 0);
     } catch (error) {
         settStatus(feilmelding(error), true);
     } finally {

@@ -50,6 +50,10 @@ På Linux kan systemavhengigheter installeres med
 server og simulerte API-svar, så Spring Boot trenger ikke å kjøre.
 Feilspor lagres i `build/playwright-results/`.
 
+Gruppematrisen beholder delvise resultater hvis oppslag av Nom-enheter eller
+permisjonsstatus feiler. Berørte celler merkes «Oppslag feilet» med feildetaljer,
+og kopiering blokkeres til dataene er hentet uten feil.
+
 ## Tech stack
 
 - **Språk:** Kotlin 2.4, JDK 27

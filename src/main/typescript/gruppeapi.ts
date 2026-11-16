@@ -1,7 +1,20 @@
 import {z} from 'zod';
 import {type MedlemRespons, type NomBulkAnsatt, nomBulkAnsattSchema, type NomEnhetAnsatteRespons} from './api-types.js';
-import {hentJson, hentTekst, lesValidert} from './http.js';
+import {hentJson, hentResponse, hentTekst, lesValidert} from './http.js';
 import {type Gruppe, resultatnavn, type Sok, sokenavn, sokeUrl, tolkMedlemmer, visningsnavn} from './gruppelogikk.js';
+
+export async function hentDisablede(): Promise<Set<string>> {
+    const response = await hentResponse(
+        sokeUrl({type: 'gruppe', verdi: 'Alle disablede brukere'}),
+        'Kunne ikke hente disablede brukere'
+    );
+    const medlemmer = await lesValidert(
+        response,
+        z.array(z.object({navIdent: z.string()})),
+        'Uventet respons: forventet en liste med nav-identer.'
+    );
+    return new Set(medlemmer.map(medlem => medlem.navIdent));
+}
 
 export async function hentNomAnsatte(navIdenter: string[]): Promise<NomBulkAnsatt[]> {
     const response = await fetch('/api/v1/nom/enhet/bulk', {

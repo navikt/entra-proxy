@@ -29,6 +29,7 @@ jobs:
       node: true
       playwright: true
       cache-read-only: true
+      upload-test-reports: true
 
   pages:
     name: pages
@@ -42,6 +43,7 @@ jobs:
     with:
       jekyll: true
       detekt: true
+      test-reports: true
       url-path: detekt/
 
   deploy:

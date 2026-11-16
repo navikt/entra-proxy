@@ -27,6 +27,10 @@ Kjør kodeanalyse med `./gradlew detekt`.
 Detekt-rapporten fra siste vellykkede main-build publiseres på
 [GitHub Pages](https://navikt.github.io/entra-proxy/detekt/).
 
+Fra samme main-build publiseres også
+[JaCoCo-dekningsrapporten](https://navikt.github.io/entra-proxy/jacoco/) og
+[testrapporten](https://navikt.github.io/entra-proxy/tests/).
+
 ### Frontend
 
 Skriptene til utforskersidene ligger i `src/main/typescript/`. HTML og CSS

@@ -1,3 +1,5 @@
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.plugin.getSupportedKotlinVersion
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -55,8 +57,14 @@ plugins {
 configurations.named("detekt") {
     resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin") {
-            useVersion(dev.detekt.gradle.plugin.getSupportedKotlinVersion())
+            useVersion(getSupportedKotlinVersion())
         }
+    }
+}
+
+tasks.withType<Detekt>().configureEach {
+    reports {
+        sarif.required = true
     }
 }
 detekt {
@@ -65,12 +73,6 @@ detekt {
     config.setFrom(file("config/detekt/detekt.yml"))
     baseline = file(if (providers.gradleProperty("detektUtenBaseline").isPresent)
         "build/ingen-baseline.xml" else "detekt-baseline.xml")
-}
-
-configurations.matching { it.name.startsWith("detekt") }.configureEach {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.jetbrains.kotlin") useVersion(libs.versions.kotlin.get())
-    }
 }
 
 tasks.named<JacocoReport>("jacocoTestReport") {

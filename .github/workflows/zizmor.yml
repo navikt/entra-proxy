@@ -16,6 +16,8 @@ jobs:
     name: zizmor
     permissions:
       contents: read
-      security-events: write  # opplasting av SARIF til Code Scanning
+      security-events: write  # kreves av den gjenbrukbare workflowen
       actions: read           # zizmor leser workflow-metadata via GH API
-    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-zizmor.yml@e57f215d69ecd0abfbff24911377061babf9571f # main
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-zizmor.yml@e57f215d69ecd0abfbff24911377061babf9571f # 0.0.112
+    with:
+      advanced-security: false

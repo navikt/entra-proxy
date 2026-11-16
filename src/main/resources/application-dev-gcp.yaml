@@ -18,6 +18,9 @@ management:
     recording:
       enabled: true
 
+info:
+  client-id: ${azure.app.client.id}
+
 oppfolging:
   enabled: true
 

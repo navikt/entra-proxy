@@ -149,6 +149,8 @@ valkey:
   host: ${valkey.host.${nais.cluster.cache}}
 
 info:
+  cluster: ${nais.cluster.name:local}
+  name: ${spring.application.name}
   image: ${nais.app.image:unknown}
 server:
   forward-headers-strategy: framework

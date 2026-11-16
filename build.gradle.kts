@@ -23,6 +23,7 @@ val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {
 group = "no.nav.sikkerhetstjenesten.entraproxy"
 version = "1.0.1"
 extra["jackson-2-bom.version"] = "2.22.4"
+extra["logback.version"] = "1.6.7"
 
 plugins {
     id("jacoco")

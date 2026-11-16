@@ -31,22 +31,6 @@ Fra samme main-build publiseres også
 [JaCoCo-dekningsrapporten](https://navikt.github.io/entra-proxy/jacoco/) og
 [testrapporten](https://navikt.github.io/entra-proxy/tests/).
 
-Dekningsrapporten vises med ReportGenerator og temaet `Html_Dark`.
-Den opprinnelige [JaCoCo-rapporten](https://navikt.github.io/entra-proxy/jacoco-original/)
-beholdes for sammenligning. Sett repository-variabelen `DISABLE_REPORTGENERATOR`
-til `true` under **Settings > Secrets and variables > Actions > Variables** for
-å bruke originalrapporten på `/jacoco/` igjen ved neste vellykkede main-build.
-Da installeres eller kjøres ikke .NET/ReportGenerator.
-
-Eksperimentet er isolert i `.github/workflows/coverage-build.yml` og
-`coverage-pages.yml`, basert på de delte workflowene i
-`navikt/sikkerhetstjenesten-lib` ved `e57f215d69ecd0abfbff24911377061babf9571f`.
-For å fjerne det helt: endre `build.uses` og `pages.uses` i `deploy.yml` tilbake til
-henholdsvis `navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-gradle-build.yml@e57f215d69ecd0abfbff24911377061babf9571f`
-og `navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-pages.yml@e57f215d69ecd0abfbff24911377061babf9571f`,
-fjern `reportgenerator` fra `pages.with`, og slett de to lokale workflowene.
-PR-bygg bruker fortsatt den delte build-workflowen uten endringer.
-
 ### Frontend
 
 Skriptene til utforskersidene ligger i `src/main/typescript/`. HTML og CSS

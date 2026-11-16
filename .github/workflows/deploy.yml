@@ -21,7 +21,7 @@ jobs:
       checks: write    # publisere test-resultater til Checks API
       contents: read   # checkout kode
       id-token: write  # nais/docker-build-push (OIDC mot GAR)
-    uses: $/.github/workflows/coverage-build.yml
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-gradle-build.yml@e57f215d69ecd0abfbff24911377061babf9571f # 0.0.112
     with:
       team: sikkerhetstjenesten
       gradle-tasks: detekt test frontendTest jacocoTestReport cyclonedxBom bootJar
@@ -39,12 +39,11 @@ jobs:
       contents: read
       pages: write     # actions/deploy-pages
       id-token: write  # actions/deploy-pages (OIDC)
-    uses: $/.github/workflows/coverage-pages.yml
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-pages.yml@e57f215d69ecd0abfbff24911377061babf9571f # 0.0.112
     with:
       jekyll: true
       detekt: true
       test-reports: true
-      reportgenerator: ${{ vars.DISABLE_REPORTGENERATOR != 'true' }}
       url-path: detekt/
 
   deploy:

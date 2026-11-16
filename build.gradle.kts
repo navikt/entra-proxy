@@ -1,6 +1,5 @@
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.tasks.testing.Test
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_26
 import org.gradle.language.base.plugins.LifecycleBasePlugin.CHECK_TASK_NAME
@@ -53,6 +52,13 @@ plugins {
     alias(libs.plugins.kotest)
 }
 
+configurations.named("detekt") {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion(dev.detekt.gradle.plugin.getSupportedKotlinVersion())
+        }
+    }
+}
 detekt {
     buildUponDefaultConfig = true
     ignoreFailures = true

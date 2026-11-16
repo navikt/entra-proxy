@@ -53,7 +53,6 @@ springdocOpenapiStarterWebmvcUi = { module = "org.springdoc:springdoc-openapi-st
 springMockk = { module = "com.ninja-squad:springmockk", version.ref = "springMockk" }
 springSecurityTest = { module = "org.springframework.security:spring-security-test" }
 springSessionDataRedis = { module = "org.springframework.session:spring-session-data-redis" }
-# Testcontainers support for Redis-based integration tests
 testcontainersRedis = { module = "com.redis:testcontainers-redis", version = "3.0.1" }
 
 [bundles]

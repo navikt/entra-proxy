@@ -1,4 +1,4 @@
-
+import org.ajoberstar.grgit.Grgit
 import org.gradle.api.tasks.testing.Test
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -12,8 +12,24 @@ val javaVersion = JavaLanguageVersion.of(27)
 
 buildscript {
     dependencies {
+        classpath(libs.grgitCore)
         classpath(libs.kotlinGradlePlugin)
     }
+}
+
+abstract class GitBuildInfoValueSource : ValueSource<Map<String, String>, GitBuildInfoValueSource.Params> {
+    interface Params : ValueSourceParameters {
+        val projectDir: Property<String>
+    }
+
+    override fun obtain(): Map<String, String> =
+        Grgit.open(mapOf("currentDir" to parameters.projectDir.get())).use { git ->
+            mapOf(
+                "git.branch" to git.branch.current().name,
+                "git.commit.id" to git.head().abbreviatedId,
+                "git.commit.time" to git.head().dateTime.toString()
+            )
+        }
 }
 
 val gitBuildInfo = providers.of(GitBuildInfoValueSource::class.java) {

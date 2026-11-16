@@ -1,7 +1,6 @@
 package no.nav.sikkerhetstjenesten.entraproxy.nom
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
-import no.nav.sikkerhetstjenesten.entraproxy.felles.SERVICECLIENT
 import no.nav.sikkerhetstjenesten.entraproxy.nom.NomGraphQLConfig.Companion.NOMGRAPH
 import no.nav.sikkerhetstjenesten.felles.NoCoverageAnalysis
 import no.nav.sikkerhetstjenesten.felles.graphql.GraphQLLoggingInterceptor
@@ -30,7 +29,7 @@ class NomBeanConfig {
     @Qualifier(NOMGRAPH)
     fun nomGraphRestClient(builder: Builder, cfg: NomGraphQLConfig,
                            factoryBuilderCustomizer: ClientHttpRequestFactoryBuilderCustomizer<HttpComponentsClientHttpRequestFactoryBuilder>,
-                           @Value($$"${$$SERVICECLIENT.clients.connect-timeout:3s}") connectTimeout: Duration,
+                           @Value($$"${spring.http.clients.connect-timeout:3s}") connectTimeout: Duration,
                            interceptors: FellesHttpClientInterceptors,
                            mgr: OAuth2AuthorizedClientManager, failureHandler: OAuth2AuthorizationFailureHandler) =
         builder

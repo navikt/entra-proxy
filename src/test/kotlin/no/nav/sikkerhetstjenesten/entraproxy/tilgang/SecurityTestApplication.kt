@@ -14,8 +14,10 @@ import no.nav.sikkerhetstjenesten.felles.notifikasjon.NotificationAutoConfigurat
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Import
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 
 @SpringBootApplication(exclude = [CacheAutoConfiguration::class])
+@EnableMethodSecurity
 @Import(
     EnhetController::class,
     TemaController::class,

@@ -45,6 +45,7 @@ configurations.named("detekt") {
 
 tasks.withType<Detekt>().configureEach {
     reports {
+        markdown.required = false
         sarif.required = true
     }
 }

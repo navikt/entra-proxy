@@ -85,8 +85,13 @@ for (const [name, parameter] of [['403', 'arsak'], ['401', 'navident']]) {
     });
 }
 
-test('group explorer lists and sorts base members', async ({app}) => {
-    await app.open('grupper', [json(basisUrl, ansatte)]);
+test('group explorer compares base members with leave status without another search panel', async ({app}) => {
+    await app.open('grupper', [
+        json(basisUrl, ansatte),
+        json(permisjonUrl, [{navIdent: 'B123456'}]),
+        json(nomBulkUrl, nomAnsatte),
+        {url: enhetsnavnUrl, body: 'Testenhet'}
+    ]);
     const {page, calls} = app;
     await submit(page, '#gruppe-form', 'Basis');
     await expect(page.locator('#status')).toHaveText('2 medlemmer i Basis');
@@ -94,20 +99,69 @@ test('group explorer lists and sorts base members', async ({app}) => {
 
     await page.locator('.medlemmer-bryter').click();
     await expect(page.locator('#vis-utforsket-medlemmer')).toBeChecked();
-    await expect(page.locator('#utforsket-medlemmer-resultat')).toBeVisible();
-    const memberRows = page.locator('#utforsket-medlemmer-rader tr');
+    await expect(page.locator('.sok-panel')).toHaveCount(1);
+    await expect(page.locator('#felles-resultat')).toBeVisible();
+    await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
+    await expect(page.locator('#felles-medlemmer tr')).toHaveText([
+        'Kun i Basis1', 'Basis og Ansatt er i permisjon1'
+    ]);
+    await expect(page.locator('#sammenligning-tabell-overskrift th')).toHaveText([
+        'Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn', 'Ansatt er i permisjon'
+    ]);
+    const memberRows = page.locator('#sammenligning-tabell-rader tr');
     await expect(memberRows).toHaveCount(2);
-    const memberSort = page.locator('#utforsket-medlemmer-overskrift-rad .sorter-knapp').first();
+    await expect(memberRows.locator('td:last-child')).toHaveText(['', '\u2713']);
+    await expect(memberRows.first().locator('td').nth(2)).toHaveText('Testenhet');
+    await page.locator('#kopier-detaljvisning').click();
+    await expect(page.locator('#kopier-status')).toHaveText('Tabellen er kopiert til utklippstavlen.');
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain(
+        'B123456;Testansatt B;1234;Testenhet;true'
+    );
+    const memberSort = page.locator('#sammenligning-tabell-overskrift .sorter-knapp').first();
     await memberSort.click();
     await memberSort.click();
     await expect(memberRows.first().locator('th')).toHaveText('B123456');
     await expect(memberRows.first().locator('a')).toHaveAttribute('href', '/html/ansatt.html?ansattid=B123456');
+    await page.locator('.medlemmer-bryter').click();
+    await expect(page.locator('#felles-resultat')).toBeHidden();
+    await expect(page.locator('#sammenligning-detaljer')).toBeHidden();
 });
+
+for (const [name, response, error] of [
+    ['empty leave group', json(permisjonUrl, []), undefined],
+    ['failed leave lookup', json(permisjonUrl, {detail: 'Ingen tilgang'}, 403), 'Ingen tilgang'],
+    ['invalid leave lookup', json(permisjonUrl, {}), 'Uventet respons: forventet en liste med nav-identer.']
+] satisfies [string, MockResponse, string | undefined][]) {
+    test(`base member view handles ${name}`, async ({app}) => {
+        await app.open('grupper', [
+            json(basisUrl, ansatte), response, json(nomBulkUrl, nomAnsatte),
+            {url: enhetsnavnUrl, body: 'Testenhet'}
+        ]);
+        const {page} = app;
+        await submit(page, '#gruppe-form', 'Basis');
+        await page.locator('.medlemmer-bryter').click();
+        await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
+        await expect(page.locator('#sammenligning-tabell-rader tr td:last-child'))
+            .toHaveText(error ? ['Oppslag feilet', 'Oppslag feilet'] : ['', '']);
+        if (error) {
+            await expect(page.locator('#felles-status')).toHaveText(`Kunne ikke hente permisjonsstatus: ${error}`);
+            await expect(page.locator('#felles-status')).toHaveClass(/error/);
+            await expect(page.locator('#felles-medlemmer tr')).toHaveCount(0);
+        } else {
+            await expect(page.locator('#felles-medlemmer tr')).toHaveText([
+                'Kun i Basis2', 'Basis og Ansatt er i permisjon0'
+            ]);
+        }
+    });
+}
 
 test('group explorer adds and removes comparison panels', async ({app}) => {
     await app.open('grupper', [
         json(basisUrl, ansatte),
         json(sammenligningUrl, [ansatte[0]]),
+        json(permisjonUrl, [{navIdent: 'B123456'}]),
+        json(nomBulkUrl, nomAnsatte),
+        {url: enhetsnavnUrl, body: 'Testenhet'},
         json(permisjonUrl, [{navIdent: 'B123456'}]),
         json(nomBulkUrl, nomAnsatte),
         {url: enhetsnavnUrl, body: 'Testenhet'}
@@ -116,6 +170,7 @@ test('group explorer adds and removes comparison panels', async ({app}) => {
     await submit(page, '#gruppe-form', 'Basis');
     await page.locator('.medlemmer-bryter').click();
     await expect(page.locator('#vis-utforsket-medlemmer')).toBeChecked();
+    await expect(page.locator('html')).not.toHaveClass(/soker/);
     await page.locator('.nytt-sok').click();
     await expect(page.locator('#vis-utforsket-medlemmer')).not.toBeChecked();
     const panel = page.locator('.sok-panel').nth(1);

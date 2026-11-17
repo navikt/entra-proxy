@@ -9,7 +9,7 @@ import {
     tolkNomSok
 } from './gruppelogikk.js';
 import {hentDisablede, hentGruppe, type HentetGruppe, hentNomAnsatte, hentTilgangsenhetsnavn} from './gruppeapi.js';
-import {lagCelle, lagMedlemRad, lagSorterbarOverskrift, nullstillSortering} from './tabell.js';
+import {lagCelle, lagMedlemRad, lagSorterbarOverskrift} from './tabell.js';
 
 const FASTE_KOLONNER = ['Nav-ident', 'Navn', 'Nom tilgangsenhet', 'Nom tilgangsenhet navn'];
 const PERMISJON_OVERSKRIFT = 'Ansatt er i permisjon';
@@ -32,11 +32,6 @@ const kopierStatus = hentElement('#kopier-status', HTMLParagraphElement);
 
 const visUtforsketMedlemmer = hentElement('#vis-utforsket-medlemmer', HTMLInputElement);
 const medlemmerBryter = hentElement('.medlemmer-bryter', HTMLLabelElement);
-const utforsketMedlemmerResultat = hentElement('#utforsket-medlemmer-resultat', HTMLElement);
-const utforsketMedlemmerTabell = hentElement('.sammenligning-tabell', HTMLDivElement, utforsketMedlemmerResultat);
-const utforsketMedlemmerStatus = hentElement('#utforsket-medlemmer-status', HTMLParagraphElement);
-const utforsketMedlemmerRader = hentElement('#utforsket-medlemmer-rader', HTMLTableSectionElement);
-const utforsketMedlemmerOverskrift = hentElement('#utforsket-medlemmer-overskrift-rad', HTMLTableRowElement);
 
 interface TilgangsenhetCeller {
     enhet: HTMLTableCellElement;
@@ -48,6 +43,7 @@ interface TilgangsenhetCeller {
 const grupper = new Map<HTMLElement, Gruppe>();
 let antallSok = 1;
 let aktiveOppslag = 0;
+let sisteVisning = 0;
 
 function allePaneler(): HTMLElement[] {
     return [...sok.querySelectorAll<HTMLElement>('.sok-panel')];
@@ -99,35 +95,15 @@ kopierDetaljvisning.addEventListener('click', trygg(async () => {
     }
 }));
 
-function visUtforsketGruppe(): void {
-    const utforsket = grupper.get(forstePanel);
-    medlemmerBryter.hidden = !utforsket;
-    if (!utforsket) {
-        visUtforsketMedlemmer.checked = false;
-    }
-    utforsketMedlemmerResultat.hidden = !visUtforsketMedlemmer.checked;
-    if (utforsketMedlemmerResultat.hidden) {
-        return;
-    }
-    const medlemmer = utforsket?.medlemmer ?? [];
-    utforsketMedlemmerRader.replaceChildren();
-    nullstillSortering(utforsketMedlemmerOverskrift);
-    utforsketMedlemmerTabell.classList.toggle('med-rullefelt', medlemmer.length > MAKS_RADER_UTEN_RULLEFELT);
-    utforsketMedlemmerTabell.scrollTop = 0;
-    utforsketMedlemmerStatus.textContent = medlemmer.length === 0
-        ? 'Ingen medlemmer i gruppa som utforskes.'
-        : medlemstekst(medlemmer.length);
-    utforsketMedlemmerRader.append(...medlemmer.map(medlem => lagMedlemRad(medlem)));
-}
-
 function visSammenligning(): void {
+    const visningId = ++sisteVisning;
     const utforsket = grupper.get(forstePanel);
     const sammenligninger = allePaneler().slice(1)
         .flatMap(panel => grupper.get(panel) ?? [])
         .filter(gruppe => gruppe.medlemmer.length > 0);
     const visResultat = allePaneler().every(panel => grupper.has(panel))
         && utforsket !== undefined && utforsket.medlemmer.length > 0
-        && sammenligninger.length > 0;
+        && (sammenligninger.length > 0 || visUtforsketMedlemmer.checked);
 
     fellesResultat.hidden = !visResultat;
     sammenligningDetaljer.hidden = !visResultat;
@@ -144,9 +120,13 @@ function visSammenligning(): void {
         return;
     }
 
-    visOppsummering(utforsket, sammenligninger);
+    if (visUtforsketMedlemmer.checked) {
+        settStatus(fellesStatus, 'Henter permisjonsstatus...');
+    } else {
+        visOppsummering(utforsket, sammenligninger);
+    }
     const celler = visDetaljer(utforsket, sammenligninger);
-    void hentPermisjonsstatus(celler);
+    void hentPermisjonsstatus(celler, visUtforsketMedlemmer.checked ? {utforsket, visningId} : undefined);
     void hentNomTilgangsenheter(celler);
 }
 
@@ -156,7 +136,7 @@ function visOppsummering(utforsket: Gruppe, sammenligninger: Gruppe[]): void {
         rad.append(lagCelle(oppsummering.grupper), lagCelle(String(oppsummering.antall)));
         return rad;
     }));
-    fellesStatus.textContent = 'Antall medlemmer basert på gruppene over.';
+    settStatus(fellesStatus, 'Antall medlemmer basert på gruppene over.');
 }
 
 function visDetaljer(utforsket: Gruppe, sammenligninger: Gruppe[]): Map<string, TilgangsenhetCeller> {
@@ -183,7 +163,10 @@ function visDetaljer(utforsket: Gruppe, sammenligninger: Gruppe[]): Map<string, 
     return celler;
 }
 
-async function hentPermisjonsstatus(celler: Map<string, TilgangsenhetCeller>): Promise<void> {
+async function hentPermisjonsstatus(
+    celler: Map<string, TilgangsenhetCeller>,
+    oppsummering?: {utforsket: Gruppe; visningId: number}
+): Promise<void> {
     for (const {permisjon} of celler.values()) {
         permisjon.textContent = 'Henter...';
     }
@@ -193,11 +176,21 @@ async function hentPermisjonsstatus(celler: Map<string, TilgangsenhetCeller>): P
         for (const [navIdent, {permisjon}] of celler) {
             permisjon.textContent = disablede.has(navIdent) ? '✓' : '';
         }
+        if (oppsummering?.visningId === sisteVisning) {
+            visOppsummering(oppsummering.utforsket, [{
+                navn: PERMISJON_OVERSKRIFT,
+                sokenavn: 'Alle disablede brukere',
+                medlemmer: oppsummering.utforsket.medlemmer.filter(medlem => disablede.has(medlem.navIdent))
+            }]);
+        }
     } catch (error) {
         for (const {permisjon} of celler.values()) {
             permisjon.textContent = 'Oppslag feilet';
             permisjon.title = feilmelding(error);
             permisjon.classList.add('error');
+        }
+        if (oppsummering?.visningId === sisteVisning) {
+            settStatus(fellesStatus, `Kunne ikke hente permisjonsstatus: ${feilmelding(error)}`, true);
         }
     } finally {
         oppdaterSokemarkering(-1);
@@ -241,7 +234,10 @@ async function hentNomTilgangsenheter(celler: Map<string, TilgangsenhetCeller>):
 }
 
 function oppdaterVisning(): void {
-    visUtforsketGruppe();
+    medlemmerBryter.hidden = !grupper.has(forstePanel);
+    if (medlemmerBryter.hidden) {
+        visUtforsketMedlemmer.checked = false;
+    }
     for (const panel of allePaneler()) {
         nyttSokKnapp(panel).disabled = !grupper.has(panel);
     }
@@ -259,7 +255,6 @@ function fjernSammenligningspaneler(): void {
 function leggTilSammenligningspanel(): void {
     if (visUtforsketMedlemmer.checked) {
         visUtforsketMedlemmer.checked = false;
-        visUtforsketGruppe();
     }
     const nyttPanel = hentElement('.sok-panel', HTMLElement, panelMal.content).cloneNode(true) as HTMLElement;
     antallSok += 1;
@@ -373,9 +368,6 @@ visUtforsketMedlemmer.addEventListener('change', () => {
     oppdaterVisning();
 });
 
-utforsketMedlemmerOverskrift.append(...['Nav-ident', 'Navn'].map((tekst, indeks) =>
-    lagSorterbarOverskrift(tekst, indeks, utforsketMedlemmerOverskrift, utforsketMedlemmerRader)
-));
 klargjorSok(forstePanel);
 
 const tilgangsenhetIdFraUrl = new URLSearchParams(window.location.search).get('tilgangsenhetId');

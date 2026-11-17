@@ -26,4 +26,6 @@ interface EntraGraphOperations {
     fun gruppeMedlemmer(oid: String): Set<Ansatt>
 
     fun antallMedlemmer(vararg gruppeIder: UUID): Map<UUID, Long>
+
+    fun validerGrupper(vararg gruppeIder: UUID)
 }

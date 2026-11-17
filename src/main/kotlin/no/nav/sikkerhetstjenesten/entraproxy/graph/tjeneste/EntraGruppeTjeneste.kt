@@ -26,6 +26,9 @@ class EntraGruppeTjeneste(private val graph: EntraGraphOperations) {
     fun antallMedlemmerIGrupper(vararg gruppeIder: UUID): Map<UUID, Long> =
         graph.antallMedlemmer(*gruppeIder)
 
+    fun validerGrupper(vararg gruppeIder: UUID) =
+        graph.validerGrupper(*gruppeIder)
+
     fun medlemmerIGrupperSomMatcher(substring: String): List<GruppeMedMedlemmer> =
         graph.grupperSomMatcher(substring).also {
             log.info("Fant {} grupper som matcher '{}'", it.size, substring)

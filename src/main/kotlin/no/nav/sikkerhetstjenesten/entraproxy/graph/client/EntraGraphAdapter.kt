@@ -10,8 +10,11 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.GrupperIkkeFunnetException
 import org.slf4j.LoggerFactory.getLogger
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.HttpStatus.OK
+import org.springframework.web.client.RestClientResponseException
 import java.net.URI
 import java.util.UUID
 
@@ -85,7 +88,32 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .flatMap { antallForBatch(it).toList() }
             .toMap()
 
-
+    override fun validerGrupper(vararg gruppeIder: UUID) {
+        val manglendeGrupper = mutableSetOf<UUID>()
+        gruppeIder.distinct().chunked(BATCH_STØRRELSE).forEach { batch ->
+            val forespørsler = batch.mapIndexed { index, gruppeId ->
+                BatchSubRequest("$index", $$"/groups/$$gruppeId?$select=id")
+            }
+            val responser = client.batch(BatchRequest(forespørsler)).responses.associateBy { it.id }
+            forespørsler.forEachIndexed { index, forespørsel ->
+                val gruppeId = batch[index]
+                val respons = checkNotNull(responser[forespørsel.id]) {
+                    "Mangler batchrespons for gruppe $gruppeId"
+                }
+                when (respons.status) {
+                    OK.value() -> Unit
+                    NOT_FOUND.value() -> manglendeGrupper.add(gruppeId)
+                    else -> throw RestClientResponseException(
+                        "Kunne ikke validere gruppe $gruppeId i Entra (status ${respons.status})",
+                        respons.status, "", null, null, null
+                    )
+                }
+            }
+        }
+        if (manglendeGrupper.isNotEmpty()) {
+            throw GrupperIkkeFunnetException(manglendeGrupper)
+        }
+    }
 
     private fun utvidetAnsatt(filter: String, verdi: String)  =
         client.bruker(ANSATTE_FELTER, filter).ansatte.firstOrNull()?.let { respons ->

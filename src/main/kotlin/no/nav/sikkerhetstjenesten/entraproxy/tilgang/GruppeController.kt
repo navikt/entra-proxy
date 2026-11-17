@@ -16,10 +16,10 @@ import java.util.UUID
 
 @Tag(name = "GruppeController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
-@RequestMapping(API_V1)
+@RequestMapping("$API_V1/gruppe/")
 class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {
 
-    @GetMapping("gruppe/medlemmer")
+    @GetMapping("medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")
     fun gruppeMedlemmer(@RequestParam gruppeNavn: String) =
         oid.gruppeOid(gruppeNavn)?.let {
@@ -27,18 +27,24 @@ class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid:
         } ?: emptySet()
 
     @Hidden
-    @GetMapping("gruppe/medlemmer/sok")
+    @GetMapping("medlemmer/sok")
     @Operation(summary = "Hent ansatte i alle grupper som matcher en substring av gruppenavnet fra Entra")
     fun medlemmerIGrupperSomMatcher(@RequestParam gruppeNavn: String) =
         gruppe.medlemmerIGrupperSomMatcher(gruppeNavn)
 
-    @GetMapping("gruppe/medlemmer/sok/per-ansatt")
+    @Hidden
+    @GetMapping("valider")
+    @Operation(summary = "Valider at alle gruppene finnes i Entra")
+    fun valider(@RequestBody gruppeIder: Set<UUID>) =
+        gruppe.validerGrupper(*gruppeIder.toTypedArray())
+
+    @GetMapping("medlemmer/sok/per-ansatt")
     @Operation(summary = "Hent hvilke matchende grupper hver ansatt er medlem i, for grupper som matcher en substring av gruppenavnet")
     @Hidden
     fun grupperPerAnsattSomMatcher(@RequestParam gruppeNavn: String) =
         gruppe.grupperPerAnsattSomMatcher(gruppeNavn)
 
-    @PostMapping("gruppe/antall/bulk")
+    @PostMapping("antall/bulk")
     @Operation(summary = "Hent antall medlemmer for flere grupper fra Entra")
     @Hidden
     fun antallMedlemmerIGrupper(@RequestBody gruppeIder: Set<UUID>) =

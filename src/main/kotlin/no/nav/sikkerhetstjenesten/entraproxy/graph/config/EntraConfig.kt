@@ -1,8 +1,8 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.config
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.SERVICECLIENT
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.ENTRA_PING_PATH
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient.Companion.ENTRA_PING_PATH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient.Companion.GRAPH
 import no.nav.sikkerhetstjenesten.felles.cache.CachableRestConfig
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkelConfig
 import no.nav.sikkerhetstjenesten.felles.rest.RestConfig

@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.MedlemmerConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.MedlemmerConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component

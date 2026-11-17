@@ -7,6 +7,8 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere.EntraOidCacheOppfrisker
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import java.time.Duration.ofDays
 

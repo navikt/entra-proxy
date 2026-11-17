@@ -13,7 +13,7 @@ import io.mockk.verifySequence
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphOperations
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import java.util.UUID.randomUUID
 

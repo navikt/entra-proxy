@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.sikkerhetstjenesten.entraproxy.API_V1
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

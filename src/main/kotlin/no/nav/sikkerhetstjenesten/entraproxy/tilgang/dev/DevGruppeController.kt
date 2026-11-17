@@ -3,8 +3,8 @@ package no.nav.sikkerhetstjenesten.entraproxy.tilgang.dev
 import io.swagger.v3.oas.annotations.tags.Tag
 import no.nav.boot.conditionals.ConditionalOnNotProd
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.norg.NorgTjeneste
 import no.nav.sikkerhetstjenesten.felles.utils.cluster.ClusterConstants.DEV

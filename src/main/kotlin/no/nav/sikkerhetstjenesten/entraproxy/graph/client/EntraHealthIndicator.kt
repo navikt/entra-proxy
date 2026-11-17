@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.client
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraConfig
 import no.nav.sikkerhetstjenesten.felles.rest.PingableHealthIndicator
 import org.springframework.boot.health.contributor.HealthIndicator
 import org.springframework.stereotype.Component

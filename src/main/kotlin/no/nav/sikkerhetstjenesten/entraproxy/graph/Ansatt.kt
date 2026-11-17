@@ -1,29 +1,25 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph
 
-interface AnsattBasis {
-    val navIdent: AnsattId
-    val visningNavn: String?
-    val fornavn: String?
-    val etternavn: String?
-}
+internal const val UKJENT = "N/A"
+
 
 data class Ansatt(
-    override val navIdent: AnsattId,
-    override val visningNavn: String? = UKJENT,
-    override val fornavn: String? = UKJENT,
-    override val etternavn: String? = UKJENT) : AnsattBasis, Comparable<Ansatt> {
+    val navIdent: AnsattId,
+    val visningNavn: String? = UKJENT,
+    val fornavn: String? = UKJENT,
+    val etternavn: String? = UKJENT) : Comparable<Ansatt> {
 
     override fun compareTo(other: Ansatt): Int = navIdent.compareTo(other.navIdent)
 }
 
 data class UtvidetAnsatt(
-    override val navIdent: AnsattId,
-    override val visningNavn: String? = UKJENT,
-    override val fornavn: String? = UKJENT,
-    override val etternavn: String? = UKJENT,
+    val navIdent: AnsattId,
+    val visningNavn: String? = UKJENT,
+    val fornavn: String? = UKJENT,
+    val etternavn: String? = UKJENT,
     val tIdent: TIdent,
     val epost: String? = UKJENT,
-    val enhet: Enhet) : AnsattBasis, Comparable<UtvidetAnsatt> {
+    val enhet: Enhet) :  Comparable<UtvidetAnsatt> {
 
     override fun compareTo(other: UtvidetAnsatt): Int = navIdent.compareTo(other.navIdent)
 }

@@ -6,6 +6,8 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere.MedlemmerCacheOppfrisker
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.MedlemmerConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import java.time.Duration.ofHours
 import java.util.UUID

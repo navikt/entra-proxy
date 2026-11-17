@@ -1,8 +1,9 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.client
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraSaksbehandlerRespons.AnsattRespons
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UKJENT
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraSaksbehandlerRespons.AnsattRespons
 import no.nav.sikkerhetstjenesten.entraproxy.security.ClientSecurityBeanConfig.Companion.HEADER_CONSISTENCY_LEVEL
 import org.springframework.http.HttpMethod.GET
 import java.net.URI
@@ -63,6 +64,5 @@ data class BatchSubRespons(val id: String, val status: Int, val body: Any? = nul
 
 internal const val TIDENT_DEFAULT = "AAA1234"
 internal const val VALUE = "value"
-internal const val UKJENT = "N/A"
 internal const val UKJENT_ENHET = "0000"
 internal const val NEXT_LINK = "@odata.nextLink"

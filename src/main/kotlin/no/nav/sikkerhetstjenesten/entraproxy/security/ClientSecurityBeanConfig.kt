@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.security
 
 import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient.Companion.GRAPH
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

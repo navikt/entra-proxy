@@ -1,7 +1,7 @@
 package no.nav.sikkerhetstjenesten.entraproxy.cache
 
 import no.nav.boot.conditionals.ConditionalOnGCP
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphOperations
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import no.nav.sikkerhetstjenesten.felles.leder.LeaderAware
 import org.slf4j.LoggerFactory.getLogger

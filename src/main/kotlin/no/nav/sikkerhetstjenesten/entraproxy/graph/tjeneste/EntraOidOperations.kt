@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import java.util.UUID
 
 interface EntraOidOperations {

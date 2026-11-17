@@ -1,6 +1,12 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.client
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import java.util.UUID
 
 interface EntraGraphOperations {

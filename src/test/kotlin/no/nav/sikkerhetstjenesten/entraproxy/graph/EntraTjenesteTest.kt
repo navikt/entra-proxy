@@ -12,7 +12,14 @@ import io.mockk.verify
 import io.mockk.verifySequence
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EnhetOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOppslag
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import java.util.UUID.randomUUID
 

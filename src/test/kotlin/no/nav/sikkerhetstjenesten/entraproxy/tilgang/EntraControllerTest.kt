@@ -8,10 +8,10 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
 import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraMailTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppeTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraMailTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema

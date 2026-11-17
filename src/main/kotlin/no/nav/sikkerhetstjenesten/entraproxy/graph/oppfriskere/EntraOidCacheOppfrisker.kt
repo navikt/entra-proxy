@@ -1,8 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.oppfriskere
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidTjeneste
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.AbstractCacheOppfrisker
 import no.nav.sikkerhetstjenesten.felles.cache.CacheNøkkel
 import org.springframework.stereotype.Component

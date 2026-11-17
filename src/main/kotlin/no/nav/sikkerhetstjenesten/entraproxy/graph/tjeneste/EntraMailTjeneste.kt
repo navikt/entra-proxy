@@ -1,5 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraMailClient
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.MailRequest
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.beans.factory.annotation.Value
@@ -16,7 +17,6 @@ class EntraMailTjeneste(private val client: EntraMailClient, @param:Value($$"${g
         }
 
 }
-
 
 
 

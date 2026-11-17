@@ -1,8 +1,15 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.client
 
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Ansatt
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Companion.ENHET_PREFIX
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe
+import no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent
+import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Tema.Companion.TEMA_PREFIX
+import no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.http.HttpStatus.OK
 import java.net.URI

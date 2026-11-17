@@ -1,6 +1,12 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.config
 
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient.Companion.GRAPH
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraMailClient
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOperations
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOppslag
+import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

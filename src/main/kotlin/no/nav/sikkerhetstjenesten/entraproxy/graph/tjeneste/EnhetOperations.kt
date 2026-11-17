@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 

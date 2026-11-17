@@ -1,7 +1,11 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
 import io.opentelemetry.api.trace.Span
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraOidConfig.Companion.ENTRA_OID
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
+import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphAdapter
+import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient
+import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable

@@ -282,7 +282,7 @@ test.describe('membership matrix', () => {
         expect(calls).toHaveLength(4);
         const nomCall = calls.find(call => new URL(call.url()).pathname === nomBulkUrl);
         expect(nomCall?.postDataJSON()).toEqual(['A123456', 'B123456']);
-        await expect(page.locator('#basis-rader tr')).toHaveCount(2);
+        await expect(page.locator('#basis-status')).toContainText('2 ansatt(e) valgt fra Basis.');
         await expect(page.locator('#resultat')).toBeVisible();
         await expect(page.locator('#tabell-overskrift th')).toHaveText([
             'Nav-ident', 'Navn', 'Nom-enhet', 'Ansatt er i permisjon', 'TEMA 10', 'TEMA 2'

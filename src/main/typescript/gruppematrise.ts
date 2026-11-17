@@ -6,8 +6,6 @@ import {celletekst, lagCelle} from './tabell.js';
 
 const nomForm = hentElement('#nom-form', HTMLFormElement);
 const gruppeForm = hentElement('#gruppe-form', HTMLFormElement);
-const basisResultat = hentElement('#basis-resultat', HTMLElement);
-const basisRader = hentElement('#basis-rader', HTMLTableSectionElement);
 const form = hentElement('#sok-form', HTMLFormElement);
 const input = hentElement('#gruppeNavn', HTMLInputElement);
 const status = hentElement('#status', HTMLParagraphElement);
@@ -74,20 +72,6 @@ function lagNavIdentLenke(navIdent: string): HTMLAnchorElement {
     lenke.href = `/html/ansatt.html?ansattid=${encodeURIComponent(navIdent)}`;
     lenke.textContent = navIdent;
     return lenke;
-}
-
-function byggBasisTabell(ansatte: Ansatt[]): void {
-    const rader = ansatte.map(ansatt => {
-        const rad = document.createElement('tr');
-        const identCelle = document.createElement('th');
-        identCelle.scope = 'row';
-        identCelle.textContent = ansatt.navIdent;
-        const navnCelle = document.createElement('td');
-        navnCelle.textContent = ansatt.visningNavn ?? '';
-        rad.append(identCelle, navnCelle);
-        return rad;
-    });
-    basisRader.replaceChildren(...rader);
 }
 
 function lagFeilCelle(feil: string): HTMLTableCellElement {
@@ -248,8 +232,6 @@ for (const skjema of [nomForm, gruppeForm]) {
 
         basisAnsatte = null;
         enhetsnummerPerAnsatt = {data: new Map()};
-        basisResultat.hidden = true;
-        basisRader.replaceChildren();
         nullstillMatrise();
         settBasisStatus(nomForm, '');
         settBasisStatus(gruppeForm, '');
@@ -277,7 +259,6 @@ for (const skjema of [nomForm, gruppeForm]) {
             }
 
             basisAnsatte = ansatte;
-            byggBasisTabell(ansatte);
             try {
                 enhetsnummerPerAnsatt = {data: await hentEnhetsnummer(ansatte.map(ansatt => ansatt.navIdent))};
             } catch (error) {

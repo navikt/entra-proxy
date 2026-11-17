@@ -19,21 +19,23 @@ import java.util.UUID.randomUUID
 class EntraGraphAdapterTest : BehaviorSpec({
     Given("validering av grupper i Entra") {
         When("alle gruppene finnes") {
-            Then("valideres unike grupper i batcher på maksimalt 20") {
+            Then("returneres gruppenavn per id for unike grupper i batcher på maksimalt 20") {
                 val client = mockk<EntraGraphClient>()
                 val gruppeIder = List(25) { randomUUID() }
                 val forespørsler = mutableListOf<BatchRequest>()
                 every { client.batch(capture(forespørsler)) } answers {
                     BatchRespons(firstArg<BatchRequest>().requests.reversed().map {
-                        BatchSubRespons(it.id, 200)
+                        val gruppeId = it.url.substringAfter("/groups/").substringBefore("?")
+                        BatchSubRespons(it.id, 200, mapOf("id" to gruppeId, "displayName" to "Gruppe $gruppeId"))
                     })
                 }
 
-                EntraGraphAdapter(client).validerGrupper(*(gruppeIder + gruppeIder.first()).toTypedArray())
+                val resultat = EntraGraphAdapter(client).validerGrupper(*(gruppeIder + gruppeIder.first()).toTypedArray())
 
+                resultat shouldBe gruppeIder.associateWith { "Gruppe $it" }
                 forespørsler.map { it.requests.size } shouldBe listOf(20, 5)
                 forespørsler.flatMap { it.requests }.map { it.url } shouldBe
-                    gruppeIder.map { $$"/groups/$$it?$select=id" }
+                    gruppeIder.map { $$"/groups/$$it?$select=id,displayName" }
                 forespørsler.flatMap { it.requests }.all { it.method == "GET" } shouldBe true
             }
         }
@@ -42,7 +44,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
             Then("gjøres ingen oppslag") {
                 val client = mockk<EntraGraphClient>()
 
-                EntraGraphAdapter(client).validerGrupper()
+                EntraGraphAdapter(client).validerGrupper() shouldBe emptyMap()
 
                 verify(exactly = 0) { client.batch(any()) }
             }
@@ -53,7 +55,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 val client = mockk<EntraGraphClient>()
                 val gruppeIder = List(2) { randomUUID() }
                 every { client.batch(any()) } returns BatchRespons(
-                    listOf(BatchSubRespons("1", 404), BatchSubRespons("0", 200))
+                    listOf(BatchSubRespons("1", 404), BatchSubRespons("0", 200, mapOf("displayName" to "Gruppe")))
                 )
 
                 val feil = shouldThrow<GrupperIkkeFunnetException> {
@@ -73,9 +75,9 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 every { client.batch(any()) } answers {
                     BatchRespons(firstArg<BatchRequest>().requests.reversed().map { forespørsel ->
                         val status = if (manglendeGrupper.any {
-                            forespørsel.url == $$"/groups/$$it?$select=id"
+                            forespørsel.url == $$"/groups/$$it?$select=id,displayName"
                         }) 404 else 200
-                        BatchSubRespons(forespørsel.id, status)
+                        BatchSubRespons(forespørsel.id, status, mapOf("displayName" to "Gruppe"))
                     })
                 }
 
@@ -113,6 +115,20 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 shouldThrow<IllegalStateException> {
                     EntraGraphAdapter(client).validerGrupper(gruppeId)
                 }.message shouldContain gruppeId.toString()
+            }
+        }
+
+        When("en vellykket batchrespons mangler gyldig gruppenavn") {
+            Then("feiler valideringen i stedet for å returnere ufullstendige data") {
+                listOf(null, "ugyldig", emptyMap<String, String>(), mapOf("displayName" to 123)).forEach { body ->
+                    val client = mockk<EntraGraphClient>()
+                    val gruppeId = randomUUID()
+                    every { client.batch(any()) } returns BatchRespons(listOf(BatchSubRespons("0", 200, body)))
+
+                    shouldThrow<IllegalStateException> {
+                        EntraGraphAdapter(client).validerGrupper(gruppeId)
+                    }.message shouldContain gruppeId.toString()
+                }
             }
         }
 

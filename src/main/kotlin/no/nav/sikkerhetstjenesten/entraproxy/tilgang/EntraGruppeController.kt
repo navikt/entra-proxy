@@ -34,7 +34,7 @@ class EntraGruppeController(private val gruppe: EntraGruppeTjeneste, private val
 
     @Hidden
     @GetMapping("valider")
-    @Operation(summary = "Valider at alle gruppene finnes i Entra")
+    @Operation(summary = "Valider at alle gruppene finnes i Entra og returner gruppenavn per id")
     fun valider(@RequestBody gruppeIder: Set<UUID>) =
         gruppe.validerGrupper(*gruppeIder.toTypedArray())
 

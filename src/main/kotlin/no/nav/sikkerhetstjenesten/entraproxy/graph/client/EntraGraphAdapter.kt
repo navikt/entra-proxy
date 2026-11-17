@@ -88,11 +88,12 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
             .flatMap { antallForBatch(it).toList() }
             .toMap()
 
-    override fun validerGrupper(vararg gruppeIder: UUID) {
+    override fun validerGrupper(vararg gruppeIder: UUID): Map<UUID, String> {
+        val gruppenavn = mutableMapOf<UUID, String>()
         val manglendeGrupper = mutableSetOf<UUID>()
         gruppeIder.distinct().chunked(BATCH_STØRRELSE).forEach { batch ->
             val forespørsler = batch.mapIndexed { index, gruppeId ->
-                BatchSubRequest("$index", $$"/groups/$$gruppeId?$select=id")
+                BatchSubRequest("$index", $$"/groups/$$gruppeId?$select=$$MINIMUM_FELTER")
             }
             val responser = client.batch(BatchRequest(forespørsler)).responses.associateBy { it.id }
             forespørsler.forEachIndexed { index, forespørsel ->
@@ -101,7 +102,11 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
                     "Mangler batchrespons for gruppe $gruppeId"
                 }
                 when (respons.status) {
-                    OK.value() -> Unit
+                    OK.value() -> {
+                        gruppenavn[gruppeId] = checkNotNull((respons.body as? Map<*, *>)?.get("displayName") as? String) {
+                            "Mangler gruppenavn i batchrespons for gruppe $gruppeId"
+                        }
+                    }
                     NOT_FOUND.value() -> manglendeGrupper.add(gruppeId)
                     else -> throw RestClientResponseException(
                         "Kunne ikke validere gruppe $gruppeId i Entra (status ${respons.status})",
@@ -113,6 +118,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
         if (manglendeGrupper.isNotEmpty()) {
             throw GrupperIkkeFunnetException(manglendeGrupper)
         }
+        return gruppenavn
     }
 
     private fun utvidetAnsatt(filter: String, verdi: String)  =

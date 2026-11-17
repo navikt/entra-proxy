@@ -29,7 +29,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
                     })
                 }
 
-                EntraGraphAdapter(client).validerGrupper(gruppeIder + gruppeIder.first())
+                EntraGraphAdapter(client).validerGrupper(*(gruppeIder + gruppeIder.first()).toTypedArray())
 
                 forespørsler.map { it.requests.size } shouldBe listOf(20, 5)
                 forespørsler.flatMap { it.requests }.map { it.url } shouldBe
@@ -42,7 +42,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
             Then("gjøres ingen oppslag") {
                 val client = mockk<EntraGraphClient>()
 
-                EntraGraphAdapter(client).validerGrupper(emptyList())
+                EntraGraphAdapter(client).validerGrupper()
 
                 verify(exactly = 0) { client.batch(any()) }
             }
@@ -57,10 +57,10 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 )
 
                 val feil = shouldThrow<GrupperIkkeFunnetException> {
-                    EntraGraphAdapter(client).validerGrupper(gruppeIder)
+                    EntraGraphAdapter(client).validerGrupper(*gruppeIder.toTypedArray())
                 }
 
-                feil.gruppeIder shouldBe listOf(gruppeIder[1])
+                feil.gruppeIder shouldBe setOf(gruppeIder[1])
                 feil.message shouldContain gruppeIder[1].toString()
             }
         }
@@ -80,10 +80,10 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 }
 
                 val feil = shouldThrow<GrupperIkkeFunnetException> {
-                    EntraGraphAdapter(client).validerGrupper(gruppeIder + manglendeGrupper)
+                    EntraGraphAdapter(client).validerGrupper(*(gruppeIder + manglendeGrupper).toTypedArray())
                 }
 
-                feil.gruppeIder shouldBe manglendeGrupper
+                feil.gruppeIder shouldBe manglendeGrupper.toSet()
                 manglendeGrupper.forEach { feil.message shouldContain it.toString() }
                 verify(exactly = 3) { client.batch(any()) }
             }
@@ -98,7 +98,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
                     )
 
                     shouldThrow<RestClientResponseException> {
-                        EntraGraphAdapter(client).validerGrupper(List(2) { randomUUID() })
+                        EntraGraphAdapter(client).validerGrupper(randomUUID(), randomUUID())
                     }.statusCode.value() shouldBe status
                 }
             }
@@ -111,7 +111,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 every { client.batch(any()) } returns BatchRespons()
 
                 shouldThrow<IllegalStateException> {
-                    EntraGraphAdapter(client).validerGrupper(listOf(gruppeId))
+                    EntraGraphAdapter(client).validerGrupper(gruppeId)
                 }.message shouldContain gruppeId.toString()
             }
         }
@@ -123,7 +123,7 @@ class EntraGraphAdapterTest : BehaviorSpec({
                 every { client.batch(any()) } throws feil
 
                 shouldThrow<IllegalStateException> {
-                    EntraGraphAdapter(client).validerGrupper(listOf(randomUUID()))
+                    EntraGraphAdapter(client).validerGrupper(randomUUID())
                 } shouldBe feil
             }
         }

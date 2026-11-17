@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Tag(name = "GruppeController", description = "Disse endepunktene skal brukes i produksjon")
+@Tag(name = "EntraGruppeController", description = "Disse endepunktene skal brukes i produksjon")
 @RestController
 @RequestMapping("$API_V1/gruppe/")
-class GruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {
+class EntraGruppeController(private val gruppe: EntraGruppeTjeneste, private val oid: EntraOidTjeneste) {
 
     @GetMapping("medlemmer")
     @Operation(summary = "Hent ansatte i en gitt gruppe fra Entra")

@@ -22,7 +22,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
     EnhetController::class,
     TemaController::class,
     AnsattController::class,
-    GruppeController::class,
+    EntraGruppeController::class,
     EntraMailController::class,
     NomController::class,
     CacheController::class,

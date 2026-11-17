@@ -90,8 +90,8 @@ Settes i `.nais/naiserator.yaml` og i `.nais/dev-gcp.json` / `.nais/prod-gcp.jso
 
 ## Cache
 
-Graph-integrasjonen er delt i `graph.client`, `graph.config`, `graph.tjeneste` og
-`graph.oppfriskere`. Domenetypene blir i `graph` for å bevare klassenavnene til
+Graph-integrasjonen er delt i `graph.client`, `graph.config`, `graph.exceptions`,
+`graph.tjeneste` og `graph.oppfriskere`. Domenetypene blir i `graph` for å bevare klassenavnene til
 eksisterende cacheverdier.
 
 Løsningen har flere cacher:

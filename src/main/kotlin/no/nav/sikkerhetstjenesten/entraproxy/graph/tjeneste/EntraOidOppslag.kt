@@ -1,8 +1,8 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.felles.cache.CacheOperations
 import org.slf4j.LoggerFactory.getLogger
 import java.util.UUID

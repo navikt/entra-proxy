@@ -10,7 +10,7 @@ class GraphCacheCompatibilityTest : BehaviorSpec({
             UtvidetAnsatt::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.UtvidetAnsatt",
             AnsattId::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId",
             Enhet::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet",
-            Enhet.Enhetnummer::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet\$Enhetnummer",
+            Enhet.Enhetnummer::class.java to $$"no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet$Enhetnummer",
             EntraGruppe::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.EntraGruppe",
             TIdent::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.TIdent",
             Tema::class.java to "no.nav.sikkerhetstjenesten.entraproxy.graph.Tema",

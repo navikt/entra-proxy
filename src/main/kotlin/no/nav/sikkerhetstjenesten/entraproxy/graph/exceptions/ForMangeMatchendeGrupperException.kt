@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions
 
 class ForMangeMatchendeGrupperException(
     val gruppenavnSubstring: String,

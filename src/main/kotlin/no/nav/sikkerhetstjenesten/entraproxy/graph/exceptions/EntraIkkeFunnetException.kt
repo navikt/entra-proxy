@@ -1,4 +1,6 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions
+
+import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
 
 class EntraIkkeFunnetException(
     val ansattId: AnsattId,

@@ -1,10 +1,10 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattMedGrupper
-import no.nav.sikkerhetstjenesten.entraproxy.graph.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.GruppeMedMedlemmer
 import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.MedlemmerConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable

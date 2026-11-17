@@ -16,8 +16,9 @@ import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient.Compa
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.ENTRA_OID
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.OID_CACHE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.MedlemmerConfig.Companion.MEDLEMMER
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraIkkeFunnetException
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraOidException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
-import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOppslag
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidTjeneste

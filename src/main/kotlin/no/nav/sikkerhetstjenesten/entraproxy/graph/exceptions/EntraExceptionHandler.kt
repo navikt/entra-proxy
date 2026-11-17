@@ -1,4 +1,4 @@
-package no.nav.sikkerhetstjenesten.entraproxy.graph
+package no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions
 
 import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext.Companion.NAVIDENT

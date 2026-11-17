@@ -14,6 +14,8 @@ import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveAnsatte
 import no.nav.sikkerhetstjenesten.entraproxy.cache.CacheInaktiveNavIdenter.Companion.INAKTIVE
 import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.OID_CACHE
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraIkkeFunnetException
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.ForMangeMatchendeGrupperException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EnhetOperations
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraGruppeTjeneste
 import no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste.EntraOidOperations

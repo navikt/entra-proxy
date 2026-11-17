@@ -1,16 +1,14 @@
 package no.nav.sikkerhetstjenesten.entraproxy.graph.tjeneste
 
-import io.opentelemetry.api.trace.Span
 import no.nav.sikkerhetstjenesten.entraproxy.graph.AnsattId
-import no.nav.sikkerhetstjenesten.entraproxy.graph.EntraIkkeFunnetException
 import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphAdapter
 import no.nav.sikkerhetstjenesten.entraproxy.graph.client.EntraGraphClient
 import no.nav.sikkerhetstjenesten.entraproxy.graph.config.EntraOidConfig.Companion.ENTRA_OID
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraIkkeFunnetException
+import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraOidException
 import no.nav.sikkerhetstjenesten.felles.rest.RestRetryingWhenRecoverableService
 import org.slf4j.LoggerFactory.getLogger
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.http.HttpStatus.NOT_FOUND
-import org.springframework.web.ErrorResponseException
 
 
 @RestRetryingWhenRecoverableService
@@ -35,12 +33,4 @@ class EntraOidTjeneste(private val client: EntraGraphClient) {
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
         client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
-}
-
-class EntraOidException(ansattId: String, msg: String) : ErrorResponseException(NOT_FOUND) {
-    init {
-        body.title = "Uventet respons fra Entra"
-        body.detail = msg
-        body.properties = mapOf("navIdent" to ansattId, "traceId" to Span.current().spanContext.traceId)
-    }
 }

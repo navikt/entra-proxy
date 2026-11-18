@@ -30,9 +30,6 @@ const sammenligningTabellRader = hentElement('#sammenligning-tabell-rader', HTML
 const kopierDetaljvisning = hentElement('#kopier-detaljvisning', HTMLButtonElement);
 const kopierStatus = hentElement('#kopier-status', HTMLParagraphElement);
 
-const visUtforsketMedlemmer = hentElement('#vis-utforsket-medlemmer', HTMLInputElement);
-const medlemmerBryter = hentElement('.medlemmer-bryter', HTMLLabelElement);
-
 interface TilgangsenhetCeller {
     enhet: HTMLTableCellElement;
     navn: HTMLTableCellElement;
@@ -101,9 +98,9 @@ function visSammenligning(): void {
     const sammenligninger = allePaneler().slice(1)
         .flatMap(panel => grupper.get(panel) ?? [])
         .filter(gruppe => gruppe.medlemmer.length > 0);
+    const sammenlignMedPermisjon = sammenligninger.length === 0;
     const visResultat = allePaneler().every(panel => grupper.has(panel))
-        && utforsket !== undefined && utforsket.medlemmer.length > 0
-        && (sammenligninger.length > 0 || visUtforsketMedlemmer.checked);
+        && utforsket !== undefined && utforsket.medlemmer.length > 0;
 
     fellesResultat.hidden = !visResultat;
     sammenligningDetaljer.hidden = !visResultat;
@@ -120,13 +117,13 @@ function visSammenligning(): void {
         return;
     }
 
-    if (visUtforsketMedlemmer.checked) {
+    if (sammenlignMedPermisjon) {
         settStatus(fellesStatus, 'Henter permisjonsstatus...');
     } else {
         visOppsummering(utforsket, sammenligninger);
     }
     const celler = visDetaljer(utforsket, sammenligninger);
-    void hentPermisjonsstatus(celler, visUtforsketMedlemmer.checked ? {utforsket, visningId} : undefined);
+    void hentPermisjonsstatus(celler, sammenlignMedPermisjon ? {utforsket, visningId} : undefined);
     void hentNomTilgangsenheter(celler);
 }
 
@@ -234,28 +231,13 @@ async function hentNomTilgangsenheter(celler: Map<string, TilgangsenhetCeller>):
 }
 
 function oppdaterVisning(): void {
-    medlemmerBryter.hidden = !grupper.has(forstePanel);
-    if (medlemmerBryter.hidden) {
-        visUtforsketMedlemmer.checked = false;
-    }
     for (const panel of allePaneler()) {
         nyttSokKnapp(panel).disabled = !grupper.has(panel);
     }
     visSammenligning();
 }
 
-function fjernSammenligningspaneler(): void {
-    for (const panel of allePaneler().slice(1)) {
-        panel.remove();
-        grupper.delete(panel);
-    }
-    sammenligningsoverskrift.hidden = true;
-}
-
 function leggTilSammenligningspanel(): void {
-    if (visUtforsketMedlemmer.checked) {
-        visUtforsketMedlemmer.checked = false;
-    }
     const nyttPanel = hentElement('.sok-panel', HTMLElement, panelMal.content).cloneNode(true) as HTMLElement;
     antallSok += 1;
     nyttPanel.setAttribute('aria-label', `Gruppesøk ${antallSok}`);
@@ -360,13 +342,6 @@ function klargjorSok(panel: HTMLElement): void {
         }));
     }
 }
-
-visUtforsketMedlemmer.addEventListener('change', () => {
-    if (visUtforsketMedlemmer.checked) {
-        fjernSammenligningspaneler();
-    }
-    oppdaterVisning();
-});
 
 klargjorSok(forstePanel);
 

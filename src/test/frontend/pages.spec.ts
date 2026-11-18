@@ -85,7 +85,7 @@ for (const [name, parameter] of [['403', 'arsak'], ['401', 'navident']]) {
     });
 }
 
-test('group explorer compares base members with leave status without another search panel', async ({app}) => {
+test('group explorer compares base members with leave status by default', async ({app}) => {
     await app.open('grupper', [
         json(basisUrl, ansatte),
         json(permisjonUrl, [{navIdent: 'B123456'}]),
@@ -95,10 +95,8 @@ test('group explorer compares base members with leave status without another sea
     const {page, calls} = app;
     await submit(page, '#gruppe-form', 'Basis');
     await expect(page.locator('#status')).toHaveText('2 medlemmer i Basis');
-    expect(calls).toHaveLength(1);
-
-    await page.locator('.medlemmer-bryter').click();
-    await expect(page.locator('#vis-utforsket-medlemmer')).toBeChecked();
+    expect(calls).toHaveLength(4);
+    await expect(page.getByRole('checkbox')).toHaveCount(0);
     await expect(page.locator('.sok-panel')).toHaveCount(1);
     await expect(page.locator('#felles-resultat')).toBeVisible();
     await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
@@ -122,9 +120,6 @@ test('group explorer compares base members with leave status without another sea
     await memberSort.click();
     await expect(memberRows.first().locator('th')).toHaveText('B123456');
     await expect(memberRows.first().locator('a')).toHaveAttribute('href', '/html/ansatt.html?ansattid=B123456');
-    await page.locator('.medlemmer-bryter').click();
-    await expect(page.locator('#felles-resultat')).toBeHidden();
-    await expect(page.locator('#sammenligning-detaljer')).toBeHidden();
 });
 
 for (const [name, response, error] of [
@@ -139,7 +134,6 @@ for (const [name, response, error] of [
         ]);
         const {page} = app;
         await submit(page, '#gruppe-form', 'Basis');
-        await page.locator('.medlemmer-bryter').click();
         await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
         await expect(page.locator('#sammenligning-tabell-rader tr td:last-child'))
             .toHaveText(error ? ['Oppslag feilet', 'Oppslag feilet'] : ['', '']);
@@ -164,15 +158,16 @@ test('group explorer adds and removes comparison panels', async ({app}) => {
         {url: enhetsnavnUrl, body: 'Testenhet'},
         json(permisjonUrl, [{navIdent: 'B123456'}]),
         json(nomBulkUrl, nomAnsatte),
+        {url: enhetsnavnUrl, body: 'Testenhet'},
+        json(permisjonUrl, [{navIdent: 'B123456'}]),
+        json(nomBulkUrl, nomAnsatte),
         {url: enhetsnavnUrl, body: 'Testenhet'}
     ]);
     const {page} = app;
     await submit(page, '#gruppe-form', 'Basis');
-    await page.locator('.medlemmer-bryter').click();
-    await expect(page.locator('#vis-utforsket-medlemmer')).toBeChecked();
-    await expect(page.locator('html')).not.toHaveClass(/soker/);
+    await expect(page.locator('#felles-resultat')).toBeVisible();
     await page.locator('.nytt-sok').click();
-    await expect(page.locator('#vis-utforsket-medlemmer')).not.toBeChecked();
+    await expect(page.locator('#felles-resultat')).toBeHidden();
     const panel = page.locator('.sok-panel').nth(1);
     await expect(panel.locator('label')).toHaveAttribute('for', await panel.locator('input').getAttribute('id') ?? '');
     await submit(page, '#gruppe-form-2', 'Sammenligning');
@@ -180,7 +175,11 @@ test('group explorer adds and removes comparison panels', async ({app}) => {
     await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
     await panel.locator('.fjern-gruppe').click();
     await expect(page.locator('.sok-panel')).toHaveCount(1);
-    await expect(page.locator('#felles-resultat')).toBeHidden();
+    await expect(page.locator('#felles-resultat')).toBeVisible();
+    await expect(page.locator('#felles-medlemmer tr')).toHaveText([
+        'Kun i Basis1', 'Basis og Ansatt er i permisjon1'
+    ]);
+    await expect(page.locator('html')).not.toHaveClass(/soker/);
 });
 
 test.describe('group comparison details', () => {
@@ -188,6 +187,9 @@ test.describe('group comparison details', () => {
         await app.open('grupper', [
             json(basisUrl, ansatte),
             json(sammenligningUrl, [ansatte[0]]),
+            json(permisjonUrl, [{navIdent: 'B123456'}]),
+            json(nomBulkUrl, nomAnsatte),
+            {url: enhetsnavnUrl, body: 'Testenhet'},
             json(permisjonUrl, [{navIdent: 'B123456'}]),
             json(nomBulkUrl, nomAnsatte),
             {url: enhetsnavnUrl, body: 'Testenhet'}
@@ -200,7 +202,7 @@ test.describe('group comparison details', () => {
 
     test('enriches units and displays membership summaries', async ({app}) => {
         const {page, calls} = app;
-        expect(calls).toHaveLength(5);
+        expect(calls).toHaveLength(8);
         const nomCall = calls.find(call => new URL(call.url()).pathname === nomBulkUrl);
         expect(nomCall?.postDataJSON()).toEqual(['A123456', 'B123456']);
         const summary = page.locator('#felles-medlemmer tr');
@@ -254,6 +256,8 @@ for (const [name, response, error, reverseLookups] of [
         ];
         await app.open('grupper', [
             json(basisUrl, ansatte), json(sammenligningUrl, [ansatte[0]]),
+            json(permisjonUrl, []), json(nomBulkUrl, nomAnsatte),
+            {url: enhetsnavnUrl, body: 'Testenhet'},
             ...(reverseLookups ? lookups.reverse() : lookups), {url: enhetsnavnUrl, body: 'Testenhet'}
         ]);
         const {page} = app;
@@ -284,12 +288,20 @@ for (const [id, response, extra, url] of [
     ['ab123c', {ansatte: nomAnsatte, navn: 'Testenhet'}, [], '/api/v1/nom/ansatte/enhet/ab123c']
 ] satisfies [string, unknown, MockResponse[], string][]) {
     test(`group explorer preserves URL lookup for ${id}`, async ({app}) => {
-        await app.open('grupper', [json(url, response), ...extra], `?tilgangsenhetId=${id}`);
+        await app.open('grupper', [
+            json(url, response), ...extra,
+            json(permisjonUrl, [{navIdent: 'B123456'}]),
+            json(nomBulkUrl, nomAnsatte),
+            {url: enhetsnavnUrl, body: 'Testenhet'}
+        ], `?tilgangsenhetId=${id}`);
         const {page} = app;
         await expect(page.locator('#nom-status')).toContainText('2 medlemmer i');
         await expect(page.locator('#nom-status')).toContainText('Testenhet');
         expect(new URL(app.calls[0].url()).pathname).toBe(url);
         await expect(page.locator('.nytt-sok')).toBeEnabled();
+        await expect(page.locator('#sammenligning-detaljer')).toBeVisible();
+        await expect(page.locator('#sammenligning-tabell-rader tr td:last-child')).toHaveText(['', '\u2713']);
+        await expect(page.locator('html')).not.toHaveClass(/soker/);
     });
 }
 

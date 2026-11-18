@@ -117,13 +117,18 @@ function visSammenligning(): void {
         return;
     }
 
+    let permisjonsantall: HTMLTableCellElement | undefined;
     if (sammenlignMedPermisjon) {
         settStatus(fellesStatus, 'Henter permisjonsstatus...');
     } else {
         visOppsummering(utforsket, sammenligninger);
+        permisjonsantall = lagCelle('Henter...');
+        const rad = document.createElement('tr');
+        rad.append(lagCelle(`${utforsket.navn} og ${PERMISJON_OVERSKRIFT}`), permisjonsantall);
+        fellesListe.append(rad);
     }
     const celler = visDetaljer(utforsket, sammenligninger);
-    void hentPermisjonsstatus(celler, sammenlignMedPermisjon ? {utforsket, visningId} : undefined);
+    void hentPermisjonsstatus(celler, {utforsket, visningId, permisjonsantall});
     void hentNomTilgangsenheter(celler);
 }
 
@@ -162,7 +167,7 @@ function visDetaljer(utforsket: Gruppe, sammenligninger: Gruppe[]): Map<string, 
 
 async function hentPermisjonsstatus(
     celler: Map<string, TilgangsenhetCeller>,
-    oppsummering?: {utforsket: Gruppe; visningId: number}
+    oppsummering: {utforsket: Gruppe; visningId: number; permisjonsantall?: HTMLTableCellElement}
 ): Promise<void> {
     for (const {permisjon} of celler.values()) {
         permisjon.textContent = 'Henter...';
@@ -173,12 +178,18 @@ async function hentPermisjonsstatus(
         for (const [navIdent, {permisjon}] of celler) {
             permisjon.textContent = disablede.has(navIdent) ? '✓' : '';
         }
-        if (oppsummering?.visningId === sisteVisning) {
-            visOppsummering(oppsummering.utforsket, [{
-                navn: PERMISJON_OVERSKRIFT,
-                sokenavn: 'Alle disablede brukere',
-                medlemmer: oppsummering.utforsket.medlemmer.filter(medlem => disablede.has(medlem.navIdent))
-            }]);
+        if (oppsummering.visningId === sisteVisning) {
+            if (oppsummering.permisjonsantall) {
+                oppsummering.permisjonsantall.textContent = String(
+                    [...celler.keys()].filter(navIdent => disablede.has(navIdent)).length
+                );
+            } else {
+                visOppsummering(oppsummering.utforsket, [{
+                    navn: PERMISJON_OVERSKRIFT,
+                    sokenavn: 'Alle disablede brukere',
+                    medlemmer: oppsummering.utforsket.medlemmer.filter(medlem => disablede.has(medlem.navIdent))
+                }]);
+            }
         }
     } catch (error) {
         for (const {permisjon} of celler.values()) {
@@ -186,7 +197,11 @@ async function hentPermisjonsstatus(
             permisjon.title = feilmelding(error);
             permisjon.classList.add('error');
         }
-        if (oppsummering?.visningId === sisteVisning) {
+        if (oppsummering.visningId === sisteVisning) {
+            if (oppsummering.permisjonsantall) {
+                settStatus(oppsummering.permisjonsantall, 'Oppslag feilet', true);
+                oppsummering.permisjonsantall.title = feilmelding(error);
+            }
             settStatus(fellesStatus, `Kunne ikke hente permisjonsstatus: ${feilmelding(error)}`, true);
         }
     } finally {

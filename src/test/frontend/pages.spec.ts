@@ -187,10 +187,10 @@ test.describe('group comparison details', () => {
         await app.open('grupper', [
             json(basisUrl, ansatte),
             json(sammenligningUrl, [ansatte[0]]),
-            json(permisjonUrl, [{navIdent: 'B123456'}]),
+            json(permisjonUrl, [{navIdent: 'B123456'}, {navIdent: 'C123456'}]),
             json(nomBulkUrl, nomAnsatte),
             {url: enhetsnavnUrl, body: 'Testenhet'},
-            json(permisjonUrl, [{navIdent: 'B123456'}]),
+            json(permisjonUrl, [{navIdent: 'B123456'}, {navIdent: 'C123456'}]),
             json(nomBulkUrl, nomAnsatte),
             {url: enhetsnavnUrl, body: 'Testenhet'}
         ]);
@@ -206,6 +206,9 @@ test.describe('group comparison details', () => {
         const nomCall = calls.find(call => new URL(call.url()).pathname === nomBulkUrl);
         expect(nomCall?.postDataJSON()).toEqual(['A123456', 'B123456']);
         const summary = page.locator('#felles-medlemmer tr');
+        await expect(summary).toHaveText([
+            'Kun i Basis1', 'Basis og Sammenligning1', 'Basis og Ansatt er i permisjon1'
+        ]);
         await expect(summary.nth(0).locator('td').nth(1)).toHaveText('1');
         await expect(summary.nth(1).locator('td').nth(1)).toHaveText('1');
         const rows = page.locator('#sammenligning-tabell-rader tr');
@@ -272,6 +275,10 @@ for (const [name, response, error, reverseLookups] of [
             await expect(cells.first()).toHaveClass(/error/);
             await expect(cells.first()).toHaveAttribute('title', error);
         }
+        await expect(page.locator('#felles-medlemmer tr')).toHaveText([
+            'Kun i Basis1', 'Basis og Sammenligning1',
+            `Basis og Ansatt er i permisjon${error ? 'Oppslag feilet' : '0'}`
+        ]);
         await page.locator('#kopier-detaljvisning').click();
         await expect(page.locator('#kopier-status')).toHaveText(error
             ? 'Kopiering feilet: Medlemskap er ikke ferdig hentet eller oppslaget feilet.'

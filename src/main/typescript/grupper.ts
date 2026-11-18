@@ -125,7 +125,7 @@ function visSammenligning(): void {
         permisjonsantall = lagCelle('Henter...');
         const rad = document.createElement('tr');
         rad.append(lagCelle(`${utforsket.navn} og ${PERMISJON_OVERSKRIFT}`), permisjonsantall);
-        fellesListe.append(rad);
+        fellesListe.insertBefore(rad, fellesListe.rows[1] ?? null);
     }
     const celler = visDetaljer(utforsket, sammenligninger);
     void hentPermisjonsstatus(celler, {utforsket, visningId, permisjonsantall});

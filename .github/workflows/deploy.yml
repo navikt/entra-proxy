@@ -15,6 +15,14 @@ permissions:
   contents: read
 
 jobs:
+  cpu-flags:
+    name: CPU flags
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Show CPU flags
+        run: grep -m1 '^flags' /proc/cpuinfo | tr ' ' '\n' | grep -E '^(avx512f|avx512bw|avx512vbmi|bmi2)$'
+
   build:
     name: build
     permissions:

@@ -13,6 +13,16 @@
   },
   "inbound": [
     {
+      "name": "familie-integrasjoner",
+      "namespace": "teamfamilie",
+      "cluster": "dev-gcp"
+    },
+    {
+      "name": "familie-integrasjoner",
+      "namespace": "teamfamilie",
+      "cluster": "dev-fss"
+    },
+    {
       "name": "alloy",
       "namespace": "nais-system",
       "cluster": "dev-gcp"

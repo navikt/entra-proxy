@@ -33,7 +33,7 @@ jobs:
     permissions:
       contents: read
       id-token: write  # nais/deploy/actions/deploy (OIDC mot Nais)
-    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-nais-deploy.yml@e57f215d69ecd0abfbff24911377061babf9571f # 0.0.112
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-nais-deploy.yml@3fd91ac02dac6a6a014f72e65bf79a362054801a # 0.0.113
     with:
       team: sikkerhetstjenesten
       clusters: '["prod-gcp"]'

@@ -4,6 +4,10 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+registries:
+  github-packages-mirror:
+    type: maven-repository
+    url: https://github-package-registry-mirror.gc.nav.no/cached/maven-release
 updates:
   - package-ecosystem: github-actions
     directory: "/"
@@ -14,6 +18,8 @@ updates:
       default-days: 7
   - package-ecosystem: "gradle"
     directory: "/"
+    registries:
+      - github-packages-mirror
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10

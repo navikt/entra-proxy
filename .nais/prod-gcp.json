@@ -12,6 +12,11 @@
   },
   "inbound": [
     {
+      "name": "tiltakspenger-saksbehandling-api",
+      "namespace":  "tpts",
+      "cluster": "prod-gcp"
+    },
+    {
       "name": "familie-integrasjoner",
       "namespace": "teamfamilie",
       "cluster": "prod-gcp"

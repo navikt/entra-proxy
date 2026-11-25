@@ -13,6 +13,11 @@
   },
   "inbound": [
     {
+      "name": "tiltakspenger-saksbehandling-api",
+      "namespace":  "tpts",
+      "cluster": "dev-gcp"
+    },
+    {
       "name": "familie-integrasjoner",
       "namespace": "teamfamilie",
       "cluster": "dev-gcp"
@@ -294,7 +299,7 @@
       "cluster": "dev-gcp"
     }
 
-  ],
+  ],,
   "nais": {
     "cluster": {
       "type": "dev",

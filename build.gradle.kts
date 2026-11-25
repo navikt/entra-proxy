@@ -7,6 +7,17 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget.Companion.fromTarget
 import org.springframework.boot.gradle.plugin.SpringBootPlugin.BOOT_JAR_TASK_NAME
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        constraints {
+            classpath("com.google.guava:guava:${providers.gradleProperty("guavaVersion").get()}")
+        }
+    }
+}
+
 val javaVersion = JavaLanguageVersion.of(27)
 val jvmTargetVersion = 26
 
@@ -118,6 +129,10 @@ configurations.configureEach {
 }
 
 dependencies {
+    constraints {
+        implementation("com.google.guava:guava:${providers.gradleProperty("guavaVersion").get()}")
+    }
+
     implementation(libs.boot.conditionals)
     implementation(libs.bundles.observability)
     implementation(libs.httpclient5)

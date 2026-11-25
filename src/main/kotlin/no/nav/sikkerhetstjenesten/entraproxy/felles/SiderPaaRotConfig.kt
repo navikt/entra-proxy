@@ -13,7 +13,7 @@ class SiderPaaRotConfig : WebMvcConfigurer {
         }
     }
 
-    companion object {
-        val SIDER = listOf("ansatt", "grupper", "gruppematrise", "logout", "401", "403")
+    private companion object {
+        private val SIDER = listOf("ansatt", "grupper", "gruppematrise", "logout", "401", "403")
     }
 }

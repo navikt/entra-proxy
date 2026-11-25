@@ -1,6 +1,5 @@
 package no.nav.sikkerhetstjenesten.entraproxy.tilgang
 
-import no.nav.sikkerhetstjenesten.entraproxy.felles.FellesHttpClientInterceptors
 import no.nav.sikkerhetstjenesten.entraproxy.felles.PageNotFoundHandler
 import no.nav.sikkerhetstjenesten.entraproxy.felles.SiderPaaRotConfig
 import no.nav.sikkerhetstjenesten.entraproxy.graph.exceptions.EntraExceptionHandler

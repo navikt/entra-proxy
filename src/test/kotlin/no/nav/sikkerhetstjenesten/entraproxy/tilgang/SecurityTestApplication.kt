@@ -11,6 +11,7 @@ import no.nav.sikkerhetstjenesten.entraproxy.security.UtforskerSecurityBeanConfi
 import no.nav.sikkerhetstjenesten.felles.cache.CacheAutoConfiguration
 import no.nav.sikkerhetstjenesten.felles.notifikasjon.NotificationAutoConfiguration
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
+import no.nav.sikkerhetstjenesten.felles.rest.HttpStandardClientInterceptors
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Import
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
@@ -34,6 +35,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
     ClientSecurityBeanConfig::class,
     UtforskerSecurityBeanConfig::class,
     NotificationAutoConfiguration::class,
-    FellesHttpClientInterceptors::class,
+    HttpStandardClientInterceptors::class,
     DefaultRestErrorHandler::class)
 class SecurityTestApplication

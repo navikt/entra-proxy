@@ -4,8 +4,10 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.sikkerhetstjenesten.entraproxy.graph.Enhet.Enhetnummer
 import no.nav.sikkerhetstjenesten.felles.rest.ConsumerAwareHandlerInterceptor
 import no.nav.sikkerhetstjenesten.felles.rest.DefaultRestErrorHandler
+import no.nav.sikkerhetstjenesten.felles.rest.HttpStandardClientInterceptors
 import no.nav.sikkerhetstjenesten.felles.security.AuthContext
 import org.apache.hc.core5.util.TimeValue
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.http.client.HttpComponentsClientHttpRequestFactoryBuilder
 import org.springframework.boot.http.client.autoconfigure.ClientHttpRequestFactoryBuilderCustomizer
 import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer
@@ -18,6 +20,8 @@ import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.zalando.logbook.Logbook
+import org.zalando.logbook.spring.LogbookClientHttpRequestInterceptor
 import tools.jackson.core.StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION
 
 
@@ -28,6 +32,10 @@ class RestClientBeanConfig(
 
     @Bean
     fun handler() = DefaultRestErrorHandler()
+
+    @Bean
+    fun interceptors(logbook: ObjectProvider<LogbookClientHttpRequestInterceptor>) =
+        HttpStandardClientInterceptors(logbook)
 
     @Bean
     fun jackson3Customizer() = JsonMapperBuilderCustomizer {

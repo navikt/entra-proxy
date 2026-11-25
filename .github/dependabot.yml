@@ -25,6 +25,8 @@ updates:
       default-days: 7
   - package-ecosystem: "gradle"
     directory: "/"
+    registries:
+      - github-packages-mirror
     groups:
       minor-and-patch:
         patterns:
@@ -32,8 +34,6 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    registries:
-      - github-packages-mirror
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10

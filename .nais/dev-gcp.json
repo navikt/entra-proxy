@@ -298,8 +298,7 @@
       "namespace": "eien",
       "cluster": "dev-gcp"
     }
-
-  ],,
+  ],
   "nais": {
     "cluster": {
       "type": "dev",

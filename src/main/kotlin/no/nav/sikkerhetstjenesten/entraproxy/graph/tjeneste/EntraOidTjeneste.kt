@@ -18,7 +18,7 @@ class EntraOidTjeneste(private val client: EntraGraphClient) {
 
     @Cacheable(ENTRA_OID, key = "#ansattId.verdi")
     fun ansattOid(ansattId: AnsattId) =
-        with(client.users("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
+        with(client.ansatte("id", filter = "${EntraGraphAdapter.BRUKER} eq '${ansattId.verdi}'").oids) {
             when (size) {
                 0 -> throw EntraIkkeFunnetException(ansattId,
                     "Fant ingen oid for ${ansattId.verdi}, er den fremdeles gyldig?")
@@ -32,5 +32,5 @@ class EntraOidTjeneste(private val client: EntraGraphClient) {
 
     @Cacheable(ENTRA_OID)
     fun gruppeOid(gruppeNavn: String) =
-        client.groups("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
+        client.grupper("id,displayName", "displayName eq '$gruppeNavn'").value.firstOrNull()?.id
 }

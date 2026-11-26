@@ -13,21 +13,21 @@ import java.net.URI
 interface EntraGraphClient {
 
     @GetExchange("/users")
-    fun users(
+    fun ansatte(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
         @RequestParam($$"$count") count: String = "true",
     ): AnsattOids
 
     @GetExchange("/groups")
-    fun groups(
+    fun grupper(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter") filter: String,
         @RequestParam($$"$count") count: String = "true",
     ): Grupper
 
     @GetExchange("/groups")
-    fun grupperSok(
+    fun gruppeSøk(
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$search") search: String,
         @RequestParam($$"$top") top: Int = TOP,
@@ -35,7 +35,7 @@ interface EntraGraphClient {
     ): Grupper
 
     @GetExchange("/users/{ansattId}/memberOf")
-    fun memberOf(
+    fun medlemsskap(
         @PathVariable ansattId: String,
         @RequestParam($$"$select") select: String,
         @RequestParam($$"$filter", required = false) filter: String? = null,

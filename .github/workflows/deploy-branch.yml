@@ -1,12 +1,10 @@
-name: Build and deploy branch
+name: Build and deploy branch to prod
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
-# Én PR-build om gangen per PR — kanseller pågående når ny push kommer.
+# Én manuell prod-deploy om gangen per ref — kanseller pågående når ny kjøring startes.
 concurrency:
-  group: deploy-branch-${{ github.event.pull_request.number || github.ref }}
+  group: deploy-prod-${{ github.ref }}
   cancel-in-progress: true
 
 # Deny-by-default på workflow-nivå; jobs åpner kun det de trenger.
@@ -28,9 +26,6 @@ jobs:
       node: true
       playwright: true
       cache-read-only: false
-      checkout-ref: ${{ github.event.pull_request.head.ref }}
-      checkout-repository: ${{ github.event.pull_request.head.repo.full_name }}
-      checkout-fetch-depth: 0
 
   deploy:
     name: deploy
@@ -41,6 +36,6 @@ jobs:
     uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-nais-deploy.yml@a7071500cb4efccab97843c96c5477afeb8689fd # 0.0.116
     with:
       team: sikkerhetstjenesten
-      clusters: '["dev-gcp"]'
+      clusters: '["prod-gcp"]'
       resource: .nais/naiserator.yaml
       image: ${{ needs.build.outputs.image }}

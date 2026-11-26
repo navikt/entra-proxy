@@ -30,7 +30,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
     override fun temaer(ansattOid: UUID) =
         allSider("temaer for $ansattOid",
-            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"),
+            client.medlemsskap("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$TEMA_PREFIX')"),
             Tilganger::next,
             client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
@@ -48,7 +48,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
     override fun grupperSomMatcher(subString: String) =
         allSider("grupper som matcher '$subString'",
-            client.grupperSok(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)),
+            client.gruppeSøk(GRUPPE_FELTER, GRUPPE_SEARCH.format(subString)),
             Grupper::next,
             client::grupperSide)
             .flatMapTo(mutableSetOf()) { it.value }
@@ -57,7 +57,7 @@ class EntraGraphAdapter(private val client: EntraGraphClient) : EntraGraphOperat
 
     override fun enheter(ansattOid: UUID) =
         allSider("enheter for $ansattOid",
-            client.memberOf("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
+            client.medlemsskap("$ansattOid", MINIMUM_FELTER, "startswith(displayName,'$ENHET_PREFIX')"),
             Tilganger::next, client::tilgangerSide)
             .flatMapTo(mutableSetOf()) { it.value }
             .mapTo(mutableSetOf()) { Enhetnummer(it.displayName) }

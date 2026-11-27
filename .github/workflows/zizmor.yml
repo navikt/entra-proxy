@@ -22,6 +22,6 @@ jobs:
       contents: read
       security-events: write  # kreves av den gjenbrukbare workflowen
       actions: read           # zizmor leser workflow-metadata via GH API
-    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-zizmor.yml@a7071500cb4efccab97843c96c5477afeb8689fd # 0.0.116
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-zizmor.yml@e1729d20f16f52eb943a4bacdb44cf3f25a2cfa2 # 0.0.117
     with:
       advanced-security: false

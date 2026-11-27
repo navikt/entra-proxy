@@ -18,7 +18,7 @@ jobs:
       checks: write    # publisere test-resultater til Checks API
       contents: read   # checkout kode
       id-token: write  # nais/docker-build-push (OIDC mot GAR)
-    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-gradle-build.yml@a7071500cb4efccab97843c96c5477afeb8689fd # 0.0.116
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-gradle-build.yml@e1729d20f16f52eb943a4bacdb44cf3f25a2cfa2 # 0.0.117
     with:
       team: sikkerhetstjenesten
       gradle-tasks: detekt test frontendTest jacocoTestReport cyclonedxBom bootJar
@@ -33,7 +33,7 @@ jobs:
     permissions:
       contents: read
       id-token: write  # nais/deploy/actions/deploy (OIDC mot Nais)
-    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-nais-deploy.yml@a7071500cb4efccab97843c96c5477afeb8689fd # 0.0.116
+    uses: navikt/sikkerhetstjenesten-lib/.github/workflows/reusable-nais-deploy.yml@e1729d20f16f52eb943a4bacdb44cf3f25a2cfa2 # 0.0.117
     with:
       team: sikkerhetstjenesten
       clusters: '["prod-gcp"]'

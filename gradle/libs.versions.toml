@@ -1,5 +1,5 @@
 [versions]
-boot-conditionals = "6.0.12"
+boot-conditionals = "6.1.0"
 cyclonedx = "3.6.1"
 detekt = "2.0.0-alpha.6"
 git-properties = "4.0.1"
